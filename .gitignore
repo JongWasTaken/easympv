@@ -1,0 +1,7 @@
+*.exe
+*.ico
+*.bat
+*.emu
+*.txt
+watch_later/
+watch_later/*

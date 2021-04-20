@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "scripts\\easympv.js"
+		},
+		{
+			"name": "mpv",
+			"path": "."
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"Lfile",
+			"Ltmp"
+		]
+	}
+}

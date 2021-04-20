@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "command": "%localappdata%\\mpv\\mpv.com",
+            "args": [
+                "A:\\Archive\\Yu-Gi-Oh! - The Dark Side of Dimensions.mkv"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        }
+    ]
+}
