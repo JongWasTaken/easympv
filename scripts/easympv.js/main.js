@@ -208,6 +208,21 @@ mp.msg.info(
 (function () {
   var on_start = function () {
     // this function gets executed on file-load event
+
+    // unlock speedcaps
+    mp.msg.info("Unlocking speedcaps for scaletempo2...");
+    mp.commandv(
+      "af",
+      "remove",
+      "scaletempo2"
+    );
+    mp.commandv(
+      "af",
+      "add",
+      "scaletempo2=min-speed=0.1:max-speed=10.0:search-interval=30:window-size=20"
+    );
+
+
     mp.msg.info("Applying startup shader...");
     if (!mp.get_property("path").includes("video=")) {
       Shaders.apply("a4k_auto_event"); // autoapply a4k
