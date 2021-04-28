@@ -161,6 +161,16 @@ Shaders.apply = function (shaderset) {
       "set",
       "~~/shaders/FSRCNNX_x2_16-0-4-1.glsl"
     );
+  } else if (shaderset == "SSimSuperRes") {
+    Shaders.name = "SSimSuperRes";
+    Shaders.anime4k_strength = 0;
+    mp.commandv("change-list", "glsl-shaders", "clr", "");
+    mp.commandv(
+      "change-list",
+      "glsl-shaders",
+      "set",
+      "~~/shaders/SSimSuperRes.glsl"
+    );
   } else if (shaderset == "fxaa") {
     Shaders.name = "FXAA";
     Shaders.anime4k_strength = 0;
@@ -241,6 +251,8 @@ Shaders.applyByName = function (name) {
     Shaders.apply("nnedi3_256");
   } else if (name == "CRT") {
     Shaders.apply("crt");
+  } else if (name == "SSimSuperRes") {
+    Shaders.apply("SSimSuperRes");
   } else {
   }
 };

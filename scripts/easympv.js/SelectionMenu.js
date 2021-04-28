@@ -408,7 +408,8 @@ SelectionMenu.prototype._renderActiveText = function () {
 SelectionMenu.prototype.renderMenu = function (
   selectionPrefix,
   renderMode,
-  selectionSuffix
+  selectionSuffix,
+  replacement
 ) {
   var c = this.useTextColors,
     finalString;
@@ -458,8 +459,10 @@ SelectionMenu.prototype.renderMenu = function (
 
     // Format and add all output lines.
     var opt;
+    var temp;
     for (var i = startIdx; i <= endIdx; ++i) {
       opt = this.options[i];
+      temp = Ass.esc(typeof opt === "object" ? opt.menuText : opt, c)
       if (i === this.selectionIdx)
         // NOTE: Prefix stays on screen until cursor-move or re-render.
         finalString +=
@@ -467,19 +470,20 @@ SelectionMenu.prototype.renderMenu = function (
           "➤ " +
           (typeof selectionPrefix === "string"
             ? Ass.esc(selectionPrefix, c) + " "
+            : "");        
+        finalString +=
+          (typeof selectionSuffix === "string"
+            ? Ass.esc(selectionSuffix, c) + " "
             : "");
+        if(typeof replacement === "string") { temp = Ass.esc(typeof replacement === "string" ? replacement : opt, c); }; // this does not work rn
+
       finalString +=
         i === startIdx && startIdx > 0
           ? "..."
           : i === endIdx && endIdx < maxIdx
           ? "..."
-          : Ass.esc(typeof opt === "object" ? opt.menuText : opt, c);
-      if (i === this.selectionIdx)
-        // NOTE: Prefix stays on screen until cursor-move or re-render.
-        finalString +=
-          typeof selectionSuffix === "string"
-            ? Ass.esc(selectionSuffix, c) + " "
-            : "";
+          : temp
+
       if (i === this.selectionIdx) finalString += Ass.white(c);
       if (i !== endIdx) finalString += "\n";
     }
@@ -490,7 +494,7 @@ SelectionMenu.prototype.renderMenu = function (
   // Update cached menu text. But only open/redraw the menu if it's already
   // active OR if we're NOT being prevented from going out of "hidden" state.
   this.currentMenuText = finalString;
-
+  
   // Handle render mode:
   // 1 = Only redraw if menu is onscreen (doesn't trigger open/redrawing if
   // the menu is closed or busy showing a text message); 2 = Don't show/redraw
