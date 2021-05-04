@@ -1,3 +1,12 @@
+/*
+ * MENUS.JS (MODULE)
+ *
+ * Author:              Jong
+ * URL:                 https://smto.pw/mpv
+ * License:             MIT License0
+ *
+ */
+
 var Menu = {},
 Utils = require("./Utils"),
 Ass = require("./AssFormat"),
@@ -122,6 +131,10 @@ Menu.main = new SelectionMenu({
     }
   };
 
+  Menu.main.resetText = function () {
+    Menu.main.setTitle("easympv");
+  };
+
   Menu.main.setCallbackMenuOpen(Menu.main.handler);
   Menu.main.setCallbackMenuRight(Menu.main.handler);
 
@@ -154,66 +167,16 @@ Menu.main = new SelectionMenu({
 
     options.push({
       menuText: "Recommended Anime4K Settings\n",
-      item: "a4k_auto_user",
+      item: "a4k_auto",
     });
-    options.push({
-      menuText: "SD Anime4K Faithful",
-      item: "a4k_sd_1",
-    });
-    options.push({
-      menuText: "SD Anime4K Improved",
-      item: "a4k_sd_2",
-    });
-    options.push({
-      menuText: "SD Anime4K Improved & Deblured\n",
-      item: "a4k_sd_3",
-    });
-    options.push({
-      menuText: "HD Anime4K Faithful",
-      item: "a4k_hd_1",
-    });
-    options.push({
-      menuText: "HD Anime4K Improved",
-      item: "a4k_hd_2",
-    });
-    options.push({
-      menuText: "HD Anime4K Improved & Deblured\n",
-      item: "a4k_hd_3",
-    });
-    options.push({
-      menuText: "Adaptive Sharpen",
-      item: "adaptivesharpen",
-    });
-    options.push({
-      menuText: "KrigBilateral (experimental)",
-      item: "krig",
-    });
-    options.push({
-      menuText: "A4K Denoiser (experimental)",
-      item: "a4k_denoise",
-    });
-    options.push({
-      menuText: "FSRCNNX (High x16/experimental)",
-      item: "FSRCNNX16",
-    });
-    options.push({
-      menuText: "FXAA",
-      item: "fxaa",
-    });
-    options.push({
-      menuText: "SSimSuperRes",
-      item: "SSimSuperRes",
-    });
-    options.push({
-      menuText: "NNEDI3 (128 Neurons/experimental)",
-      item: "nnedi3_128",
-    });
-    /*
-    options.push({
-        'menuText': 'NNEDI3 (256 Neurons/experimental)',
-        'item': 'nnedi3_256'
-    });
-    */
+    var i;
+    for (i = 0; i < Shaders.sets.length; i++) {
+      options.push({
+        menuText: Shaders.sets[i].name,
+        item: Shaders.sets[i].name,
+      });
+    }
+
     return {
       options: options,
     };
@@ -263,6 +226,15 @@ Menu.main = new SelectionMenu({
         break;
     }
   };
+
+  Menu.shaders.resetText = function () {
+    Menu.shaders.setTitle("easympv shaders");
+    Menu.shaders.setDescription(
+      "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
+        Shaders.name
+    );
+  };
+
   Menu.shaders.setCallbackMenuOpen(Menu.shaders.handler);
   Menu.shaders.setCallbackMenuRight(Menu.shaders.handler);
 
@@ -346,6 +318,17 @@ Menu.main = new SelectionMenu({
         break;
     }
   };
+
+  Menu.chapters.resetText = function () {
+    Menu.chapters.setTitle("easympv chapters");
+    Menu.chapters.setDescription(
+      '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+        Chapters.mode +
+        "\nCurrently " +
+        Chapters.status
+    );
+  };
+
   Menu.chapters.setCallbackMenuOpen(Menu.chapters.handler);
   Menu.chapters.setCallbackMenuRight(Menu.chapters.handler);
 
@@ -482,6 +465,12 @@ Menu.main = new SelectionMenu({
         }
     }
   };
+
+  Menu.settings.resetText = function (version) {
+    Menu.settings.setTitle("easympv preferences");
+    Menu.settings.setDescription("easympv(plugin), version " + version);
+  };
+
   Menu.settings.setCallbackMenuOpen(Menu.settings.handler);
   Menu.settings.setCallbackMenuRight(Menu.settings.handler);
 
@@ -581,6 +570,14 @@ Menu.main = new SelectionMenu({
 
         break;
     }
+  };
+
+  Menu.colors.resetText = function () {
+    Menu.colors.setTitle("easympv colors");
+    Menu.colors.setDescription(
+      "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
+        Colors.lookName
+    );
   };
 
   Menu.colors.setCallbackMenuOpen(Menu.colors.handler);

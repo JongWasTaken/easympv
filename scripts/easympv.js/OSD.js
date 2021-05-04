@@ -2,7 +2,7 @@
  * OSD.JS (MODULE)
  *
  * Author:         Jong
- * URL:            http://smto.pw/mpv
+ * URL:            https://smto.pw/mpv
  * License:        MIT License
  */
 

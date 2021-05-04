@@ -6,7 +6,7 @@
  *                          https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst#mpoptions-functions
  * Original Author:         VideoPlayerCode
  * Modified by:             Jong
- * URL:                     http://smto.pw/mpv
+ * URL:                     https://smto.pw/mpv
  * License:                 Apache License, Version 2.0
  */
 

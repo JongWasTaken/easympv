@@ -2,7 +2,7 @@
  * CHAPTERS.JS (MODULE)
  *
  * Author:         Jong
- * URL:            http://smto.pw/mpv
+ * URL:            https://smto.pw/mpv
  * License:        MIT License
  */
 
@@ -15,15 +15,13 @@ Chapters.cspeed = 1;
 Chapters.mode = "skip";
 Chapters.status = "disabled";
 
-Chapters.Handler = function () {
-  // is called on every chapter change (in main.js)
-
+Chapters.Handler = function () { // Called on every chapter change (in main.js)
   mp.msg.info("Chapter change detected.");
+  Chapters.current = mp.get_property("chapter"); // Which chapter is currently playing
+  Chapters.total = Number(mp.get_property("chapters")) - 1; // Total number of chapters in video file
 
-  Chapters.current = mp.get_property("chapter"); // which chapter is currently playing
-  Chapters.total = Number(mp.get_property("chapters")) - 1; // total number of chapters in video file
-
-  // try to identify 'style' by comparing data to common patterns
+  // Try to identify 'style' by comparing data to common patterns
+  // Even though this seems janky, it works suprisingly well 
   if (Chapters.total >= 5) {
     Chapters.style = "modern";
   } else if (Chapters.total == 4) {
@@ -34,8 +32,10 @@ Chapters.Handler = function () {
     Chapters.style = "unknown";
   }
 
-  //mp.msg.info("TOTAL CHAPTERS: " + Chapters.total + "\nCURRENT CHAPTER: " + Chapters.current + "\nCHAPTER STYLE: " + Chapters.style); // left this line for debug purposes
+  // Left this line for debug purposes
+  //mp.msg.info("TOTAL CHAPTERS: " + Chapters.total + "\nCURRENT CHAPTER: " + Chapters.current + "\nCHAPTER STYLE: " + Chapters.style); 
 
+  // Do the actual operation
   if (Chapters.status == "enabled") {
     if (Chapters.mode == "skip") {
       if (Chapters.style == "modern") {

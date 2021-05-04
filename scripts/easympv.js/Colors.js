@@ -2,7 +2,7 @@
  * COLORS.JS (MODULE), using parts of COLORBOX.JS by VideoPlayerCode
  *
  * Author:         Jong
- * URL:            http://smto.pw/mpv
+ * URL:            https://smto.pw/mpv
  * License:        Apache License, Version 2.0
  */
 
