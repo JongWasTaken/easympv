@@ -41,8 +41,6 @@
 	"A4K Denoiser": ["Anime4K_Denoise_Heavy_CNN_L.glsl"],
 	"FSRCNNX (High x16)": ["FSRCNNX_x2_16-0-4-1.glsl"],
 	"SSimSuperRes": ["SSimSuperRes.glsl"],
-	"FXAA": ["fxaa.glsl"],
 	"NNEDI3 (128 Neurons)": ["nnedi3-nns128-win8x6.hook"],
-	"NNEDI3 (256 Neurons)": ["nnedi3-nns256-win8x6.hook"],
-	"CRT": ["crt.glsl"]
+	"NNEDI3 (256 Neurons)": ["nnedi3-nns256-win8x6.hook"]
 }

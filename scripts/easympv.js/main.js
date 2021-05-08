@@ -279,6 +279,7 @@ mp.observe_property(
 );
 
 // Mouse Input preliminary work
+/*
 mp.observe_property(
   "mouse-pos",
   undefined,
@@ -289,7 +290,7 @@ mp.observe_property(
     //mp.msg.info("Current mouse coords: X " + x + ", Y " + y);
   }
 );
-
+*/
 // Set startup preset from file
 var startupPreset = colorboxuserConfig.getValue("startup_preset");
 if (startupPreset.length) {
