@@ -1,0 +1,166 @@
+#!!1.7.0|stable
+### THE FIRST LINE OF THE FILE CONTAINS METADATA STARTING WITH #!! AND SEPERATED BY |
+### #!!VERSION|CHANNEL
+
+### easympv update file specification
+### save file as VERSIONNUMBER.emu (easympvupdate)
+
+# version baseDirRemote
+# The base directory of the build stored on the website for version x.  
+
+# baseDirLocal
+# The base directory of the currently installed build (%appdata%\mpv).
+
+## Config File operations
+
+# CONFIG ADD file(+=/) option=value
+# Adds option=value to specified file.
+# If it exists already, the existing value will be set to value.
+#CONFIG;ADD;script-opts+easympv.conf;content=value
+
+# CONFIG REMOVE file(+=/) option=none
+# Removes option from specified file, =none required
+#CONFIG;REMOVE;file;option=none
+
+# CONFIG EDIT file(+=/) option=value
+# Obsolete, use ADD instead; Sets option in specified file
+#CONFIG;EDIT;file;option=value
+
+## File operations
+
+# FILE ADD file
+# File to be downloaded from version baseDirRemote to baseDirLocal.
+# Replaces file if it already exists.
+#FILE;ADD;/scripts/easympv.js/main.js
+
+# FILE REMOVE file
+# Removes specified file from baseDirLocal.
+#FILE;REMOVE;filename
+
+# FILE UTIL
+# Replaces utility with newest version in website root (argument 2 can be anything, but must exist)
+#FILE;UTIL;dummy
+
+## Folder operations
+
+# FOLDER ADD Folder
+# Creates folder folder if not existing
+#FOLDER;ADD;name
+
+# FOLDER REMOVE folder
+# Removes folder folder if exists
+#FOLDER;REMOVE;name
+
+###
+### example production script for version 1.7
+###
+
+## Cleanup
+# Remove ALL of our scripts
+FOLDER;REMOVE;/scripts/easympv.js
+FOLDER;REMOVE;/scripts/mpvcord
+FILE;REMOVE;/scripts/autoload.lua
+FILE;REMOVE;/scripts/autosave.lua
+FILE;REMOVE;/scripts/betterchapters.lua
+FILE;REMOVE;/scripts/blur-edges.lua
+# Now the scripts folder only contains user added scripts
+FOLDER;REMOVE;/images
+# images get purged completely
+FOLDER;REMOVE;/shaders
+# idealy we would remove each shader seperatly, but this is just an example
+
+## Adding folders
+FOLDER;ADD;/images
+FOLDER;ADD;/shaders
+FOLDER;ADD;/scripts/easympv.js
+FOLDER;ADD;/scripts/mpvcord
+FOLDER;ADD;/watch_later
+
+## Lua Scripts
+FILE;ADD;/scripts/autoload.lua
+FILE;ADD;/scripts/autosave.lua
+FILE;ADD;/scripts/betterchapters.lua
+FILE;ADD;/scripts/blur-edges.lua
+
+## easympv
+FILE;ADD;/scripts/easympv.js/AssFormat.js
+FILE;ADD;/scripts/easympv.js/Chapters.js
+FILE;ADD;/scripts/easympv.js/Colors.js
+FILE;ADD;/scripts/easympv.js/main.js
+FILE;ADD;/scripts/easympv.js/Menus.js
+FILE;ADD;/scripts/easympv.js/Options.js
+FILE;ADD;/scripts/easympv.js/OSD.js
+FILE;ADD;/scripts/easympv.js/SelectionMenu.js
+FILE;ADD;/scripts/easympv.js/Shaders.js
+FILE;ADD;/scripts/easympv.js/Shaders.json
+FILE;ADD;/scripts/easympv.js/Utils.js
+
+## mpvcord
+FILE;ADD;/scripts/mpvcord/main.lua
+FILE;ADD;/scripts/mpvcord/lua-discordGameSDK.lua
+
+## images
+FILE;ADD;/images/colorbox.bmp
+FILE;ADD;/images/logo.bmp
+FILE;ADD;/images/shaders.bmp
+
+## shaders
+FILE;ADD;/shaders/adaptive-sharpen.glsl
+FILE;ADD;/shaders/Anime4K_Auto_Downscale_Pre_x4.glsl
+FILE;ADD;/shaders/Anime4K_DarkLines_Fast.glsl
+FILE;ADD;/shaders/Anime4K_DarkLines_HQ.glsl
+FILE;ADD;/shaders/Anime4K_DarkLines_VeryFast.glsl
+FILE;ADD;/shaders/Anime4K_Deblur_CNN_L.glsl
+FILE;ADD;/shaders/Anime4K_Deblur_CNN_M.glsl
+FILE;ADD;/shaders/Anime4K_Deblur_DoG.glsl
+FILE;ADD;/shaders/Anime4K_Deblur_Original.glsl
+FILE;ADD;/shaders/Anime4K_Denoise_Bilateral_Mean.glsl
+FILE;ADD;/shaders/Anime4K_Denoise_Bilateral_Median.glsl
+FILE;ADD;/shaders/Anime4K_Denoise_Bilateral_Mode.glsl
+FILE;ADD;/shaders/Anime4K_Denoise_Heavy_CNN_L.glsl
+FILE;ADD;/shaders/Anime4K_RA_CNN_L.glsl
+FILE;ADD;/shaders/Anime4K_RA_CNN_M.glsl
+FILE;ADD;/shaders/Anime4K_RA_CNN_UL.glsl
+FILE;ADD;/shaders/Anime4K_RA_DoG.glsl
+FILE;ADD;/shaders/Anime4K_ThinLines_Fast.glsl
+FILE;ADD;/shaders/Anime4K_ThinLines_HQ.glsl
+FILE;ADD;/shaders/Anime4K_ThinLines_VeryFast.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_L_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_L_x2_Deblur.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_L_x2_Denoise.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_M_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_M_x2_Deblur.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_M_x2_Denoise.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_UL_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_UL_x2_Deblur.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_CNN_UL_x2_Denoise.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_DoG_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_DoG_x2_Deblur.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_DTD_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_Original_x2.glsl
+FILE;ADD;/shaders/Anime4K_Upscale_Original_x2_Deblur_x2.glsl
+FILE;ADD;/shaders/crt.glsl
+FILE;ADD;/shaders/FSRCNNX_x2_16-0-4-1.glsl
+FILE;ADD;/shaders/FSRCNNX_x2_8-0-4-1.glsl
+FILE;ADD;/shaders/fxaa.glsl
+FILE;ADD;/shaders/KrigBilateral.glsl
+FILE;ADD;/shaders/nnedi3-nns128-win8x6.hook
+FILE;ADD;/shaders/nnedi3-nns16-win8x6.hook
+FILE;ADD;/shaders/nnedi3-nns256-win8x6.hook
+FILE;ADD;/shaders/nnedi3-nns32-win8x6.hook
+FILE;ADD;/shaders/nnedi3-nns64-win8x6.hook
+FILE;ADD;/shaders/noise_static_chroma.hook
+FILE;ADD;/shaders/noise_static_chroma_strong.hook
+FILE;ADD;/shaders/noise_static_luma.hook
+FILE;ADD;/shaders/noise_static_luma_strong.hook
+FILE;ADD;/shaders/ravu-lite-r4.hook
+FILE;ADD;/shaders/ravu-r4.hook
+FILE;ADD;/shaders/SSimDownscaler.glsl
+FILE;ADD;/shaders/SSimSuperRes.glsl
+FILE;ADD;/shaders/hs.ass
+
+# dummy
+FILE;ADD;/watch_later/dummy
+
+# Update the utility, just in case
+FILE;UTIL;dummy
