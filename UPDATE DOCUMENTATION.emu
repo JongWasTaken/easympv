@@ -3,7 +3,8 @@
 ### #!!VERSION|CHANNEL
 
 ### easympv update file specification
-### save file as VERSIONNUMBER.emu (easympvupdate)
+### save file as something.emu (easympvupdate)
+### (this file is a working spec for update 1.7!)
 
 # version baseDirRemote
 # The base directory of the build stored on the website for version x.  
@@ -52,7 +53,7 @@
 #FOLDER;REMOVE;name
 
 ###
-### example production script for version 1.7
+### production script for version 1.7
 ###
 
 ## Cleanup
@@ -64,10 +65,62 @@ FILE;REMOVE;/scripts/autosave.lua
 FILE;REMOVE;/scripts/betterchapters.lua
 FILE;REMOVE;/scripts/blur-edges.lua
 # Now the scripts folder only contains user added scripts
-FOLDER;REMOVE;/images
 # images get purged completely
-FOLDER;REMOVE;/shaders
-# idealy we would remove each shader seperatly, but this is just an example
+FOLDER;REMOVE;/images
+# removing each shader
+FILE;REMOVE;/shaders/adaptive-sharpen.glsl
+FILE;REMOVE;/shaders/Anime4K_Auto_Downscale_Pre_x4.glsl
+FILE;REMOVE;/shaders/Anime4K_DarkLines_Fast.glsl
+FILE;REMOVE;/shaders/Anime4K_DarkLines_HQ.glsl
+FILE;REMOVE;/shaders/Anime4K_DarkLines_VeryFast.glsl
+FILE;REMOVE;/shaders/Anime4K_Deblur_CNN_L.glsl
+FILE;REMOVE;/shaders/Anime4K_Deblur_CNN_M.glsl
+FILE;REMOVE;/shaders/Anime4K_Deblur_DoG.glsl
+FILE;REMOVE;/shaders/Anime4K_Deblur_Original.glsl
+FILE;REMOVE;/shaders/Anime4K_Denoise_Bilateral_Mean.glsl
+FILE;REMOVE;/shaders/Anime4K_Denoise_Bilateral_Median.glsl
+FILE;REMOVE;/shaders/Anime4K_Denoise_Bilateral_Mode.glsl
+FILE;REMOVE;/shaders/Anime4K_Denoise_Heavy_CNN_L.glsl
+FILE;REMOVE;/shaders/Anime4K_RA_CNN_L.glsl
+FILE;REMOVE;/shaders/Anime4K_RA_CNN_M.glsl
+FILE;REMOVE;/shaders/Anime4K_RA_CNN_UL.glsl
+FILE;REMOVE;/shaders/Anime4K_RA_DoG.glsl
+FILE;REMOVE;/shaders/Anime4K_ThinLines_Fast.glsl
+FILE;REMOVE;/shaders/Anime4K_ThinLines_HQ.glsl
+FILE;REMOVE;/shaders/Anime4K_ThinLines_VeryFast.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_L_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_L_x2_Deblur.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_L_x2_Denoise.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_M_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_M_x2_Deblur.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_M_x2_Denoise.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_UL_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_UL_x2_Deblur.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_CNN_UL_x2_Denoise.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_DoG_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_DoG_x2_Deblur.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_DTD_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_Original_x2.glsl
+FILE;REMOVE;/shaders/Anime4K_Upscale_Original_x2_Deblur_x2.glsl
+FILE;REMOVE;/shaders/crt.glsl
+FILE;REMOVE;/shaders/FSRCNNX_x2_16-0-4-1.glsl
+FILE;REMOVE;/shaders/FSRCNNX_x2_8-0-4-1.glsl
+FILE;REMOVE;/shaders/fxaa.glsl
+FILE;REMOVE;/shaders/KrigBilateral.glsl
+FILE;REMOVE;/shaders/nnedi3-nns128-win8x6.hook
+FILE;REMOVE;/shaders/nnedi3-nns16-win8x6.hook
+FILE;REMOVE;/shaders/nnedi3-nns256-win8x6.hook
+FILE;REMOVE;/shaders/nnedi3-nns32-win8x6.hook
+FILE;REMOVE;/shaders/nnedi3-nns64-win8x6.hook
+FILE;REMOVE;/shaders/noise_static_chroma.hook
+FILE;REMOVE;/shaders/noise_static_chroma_strong.hook
+FILE;REMOVE;/shaders/noise_static_luma.hook
+FILE;REMOVE;/shaders/noise_static_luma_strong.hook
+FILE;REMOVE;/shaders/ravu-lite-r4.hook
+FILE;REMOVE;/shaders/ravu-r4.hook
+FILE;REMOVE;/shaders/SSimDownscaler.glsl
+FILE;REMOVE;/shaders/SSimSuperRes.glsl
+FILE;REMOVE;/shaders/hs.ass
 
 ## Adding folders
 FOLDER;ADD;/images
@@ -159,7 +212,7 @@ FILE;ADD;/shaders/SSimDownscaler.glsl
 FILE;ADD;/shaders/SSimSuperRes.glsl
 FILE;ADD;/shaders/hs.ass
 
-# dummy
+# dummy file in watch_later to prevent crashes on fresh installation
 FILE;ADD;/watch_later/dummy
 
 # Update the utility, just in case
