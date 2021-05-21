@@ -2,5 +2,8 @@
 *.ico
 *.bat
 *.txt
+*.log
 watch_later/
 watch_later/*
+testfolder/
+testfolder/*

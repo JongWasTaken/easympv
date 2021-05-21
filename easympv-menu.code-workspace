@@ -1,9 +1,6 @@
 {
 	"folders": [
 		{
-			"path": "scripts\\easympv.js"
-		},
-		{
 			"name": "mpv",
 			"path": "."
 		}

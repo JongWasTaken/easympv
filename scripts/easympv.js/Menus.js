@@ -381,7 +381,7 @@ Menu.main = new SelectionMenu({
     });
     if (randomPipeNames) {
       options.push({
-        menuText: "Switch to unsecure IPC server (!)\n",
+        menuText: "Switch to insecure IPC server (!)\n",
         item: "remote",
       });
     }
