@@ -20,8 +20,13 @@
 #CONFIG;ADD;script-opts+easympv.conf;content=value
 
 # CONFIG REMOVE file(+=/) option=none
-# Removes option from specified file, =none required
-#CONFIG;REMOVE;file;option=none
+# Removes option from specified file
+#CONFIG;REMOVE;file;option
+
+# CONFIG REGEN
+# Migrates current configuration to latest spec
+# Might result in configuration loss, use only when needed
+#CONFIG;REGEN
 
 # CONFIG EDIT file(+=/) option=value
 # Obsolete, use ADD instead; Sets option in specified file
@@ -39,8 +44,8 @@
 #FILE;REMOVE;filename
 
 # FILE UTIL
-# Replaces utility with newest version in website root (argument 2 can be anything, but must exist)
-#FILE;UTIL;dummy
+# Replaces utility with newest version in website root
+#FILE;UTIL
 
 ## Folder operations
 
@@ -215,5 +220,8 @@ FILE;ADD;/shaders/hs.ass
 # dummy file in watch_later to prevent crashes on fresh installation
 FILE;ADD;/watch_later/dummy
 
+# Test
+CONFIG;REGEN
+
 # Update the utility, just in case
-FILE;UTIL;dummy
+FILE;UTIL

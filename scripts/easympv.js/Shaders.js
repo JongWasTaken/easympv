@@ -6,14 +6,9 @@
  * License:        MIT License
  */
 
-// TODO: rewrite this whole thing
-// IDEALY: load shaders from file
-// apply ONLY by nice name, no internal bs
-
 var Shaders = {};
 Shaders.name = "none";
-Shaders.anime4k_strength;
-Shaders.firsttime = true;
+//Shaders.firsttime = true;
 Shaders.sets = [];
 
 Shaders.set = function(name,files) {
@@ -73,20 +68,10 @@ Shaders.apply = function (shader) {
     } else if (height > 720) {
       isHD = true;
     }
-
-    switch (Shaders.anime4k_strength) {
-      case 0:
-        Shaders.apply("clear");
-      case 1:
-        if (isHD) { Shaders.apply("HD Anime4K Faithful"); } else { Shaders.apply("SD Anime4K Faithful"); }
-      case 2:
-        if (isHD) { Shaders.apply("HD Anime4K Improved"); } else { Shaders.apply("SD Anime4K Improved"); }
-      case 3:
-        if (isHD) { Shaders.apply("HD Anime4K Improved & Deblured"); } else { Shaders.apply("SD Anime4K Improved & Deblured"); }
-    }
+    if (isHD) { Shaders.apply("HD Anime4K Improved & Deblured"); } else { Shaders.apply("SD Anime4K Improved & Deblured"); }
 
   }
-  else if (shader == "clear")
+  else if (shader == "clear" || shader == "none")
   {
     Shaders.name = "none";
     mp.commandv("change-list", "glsl-shaders", "clr", "");

@@ -50,6 +50,7 @@ var Options = require("./Options"),
   randomPipeNames = true,
   assOverride = false,
   subtitleStyleOverride = false,
+  startupShader = "none",
   version = "1.7",
   manual = false,
   debug = false;
@@ -57,8 +58,7 @@ var Options = require("./Options"),
 // Creating options
 var userConfig = new Options.advanced_options(
   {
-    anime4k_strengh: 4,
-    anime4k_strength: 4,
+    shader: "none",
     subtitleStyleOverride: false,
     useRandomPipeName: true,
     manualInstallation: false,
@@ -71,17 +71,11 @@ var userConfig = new Options.advanced_options(
 Shaders.populateSets();
 
 // Get values from file
+startupShader = userConfig.getValue("shader");
 debug = userConfig.getValue("debugMode");
 subtitleStyleOverride = userConfig.getValue("subtitleStyleOverride");
 randomPipeNames = userConfig.getValue("useRandomPipeName");
 manual = userConfig.getValue("manualInstallation");
-
-if (userConfig.getValue("anime4k_strengh") != 4) {
-  // typo correction
-  Shaders.anime4k_strength = userConfig.getValue("anime4k_strengh");
-} else {
-  Shaders.anime4k_strength = userConfig.getValue("anime4k_strength");
-}
 
 // Creating options for colorbox
 var colorboxuserConfig = new Options.advanced_options(
@@ -180,7 +174,7 @@ mp.msg.info(
 var on_start = function () {
   mp.msg.info("Applying startup shader...");
   if (!mp.get_property("path").includes("video=")) { // shader will not be applied if using video device
-    Shaders.apply("a4k_auto"); // autoapply a4k
+    Shaders.apply(startupShader);
   }
   // TODO: Fix or remove
   if (subtitleStyleOverride) {
