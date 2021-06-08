@@ -47,6 +47,7 @@ var Options = require("./Options"),
   Colors = require("./Colors"),
   Chapters = require("./Chapters"),
   Menu = require("./Menus"),
+  isFirstFile = true,
   randomPipeNames = true,
   assOverride = false,
   subtitleStyleOverride = false,
@@ -167,37 +168,45 @@ var toggle_assoverride = function (silent) {
 // Per File Option Saving (Step 1: Cache)
 Utils.cacheWL(); // Create a copy of watch_later folder, as current file will get deleted by mpv after read
 mp.msg.info(
-  'Please ignore "Error parsing option shader (option not found)" errors. They are expected.'
+  'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
 ); // because mpv does not know our custom options
 
 // This will be executed on file-load
 var on_start = function () {
-  mp.msg.info("Applying startup shader...");
-  if (!mp.get_property("path").includes("video=")) { // shader will not be applied if using video device
-    Shaders.apply(startupShader);
-  }
-  // TODO: Fix or remove
-  if (subtitleStyleOverride) {
-    toggle_assoverride(true);
+  if(isFirstFile) // will only be applied for the first file
+  {
+    mp.msg.info("Applying startup shader...");
+    if (!mp.get_property("path").includes("video=")) { // shader will not be applied if using video device
+      Shaders.apply(startupShader);
+    }
+
+    // TODO: Fix or remove
+    if (subtitleStyleOverride) {
+      toggle_assoverride(true);
+    }
+
+    // Audio Filter
+    if (  // Checks for default.sofa and applies it as an audio filter if found
+      mp.utils.file_info(mp.utils.get_user_path("~~/") + "/default.sofa") !=
+      undefined
+    ) {
+      mp.msg.info("Sofa file found!");
+      var path = mp.utils
+        .get_user_path("~~/")
+        .toString()
+        .replace(/\\/g, "/")
+        .substring(2);
+      mp.commandv(
+        "af",
+        "set",
+        "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
+      );
+    }
+
+    isFirstFile = false;
   }
 
-  // Audio Filter
-  if (  // Checks for default.sofa and applies it as an audio filter if found
-    mp.utils.file_info(mp.utils.get_user_path("~~/") + "/default.sofa") !=
-    undefined
-  ) {
-    mp.msg.info("Sofa file found!");
-    var path = mp.utils
-      .get_user_path("~~/")
-      .toString()
-      .replace(/\\/g, "/")
-      .substring(2);
-    mp.commandv(
-      "af",
-      "set",
-      "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
-    );
-  }
+  // TODO: give priority to user selected Shaderset/Colorset for current session
   // Per File Option Saving (Part 2: Loading for video file)
   var wld = Utils.getWLData();
   if (wld != undefined) {
