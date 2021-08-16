@@ -98,7 +98,22 @@ OSD.status = function (name) {
 // Draw image to screen at specified coordinates.
 OSD.show = function (name, x, y) {
   if (name != undefined && x != undefined && y != undefined) {
-    var image = __getFilebyName(name);
+
+    var scale = "";
+    var height = mp.get_property("osd-height");
+    if (height == 0) {
+      height = mp.get_property("height");
+    }
+    
+    if(height < 1090) {
+      scale = "";
+    } else if(height <= 1450 && height >= 1080) {
+      scale = "2";
+    } else if(height <= 2170 && height >= 1440) {
+      scale = "4";
+    }
+    //mp.msg.info("CURRENT SCALE: " + scale);
+    var image = __getFilebyName(scale + name);
     image.data.x = x;
     image.data.y = y;
     if (!image.data.active) {
@@ -122,22 +137,8 @@ OSD.show = function (name, x, y) {
 // Draws/hides image to/from screen.
 OSD.toggle = function (name, x, y) {
   var image = __getFilebyName(name);
-  image.data.x = x;
-  image.data.y = y;
   if (!image.data.active) {
-    mp.commandv(
-      "overlay-add",
-      image.data.id,
-      image.data.x,
-      image.data.y,
-      image.data.file,
-      image.data.offset,
-      "bgra",
-      image.data.width,
-      image.data.height,
-      image.data.width * 4
-    );
-    image.data.active = true;
+    OSD.show(image.name,x,y)
   } else {
     mp.commandv("overlay-remove", image.data.id);
     image.data.active = false;
@@ -151,6 +152,14 @@ OSD.hide = function (name) {
     if (image.data.active) {
       mp.commandv("overlay-remove", image.data.id);
       image.data.active = false;
+    }
+  }
+};
+
+OSD.hideAll = function () {
+  for (i = 0; i < Files.length; i++) {
+    if (Files[i].data.active == true) {
+      OSD.hide(Files[i].name);
     }
   }
 };

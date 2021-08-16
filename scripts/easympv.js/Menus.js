@@ -37,6 +37,22 @@ Menu.main = new SelectionMenu({
       menuText: "Close\n\n",
       item: "close",
     });
+    if(mp.get_property("path") != null)
+    {
+      if(mp.get_property("path").includes("video="))
+      {
+       options.push({
+         menuText: "[Reload Video Device]\n",
+         item: "videodevice_reload",
+       });
+      }
+    }
+     if(Number(mp.get_property("playlist-count")) > 1) {
+       options.push({
+         menuText: "[Shuffle playlist]\n",
+         item: "shuffle",
+       });
+     }
     options.push({
       menuText: "Open...",
       item: "open",
@@ -47,10 +63,7 @@ Menu.main = new SelectionMenu({
         'item': 'show'
     });
     */
-    options.push({
-      menuText: "Shuffle playlist\n",
-      item: "shuffle",
-    });
+
     options.push({
       menuText: "Shaders",
       item: "shaders",
@@ -127,6 +140,8 @@ Menu.main = new SelectionMenu({
           Utils.externalUtil("open " + randomPipeName);
         } else if (selection.item == "quit") {
           mp.commandv("quit_watch_later");
+        } else if (selection.item == "videodevice_reload") {
+          Utils.externalUtil("videoreload "+randomPipeName);
         }
     }
   };
@@ -243,6 +258,9 @@ Menu.main = new SelectionMenu({
     maxLines: max_lines,
     menuFontSize: font_size,
     menuFontAlpha: font_alpha,
+    titleImage: "chapters",
+    titleImageX: 36,
+    titleImageY: 30,
   });
 
 
@@ -337,6 +355,9 @@ Menu.main = new SelectionMenu({
     maxLines: max_lines,
     menuFontSize: font_size,
     menuFontAlpha: font_alpha,
+    titleImage: "settings",
+    titleImageX: 36,
+    titleImageY: 30,
   });
 
   Menu.settings.build = function () {
@@ -467,7 +488,7 @@ Menu.main = new SelectionMenu({
   };
 
   Menu.settings.resetText = function (version) {
-    Menu.settings.setTitle("easympv preferences");
+    Menu.settings.setTitle("easympv settings");
     Menu.settings.setDescription("easympv(plugin), version " + version);
   };
 
@@ -479,7 +500,7 @@ Menu.main = new SelectionMenu({
     maxLines: max_lines,
     menuFontSize: font_size,
     menuFontAlpha: font_alpha,
-    titleImage: "colorbox",
+    titleImage: "colors",
     titleImageX: 36,
     titleImageY: 30,
   });

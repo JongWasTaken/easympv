@@ -71,7 +71,7 @@ Shaders.apply = function (shader) {
     if (isHD) { Shaders.apply("HD Anime4K Improved & Deblured"); } else { Shaders.apply("SD Anime4K Improved & Deblured"); }
 
   }
-  else if (shader == "clear" || shader == "none")
+  else if (shader == "clear" || shader == "none" || shader == "" || shader == undefined)
   {
     Shaders.name = "none";
     mp.commandv("change-list", "glsl-shaders", "clr", "");
@@ -79,7 +79,13 @@ Shaders.apply = function (shader) {
   else
   {
     mp.commandv("change-list", "glsl-shaders", "clr", "");
-    Shaders.name = shader;
+    if(shader.includes("none") || shader.includes("undefined")) {
+      Shaders.name = "none";
+    }
+    else
+    {
+      Shaders.name = shader;
+    }
 
     var i;
     for (i = 0; i < Shaders.sets.length; i++) {

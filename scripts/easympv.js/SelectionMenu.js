@@ -417,8 +417,14 @@ SelectionMenu.prototype.renderMenu = function (
   // Title.
   if (
     this.titleImageX != undefined &&
-    mp.get_property("osd-width") >= 1900 &&
-    mp.get_property("osd-width") <= 1940
+    mp.get_property("osd-height") >= 1060 &&
+    mp.get_property("osd-height") <= 1100 ||
+    this.titleImageX != undefined &&
+    mp.get_property("osd-height") >= 1420 &&
+    mp.get_property("osd-height") <= 1460 ||
+    this.titleImageX != undefined &&
+    mp.get_property("osd-height") >= 2140 &&
+    mp.get_property("osd-height") <= 2180
   ) {
     this.title = "        ";
     OSD.show(this.titleImage, this.titleImageX, this.titleImageY);
@@ -557,7 +563,8 @@ SelectionMenu.prototype.hideMenu = function () {
   }
 
   // remove logo (if any)
-  OSD.hide(this.titleImage);
+  OSD.hideAll(); // dirty little hack because i am lazy
+  //OSD.hide(this.titleImage);
 
   // Get rid of any lingering "stop message" timeout and message.
   this.stopMessage(true);

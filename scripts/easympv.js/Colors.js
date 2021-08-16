@@ -5,7 +5,7 @@
  * URL:            https://smto.pw/mpv
  * License:        Apache License, Version 2.0
  */
-
+//TODO: Rewrite
 var Colors = {};
 Colors.lookName = "none";
 Colors.presetCache = {};

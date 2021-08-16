@@ -1,5 +1,5 @@
 /*
- * EASYMPV.JS (main.js), using parts of COLORBOX.JS by VideoPlayerCode
+ * EASYMPV.JS (main.js)
  *
  * Author:              Jong
  * URL:                 https://smto.pw/mpv
@@ -10,13 +10,13 @@
  *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
  * JavaScript documentation, for the few odd ones out:
  *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
- * input.conf documentation, for commands, properties and other tidbits
+ * input.conf documentation, for commands, properties, events and other tidbits
  *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
  *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list
  *
  * Important!
  *     mpv uses MuJS, which is ES5 compliant, but not ES6!
- *     Most IE polyfills can be used though.
+ *     Most IE polyfills will probably work.
  * 
  * Snippets:
  *     how to check for a file (check for undefined)
@@ -173,11 +173,17 @@ mp.msg.info(
 
 // This will be executed on file-load
 var on_start = function () {
+
+  // TODO: give priority to user selected Shaderset/Colorset for current session
+  // Per File Option Saving (Part 2: Loading for video file)
+  var wld = Utils.getWLData();
+
+
   if(isFirstFile) // will only be applied for the first file
   {
-    mp.msg.info("Applying startup shader...");
+
     if (!mp.get_property("path").includes("video=")) { // shader will not be applied if using video device
-      Shaders.apply(startupShader);
+      if (wld == undefined) { Shaders.apply(startupShader); }
     }
 
     // TODO: Fix or remove
@@ -206,12 +212,15 @@ var on_start = function () {
     isFirstFile = false;
   }
 
-  // TODO: give priority to user selected Shaderset/Colorset for current session
-  // Per File Option Saving (Part 2: Loading for video file)
-  var wld = Utils.getWLData();
   if (wld != undefined) {
-    Shaders.apply(wld.shader);
-    Colors.applyLookByName(wld.color);
+    if(wld.shader != undefined)
+    {
+      Shaders.apply(wld.shader);
+    }
+    if(wld.color != undefined)
+    {
+      Colors.applyLookByName(wld.color);
+    }
   }
 };
 
