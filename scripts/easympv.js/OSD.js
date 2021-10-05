@@ -20,7 +20,7 @@ If the file is not found, defaults will be used instead.
 This is needed because there is no way to check image metadata.
 */
 __getImageInfo = function (file) {
-  mp.msg.info("Checking for image info file: " + file);
+  //mp.msg.info("Checking for image info file: " + file);
   file = mp.utils.get_user_path("~~/images/") + file + ".info";
   var h, w;
   if (mp.utils.file_info(file) != undefined) {
@@ -33,9 +33,9 @@ __getImageInfo = function (file) {
         w = Number(pair[1]);
       }
     }
-    mp.msg.info("Image info found! (H: " + h + ", W: " + w + ")");
+    //mp.msg.info("Image info found! (H: " + h + ", W: " + w + ")");
   } else {
-    mp.msg.info("Image info not found! Assuming default. (H: 60, W: 200)");
+    //mp.msg.info("Image info not found! Assuming default. (H: 60, W: 200)");
     h = 60;
     w = 200;
   }

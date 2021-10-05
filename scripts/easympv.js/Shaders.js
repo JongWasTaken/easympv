@@ -7,9 +7,14 @@
  */
 
 var Shaders = {};
+var seperator = "";
 Shaders.name = "none";
 //Shaders.firsttime = true;
 Shaders.sets = [];
+
+var Utils = require("./Utils");
+if(Utils.os == "win") {seperator = ";"}
+else {seperator = ":"}
 
 Shaders.set = function(name,files) {
   this.name = name;
@@ -24,7 +29,7 @@ Shaders.populateSets = function() {
     var filelist = "";
     var i = 0;
     for (i = 0; i < file[set].length; i++) {
-      filelist = filelist + "~~/shaders/" + file[set][i] + ";";
+      filelist = filelist + "~~/shaders/" + file[set][i] + seperator;
     }
     filelist = filelist.slice(0, filelist.length-1);
     Shaders.sets.push(new Shaders.set(set,filelist))

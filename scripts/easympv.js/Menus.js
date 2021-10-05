@@ -3,7 +3,7 @@
  *
  * Author:              Jong
  * URL:                 https://smto.pw/mpv
- * License:             MIT License0
+ * License:             MIT License
  *
  */
 
@@ -243,7 +243,7 @@ Menu.main = new SelectionMenu({
   };
 
   Menu.shaders.resetText = function () {
-    Menu.shaders.setTitle("easympv shaders");
+    Menu.shaders.setTitle("Shaders");
     Menu.shaders.setDescription(
       "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
         Shaders.name
@@ -338,7 +338,7 @@ Menu.main = new SelectionMenu({
   };
 
   Menu.chapters.resetText = function () {
-    Menu.chapters.setTitle("easympv chapters");
+    Menu.chapters.setTitle("Chapters");
     Menu.chapters.setDescription(
       '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
         Chapters.mode +
@@ -488,8 +488,8 @@ Menu.main = new SelectionMenu({
   };
 
   Menu.settings.resetText = function (version) {
-    Menu.settings.setTitle("easympv settings");
-    Menu.settings.setDescription("easympv(plugin), version " + version);
+    Menu.settings.setTitle("Settings");
+    Menu.settings.setDescription("easympv-scripts " + version);
   };
 
   Menu.settings.setCallbackMenuOpen(Menu.settings.handler);
@@ -594,7 +594,7 @@ Menu.main = new SelectionMenu({
   };
 
   Menu.colors.resetText = function () {
-    Menu.colors.setTitle("easympv colors");
+    Menu.colors.setTitle("Colors");
     Menu.colors.setDescription(
       "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
         Colors.lookName

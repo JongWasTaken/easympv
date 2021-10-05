@@ -16,7 +16,7 @@
 
 # CONFIG ADD file(+=/) option=value
 # Adds option=value to specified file.
-# If it exists already, the existing value will be set to value.
+# If it exists already, the existing option will be set to value.
 #CONFIG;ADD;script-opts+easympv.conf;content=value
 
 # CONFIG REMOVE file(+=/) option=none

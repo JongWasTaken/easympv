@@ -23,16 +23,27 @@ if (mp.utils.getenv("OS") == "Windows_NT") {
     Utils.os = "linux";
     mp.msg.info("Detected operating system: Linux");
     mp.msg.info(
-      'Linux is not officially supported. Tough the majority of features will work if you install "mono". Don\'t blame me when something breaks!'
+      'Linux support is experimental. Don\'t blame me when something breaks!'
     );
   } else {
     Utils.os = "mac";
     mp.msg.info("Detected operating system: macOS");
     mp.msg.info(
-      "macOS is not officially supported. Don't blame me when something breaks!"
+      "macOS is not officially supported and never will be. Don't blame me when something breaks!"
     );
   }
 }
+
+Utils.report = function(text,osd){
+  if(osd){
+    mp.osd_message(
+      Ass.startSeq() +
+        Ass.size(14) +
+        text
+    );
+  }
+  mp.msg.info(text);
+};
 
 // Open file relative to config root. Can also run applications.
 Utils.openFile = function (file) {
@@ -52,19 +63,24 @@ Utils.openFile = function (file) {
 
 Utils.externalUtil = function (arg) {
   mp.msg.info("Starting utility with arguments: " + arg);
-  var util = mp.utils.get_user_path("~~/") + "/easympvUtility.exe";
   if (Utils.os == "win") {
+    var util = mp.utils.get_user_path("~~/") + "/easympvUtility.exe";
     util = util.replace("+", "/");
     util = util.replace("/", "\\");
     mp.commandv("run", "cmd", "/c", util + " " + arg);
   } else if (Utils.os == "mac") {
     mp.msg.info("macOS is not supported.");
   } else if (Utils.os == "linux") {
+    var util = mp.utils.get_user_path("~~/") + "/easympvUtility";
     var largs = arg.split(" ");
     if (largs.length == 1) {
-      mp.commandv("run", "mono", util, largs[0]);
+      mp.commandv("run",  util, largs[0]);
     } else if (largs.length == 2) {
-      mp.commandv("run", "mono", util, largs[0], largs[1]);
+      mp.commandv("run",  util, largs[0], largs[1]);
+    } else if (largs.length == 3) {
+      mp.commandv("run",  util, largs[0], largs[1], largs[2]);
+    } else if (largs.length == 4) {
+      mp.commandv("run",  util, largs[0], largs[1], largs[2], largs[3]);
     }
   }
 };
@@ -74,12 +90,21 @@ Utils.clearWatchdata = function () {
   var folder = mp.utils.get_user_path("~~/watch_later");
   if (Utils.os == "win") {
     folder = folder.replace("/", "\\");
-    mp.commandv("run", "cmd", "/c", "del /Q /S " + folder.replace("/", "\\"));
+    mp.commandv("run", "cmd", "/c", ""+
+    "copy " + folder.replace("/", "\\") + "\\00000000000000000000000000000000 " + mp.utils.get_user_path("~~/").replace("/", "\\") + " && " +
+    "del /Q /S " + folder.replace("/", "\\") + " && " +
+    "copy "+ mp.utils.get_user_path("~~/").replace("/", "\\") + "\\00000000000000000000000000000000 " + folder.replace("/", "\\") + "\\00000000000000000000000000000000" + " && " +
+    "del /Q " + mp.utils.get_user_path("~~/").replace("/", "\\") +"\\00000000000000000000000000000000"
+    );
   } else if (Utils.os == "mac") {
     mp.msg.info("macOS is not supported.");
     //mp.commandv("run","zsh","-c","rm -rf " + folder);
   } else if (Utils.os == "linux") {
+    mp.commandv("run", "cp", folder + "/00000000000000000000000000000000", mp.utils.get_user_path("~~/"));
     mp.commandv("run", "rm", "-rf", folder);
+    mp.commandv("run", "mkdir", folder);
+    mp.commandv("run", "cp", mp.utils.get_user_path("~~/") + "/00000000000000000000000000000000", folder);
+    mp.commandv("run", "rm", "-rf", mp.utils.get_user_path("~~/") + "/00000000000000000000000000000000");
   }
 };
 

@@ -52,7 +52,7 @@ var Options = require("./Options"),
   assOverride = false,
   subtitleStyleOverride = false,
   startupShader = "none",
-  version = "1.7",
+  version = "1.8",
   manual = false,
   debug = false;
 
@@ -102,7 +102,7 @@ var imageArray = mp.utils.readdir(
 for (i = 0; i < imageArray.length; i++) {
   if (imageArray[i].includes(".bmp") && !imageArray[i].includes(".info")) {
     OSD.addFile(imageArray[i].replace(".bmp", ""), imageArray[i]);
-    mp.msg.info("Indexed image: " + imageArray[i]);
+    //mp.msg.info("Indexed image: " + imageArray[i]);
   }
 }
 
@@ -124,7 +124,14 @@ if (randomPipeNames) {
   var randomPipeName = "mpv";
   mp.msg.info("PipeName: mpv");
 }
-mp.set_property("input-ipc-server", randomPipeName);
+
+if(Utils.os != "win")
+{
+  mp.set_property("input-ipc-server", "/tmp/" + randomPipeName); // sockets need a location
+}
+else {
+  mp.set_property("input-ipc-server", randomPipeName); // named pipes exist in the limbo
+}
 
 // Automatic check for updates
 if (!manual) {
