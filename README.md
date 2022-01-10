@@ -1,7 +1,8 @@
 # easympv-scripts
 ![](https://raw.githubusercontent.com/JongWasTaken/easympv-scripts/master/images/logo.bmp?token=AHJPHOK5XHM56JRRMOB7ZPTBDK24G)
 
-Script side of easympv.
+(WORK IN PROGRESS; UN-PRIVATED FOR UPDATER TESTING)
+Script side of easympv. 
 
 [FAQ](https://smto.pw/blog/?page_id=93)
 
