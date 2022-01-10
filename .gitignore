@@ -3,6 +3,8 @@
 *.bat
 *.txt
 *.log
+*.code-workspace
+*.conf
 watch_later/
 watch_later/*
 testfolder/
