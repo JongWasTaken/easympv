@@ -174,7 +174,7 @@ var toggle_assoverride = function (silent) {
 
 // Per File Option Saving (Step 1: Cache)
 Utils.cacheWL(); // Create a copy of watch_later folder, as current file will get deleted by mpv after read
-mp.msg.info(
+mp.msg.warn(
   'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
 ); // because mpv does not know our custom options
 

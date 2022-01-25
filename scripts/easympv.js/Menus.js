@@ -7,6 +7,44 @@
  *
  */
 
+/*
+Ideas for a new menu system:
+
+1. An js object containing settings (MenuSpecification)
+
+{
+  autoClose, default font size, logo image, description
+}
+
+2. An js object array containing every menu entry (MenuItems)
+
+{
+  title: "Option", // will be shown
+  item: "xxx", // will get passed to handler
+  desciption*: "bla bla", // optional description for item
+  color*: #fff, // optional color override
+  image*: "name" // OSD.Image name overrides title
+},{}...
+
+3. Create Menu object from MenuSpecification & MenuItems
+
+var menu = new Menus.Menu(MenuSpecification,MenuItems[,Menu parentMenu for automatic back button])
+
+4. Assign function to Menu.handler
+
+menu.handler = function (event, item) {
+  if(event == "open" && item == "item")
+    mp.msg.info("Item opened!");
+}
+
+5. Profit ???
+
+Optional: Mouse support?
+
+--> Calculate boundaries for each menuitem
+--> Hook MouseClick mpv event, check if in any boundary, handle as 'open' event if yes
+
+*/
 var Menu = {},
 Utils = require("./Utils"),
 Ass = require("./AssFormat"),

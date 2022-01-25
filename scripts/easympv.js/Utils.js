@@ -22,7 +22,7 @@ if (mp.utils.getenv("OS") == "Windows_NT") {
   if (mp.utils.getenv("DISPLAY") != undefined) {
     Utils.os = "linux";
     mp.msg.info("Detected operating system: Linux");
-    mp.msg.info(
+    mp.msg.warn(
       'Linux support is experimental. Don\'t blame me when something breaks!'
     );
   } else {
@@ -426,18 +426,22 @@ Utils.rtrim = function (str) {
 Utils.wlCache = [];
 
 Utils.cacheWL = function() {
-  var wlFilesCache = mp.utils.readdir(
-    mp.utils.get_user_path("~~/watch_later/"),
-    "files"
-  );
-  for (i = 0; i < wlFilesCache.length; i++) {
-    var file = {
-      name: wlFilesCache[i],
-      content: mp.utils.read_file(
-        mp.utils.get_user_path("~~/watch_later/") + wlFilesCache[i]
-      ),
-    };
-    Utils.wlCache.push(file);
+
+  if(mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) != undefined)
+  {
+    var wlFilesCache = mp.utils.readdir(
+      mp.utils.get_user_path("~~/watch_later/"),
+      "files"
+    );
+    for (i = 0; i < wlFilesCache.length; i++) {
+      var file = {
+        name: wlFilesCache[i],
+        content: mp.utils.read_file(
+          mp.utils.get_user_path("~~/watch_later/") + wlFilesCache[i]
+        ),
+      };
+      Utils.wlCache.push(file);
+    }
   }
 }
 
@@ -489,7 +493,9 @@ Utils.writeWLData = function(shader,color) {
       cFile = mp.get_property("playlist/" + i + "/filename");
     }
   }
-  var WLfile =
+  if (cFile != undefined)
+  {
+    var WLfile =
     mp.utils.get_user_path("~~/") +
     "/watch_later/" +
     Utils.md5(cFile).toUpperCase();
@@ -500,6 +506,7 @@ Utils.writeWLData = function(shader,color) {
       var WLtmp = WLtmp + "shader=" + shader + "\n" + "color=" + color + "\n";
       mp.utils.write_file("file://" + WLfile, WLtmp);
     }
+  }
 }
 
 

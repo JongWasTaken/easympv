@@ -112,7 +112,7 @@ OSD.show = function (name, x, y) {
     } else if(height <= 2170 && height >= 1440) {
       scale = "4";
     }
-    //mp.msg.info("CURRENT SCALE: " + scale);
+
     var image = __getFilebyName(scale + name);
     image.data.x = x;
     image.data.y = y;
