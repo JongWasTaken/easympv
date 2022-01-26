@@ -254,14 +254,11 @@ var on_shutdown = function () {
 
 ////////////////////////////////////////////////////////////////////////
 
-var auto_close = 5;
-//var font_size= 30;
-
 var MainMenuSettings = {
   title: "easympv2",
   description: "[displayMethod: "+ MenuSystem.displayMethod +"]",
-  image: "logo",
-  autoClose: auto_close
+  descriptionColor: "4444ee",
+  image: "logo"
 };
 
 var MainMenuItems = [
@@ -370,7 +367,6 @@ MainMenu.handler = function (event, action) {
 };
 
 var ShadersMenuSettings = {
-  autoClose: auto_close,
   title: "Shaders",
   description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " + Shaders.name,
   image: "shaders",
@@ -440,7 +436,6 @@ ShadersMenu.handler = function (event, action) {
 };
 
 var ChaptersMenuSettings = {
-  autoClose: auto_close,
   image: "chapters",
   title: "Chapters",
   description: '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
@@ -514,7 +509,6 @@ ChaptersMenu.handler = function (event, action) {
 };
 
 var SettingsMenuSettings = {
-  autoClose: auto_close,
   image: "settings",
   title: "Settings",
   description: "easympv-scripts " + version
@@ -637,7 +631,6 @@ SettingsMenu.handler = function (event, action) {
 };
 
 var ColorsMenuSettings = {
-  autoClose: auto_close,
   image: "colors",
   title: "Colors",
   description: "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +

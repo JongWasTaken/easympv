@@ -10,8 +10,8 @@
 /*
 TODO:
 
+(overlay) Scaling issues
 AutoClose
-Draw over other messages
 Mouse support?
 --> Calculate boundaries for each menuitem
 --> Hook MouseClick mpv event, check if in any boundary, handle as 'open' event if yes
@@ -25,12 +25,15 @@ Create a new instance of MenuSystem.Menu(Settings,Items[,Parent])
 
 Settings must be an object and can have the following properties:
     autoClose
-    font_size
+    fontSize
     image
     title
+    titleColor
     description
+    descriptionColor
     itemPrefix
     itemSuffix
+    itemColor
     selectedItemColor
     enableMouseSupport
 All of these have default values.
@@ -95,12 +98,15 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     this.settings = {};
     /*
     autoClose
-    font_size
+    fontSize
     image
     title
+    titleColor
     description
+    descriptionColor
     itemPrefix
     itemSuffix
+    itemColor
     selectedItemColor
     enableMouseSupport
     */
@@ -126,12 +132,12 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     if (settings.autoClose != undefined)
     {
         this.settings.autoClose = settings.autoClose;
-    } else { this.settings.autoClose = 15; }
+    } else { this.settings.autoClose = 5; }
 
-    if (settings.font_size != undefined)
+    if (settings.fontSize != undefined)
     {
-        this.settings.font_size = settings.font_size;
-    } else { this.settings.font_size = 11; }
+        this.settings.fontSize = settings.fontSize;
+    } else { this.settings.fontSize = 11; }
 
     if (settings.image != undefined)
     {
@@ -143,10 +149,20 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
         this.settings.title = settings.title;
     } else { this.settings.title = "no title defined"; }
 
+    if (settings.titleColor != undefined)
+    {
+        this.settings.titleColor = settings.titleColor;
+    } else { this.settings.titleColor = "FFFFFF"; }
+
     if (settings.description != undefined)
     {
         this.settings.description = settings.description;
-    } else { this.settings.description = "no description defined"; }
+    } else { this.settings.description = undefined; }
+
+    if (settings.descriptionColor != undefined)
+    {
+        this.settings.descriptionColor = settings.descriptionColor;
+    } else { this.settings.descriptionColor = "FFFFFF"; }
 
     if (settings.itemPrefix != undefined)
     {
@@ -157,6 +173,11 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     {
         this.settings.itemSuffix = settings.itemSuffix;
     } else { this.settings.itemSuffix = "✓"; }
+
+    if (settings.itemColor != undefined)
+    {
+        this.settings.itemColor = settings.itemColor;
+    } else { this.settings.itemColor = "FFFFFF"; }
 
     if (settings.selectedItemColor != undefined)
     {
@@ -211,7 +232,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
     if(Menus.displayMethod == "message")
     {
         this.cachedMenuText += Ass.startSeq();
-        this.cachedMenuText += Ass.size(this.settings.font_size);
+        this.cachedMenuText += Ass.size(this.settings.fontSize);
 
         // Title
         var title = this.settings.title;
@@ -230,10 +251,13 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 this.allowDrawImage = true;
             }
         }
-        this.cachedMenuText += Ass.size(this.settings.font_size + 2) + title + Ass.size(this.settings.font_size) + "\n \n";
+        this.cachedMenuText += Ass.size(this.settings.fontSize + 2) + Ass.color(this.settings.titleColor) + title + Ass.size(this.settings.fontSize) + "\n \n";
 
         // Description
-        this.cachedMenuText += Ass.size(this.settings.font_size - 3) + this.settings.description + Ass.size(this.settings.font_size) + "\n \n";
+        if(this.settings.description != undefined)
+        {
+            this.cachedMenuText += Ass.size(this.settings.fontSize - 3) + Ass.color(this.settings.descriptionColor) + this.settings.description + Ass.size(this.settings.fontSize) + "\n \n";
+        }
 
         // Items
         for (var i = 0; i < this.items.length; i++)
@@ -246,11 +270,11 @@ Menus.Menu.prototype._constructMenuCache = function ()
             if (currentItem.color != undefined)
             {
                 color = Ass.color(currentItem.color);
-            }
+            } else { color = Ass.color(this.settings.itemColor); }
 
             if (currentItem.description != undefined)
             {
-                description = Ass.size(this.settings.font_size - 5) + color + " " + currentItem.description.replaceAll("\n","\n ") + Ass.white() + Ass.size(this.settings.font_size) + "\n";
+                description = Ass.size(this.settings.fontSize - 5) + color + " " + currentItem.description.replaceAll("\n","\n ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
             }
 
             if(this.selectedItemIndex == i)
@@ -273,7 +297,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
     
     if(Menus.displayMethod == "overlay")
     {
-        this.cachedMenuText += Ass.size(this.settings.font_size);
+        this.cachedMenuText += Ass.size(this.settings.fontSize);
 
         // Title
         var title = this.settings.title;
@@ -292,12 +316,18 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 this.allowDrawImage = true;
             }
         }
-        this.cachedMenuText += Ass.size(this.settings.font_size + 2) + title + Ass.size(this.settings.font_size) + "\n \n";
+        this.cachedMenuText += Ass.size(this.settings.fontSize + 2) + Ass.color(this.settings.titleColor) + title + Ass.size(this.settings.fontSize) + "\n \n";
 
         // Description
         var descriptionSizeModifier = 10;
-        var mainDescription = Ass.size(this.settings.font_size + descriptionSizeModifier) + this.settings.description.replaceAll("\n","\n"+Ass.size(this.settings.font_size + descriptionSizeModifier));
-        this.cachedMenuText += mainDescription + Ass.size(this.settings.font_size) + "\n";
+
+        if(this.settings.description != undefined)
+        {
+            var mainDescription = Ass.size(this.settings.fontSize + descriptionSizeModifier) + 
+            this.settings.description.replaceAll("\n","\n"+Ass.size(this.settings.fontSize + descriptionSizeModifier)+Ass.color(this.settings.descriptionColor));
+    
+            this.cachedMenuText += mainDescription + Ass.size(this.settings.fontSize) + "\n";
+        }
 
         // Items
         for (var i = 0; i < this.items.length; i++)
@@ -310,12 +340,12 @@ Menus.Menu.prototype._constructMenuCache = function ()
             if (currentItem.color != undefined)
             {
                 color = Ass.color(currentItem.color);
-            }
+            } else { color = Ass.color(this.settings.itemColor); }
 
             if (currentItem.description != undefined)
             {
-                description = Ass.size(this.settings.font_size + descriptionSizeModifier) + color + " " + 
-                currentItem.description.replaceAll("\n","\n"+Ass.size(this.settings.font_size + descriptionSizeModifier)+" ") + Ass.white() + Ass.size(this.settings.font_size) + "\n";
+                description = Ass.size(this.settings.fontSize + descriptionSizeModifier) + color + " " + 
+                currentItem.description.replaceAll("\n","\n"+Ass.size(this.settings.fontSize + descriptionSizeModifier)+" ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
             }
 
             if(this.selectedItemIndex == i)
