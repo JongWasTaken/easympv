@@ -136,7 +136,21 @@ OSD.show = function (name, x, y) {
 
 // Draws/hides image to/from screen.
 OSD.toggle = function (name, x, y) {
-  var image = __getFilebyName(name);
+  var scale = "";
+  var height = mp.get_property("osd-height");
+  if (height == 0) {
+    height = mp.get_property("height");
+  }
+  
+  if(height < 1090) {
+    scale = "";
+  } else if(height <= 1450 && height >= 1080) {
+    scale = "2";
+  } else if(height <= 2170 && height >= 1440) {
+    scale = "4";
+  }
+
+  var image = __getFilebyName(scale + name);
   if (!image.data.active) {
     OSD.show(image.name,x,y)
   } else {
@@ -148,7 +162,21 @@ OSD.toggle = function (name, x, y) {
 // Hides image.
 OSD.hide = function (name) {
   if (name != null) {
-    var image = __getFilebyName(name);
+    var scale = "";
+    var height = mp.get_property("osd-height");
+    if (height == 0) {
+      height = mp.get_property("height");
+    }
+    
+    if(height < 1090) {
+      scale = "";
+    } else if(height <= 1450 && height >= 1080) {
+      scale = "2";
+    } else if(height <= 2170 && height >= 1440) {
+      scale = "4";
+    }
+    
+    var image = __getFilebyName(scale + name);
     if (image.data.active) {
       mp.commandv("overlay-remove", image.data.id);
       image.data.active = false;

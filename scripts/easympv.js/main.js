@@ -23,6 +23,8 @@
  *          mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/")+"FILE")
  */
 
+// TODO: fix ColorsMenu not showing Colors.presetCache
+
 "use strict";
 
 // polyfill for String.includes()
@@ -37,6 +39,13 @@ String.prototype.includes = function (search, start) {
   }
 };
 
+String.prototype.replaceAll = function(str, newStr){
+  if (Object.prototype.toString.call(str).toLowerCase() === '[object regexp]') {
+    return this.replace(str, newStr);
+  }
+  return this.replace(new RegExp(str, 'g'), newStr);
+};
+
 // Lets Go!
 mp.msg.info("Starting!");
 var Options = require("./Options"),
@@ -46,7 +55,8 @@ var Options = require("./Options"),
   Shaders = require("./Shaders"),
   Colors = require("./Colors"),
   Chapters = require("./Chapters"),
-  Menu = require("./Menus"),
+  //Menu = require("./MenuDefinitions"),
+  MenuSystem = require("./MenuSystem"),
   isFirstFile = true,
   randomPipeNames = true,
   assOverride = false,
@@ -67,6 +77,8 @@ var userConfig = new Options.advanced_options(
   },
   "easympv" // file name to read from
 );
+
+//MenuSystem.displayMethod = "overlay";
 
 // Read Shaders.json early
 Shaders.populateSets();
@@ -240,34 +252,470 @@ var on_shutdown = function () {
   Utils.writeWLData(Shaders.name,Colors.lookName);
 };
 
+////////////////////////////////////////////////////////////////////////
+
+var auto_close = 5;
+//var font_size= 30;
+
+var MainMenuSettings = {
+  title: "easympv2",
+  description: "[displayMethod: "+ MenuSystem.displayMethod +"]",
+  image: "logo",
+  autoClose: auto_close
+};
+
+var MainMenuItems = [
+  {
+    title: "Close\n\n",
+    item: "close"
+  },
+  {
+    title: "Open...",
+    item: "open",
+    description: "This is a test description to test\nthe new overlay displayMethod"
+  },
+  {
+    title: "Shaders",
+    item: "shaders"
+  },
+  {
+    title: "Colors",
+    item: "colors"
+  },
+  {
+    title: "Chapters\n",
+    item: "chapters"
+  },
+  {
+    title: "Preferences\n\n",
+    item: "options"
+  },
+  {
+    title: "Quit mpv",
+    item: "quit"
+  }
+];
+
+if(mp.get_property("path") != null)
+{
+  if(mp.get_property("path").includes("video="))
+  {
+    MainMenuItems.splice(1,0,{
+      title: "[Reload Video Device]\n",
+      item: "videodevice_reload",
+    });
+  }
+}
+  if(Number(mp.get_property("playlist-count")) > 1) {
+  MainMenuItems.splice(2,0,{
+    title: "[Shuffle playlist]\n",
+    item: "shuffle",
+    });
+  }
+
+var MainMenu = new MenuSystem.Menu(MainMenuSettings,MainMenuItems,undefined)
+
+MainMenu.handler = function (event, action) {
+  if(event == "enter")
+  {
+    MainMenu.hideMenu();
+    if (action == "colors") {
+      if (!ColorsMenu.isMenuVisible) {
+        ColorsMenu.showMenu();
+      } else {
+        ColorsMenu.hideMenu();
+      }
+    } else if (action == "shaders") {
+      if (!ShadersMenu.isMenuVisible) {
+        ShadersMenu.showMenu();
+      } else {
+        ShadersMenu.hideMenu();
+      }
+    } else if (action == "chapters") {
+      if (!ChaptersMenu.isMenuVisible) {
+        ChaptersMenu.showMenu();
+      } else {
+        ChaptersMenu.hideMenu();
+      }
+    } else if (action == "options") {
+      if (!SettingsMenu.isMenuVisible) {
+        SettingsMenu.showMenu();
+      } else {
+        SettingsMenu.hideMenu();
+      }
+    } else if (action == "show") {
+      MainMenu.hideMenu();
+      var playlist = "   ";
+      var i;
+      for (i = 0; i < mp.get_property("playlist/count"); i++) {
+        if (mp.get_property("playlist/" + i + "/playing") === "yes") {
+          playlist = playlist + "➤ ";
+        } else {
+          playlist = playlist + "   ";
+        }
+        playlist =
+          playlist + mp.get_property("playlist/" + i + "/filename") + "\n";
+      }
+      mp.osd_message(Ass.startSeq() + Ass.size(8) + playlist, 3);
+    } else if (action == "shuffle") {
+      mp.commandv("playlist-shuffle");
+    } else if (action == "open") {
+      Utils.externalUtil("open " + randomPipeName);
+    } else if (action == "quit") {
+      mp.commandv("quit_watch_later");
+    } else if (action == "videodevice_reload") {
+      Utils.externalUtil("videoreload "+randomPipeName);
+    }
+  }
+};
+
+var ShadersMenuSettings = {
+  autoClose: auto_close,
+  title: "Shaders",
+  description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " + Shaders.name,
+  image: "shaders",
+}
+
+var ShadersMenuItems = [
+{
+  title: "[Disable All Shaders]",
+  item: "clear",
+},
+{
+  title: "[Select Default Shader]\n\n",
+  item: "select",
+},
+{
+  title: "Recommended Anime4K Settings\n",
+  item: "a4k_auto",
+}];
+
+for (var i = 0; i < Shaders.sets.length; i++) {
+  ShadersMenuItems.push({
+    title: Shaders.sets[i].name,
+    item: Shaders.sets[i].name
+  });
+}
+
+var ShadersMenu = new MenuSystem.Menu(ShadersMenuSettings,ShadersMenuItems,MainMenu);
+
+ShadersMenu.handler = function (event, action) {
+  //mp.msg.warn(event + " - " + action)
+  switch (event) {
+    case "enter":
+      ShadersMenu.hideMenu();
+      if (action == "select") {
+        Utils.externalUtil("a4k");
+      } else {
+        Shaders.apply(action);
+        ShadersMenu.setDescription(
+          "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
+            Shaders.name
+         );
+        if (action != "clear") {
+          mp.osd_message(
+            Ass.startSeq() +
+              Ass.size(11) +
+              "Shaders: {\\c&H0cff00&}enabled " +
+              Shaders.name
+          );
+        }
+      }
+      break;
+    case "right":
+      if (
+        action != "back" &&
+        action != "select" &&
+        action != "clear"
+      ) {
+        Shaders.apply(action);
+        ShadersMenu.setDescription(
+         "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
+           Shaders.name
+        );
+        ShadersMenu.AppendSuffixToCurrentItem();
+      }
+      break;
+  }
+};
+
+var ChaptersMenuSettings = {
+  autoClose: auto_close,
+  image: "chapters",
+  title: "Chapters",
+  description: '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+  Chapters.mode +
+  "\nCurrently " +
+  Chapters.status
+}
+
+var ChaptersMenuItems = [
+{
+  title: "Confirm\n\n",
+  item: "confirm",
+},
+{
+  title: "[Change Mode]",
+  item: "tmode",
+},
+{
+  title: "[Toggle]",
+  item: "tstatus",
+}
+];
+
+var ChaptersMenu = new MenuSystem.Menu(ChaptersMenuSettings,ChaptersMenuItems,MainMenu);
+
+ChaptersMenu.handler = function (event, action) {
+  switch (event) {
+    case "enter":
+      if (action == "back") {
+        ChaptersMenu.hideMenu();
+        if (!MainMenu.isMenuActive()) {
+          MainMenu.renderMenu();
+        } else {
+          MainMenu.hideMenu();
+        }
+      } else if (action == "confirm") {
+        ChaptersMenu.hideMenu();
+      }
+      break;
+    case "right":
+      if (action == "tmode") {
+        if (Chapters.mode == "skip") {
+          Chapters.mode = "slowdown";
+        } else {
+          Chapters.mode = "skip";
+        }
+        ChaptersMenu.setDescription(
+          '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+            Chapters.mode +
+            "\nCurrently " +
+            Chapters.status
+        );
+        ChaptersMenu.AppendSuffixToCurrentItem();
+
+      } else if (action == "tstatus") {
+        if (Chapters.status == "disabled") {
+          Chapters.status = "enabled";
+        } else {
+          Chapters.status = "disabled";
+        }
+        ChaptersMenu.setDescription(
+          '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+            Chapters.mode +
+            "\nCurrently " +
+            Chapters.status
+        );
+        ChaptersMenu.AppendSuffixToCurrentItem();
+      }
+      break;
+  }
+};
+
+var SettingsMenuSettings = {
+  autoClose: auto_close,
+  image: "settings",
+  title: "Settings",
+  description: "easympv-scripts " + version
+}
+
+var SettingsMenuItems = [
+  {
+    title: "More Options...\n",
+    item: "options",
+  },
+  {
+    title: "Credits and Licensing",
+    item: "credits",
+  },
+  {
+    title: "Override Subtitle Style",
+    item: "ass",
+  },
+  {
+    title: "Toggle Discord RPC\n",
+    item: "discord",
+  },
+  {
+    title: "Edit easympv.conf",
+    item: "easympvconf",
+  },
+  {
+    title: "Edit mpv.conf",
+    item: "mpvconf",
+  },
+  {
+    title: "Edit input.conf\n",
+    item: "inputconf",
+  },
+  {
+    title: "Input a command",
+    item: "command",
+  },
+  {
+    title: "Open config folder\n\n\n",
+    item: "config",
+  },
+  {
+    title: "Clear watchlater data",
+    item: "clearwld",
+  }
+];
+
+if (!manual) {
+  SettingsMenuItems.splice(1,0,{
+    title: "Check for updates",
+    item: "updater"
+  });
+}
+
+if (randomPipeNames) {
+  SettingsMenuItems.push({
+    title: "Switch to insecure IPC server (!)\n",
+    item: "remote"
+  });
+}
+if (!manual) {
+  SettingsMenuItems.push({
+    title: "Uninstall...",
+    item: "reset",
+    color : "ff0000"
+  });
+}
+
+if (debug == true) {
+  SettingsMenuItems.push({
+    title: "Open console",
+    item: "console",
+  });
+  SettingsMenuItems.push({
+    title: "Open debug screen",
+    item: "debug",
+  });
+}
+
+var SettingsMenu = new MenuSystem.Menu(SettingsMenuSettings,SettingsMenuItems,MainMenu);
+
+SettingsMenu.handler = function (event, action) {
+  if(event == "enter") {
+    SettingsMenu.hideMenu();
+    if (action == "ass") {
+      toggle_assoverride();
+    } else if (action == "discord") {
+      mp.commandv("script-binding", "drpc_toggle");
+    } else if (action == "easympvconf") {
+      Utils.openFile("script-opts+easympv.conf");
+    } else if (action == "mpvconf") {
+      Utils.openFile("mpv.conf");
+    } else if (action == "inputconf") {
+      Utils.openFile("input.conf");
+    } else if (action == "updater") {
+      Utils.externalUtil("update");
+    } else if (action == "reset") {
+      Utils.externalUtil("reset");
+    } else if (action == "config") {
+      Utils.openFile(""); // yes, empty string, see Utils.openFile()
+    } else if (action == "clearwld") {
+      Utils.clearWatchdata();
+    } else if (action == "command") {
+      Utils.externalUtil("guicommand " + randomPipeName);
+    } else if (action == "options") {
+      Utils.externalUtil("options");
+    } else if (action == "console") {
+      Utils.externalUtil("console");
+    } else if (action == "credits") {
+      Utils.externalUtil("credits");
+    } else if (action == "debug") {
+      Utils.externalUtil("debug " + randomPipeName);
+    } else if (action == "remote") {
+      randomPipeName = "mpv";
+      randomPipeNames = false;
+      mp.set_property("input-ipc-server", "mpv");
+    }
+  }
+};
+
+var ColorsMenuSettings = {
+  autoClose: auto_close,
+  image: "colors",
+  title: "Colors",
+  description: "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
+  Colors.lookName
+}
+
+var ColorsMenuItems = [
+  {
+    title: "[Disable All Presets]",
+    item: "reset",
+  },
+  {
+    title: "[Select Default Preset]\n\n",
+    item: "default",
+  }
+];
+
+for (var title in Colors.presetCache) {
+  ColorsMenuItems.push({
+    title: title,
+    item: Colors.presetCache[title],
+  });
+}
+
+var ColorsMenu = new MenuSystem.Menu(ColorsMenuSettings, ColorsMenuItems, MainMenu);
+
+ColorsMenu.handler = function (event, action) {
+  var selection = ColorsMenu.getSelectedItem();
+
+  switch (event) {
+    case "enter":
+      ColorsMenu.hideMenu();
+      if (action == "default") {
+        Utils.externalUtil("color");
+      } else {
+        Colors.applyLookWithFeedback(selection.title, action);
+      }
+      break;
+    case "right":
+      if (
+        action != "back" &&
+        action != "reset" &&
+        action != "default"
+      ) {
+        Colors.applyLookWithFeedback(selection.title, action);
+        //Colors.applyLook(action);
+        ColorsMenu.setDescription(
+          "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
+            Colors.lookName
+        );
+        ColorsMenu.AppendSuffixToCurrentItem();
+      }
+
+      break;
+  }
+};
+
+////////////////////////////////////////////////////////////////////////
+
 // Add menu key binding and its logic
 mp.add_key_binding(null, "easympv", function () {
   mp.msg.info("Menu key pressed!");
-  // Rebuild menu
-  Menu.rebuild();
-  // If no menu is active, show main menu
+  // If no menu is active, show main menum
   if (
-    !Menu.main.isMenuActive() &&
-    !Menu.shaders.isMenuActive() &&
-    !Menu.chapters.isMenuActive() &&
-    !Menu.settings.isMenuActive() &&
-    !Menu.colors.isMenuActive()
+    //!ColorsMenu.isMenuVisible &&
+    !ShadersMenu.isMenuVisible &&
+    !ChaptersMenu.isMenuVisible &&
+    !SettingsMenu.isMenuVisible &&
+    !MainMenu.isMenuVisible
   ) {
-    // Titles and Descriptions are reset in case they have been modified
-    Menu.main.resetText();
-    Menu.colors.resetText();
-    Menu.settings.resetText(version);
-    Menu.chapters.resetText();
-    Menu.shaders.resetText();
-
-    Menu.main.renderMenu();
+    MainMenu.showMenu();
   // Else hide all menus (second keypress)
   } else {
-    Menu.main.hideMenu();
-    Menu.shaders.hideMenu();
-    Menu.chapters.hideMenu();
-    Menu.settings.hideMenu();
-    Menu.colors.hideMenu();
+    MainMenu.hideMenu();
+    ShadersMenu.hideMenu();
+    ChaptersMenu.hideMenu();
+    SettingsMenu.hideMenu();
+    //ColorsMenu.hideMenu();
   }
 });
 
