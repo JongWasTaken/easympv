@@ -255,7 +255,7 @@ var on_shutdown = function () {
 ////////////////////////////////////////////////////////////////////////
 
 var MainMenuSettings = {
-  title: "easympv2",
+  title: Ass.insertSymbolFA("")+"{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
   description: "[displayMethod: "+ MenuSystem.displayMethod +"]",
   descriptionColor: "4444ee",
   image: "logo"
@@ -367,7 +367,7 @@ MainMenu.handler = function (event, action) {
 };
 
 var ShadersMenuSettings = {
-  title: "Shaders",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Shaders",
   description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " + Shaders.name,
   image: "shaders",
 }
@@ -437,7 +437,7 @@ ShadersMenu.handler = function (event, action) {
 
 var ChaptersMenuSettings = {
   image: "chapters",
-  title: "Chapters",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Chapters",
   description: '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
   Chapters.mode +
   "\nCurrently " +
@@ -510,7 +510,7 @@ ChaptersMenu.handler = function (event, action) {
 
 var SettingsMenuSettings = {
   image: "settings",
-  title: "Settings",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Settings",
   description: "easympv-scripts " + version
 }
 
@@ -632,7 +632,7 @@ SettingsMenu.handler = function (event, action) {
 
 var ColorsMenuSettings = {
   image: "colors",
-  title: "Colors",
+  title: Ass.insertSymbolFA("") + "{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
   description: "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
   Colors.lookName
 }

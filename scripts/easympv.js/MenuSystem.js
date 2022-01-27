@@ -65,7 +65,8 @@ var OSD = require("./OSD");
 var Menus = {};
 Menus.displayMethod = "message";
 
-var keybindOverrides = [
+Menus.keybindOverrides = [
+    // Normal
     {
         key: "up",
         id: "kbd_up",
@@ -89,6 +90,68 @@ var keybindOverrides = [
     {
         key: "enter",
         id: "kbd_enter",
+        action: "enter"
+    },
+
+    // Keypad
+    {
+        key: "kp8",
+        id: "kbd_kp8",
+        action: "up"
+    },
+    {
+        key: "kp2",
+        id: "kbd_kp2",
+        action: "down"
+    },
+    {
+        key: "kp4",
+        id: "kbd_kp4",
+        action: "left"
+    },
+    {
+        key: "kp6",
+        id: "kbd_kp6",
+        action: "right"
+    },
+    {
+        key: "kp0",
+        id: "kbd_kp0",
+        action: "enter"
+    },
+    {
+        key: "kp_enter",
+        id: "kbd_kp_enter",
+        action: "enter"
+    },
+    {
+        key: "kp_ins",
+        id: "kbd_kp_ins",
+        action: "enter"
+    },
+    {
+        key: "8",
+        id: "kbd_8",
+        action: "up"
+    },
+    {
+        key: "2",
+        id: "kbd_2",
+        action: "down"
+    },
+    {
+        key: "4",
+        id: "kbd_4",
+        action: "left"
+    },
+    {
+        key: "6",
+        id: "kbd_6",
+        action: "right"
+    },
+    {
+        key: "0",
+        id: "kbd_0",
         action: "enter"
     },
 ];
@@ -118,17 +181,6 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     [color]
     */
 
-    if (parentMenu != undefined)
-    {
-        this.hasBackButton = true;
-        this.parentMenu = parentMenu;
-        this.items.unshift({
-            title: "↑Back\n\n",
-            item: "@back@",
-            color: "999999"
-        });
-    } else { this.hasBackButton = false; this.parentMenu = undefined; }
-
     if (settings.autoClose != undefined)
     {
         this.settings.autoClose = settings.autoClose;
@@ -137,7 +189,18 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     if (settings.fontSize != undefined)
     {
         this.settings.fontSize = settings.fontSize;
-    } else { this.settings.fontSize = 11; }
+    } 
+    else 
+    { 
+        if(Menus.displayMethod == "message")
+        {
+            this.settings.fontSize = 11;
+        }
+        else if(Menus.displayMethod == "overlay")
+        {
+            this.settings.fontSize = 33;
+        }
+    }
 
     if (settings.image != undefined)
     {
@@ -189,6 +252,17 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
         this.settings.enableMouseSupport = settings.enableMouseSupport;
     } else { this.settings.enableMouseSupport = false; }
 
+    if (parentMenu != undefined)
+    {
+        this.hasBackButton = true;
+        this.parentMenu = parentMenu;
+        this.items.unshift({
+            title: Ass.insertSymbolFA("",this.settings.fontSize-3,this.settings.fontSize) +" Back\n\n", // ↑ 
+            item: "@back@",
+            color: "999999"
+        });
+    } else { this.hasBackButton = false; this.parentMenu = undefined; }
+
     this.cachedMenuText = "";
     this.isMenuVisible = false;
     this.suffixCacheIndex = -1;
@@ -222,6 +296,9 @@ Menus.Menu.prototype._constructMenuCache = function ()
         - will always be on top of every mp.osd_message
 
         Both _should_ look the same, but ensuring that is not easy.
+
+        Documentation for SSA specification
+        http://www.tcax.org/docs/ass-specs.htm
     */
 
     this.allowDrawImage = false;
@@ -232,6 +309,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
     if(Menus.displayMethod == "message")
     {
         this.cachedMenuText += Ass.startSeq();
+        this.cachedMenuText += Ass.setFont("Roboto");
         this.cachedMenuText += Ass.size(this.settings.fontSize);
 
         // Title
@@ -288,7 +366,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 title += this.settings.itemSuffix;
             }
         
-            this.cachedMenuText += color + title + Ass.white() + "\n" + description;
+            this.cachedMenuText += color + title + Ass.size(this.settings.fontSize) + Ass.white() + "\n" + description;
         }
 
         // End
@@ -297,7 +375,10 @@ Menus.Menu.prototype._constructMenuCache = function ()
     
     if(Menus.displayMethod == "overlay")
     {
+        var scale = Ass.scale(Math.floor(mp.get_property("osd-height")/10.8)); // Scale to current window height
+
         this.cachedMenuText += Ass.size(this.settings.fontSize);
+        this.cachedMenuText += Ass.setFont("Roboto");
 
         // Title
         var title = this.settings.title;
@@ -316,15 +397,14 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 this.allowDrawImage = true;
             }
         }
-        this.cachedMenuText += Ass.size(this.settings.fontSize + 2) + Ass.color(this.settings.titleColor) + title + Ass.size(this.settings.fontSize) + "\n \n";
+        this.cachedMenuText += scale + Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + 2) + Ass.color(this.settings.titleColor) + title + Ass.size(this.settings.fontSize)+ "\n \n";
 
         // Description
-        var descriptionSizeModifier = 10;
+        var descriptionSizeModifier = -10;
 
         if(this.settings.description != undefined)
         {
-            var mainDescription = Ass.size(this.settings.fontSize + descriptionSizeModifier) + 
-            this.settings.description.replaceAll("\n","\n"+Ass.size(this.settings.fontSize + descriptionSizeModifier)+Ass.color(this.settings.descriptionColor));
+            var mainDescription = scale + Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + descriptionSizeModifier) + Ass.color(this.settings.descriptionColor) + this.settings.description.replaceAll("\n","\n"+scale+Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + descriptionSizeModifier)+Ass.color(this.settings.descriptionColor));
     
             this.cachedMenuText += mainDescription + Ass.size(this.settings.fontSize) + "\n";
         }
@@ -344,22 +424,34 @@ Menus.Menu.prototype._constructMenuCache = function ()
 
             if (currentItem.description != undefined)
             {
-                description = Ass.size(this.settings.fontSize + descriptionSizeModifier) + color + " " + 
-                currentItem.description.replaceAll("\n","\n"+Ass.size(this.settings.fontSize + descriptionSizeModifier)+" ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
+                description = scale + Ass.size(this.settings.fontSize + descriptionSizeModifier) + color + " " + currentItem.description.replaceAll("\n","\n"+scale+Ass.size(this.settings.fontSize + descriptionSizeModifier - 2)+" ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
             }
 
             if(this.selectedItemIndex == i)
             {
                 color = Ass.color(this.settings.selectedItemColor);
-                title = this.settings.itemPrefix + title;
-            }
+                title = Ass.size(this.settings.fontSize) + this.settings.itemPrefix + title;
+            } else {title = Ass.size(this.settings.fontSize) + title}
 
             if(i == this.suffixCacheIndex)
             {
-                title += this.settings.itemSuffix;
+                var count = (title.match(/\\n/g) || []).length;
+                if(count > 1)
+                {
+                    title = title.replaceAll("\n","") + this.settings.itemSuffix;
+                    for(var i = 0; i < count; i++)
+                    {
+                        title += "\n";
+                    }
+                } 
+                else
+                {
+                    title = title.replaceAll("\n","") + this.settings.itemSuffix + "\n";
+                }
+                
             }
         
-            this.cachedMenuText += color + title + Ass.white() + "\n" + description;
+            this.cachedMenuText += scale + color + Ass.setFont("Roboto") + title + Ass.size(this.settings.fontSize) + Ass.white() + "\n" + scale + Ass.setFont("Roboto") + description;
         }
     }
     
@@ -389,9 +481,9 @@ Menus.Menu.prototype._overrideKeybinds = function ()
         };
       };
 
-    for(var i = 0; i < keybindOverrides.length; i++)
+    for(var i = 0; i < Menus.keybindOverrides.length; i++)
     {
-        var currentKey = keybindOverrides[i];
+        var currentKey = Menus.keybindOverrides[i];
 
         mp.add_forced_key_binding(
             currentKey.key,
@@ -404,9 +496,9 @@ Menus.Menu.prototype._overrideKeybinds = function ()
 
 Menus.Menu.prototype._revertKeybinds = function () 
 {
-    for(var i = 0; i < keybindOverrides.length; i++)
+    for(var i = 0; i < Menus.keybindOverrides.length; i++)
     {
-        var currentKey = keybindOverrides[i];
+        var currentKey = Menus.keybindOverrides[i];
 
         mp.remove_key_binding(
             currentKey.id
@@ -549,6 +641,7 @@ Menus.Menu.prototype.hideMenu = function ()
             this.OSD = undefined;
         }
     }
+    OSD.hideAll(); // fix
 }
 
 Menus.Menu.prototype.toggleMenu = function ()

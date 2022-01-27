@@ -67,6 +67,23 @@ Ass.alpha = function (transparencyHex, output) {
 	return output === false ? "" : "{\\alpha&H" + transparencyHex + "&}"; // 00-FF.
 };
 
+Ass.setFont = function (font) {
+	return "{\\fn"+font+"}"
+}
+
+Ass.insertSymbolFA = function (symbol, size, defaultSize) {
+
+	if(size != undefined && defaultSize != undefined)
+	{
+		return Ass.size(size) + Ass.setFont("Font Awesome 5 Free") + symbol + Ass.setFont("Roboto") + Ass.size(defaultSize);
+	} 
+	else 
+	{
+		return Ass.setFont("Font Awesome 5 Free") + symbol + Ass.setFont("Roboto");
+	}
+	
+};
+
 Ass.color = function (rgbHex, output) {
 	return output === false
 		? ""
