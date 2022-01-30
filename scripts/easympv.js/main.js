@@ -78,7 +78,7 @@ var userConfig = new Options.advanced_options(
   "easympv" // file name to read from
 );
 
-//MenuSystem.displayMethod = "overlay";
+MenuSystem.displayMethod = "overlay";
 
 // Read Shaders.json early
 Shaders.populateSets();
@@ -263,13 +263,13 @@ var MainMenuSettings = {
 
 var MainMenuItems = [
   {
-    title: "Close\n\n",
+    title: "Close        ",
     item: "close"
   },
   {
     title: "Open...",
     item: "open",
-    description: "This is a test description to test\nthe new overlay displayMethod"
+    description: "This is a test description to test    the new overlay displayMethod",
   },
   {
     title: "Shaders",
@@ -280,11 +280,11 @@ var MainMenuItems = [
     item: "colors"
   },
   {
-    title: "Chapters\n",
+    title: "Chapters    ",
     item: "chapters"
   },
   {
-    title: "Preferences\n\n",
+    title: "Preferences        ",
     item: "options"
   },
   {
@@ -298,14 +298,14 @@ if(mp.get_property("path") != null)
   if(mp.get_property("path").includes("video="))
   {
     MainMenuItems.splice(1,0,{
-      title: "[Reload Video Device]\n",
+      title: "[Reload Video Device]    ",
       item: "videodevice_reload",
     });
   }
 }
   if(Number(mp.get_property("playlist-count")) > 1) {
   MainMenuItems.splice(2,0,{
-    title: "[Shuffle playlist]\n",
+    title: "[Shuffle playlist]    ",
     item: "shuffle",
     });
   }
@@ -351,7 +351,7 @@ MainMenu.handler = function (event, action) {
           playlist = playlist + "   ";
         }
         playlist =
-          playlist + mp.get_property("playlist/" + i + "/filename") + "\n";
+          playlist + mp.get_property("playlist/" + i + "/filename") + "    ";
       }
       mp.osd_message(Ass.startSeq() + Ass.size(8) + playlist, 3);
     } else if (action == "shuffle") {
@@ -368,7 +368,7 @@ MainMenu.handler = function (event, action) {
 
 var ShadersMenuSettings = {
   title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Shaders",
-  description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " + Shaders.name,
+  description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.    Use the right arrow key to preview a profile. Use Enter to confirm.    Currently enabled Shaders: " + Shaders.name,
   image: "shaders",
 }
 
@@ -378,11 +378,11 @@ var ShadersMenuItems = [
   item: "clear",
 },
 {
-  title: "[Select Default Shader]\n\n",
+  title: "[Select Default Shader]        ",
   item: "select",
 },
 {
-  title: "Recommended Anime4K Settings\n",
+  title: "Recommended Anime4K Settings    ",
   item: "a4k_auto",
 }];
 
@@ -405,7 +405,7 @@ ShadersMenu.handler = function (event, action) {
       } else {
         Shaders.apply(action);
         ShadersMenu.setDescription(
-          "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
+          "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.    Use the right arrow key to preview a profile. Use Enter to confirm.    Currently enabled Shaders: " +
             Shaders.name
          );
         if (action != "clear") {
@@ -426,7 +426,7 @@ ShadersMenu.handler = function (event, action) {
       ) {
         Shaders.apply(action);
         ShadersMenu.setDescription(
-         "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.\nUse the right arrow key to preview a profile. Use Enter to confirm.\nCurrently enabled Shaders: " +
+         "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.    Use the right arrow key to preview a profile. Use Enter to confirm.    Currently enabled Shaders: " +
            Shaders.name
         );
         ShadersMenu.AppendSuffixToCurrentItem();
@@ -438,15 +438,15 @@ ShadersMenu.handler = function (event, action) {
 var ChaptersMenuSettings = {
   image: "chapters",
   title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Chapters",
-  description: '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+  description: '(Use the Right Arrow Key to change settings.)        This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.    Current Mode: ' +
   Chapters.mode +
-  "\nCurrently " +
+  "    Currently " +
   Chapters.status
 }
 
 var ChaptersMenuItems = [
 {
-  title: "Confirm\n\n",
+  title: "Confirm        ",
   item: "confirm",
 },
 {
@@ -483,9 +483,9 @@ ChaptersMenu.handler = function (event, action) {
           Chapters.mode = "skip";
         }
         ChaptersMenu.setDescription(
-          '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+          '(Use the Right Arrow Key to change settings.)        This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.    Current Mode: ' +
             Chapters.mode +
-            "\nCurrently " +
+            "    Currently " +
             Chapters.status
         );
         ChaptersMenu.AppendSuffixToCurrentItem();
@@ -497,9 +497,9 @@ ChaptersMenu.handler = function (event, action) {
           Chapters.status = "disabled";
         }
         ChaptersMenu.setDescription(
-          '(Use the Right Arrow Key to change settings.)\n\nThis will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.\nCurrent Mode: ' +
+          '(Use the Right Arrow Key to change settings.)        This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.    Current Mode: ' +
             Chapters.mode +
-            "\nCurrently " +
+            "    Currently " +
             Chapters.status
         );
         ChaptersMenu.AppendSuffixToCurrentItem();
@@ -516,7 +516,7 @@ var SettingsMenuSettings = {
 
 var SettingsMenuItems = [
   {
-    title: "More Options...\n",
+    title: "More Options...    ",
     item: "options",
   },
   {
@@ -528,7 +528,7 @@ var SettingsMenuItems = [
     item: "ass",
   },
   {
-    title: "Toggle Discord RPC\n",
+    title: "Toggle Discord RPC    ",
     item: "discord",
   },
   {
@@ -540,7 +540,7 @@ var SettingsMenuItems = [
     item: "mpvconf",
   },
   {
-    title: "Edit input.conf\n",
+    title: "Edit input.conf    ",
     item: "inputconf",
   },
   {
@@ -548,7 +548,7 @@ var SettingsMenuItems = [
     item: "command",
   },
   {
-    title: "Open config folder\n\n\n",
+    title: "Open config folder            ",
     item: "config",
   },
   {
@@ -566,7 +566,7 @@ if (!manual) {
 
 if (randomPipeNames) {
   SettingsMenuItems.push({
-    title: "Switch to insecure IPC server (!)\n",
+    title: "Switch to insecure IPC server (!)    ",
     item: "remote"
   });
 }
@@ -633,7 +633,7 @@ SettingsMenu.handler = function (event, action) {
 var ColorsMenuSettings = {
   image: "colors",
   title: Ass.insertSymbolFA("") + "{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
-  description: "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
+  description: "Use the right arrow key to preview a profile. Use Enter to confirm.    Profiles can be customized in the preferences.    Current Profile: " +
   Colors.lookName
 }
 
@@ -643,7 +643,7 @@ var ColorsMenuItems = [
     item: "reset",
   },
   {
-    title: "[Select Default Preset]\n\n",
+    title: "[Select Default Preset]        ",
     item: "default",
   }
 ];
@@ -678,7 +678,7 @@ ColorsMenu.handler = function (event, action) {
         Colors.applyLookWithFeedback(selection.title, action);
         //Colors.applyLook(action);
         ColorsMenu.setDescription(
-          "Use the right arrow key to preview a profile. Use Enter to confirm.\nProfiles can be customized in the preferences.\nCurrent Profile: " +
+          "Use the right arrow key to preview a profile. Use Enter to confirm.    Profiles can be customized in the preferences.    Current Profile: " +
             Colors.lookName
         );
         ColorsMenu.AppendSuffixToCurrentItem();

@@ -67,19 +67,76 @@ Ass.alpha = function (transparencyHex, output) {
 	return output === false ? "" : "{\\alpha&H" + transparencyHex + "&}"; // 00-FF.
 };
 
+Ass.setLineSpacing = function (value) {
+	
+	// below only works for increasing line spacing
+	//return "{\\fs"+value+"} {\\r}\n";
+
+	// below is possibly another way to do it
+	return "{\\org(-2000000,0)\\fr"+value+"}";
+}
+
+Ass.LineSpacingHelper = function (modifier) { 
+	this.modifier = modifier;
+	this.currentSpacing = 0 + modifier;
+	this.origin = "-2000000";
+	this.textModifier = "";
+	return this;
+}
+
+Ass.LineSpacingHelper.prototype.insert = function (size) // 0 = small, 1 = big, undefined = default
+{
+	var im = 0;
+
+	if(size != undefined)
+	{
+		if(size == 0)
+		{
+			im = -0.0001
+		}
+		else if(size == 1)
+		{
+			im = 0.0002;
+		}
+	}
+
+	this.currentSpacing = this.currentSpacing - (this.modifier - im);
+	return "{\\org("+this.origin+",0)\\fr"+this.currentSpacing+"}";
+}
+
+Ass.LineSpacingHelper.prototype.insertBlankLine = function ()
+{
+	this.currentSpacing = this.currentSpacing - this.modifier;
+	return this.insert() + " \n";
+
+	//this.currentSpacing = this.currentSpacing - this.modifier;
+	//return "{\\org("+this.origin+",0)\\fr"+this.currentSpacing+"}\n"+this.textModifier+"<space>\n{\\r}"; // " "
+}
+
+
 Ass.setFont = function (font) {
 	return "{\\fn"+font+"}"
 }
 
+Ass.setBorder = function (border) {
+	return "{\\bord"+border+"}"
+}
+
+Ass.setShadow = function (depth) {
+	return "{\\shad"+depth+"}"
+}
+
 Ass.insertSymbolFA = function (symbol, size, defaultSize) {
+
+	var font = "Font Awesome 5 Free Solid";
 
 	if(size != undefined && defaultSize != undefined)
 	{
-		return Ass.size(size) + Ass.setFont("Font Awesome 5 Free") + symbol + Ass.setFont("Roboto") + Ass.size(defaultSize);
+		return Ass.size(size) + Ass.setFont(font) + symbol + Ass.setFont("Roboto") + Ass.size(defaultSize);
 	} 
 	else 
 	{
-		return Ass.setFont("Font Awesome 5 Free") + symbol + Ass.setFont("Roboto");
+		return Ass.setFont(font) + symbol + Ass.setFont("Roboto");
 	}
 	
 };

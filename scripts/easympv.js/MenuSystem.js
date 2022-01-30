@@ -5,13 +5,13 @@
  * URL:                 https://smto.pw/mpv
  * License:             MIT License
  *
+ * Special thanks to VideoPlayerCode.
  */
 
 /*
 TODO:
 
-(overlay) Scaling issues
-AutoClose
+line spacing in overlay displaymethod (https://www.md-subs.com/line-spacing-in-ssa)
 Mouse support?
 --> Calculate boundaries for each menuitem
 --> Hook MouseClick mpv event, check if in any boundary, handle as 'open' event if yes
@@ -35,7 +35,8 @@ Settings must be an object and can have the following properties:
     itemSuffix
     itemColor
     selectedItemColor
-    enableMouseSupport
+    enableMouseSupport [unimplemented]
+    borderSize
 All of these have default values.
 
 Items is an array of objects that can have the following properties:
@@ -56,7 +57,7 @@ action is the item value of the menu entry.
 Optional: Set MenuSystem.displatMethod = "overlay" (default is "message")
 This will use mpv's osd-overlay system instead of just using the regular mp.osd_message().
 The main benefit is that all other messages will appear below the menu,
-making it "unbreakable".
+making it "unbreakable". It also scales correctly with the window size.
 ----------------------------------------------------------------*/
 
 var Ass = require("./AssFormat");
@@ -93,39 +94,86 @@ Menus.keybindOverrides = [
         action: "enter"
     },
 
+    // WASD
+    {
+        key: "w",
+        id: "kbd_w",
+        action: "up"
+    },
+    {
+        key: "s",
+        id: "kbd_s",
+        action: "down"
+    },
+    {
+        key: "a",
+        id: "kbd_a",
+        action: "left"
+    },
+    {
+        key: "d",
+        id: "kbd_d",
+        action: "right"
+    },
+    {
+        key: "W",
+        id: "kbd_w_cap",
+        action: "up"
+    },
+    {
+        key: "S",
+        id: "kbd_s_cap",
+        action: "down"
+    },
+    {
+        key: "A",
+        id: "kbd_a_cap",
+        action: "left"
+    },
+    {
+        key: "S",
+        id: "kbd_d_cap",
+        action: "right"
+    },
+    {
+        key: "SPACE",
+        id: "kbd_space",
+        action: "enter"
+    },
+
     // Keypad
     {
-        key: "kp8",
+        key: "KP8",
         id: "kbd_kp8",
         action: "up"
     },
     {
-        key: "kp2",
+        key: "KP2",
         id: "kbd_kp2",
         action: "down"
     },
     {
-        key: "kp4",
+        key: "KP4",
         id: "kbd_kp4",
         action: "left"
     },
     {
-        key: "kp6",
+        key: "KP6",
         id: "kbd_kp6",
         action: "right"
     },
     {
-        key: "kp0",
+        key: "KP0",
         id: "kbd_kp0",
         action: "enter"
     },
     {
-        key: "kp_enter",
+        key: "KP_ENTER",
         id: "kbd_kp_enter",
         action: "enter"
     },
     {
-        key: "kp_ins",
+        key: "KP_INS",
         id: "kbd_kp_ins",
         action: "enter"
     },
@@ -154,32 +202,41 @@ Menus.keybindOverrides = [
         id: "kbd_0",
         action: "enter"
     },
+
+    // MOUSE Controls
+    {
+        key: "WHEEL_UP",
+        id: "kbd_wheel_up",
+        action: "up"
+    },
+    {
+        key: "WHEEL_DOWN",
+        id: "kbd_wheel_down",
+        action: "down"
+    },
+    {
+        // WHEEL_LEFT and WHEEL_RIGHT are uncommon on mice, but here it is, for those who have it
+        key: "WHEEL_LEFT", 
+        id: "kbd_wheel_left",
+        action: "left"
+    },
+    {
+        key: "WHEEL_RIGHT",
+        id: "kbd_wheel_right",
+        action: "right"
+    },
+    {
+        key: "MBTN_MID",
+        id: "kbd_mbtn_mid",
+        action: "enter"
+    }
 ];
 
 Menus.Menu = function (settings, items, parentMenu) // constructor
 {
     this.settings = {};
-    /*
-    autoClose
-    fontSize
-    image
-    title
-    titleColor
-    description
-    descriptionColor
-    itemPrefix
-    itemSuffix
-    itemColor
-    selectedItemColor
-    enableMouseSupport
-    */
+
     this.items = items;
-    /*
-    title
-    item
-    [description]
-    [color]
-    */
 
     if (settings.autoClose != undefined)
     {
@@ -230,12 +287,12 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     if (settings.itemPrefix != undefined)
     {
         this.settings.itemPrefix = settings.itemPrefix + " ";
-    } else { this.settings.itemPrefix = "➤ "; }
+    } else { this.settings.itemPrefix = Ass.insertSymbolFA(" "); } // "➤ "
 
     if (settings.itemSuffix != undefined)
     {
         this.settings.itemSuffix = settings.itemSuffix;
-    } else { this.settings.itemSuffix = "✓"; }
+    } else { this.settings.itemSuffix = Ass.insertSymbolFA(" ",this.settings.fontSize-2,this.settings.fontSize); } // ✓
 
     if (settings.itemColor != undefined)
     {
@@ -252,12 +309,17 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
         this.settings.enableMouseSupport = settings.enableMouseSupport;
     } else { this.settings.enableMouseSupport = false; }
 
+    if (settings.borderSize != undefined)
+    {
+        this.settings.borderSize = settings.borderSize;
+    } else { this.settings.borderSize = "3"; }
+
     if (parentMenu != undefined)
     {
         this.hasBackButton = true;
         this.parentMenu = parentMenu;
         this.items.unshift({
-            title: Ass.insertSymbolFA("",this.settings.fontSize-3,this.settings.fontSize) +" Back\n\n", // ↑ 
+            title: Ass.insertSymbolFA("",this.settings.fontSize-3,this.settings.fontSize) +" Back        ", // ↑ 
             item: "@back@",
             color: "999999"
         });
@@ -266,6 +328,8 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     this.cachedMenuText = "";
     this.isMenuVisible = false;
     this.suffixCacheIndex = -1;
+    this.autoCloseStart = -1;
+    this.eventLocked = false;
 }
 
 Menus.Menu.prototype.setDescription = function (text) {
@@ -283,17 +347,19 @@ Menus.Menu.prototype._constructMenuCache = function ()
         Differences between displayMethods
 
         "message" displayMethod:
-        - Requires Ass.startSeq() at the beginning and Ass.stopSeq() at the end
-        - does not really care about line breaks, \n will always work
-        - does not allow much flexibility, but is easy to work with
-        - will fight with other mp.osd_message overlays, which causes flicker
+        + Easier to work with
+        + Better line spacing
+        - Automatic scaling is busted 
+            (there might be some universal offset to fix it)
+        - All sizes seem different
+        - Will fight over display space (basically like z-fighting in video games)
 
         "overlay" displayMethod:
-        - Every line is treated as its own SSA object,
-            colors and settings do not carry over after \n
-            - This is why Ass.startSeq()/Ass.stopSeq() are not needed
-        - is much harder to work with because of that
-        - will always be on top of every mp.osd_message
+        + Automatically scales to window size
+        + More fine-grained sizings
+        + will always be on top of every mp.osd_message (no z-fighting)
+        - Lots of space between each line, seemingly no way to change it
+        - Hard to work with
 
         Both _should_ look the same, but ensuring that is not easy.
 
@@ -303,12 +369,14 @@ Menus.Menu.prototype._constructMenuCache = function ()
 
     this.allowDrawImage = false;
     this.itemCount = 0;
-
+    
     // Start
     this.cachedMenuText = "";
     if(Menus.displayMethod == "message")
     {
-        this.cachedMenuText += Ass.startSeq();
+        var border = Ass.setBorder(this.settings.borderSize-2);
+
+        this.cachedMenuText += Ass.startSeq() + border;
         this.cachedMenuText += Ass.setFont("Roboto");
         this.cachedMenuText += Ass.size(this.settings.fontSize);
 
@@ -334,14 +402,14 @@ Menus.Menu.prototype._constructMenuCache = function ()
         // Description
         if(this.settings.description != undefined)
         {
-            this.cachedMenuText += Ass.size(this.settings.fontSize - 3) + Ass.color(this.settings.descriptionColor) + this.settings.description + Ass.size(this.settings.fontSize) + "\n \n";
+            this.cachedMenuText += Ass.size(this.settings.fontSize - 3) + Ass.color(this.settings.descriptionColor) + this.settings.description.replaceAll("    ","\n") + Ass.size(this.settings.fontSize) + "\n \n";
         }
 
         // Items
         for (var i = 0; i < this.items.length; i++)
         {
             var currentItem = this.items[i];
-            var title = currentItem.title;
+            var title = currentItem.title.replaceAll("    ","\n");
             var color = "";
             var description = "";
 
@@ -352,7 +420,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
 
             if (currentItem.description != undefined)
             {
-                description = Ass.size(this.settings.fontSize - 5) + color + " " + currentItem.description.replaceAll("\n","\n ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
+                description = Ass.size(this.settings.fontSize - 5) + color + " " + currentItem.description.replaceAll("    ","\n").replaceAll("\n","\n ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
             }
 
             if(this.selectedItemIndex == i)
@@ -363,7 +431,20 @@ Menus.Menu.prototype._constructMenuCache = function ()
 
             if(i == this.suffixCacheIndex)
             {
-                title += this.settings.itemSuffix;
+                var count = (title.match(/\n/g) || []).length;
+                if(count > 0)
+                {
+                    title = title.replaceAll("\n","") + this.settings.itemSuffix;
+                    for(var j = 0; j < count; j++)
+                    {
+                        title = title + "\n";
+                    }
+                } 
+                else
+                {
+                    title = title.replaceAll("\n","") + this.settings.itemSuffix;// + "\n";
+                }
+                
             }
         
             this.cachedMenuText += color + title + Ass.size(this.settings.fontSize) + Ass.white() + "\n" + description;
@@ -372,13 +453,73 @@ Menus.Menu.prototype._constructMenuCache = function ()
         // End
         this.cachedMenuText += Ass.stopSeq();
     }
-    
+
     if(Menus.displayMethod == "overlay")
     {
-        var scale = Ass.scale(Math.floor(mp.get_property("osd-height")/10.8)); // Scale to current window height
+        var scaleFactor = Math.floor(mp.get_property("osd-height")/10.8); // scale percentage
+        var scale = Ass.scale(scaleFactor);
+        var border = Ass.setBorder(this.settings.borderSize);
+        var font = Ass.setFont("Roboto");
+        var fontSize = this.settings.fontSize;
+        var descriptionSizeModifier = -10;
+        var currentLinePosition = 0;
 
-        this.cachedMenuText += Ass.size(this.settings.fontSize);
-        this.cachedMenuText += Ass.setFont("Roboto");
+        var findLinePosition = function (size,custom)
+        {
+            var origin = "-2000000";
+            var modifier = 0;
+            if (size == undefined)
+            {
+                size = 1;
+            }
+            if (custom == undefined)
+            {
+                custom = 0;
+            }
+            switch (size)
+            {
+                case 0: modifier = 0.0007; break; // small
+                case 1: modifier = 0.0008; break; // normal
+                case 2: modifier = 0.0015; break; // big
+                case 3: modifier = 0.0020; break; // huge
+                case 4: modifier = custom; break; // custom
+            }
+            modifier = modifier * ( 0.01 * scaleFactor);
+            currentLinePosition = currentLinePosition - modifier;
+            return "{\\org("+origin+",0)\\fr"+currentLinePosition+"}";
+        }
+
+        var lineStart = function (positionType,fontSizeModifier,customPositionModifier) 
+        {
+            if(fontSizeModifier == undefined)
+            {
+                fontSizeModifier = 0;
+            }
+            if(customPositionModifier == undefined)
+            {
+                customPositionModifier = 0;
+            }
+            if(positionType == undefined)
+            {
+                positionType = 1;
+            }
+            var s = "";
+            s += scale + findLinePosition(positionType,customPositionModifier) + border + font + Ass.size(fontSize + fontSizeModifier);
+            return s;
+        };
+
+        var lineEnd = function() 
+        {
+            var s = "\n";
+            return s; 
+        }
+
+        var lineBlank = function() 
+        {
+            var s;
+            s = lineStart(4,0,0.0005) + lineEnd();
+            return s; 
+        }
 
         // Title
         var title = this.settings.title;
@@ -397,23 +538,30 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 this.allowDrawImage = true;
             }
         }
-        this.cachedMenuText += scale + Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + 2) + Ass.color(this.settings.titleColor) + title + Ass.size(this.settings.fontSize)+ "\n \n";
+        this.cachedMenuText += lineStart(0,2) + Ass.color(this.settings.titleColor) + title + lineEnd();
 
         // Description
-        var descriptionSizeModifier = -10;
-
+        var mainDescription = "";
         if(this.settings.description != undefined)
         {
-            var mainDescription = scale + Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + descriptionSizeModifier) + Ass.color(this.settings.descriptionColor) + this.settings.description.replaceAll("\n","\n"+scale+Ass.setFont("Roboto") + Ass.size(this.settings.fontSize + descriptionSizeModifier)+Ass.color(this.settings.descriptionColor));
-    
-            this.cachedMenuText += mainDescription + Ass.size(this.settings.fontSize) + "\n";
+            var mdLines = this.settings.description.split("    "); // 4 spaces in description = line break
+            mainDescription = lineStart(2,descriptionSizeModifier) + Ass.color(this.settings.descriptionColor) + mdLines[0] + lineEnd();
+            for(var i = 1; i < mdLines.length; i++)
+            {
+                mainDescription += lineStart(0,descriptionSizeModifier) + Ass.color(this.settings.descriptionColor) + mdLines[i] + lineEnd();
+            }
         }
-
+        this.cachedMenuText += mainDescription;
         // Items
         for (var i = 0; i < this.items.length; i++)
         {
+            mp.msg.warn(this.items[i].title);
             var currentItem = this.items[i];
-            var title = currentItem.title.replaceAll("\n\n","\n \n");
+            
+            var title = currentItem.title;
+            var blankCount = (title.match(/    /g) || []).length;
+            title = title.replaceAll("    ","") // for each 4 spaces in title = 1 blank line next
+
             var color = "";
             var description = "";
 
@@ -422,40 +570,47 @@ Menus.Menu.prototype._constructMenuCache = function ()
                 color = Ass.color(currentItem.color);
             } else { color = Ass.color(this.settings.itemColor); }
 
-            if (currentItem.description != undefined)
-            {
-                description = scale + Ass.size(this.settings.fontSize + descriptionSizeModifier) + color + " " + currentItem.description.replaceAll("\n","\n"+scale+Ass.size(this.settings.fontSize + descriptionSizeModifier - 2)+" ") + Ass.white() + Ass.size(this.settings.fontSize) + "\n";
-            }
-
             if(this.selectedItemIndex == i)
             {
                 color = Ass.color(this.settings.selectedItemColor);
-                title = Ass.size(this.settings.fontSize) + this.settings.itemPrefix + title;
-            } else {title = Ass.size(this.settings.fontSize) + title}
+                title = this.settings.itemPrefix + title;
+            }
 
             if(i == this.suffixCacheIndex)
             {
-                var count = (title.match(/\\n/g) || []).length;
-                if(count > 1)
-                {
-                    title = title.replaceAll("\n","") + this.settings.itemSuffix;
-                    for(var i = 0; i < count; i++)
-                    {
-                        title += "\n";
-                    }
-                } 
-                else
-                {
-                    title = title.replaceAll("\n","") + this.settings.itemSuffix + "\n";
-                }
-                
+                title += this.settings.itemSuffix;
             }
-        
-            this.cachedMenuText += scale + color + Ass.setFont("Roboto") + title + Ass.size(this.settings.fontSize) + Ass.white() + "\n" + scale + Ass.setFont("Roboto") + description;
+
+            this.cachedMenuText += lineStart(1,0) + color + title + lineEnd();
+
+            if (currentItem.description != undefined)
+            {
+                var dLines = currentItem.description.split("    "); // 4 spaces in description = line break
+                description = lineStart(1,descriptionSizeModifier) + color + " " + dLines[0] + lineEnd();
+                for(var l = 1; l < dLines.length; l++)
+                {
+                    description += lineStart(0,descriptionSizeModifier) + color + " " + dLines[i] + lineEnd();
+                }
+            }
+
+            this.cachedMenuText += description;
+
+            for(var q = 0; q != blankCount; q++)
+            {
+                this.cachedMenuText += lineBlank();
+            }
+
         }
     }
-    
+    mp.msg.warn(this.cachedMenuText);
 }
+
+Menus.Menu.prototype._handleAutoClose = function () {
+    if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1)
+        return;
+    var current = mp.get_time();
+    if (this.autoCloseStart <= current - this.settings.autoClose) this.hideMenu();
+};
 
 Menus.Menu.prototype.AppendSuffixToCurrentItem = function () {
     this.suffixCacheIndex = this.selectedItemIndex;
@@ -508,36 +663,48 @@ Menus.Menu.prototype._revertKeybinds = function ()
 
 Menus.Menu.prototype._keyPressHandler = function (action) 
 {
-    if (action == "up")
+    this.autoCloseStart = mp.get_time();
+    if(!this.eventLocked)
     {
-        if(this.selectedItemIndex != 0) {this.selectedItemIndex = this.selectedItemIndex - 1;}
-        this._constructMenuCache();
-        this._drawMenu();
-    }
-    else if (action == "down")
-    {
-        if(this.selectedItemIndex != this.items.length - 1) {this.selectedItemIndex += 1;}
-        this._constructMenuCache();
-        this._drawMenu();
-    }
-    else
-    {
-        var item = this.items[this.selectedItemIndex].item
-        if(item == "@back@")
+        this.eventLocked = true;
+        if (action == "up")
         {
-            this.toggleMenu();
-            this.parentMenu.toggleMenu();
-        } 
-        else 
+            if(this.selectedItemIndex != 0) {this.selectedItemIndex = this.selectedItemIndex - 1;}
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
+        }
+        else if (action == "down")
         {
-            this.handler(action,item);
-            if (action != "enter")
+            if(this.selectedItemIndex != this.items.length - 1) {this.selectedItemIndex += 1;}
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
+        }
+        else
+        {
+            var item = this.items[this.selectedItemIndex].item
+            if(item == "@back@")
             {
-                this._constructMenuCache();
-                this._drawMenu();
+                this.toggleMenu();
+                this.parentMenu.toggleMenu();
+                this.eventLocked = false;
+            } 
+            else 
+            {
+                this.handler(action,item);
+                if (action != "enter")
+                {
+                    this._constructMenuCache();
+                    this._drawMenu();
+                    this.eventLocked = false;
+                }
+                this.eventLocked = false;
             }
         }
+
     }
+
 
 }
 
@@ -547,8 +714,10 @@ Menus.Menu.prototype._initOSD = function () {
         if (this.OSD == undefined)
         {
             this.OSD = mp.create_osd_overlay("ass-events");
+            // OSD is allowed entire window space
             this.OSD.res_y = mp.get_property("osd-height");
             this.OSD.res_x = mp.get_property("osd-width");
+            this.z = 99;
         }
     }
 }
@@ -558,6 +727,8 @@ Menus.Menu.prototype._drawMenu = function () {
     if(Menus.displayMethod == "message")
     {
         mp.osd_message(this.cachedMenuText, 1000);
+        // seem to be the same
+        //mp.commandv("show-text",this.cachedMenuText,1000)
     }
 
     if(Menus.displayMethod == "overlay")
@@ -576,17 +747,23 @@ Menus.Menu.prototype._startTimer = function () {
         this.menuInterval = setInterval(function () {
             x._constructMenuCache();
             x._drawMenu();
+            x._handleAutoClose();
+        }, 1000);
+    }
+    else if (Menus.displayMethod == "overlay")
+    {
+        var x = this;
+        if (this.menuInterval != undefined) clearInterval(this.menuInterval);
+        this.menuInterval = setInterval(function () {
+            x._handleAutoClose();
         }, 1000);
     }
 }
 
 Menus.Menu.prototype._stopTimer = function () {
-    if(Menus.displayMethod == "message") 
-    {
-        if (this.menuInterval != undefined) {
-            clearInterval(this.menuInterval);
-            this.menuInterval = undefined;
-        }
+    if (this.menuInterval != undefined) {
+        clearInterval(this.menuInterval);
+        this.menuInterval = undefined;
     }
 
 }
@@ -595,6 +772,7 @@ Menus.Menu.prototype.showMenu = function ()
 {
     if(!this.isMenuVisible)
     {
+        this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
         this.isMenuVisible = true;
@@ -630,6 +808,7 @@ Menus.Menu.prototype.hideMenu = function ()
     {
         if(this.isMenuVisible)
         {
+            this._stopTimer();
             mp.commandv("osd-overlay",this.OSD.id,"none","",0,0,0,"no","no");
             this._revertKeybinds();
             this.isMenuVisible = false;
