@@ -10,25 +10,21 @@
 "use strict";
 
 var Utils = require("./Utils");
-
 var Ass = {};
 
-Ass._startSeq = mp.get_property_osd("osd-ass-cc/0");
-
-Ass._stopSeq = mp.get_property_osd("osd-ass-cc/1");
-
-Ass.startSeq = function (output) {
-	return output === false ? "" : Ass._startSeq;
+Ass.startSequence = function () {
+	return mp.get_property_osd("osd-ass-cc/0");
 };
 
-Ass.stopSeq = function (output) {
-	return output === false ? "" : Ass._stopSeq;
+Ass.endSequence = function () {
+	return mp.get_property_osd("osd-ass-cc/1");
 };
 
-Ass.esc = function (str, escape) {
+Ass.escape = function (str, escape) {
 	if (escape === false)
-		// Conveniently disable escaping via the same call.
-		return str;
+		return str;		// Conveniently disable escaping via the same call.
+
+
 	// Uses the same technique as mangle_ass() in mpv's osd_libass.c:
 	// - Treat backslashes as literal by inserting a U+2060 WORD JOINER after
 	//   them so libass can't interpret the next char as an escape sequence.
@@ -38,14 +34,12 @@ Ass.esc = function (str, escape) {
 	return str.replace(/\\/g, "\\\u2060").replace(/\{/g, "\\{");
 };
 
-Ass.size = function (fontSize, output) {
-	return output === false ? "" : "{\\fs" + fontSize + "}";
+Ass.setSize = function (fontSize) {
+	return "{\\fs" + fontSize + "}";
 };
 
-Ass.scale = function (scalePercent, output) {
-	return output === false
-		? ""
-  	: "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
+Ass.setScale = function (scalePercent) {
+	return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
 };
 
 Ass.convertPercentToHex = function (percent, invertValue) {
@@ -63,67 +57,50 @@ Ass.convertPercentToHex = function (percent, invertValue) {
 	);
 };
 
-Ass.alpha = function (transparencyHex, output) {
-	return output === false ? "" : "{\\alpha&H" + transparencyHex + "&}"; // 00-FF.
+Ass.setAlpha = function (transparencyHex) {
+	return "{\\alpha&H" + transparencyHex + "&}";
 };
 
-Ass.setLineSpacing = function (value) {
-	
-	// below only works for increasing line spacing
-	//return "{\\fs"+value+"} {\\r}\n";
-
-	// below is possibly another way to do it
-	return "{\\org(-2000000,0)\\fr"+value+"}";
-}
-
-Ass.LineSpacingHelper = function (modifier) { 
-	this.modifier = modifier;
-	this.currentSpacing = 0 + modifier;
-	this.origin = "-2000000";
-	this.textModifier = "";
-	return this;
-}
-
-Ass.LineSpacingHelper.prototype.insert = function (size) // 0 = small, 1 = big, undefined = default
+Ass.drawRaw = function (commands)
 {
-	var im = 0;
-
-	if(size != undefined)
-	{
-		if(size == 0)
-		{
-			im = -0.0001
-		}
-		else if(size == 1)
-		{
-			im = 0.0002;
-		}
-	}
-
-	this.currentSpacing = this.currentSpacing - (this.modifier - im);
-	return "{\\org("+this.origin+",0)\\fr"+this.currentSpacing+"}";
+	return "{\\p1}" + commands + "{\\p0}"
 }
 
-Ass.LineSpacingHelper.prototype.insertBlankLine = function ()
+Ass.move = function (x, y)
 {
-	this.currentSpacing = this.currentSpacing - this.modifier;
-	return this.insert() + " \n";
-
-	//this.currentSpacing = this.currentSpacing - this.modifier;
-	//return "{\\org("+this.origin+",0)\\fr"+this.currentSpacing+"}\n"+this.textModifier+"<space>\n{\\r}"; // " "
+	var s = "{\\p1} ";
+	s += "m " + x + " " + y + "{\\p0}";
+	return s;
 }
 
+Ass.drawRectangle = function (x1,y1,x2,y2)
+{
+	var s = "{\\p1} ";
+	s += "m " + x1 + " " + y1 + " ";
+	s += "l " + x2 + " " + y1 + " ";
+	s += "l " + x2 + " " + y2 + " ";
+	s += "l " + x1 + " " + y2 + "{\\p0}";
+	return s;
+}
+
+Ass.drawLine = function (x1,y1,x2,y2)
+{
+	var s = "{\\p1} ";
+	s += "m " + x1 + " " + y1 + " ";
+	s += "l " + x2 + " " + y2 + "{\\p0}";
+	return s;
+}
 
 Ass.setFont = function (font) {
-	return "{\\fn"+font+"}"
+	return "{\\fn" + font + "}"
 }
 
 Ass.setBorder = function (border) {
-	return "{\\bord"+border+"}"
+	return "{\\bord" + border + "}"
 }
 
 Ass.setShadow = function (depth) {
-	return "{\\shad"+depth+"}"
+	return "{\\shad" + depth + "}"
 }
 
 Ass.insertSymbolFA = function (symbol, size, defaultSize) {
@@ -132,7 +109,7 @@ Ass.insertSymbolFA = function (symbol, size, defaultSize) {
 
 	if(size != undefined && defaultSize != undefined)
 	{
-		return Ass.size(size) + Ass.setFont(font) + symbol + Ass.setFont("Roboto") + Ass.size(defaultSize);
+		return Ass.setSize(size) + Ass.setFont(font) + symbol + Ass.setFont("Roboto") + Ass.setSize(defaultSize);
 	} 
 	else 
 	{
@@ -141,7 +118,7 @@ Ass.insertSymbolFA = function (symbol, size, defaultSize) {
 	
 };
 
-Ass.color = function (rgbHex, output) {
+Ass.setColor = function (rgbHex, output) {
 	return output === false
 		? ""
 		: "{\\1c&H" +
@@ -151,28 +128,36 @@ Ass.color = function (rgbHex, output) {
 				"&}";
 };
 
-Ass.white = function (output) {
-	return Ass.color("FFFFFF", output);
+Ass.reset = function () {
+	return "{\\r}"
+}
+
+Ass.setColorWhite = function (output) {
+	return Ass.setColor("FFFFFF", output);
 };
 
-Ass.gray = function (output) {
-	return Ass.color("909090", output);
+Ass.setColorGray = function (output) {
+	return Ass.setColor("909090", output);
 };
 
-Ass.yellow = function (output) {
-	return Ass.color("FFFF90", output);
+Ass.setColorYellow = function (output) {
+	return Ass.setColor("FFFF90", output);
 };
 
-Ass.green = function (output) {
-	return Ass.color("33ff33", output);
+Ass.setColorGreen = function (output) {
+	return Ass.setColor("33ff33", output);
 };
 
-Ass.darkred = function (output) {
-	return Ass.color("EB4034", output);
+Ass.setColorDarkRed = function (output) {
+	return Ass.setColor("EB4034", output);
 };
 
-Ass.red = function (output) {
-	return Ass.color("FF3300", output);
+Ass.setColorRed = function (output) {
+	return Ass.setColor("FF3300", output);
 };
+
+Ass.setColorBlack = function (output) {
+	return Ass.setColor("000000", output);
+}
 
 module.exports = Ass;

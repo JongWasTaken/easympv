@@ -57,6 +57,7 @@ var Options = require("./Options"),
   Chapters = require("./Chapters"),
   //Menu = require("./MenuDefinitions"),
   MenuSystem = require("./MenuSystem"),
+  WindowSystem = require("./WindowSystem"),
   isFirstFile = true,
   randomPipeNames = true,
   assOverride = false,
@@ -77,8 +78,6 @@ var userConfig = new Options.advanced_options(
   },
   "easympv" // file name to read from
 );
-
-MenuSystem.displayMethod = "overlay";
 
 // Read Shaders.json early
 Shaders.populateSets();
@@ -163,8 +162,8 @@ var toggle_assoverride = function (silent) {
     mp.msg.info("Overriding subtitle styling.");
     if (!silent) {
       mp.osd_message(
-        Ass.startSeq() +
-          Ass.size(14) +
+        Ass.startSequence() +
+          Ass.setSize(14) +
           "Override Subtitle Style: {\\c&H0cff00&}enabled"
       );
     }
@@ -176,8 +175,8 @@ var toggle_assoverride = function (silent) {
     mp.msg.info("Enabled subtitle styling.");
     if (!silent) {
       mp.osd_message(
-        Ass.startSeq() +
-          Ass.size(14) +
+        Ass.startSequence() +
+          Ass.setSize(14) +
           "Override Subtitle Style: {\\c&H3440eb&}disabled"
       );
     }
@@ -256,7 +255,7 @@ var on_shutdown = function () {
 
 var MainMenuSettings = {
   title: Ass.insertSymbolFA("")+"{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
-  description: "[displayMethod: "+ MenuSystem.displayMethod +"]",
+  description: "[test]",
   descriptionColor: "4444ee",
   image: "logo"
 };
@@ -311,11 +310,18 @@ if(mp.get_property("path") != null)
   }
 
 var MainMenu = new MenuSystem.Menu(MainMenuSettings,MainMenuItems,undefined)
-
+var w = new WindowSystem.Window({
+  xPosition: 50,
+  yPosition: 50,
+  height: 600,
+  width: 800,
+  title: "This is a test window!"
+});
 MainMenu.handler = function (event, action) {
   if(event == "enter")
   {
     MainMenu.hideMenu();
+    //w.show();
     if (action == "colors") {
       if (!ColorsMenu.isMenuVisible) {
         ColorsMenu.showMenu();
@@ -353,7 +359,7 @@ MainMenu.handler = function (event, action) {
         playlist =
           playlist + mp.get_property("playlist/" + i + "/filename") + "    ";
       }
-      mp.osd_message(Ass.startSeq() + Ass.size(8) + playlist, 3);
+      mp.osd_message(Ass.startSequence() + Ass.setSize(8) + playlist, 3);
     } else if (action == "shuffle") {
       mp.commandv("playlist-shuffle");
     } else if (action == "open") {
@@ -367,7 +373,7 @@ MainMenu.handler = function (event, action) {
 };
 
 var ShadersMenuSettings = {
-  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Shaders",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.setColorWhite()+"Shaders",
   description: "Shaders are used for post-proccesing. Anime4K will make Cartoon & Anime look even better.    Use the right arrow key to preview a profile. Use Enter to confirm.    Currently enabled Shaders: " + Shaders.name,
   image: "shaders",
 }
@@ -410,8 +416,8 @@ ShadersMenu.handler = function (event, action) {
          );
         if (action != "clear") {
           mp.osd_message(
-            Ass.startSeq() +
-              Ass.size(11) +
+            Ass.startSequence() +
+              Ass.setSize(11) +
               "Shaders: {\\c&H0cff00&}enabled " +
               Shaders.name
           );
@@ -437,7 +443,7 @@ ShadersMenu.handler = function (event, action) {
 
 var ChaptersMenuSettings = {
   image: "chapters",
-  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Chapters",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.setColorWhite()+"Chapters",
   description: '(Use the Right Arrow Key to change settings.)        This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.    Current Mode: ' +
   Chapters.mode +
   "    Currently " +
@@ -510,7 +516,7 @@ ChaptersMenu.handler = function (event, action) {
 
 var SettingsMenuSettings = {
   image: "settings",
-  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.white()+"Settings",
+  title: "{\\1c&H782B78&}"+Ass.insertSymbolFA("")+Ass.setColorWhite()+"Settings",
   description: "easympv-scripts " + version
 }
 
@@ -712,6 +718,15 @@ mp.add_key_binding(null, "easympv", function () {
   }
 });
 
+mp.add_key_binding(null, "menu-test", function () {
+  mp.msg.info("Window key pressed!");
+  if (!w.isWindowVisible) {
+    w.show();
+  } else {
+    w.hide();
+  }
+});
+
 // TODO: Remove or expand
 mp.add_key_binding("n", "toggle-sofa", function () {
   // undocumented, woohoo!
@@ -736,6 +751,21 @@ mp.observe_property(
   "chapter-metadata/by-key/title",
   undefined,
   Chapters.Handler
+);
+
+// Registering an observer to redraw Menus on window size change
+mp.observe_property(
+  "osd-height",
+  undefined,
+  function() {
+    for (var i = 0; i < MenuSystem.registeredMenus.length; i++)
+    {
+      if(MenuSystem.registeredMenus[i].isMenuVisible)
+      {
+        MenuSystem.registeredMenus[i].redrawMenu();
+      }
+    }
+  }
 );
 
 // Mouse Input preliminary work
