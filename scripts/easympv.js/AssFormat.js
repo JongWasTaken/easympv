@@ -57,7 +57,7 @@ Ass.convertPercentToHex = function (percent, invertValue) {
 	);
 };
 
-Ass.setAlpha = function (transparencyHex) {
+Ass.setTransparency = function (transparencyHex) {
 	return "{\\alpha&H" + transparencyHex + "&}";
 };
 
@@ -118,10 +118,32 @@ Ass.insertSymbolFA = function (symbol, size, defaultSize) {
 	
 };
 
-Ass.setColor = function (rgbHex, output) {
-	return output === false
-		? ""
-		: "{\\1c&H" +
+Ass.setColor = function (rgbHex) {
+	return "{\\1c&H" +
+				rgbHex.substring(4, 6) +
+				rgbHex.substring(2, 4) +
+				rgbHex.substring(0, 2) +
+				"&}";
+};
+
+Ass.setSecondaryColor = function (rgbHex) {
+	return "{\\2c&H" +
+				rgbHex.substring(4, 6) +
+				rgbHex.substring(2, 4) +
+				rgbHex.substring(0, 2) +
+				"&}";
+};
+
+Ass.setBorderColor = function (rgbHex) {
+	return "{\\3c&H" +
+				rgbHex.substring(4, 6) +
+				rgbHex.substring(2, 4) +
+				rgbHex.substring(0, 2) +
+				"&}";
+};
+
+Ass.setShadowColor = function (rgbHex) {
+	return "{\\4c&H" +
 				rgbHex.substring(4, 6) +
 				rgbHex.substring(2, 4) +
 				rgbHex.substring(0, 2) +

@@ -46,6 +46,11 @@ String.prototype.replaceAll = function(str, newStr){
   return this.replace(new RegExp(str, 'g'), newStr);
 };
 
+Number.prototype.isOdd = function()
+{
+  return (this % 2) == 1;
+}
+
 // Lets Go!
 mp.msg.info("Starting!");
 var Options = require("./Options"),
@@ -262,7 +267,7 @@ var MainMenuSettings = {
 
 var MainMenuItems = [
   {
-    title: "Close        ",
+    title: "Close@br@@br@",
     item: "close"
   },
   {
@@ -279,11 +284,11 @@ var MainMenuItems = [
     item: "colors"
   },
   {
-    title: "Chapters    ",
+    title: "Chapters@br@",
     item: "chapters"
   },
   {
-    title: "Preferences        ",
+    title: "Preferences@br@@us10@@br@",
     item: "options"
   },
   {
@@ -297,14 +302,14 @@ if(mp.get_property("path") != null)
   if(mp.get_property("path").includes("video="))
   {
     MainMenuItems.splice(1,0,{
-      title: "[Reload Video Device]    ",
+      title: "[Reload Video Device]@br@",
       item: "videodevice_reload",
     });
   }
 }
   if(Number(mp.get_property("playlist-count")) > 1) {
   MainMenuItems.splice(2,0,{
-    title: "[Shuffle playlist]    ",
+    title: "[Shuffle playlist]@br@",
     item: "shuffle",
     });
   }
@@ -357,7 +362,7 @@ MainMenu.handler = function (event, action) {
           playlist = playlist + "   ";
         }
         playlist =
-          playlist + mp.get_property("playlist/" + i + "/filename") + "    ";
+          playlist + mp.get_property("playlist/" + i + "/filename") + "@br@";
       }
       mp.osd_message(Ass.startSequence() + Ass.setSize(8) + playlist, 3);
     } else if (action == "shuffle") {
@@ -384,11 +389,11 @@ var ShadersMenuItems = [
   item: "clear",
 },
 {
-  title: "[Select Default Shader]        ",
+  title: "[Select Default Shader]@br@@br@",
   item: "select",
 },
 {
-  title: "Recommended Anime4K Settings    ",
+  title: "Recommended Anime4K Settings@br@",
   item: "a4k_auto",
 }];
 
@@ -452,7 +457,7 @@ var ChaptersMenuSettings = {
 
 var ChaptersMenuItems = [
 {
-  title: "Confirm        ",
+  title: "Confirm@br@@br@",
   item: "confirm",
 },
 {
@@ -522,7 +527,7 @@ var SettingsMenuSettings = {
 
 var SettingsMenuItems = [
   {
-    title: "More Options...    ",
+    title: "More Options...@br@",
     item: "options",
   },
   {
@@ -534,7 +539,7 @@ var SettingsMenuItems = [
     item: "ass",
   },
   {
-    title: "Toggle Discord RPC    ",
+    title: "Toggle Discord RPC@br@",
     item: "discord",
   },
   {
@@ -546,7 +551,7 @@ var SettingsMenuItems = [
     item: "mpvconf",
   },
   {
-    title: "Edit input.conf    ",
+    title: "Edit input.conf@br@",
     item: "inputconf",
   },
   {
@@ -554,7 +559,7 @@ var SettingsMenuItems = [
     item: "command",
   },
   {
-    title: "Open config folder            ",
+    title: "Open config folder@br@@br@@br@",
     item: "config",
   },
   {
@@ -572,7 +577,7 @@ if (!manual) {
 
 if (randomPipeNames) {
   SettingsMenuItems.push({
-    title: "Switch to insecure IPC server (!)    ",
+    title: "Switch to insecure IPC server (!)@br@",
     item: "remote"
   });
 }
@@ -649,7 +654,7 @@ var ColorsMenuItems = [
     item: "reset",
   },
   {
-    title: "[Select Default Preset]        ",
+    title: "[Select Default Preset]@br@@br@",
     item: "default",
   }
 ];

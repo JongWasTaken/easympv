@@ -49,7 +49,11 @@ Items is an array of objects that can have the following properties:
     item
     [description]
     [color]
-title and item are required.
+"title" and "item" are required.
+
+"title" can include these special substrings:
+    @br@ - Insert blank line after item
+    @us1@ - Insert line after item , replace 1 with amount of line characters
 
 Parent is another instance of MenuSystem.Menu, if provided, a Back button
 will appear as the first item of the Menu.
@@ -60,7 +64,7 @@ where event is the pressed key (left,right or enter) and
 action is the item value of the menu entry.
 
 Optional: Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way)
-This will use mpv's osd-overlay system instead of just using the regular mp.osd_message().
+By default we use mpv's new osd-overlay system instead of just using the regular mp.osd_message().
 The main benefit is that all other messages will appear below the menu,
 making it "unbreakable". It also scales with the window size!
 ----------------------------------------------------------------*/
@@ -121,17 +125,27 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
     if (settings.selectedItemColor != undefined)
     {
         this.settings.selectedItemColor = settings.selectedItemColor;
-    } else { this.settings.selectedItemColor = "740a58"} //"EB4034"
+    } else { this.settings.selectedItemColor = "740A58"} //"EB4034"
 
     if (settings.enableMouseSupport != undefined)
     {
         this.settings.enableMouseSupport = settings.enableMouseSupport;
     } else { this.settings.enableMouseSupport = false; }
 
+    if (settings.transparency != undefined)
+    {
+        this.settings.transparency = settings.transparency;
+    } else { this.settings.transparency = "FF"; }
+
     if (settings.borderSize != undefined)
     {
         this.settings.borderSize = settings.borderSize;
     } else { this.settings.borderSize = "3"; }
+
+    if (settings.borderColor != undefined)
+    {
+        this.settings.borderColor = settings.borderColor;
+    } else { this.settings.borderColor = "2F2C28"; }
 
     if (settings.displayMethod != undefined)
     {
@@ -348,7 +362,7 @@ Menus.Menu = function (settings, items, parentMenu) // constructor
         this.hasBackButton = true;
         this.parentMenu = parentMenu;
         this.items.unshift({
-            title: Ass.insertSymbolFA("",this.settings.fontSize-3,this.settings.fontSize) +" Back        ", // ↑ 
+            title: Ass.insertSymbolFA("",this.settings.fontSize-3,this.settings.fontSize) +" Back@br@@br@", // ↑ 
             item: "@back@",
             color: "999999"
         });
@@ -403,7 +417,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
     this.cachedMenuText = "";
     if(this.settings.displayMethod == "message")
     {
-        var border = Ass.setBorder(this.settings.borderSize-2);
+        var border = Ass.setBorderColor(this.settings.borderColor) + Ass.setBorder(this.settings.borderSize-2);
 
         this.cachedMenuText += Ass.startSequence() + border;
         this.cachedMenuText += Ass.setFont("Roboto");
@@ -438,7 +452,15 @@ Menus.Menu.prototype._constructMenuCache = function ()
         for (var i = 0; i < this.items.length; i++)
         {
             var currentItem = this.items[i];
-            var title = currentItem.title.replaceAll("    ","\n");
+            var title = currentItem.title;
+            
+            var postItemActions = [""];
+            if(title.includes("@") && !(title.match(/@/g) || []).length.isOdd())
+            {
+                postItemActions = title.match(/\@(.*?)\@/g);
+                title = title.replace(/\@(.*?)\@/g,"");
+            }
+            
             var color = "";
             var description = "";
 
@@ -477,6 +499,23 @@ Menus.Menu.prototype._constructMenuCache = function ()
             }
         
             this.cachedMenuText += color + title + Ass.setSize(this.settings.fontSize) + Ass.setColorWhite() + "\n" + description;
+            for(var q = 0; q != postItemActions.length; q++)
+            {
+                if(postItemActions[q] == "@br@")
+                {
+                    this.cachedMenuText += "\n";
+                }
+                if(postItemActions[q].includes("@us"))
+                {
+
+                    for(var h = 0;h != Number(postItemActions[q].replaceAll("@","").substring(2));h++)
+                    {
+                        this.cachedMenuText += "─";
+                    }
+                    this.cachedMenuText += "\n";
+                }
+                
+            }
         }
 
         // End
@@ -487,7 +526,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
     {
         var scaleFactor = Math.floor(mp.get_property("osd-height")/10.8); // scale percentage
         var scale = Ass.setScale(scaleFactor);
-        var border = Ass.setBorder(this.settings.borderSize);
+        var border = Ass.setBorderColor(this.settings.borderColor) + Ass.setBorder(this.settings.borderSize);
         var font = Ass.setFont("Roboto");
         var fontSize = this.settings.fontSize;
         var descriptionSizeModifier = -10;
@@ -590,9 +629,14 @@ Menus.Menu.prototype._constructMenuCache = function ()
             var currentItem = this.items[i];
             
             var title = currentItem.title;
-            var blankCount = (title.match(/    /g) || []).length;
-            title = title.replaceAll("    ","") // for each 4 spaces in title = 1 blank line next
 
+            var postItemActions = [""];
+            if(title.includes("@") && !(title.match(/@/g) || []).length.isOdd())
+            {
+                postItemActions = title.match(/\@(.*?)\@/g);
+                title = title.replace(/\@(.*?)\@/g,"");
+
+            }
             var color = "";
             var description = "";
 
@@ -613,7 +657,7 @@ Menus.Menu.prototype._constructMenuCache = function ()
             }
 
             this.cachedMenuText += lineStart(1,0) + color + title + lineEnd();
-
+            
             if (currentItem.description != undefined)
             {
                 var dLines = currentItem.description.split("    "); // 4 spaces in description = line break
@@ -626,9 +670,23 @@ Menus.Menu.prototype._constructMenuCache = function ()
 
             this.cachedMenuText += description;
 
-            for(var q = 0; q != blankCount; q++)
+            for(var q = 0; q != postItemActions.length; q++)
             {
-                this.cachedMenuText += lineBlank();
+                if(postItemActions[q] == "@br@")
+                {
+                    this.cachedMenuText += lineBlank();
+                }
+                if(postItemActions[q].includes("@us"))
+                {
+                    this.cachedMenuText += lineStart(1,0);
+
+                    for(var h = 0;h != Number(postItemActions[q].replaceAll("@","").substring(2));h++)
+                    {
+                        this.cachedMenuText += "─";
+                    }
+                    this.cachedMenuText += lineEnd();
+                }
+                
             }
 
         }
