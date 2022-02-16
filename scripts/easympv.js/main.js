@@ -542,8 +542,12 @@ var SettingsMenuSettings = {
 
 var SettingsMenuItems = [
 	{
-		title: "More Options...@br@@us10@@br@",
+		title: "More Options...",
 		item: "options",
+	},
+	{
+		title: "Reload config@br@@us10@@br@",
+		item: "reload",
 	},
 	{
 		title: "Credits and Licensing",
@@ -584,7 +588,7 @@ var SettingsMenuItems = [
 ];
 
 if (!Settings.Data.manualInstallation) {
-	SettingsMenuItems.splice(1, 0, {
+	SettingsMenuItems.splice(2, 0, {
 		title: "Check for updates",
 		item: "updater",
 	});
@@ -650,6 +654,9 @@ SettingsMenu.eventHandler = function (event, action) {
 			Utils.externalUtil("console");
 		} else if (action == "credits") {
 			Utils.externalUtil("credits");
+		} else if (action == "reload") {
+			Settings.update();
+			WindowSystem.Alerts.show("info","Configuration reloaded.");
 		} else if (action == "debug") {
 			Utils.externalUtil("debug " + randomPipeName);
 		} else if (action == "remote") {

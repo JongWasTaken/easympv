@@ -410,7 +410,8 @@ Menus.Menu = function (settings, items, parentMenu) {
 					"",
 					this.settings.fontSize - 3,
 					this.settings.fontSize
-				) + " Back@br@@br@", // ↑
+				) + SSA.setFont(this.settings.fontName)
+				+ " Back@br@@br@", // ↑
 			item: "@back@",
 			color: "999999",
 		});
