@@ -18,3 +18,5 @@ easympv2
 easympvUtility
 ./easympv
 easympv
+./easympv-cli
+easympv-cli

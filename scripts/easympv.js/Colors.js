@@ -5,12 +5,13 @@
  * URL:            https://smto.pw/mpv
  * License:        MIT License
  * 
- * Inspired (but not containing code from) COLORBOX.JS by VideoPlayerCode.
+ * Inspired by (but not containing code from) COLORBOX.JS by VideoPlayerCode.
  */
 
 var Colors = {};
 Colors.name = "none";
 Colors.sets = [];
+Colors.manualSelection = false;
 
 Colors.set = function (name, data) {
 	this.name = name;
@@ -19,6 +20,7 @@ Colors.set = function (name, data) {
 };
 
 Colors.populateSets = function () {
+	Colors.sets = [];
 	var file = JSON.parse(
 		mp.utils.read_file(
 			mp.utils.get_user_path("~~/scripts/easympv.js/Colors.json")
@@ -39,6 +41,7 @@ Colors.populateSets = function () {
 };
 
 Colors.apply = function (name) {
+	Colors.manualSelection = true;
 	if (name == "none")
 	{
 		values = {

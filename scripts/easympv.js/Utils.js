@@ -68,7 +68,7 @@ Utils.openFile = function (file) {
 
 // Run the external Utility with arguments
 Utils.externalUtil = function (arg) {
-	var utilName = "easympvUtility";
+	var utilName = "easympv-cli";
 	mp.msg.info("Starting utility with arguments: " + arg);
 	if (Utils.os == "win") {
 		var util = mp.utils.get_user_path("~~/") + "/" + utilName + ".exe";

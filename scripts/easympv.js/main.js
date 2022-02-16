@@ -69,7 +69,7 @@ Number.prototype.isOdd = function () {
 
 // Lets Go!
 mp.msg.info("Starting!");
-var Options = require("./Options"),
+var Settings = require("./Settings"),
 	Utils = require("./Utils"),
 	SSA = require("./SSAHelper"),
 	OSD = require("./OSD"),
@@ -80,41 +80,14 @@ var Options = require("./Options"),
 	MenuSystem = require("./MenuSystem"),
 	WindowSystem = require("./WindowSystem"),
 	isFirstFile = true,
-	randomPipeNames = true,
-	assOverride = false,
-	subtitleStyleOverride = false,
-	startupShader = "none",
-	version = "1.8",
-	manual = false,
-	debug = false,
-	newVersion = "",
+	sofaEnabled = false,
 	displayVersion = "";
 
-// Creating options
-var userConfig = new Options.advanced_options(
-	{
-		shader: "none",
-		color: "none",
-		subtitleStyleOverride: false,
-		useRandomPipeName: true,
-		manualInstallation: false,
-		debugMode: false,
-	},
-	"easympv" // file name to read from
-);
+// Read easympv.conf
+Settings.update();
 
-// Read Shaders.json early
+// Read JSON files early early
 Shaders.populateSets();
-
-// Get values from file
-startupShader = userConfig.getValue("shader");
-debug = userConfig.getValue("debugMode");
-subtitleStyleOverride = userConfig.getValue("subtitleStyleOverride");
-randomPipeNames = userConfig.getValue("useRandomPipeName");
-manual = userConfig.getValue("manualInstallation");
-
-// Loading presets from file
-mp.msg.info("Loading color presets...");
 Colors.populateSets();
 
 // Image indexing for later display (like menus)
@@ -134,7 +107,7 @@ for (i = 0; i < imageArray.length; i++) {
 
 // IPC server startup
 mp.msg.info("Starting ipc server...");
-if (randomPipeNames) {
+if (Settings.Data.useRandomPipeName) {
 	// the pipe name is randomized and passed to the utility for slightly more security
 	// 8 randomized integers
 	var randomPipeName = Math.floor(Math.random() * 10).toString();
@@ -158,35 +131,11 @@ if (Utils.os != "win") {
 }
 
 // Automatic check for updates
-if (!manual) {
+if (!Settings.Data.manualInstallation) {
 	mp.msg.info("Checking for updates...");
 	// Utility will check for updates and write a short lua script to scripts folder if outdated
 	Utils.externalUtil("check");
 }
-
-// TODO: Fix or remove
-var toggle_assoverride = function (silent) {
-	if (assOverride == false) {
-		assOverride = true;
-		mp.set_property("sub-ass-styles", "~~/shaders/hs.ass");
-		//mp.set_property("blend-subtitles", "no");
-		//mp.set_property("sub-ass-scale-with-window", "yes");
-		mp.set_property("sub-ass-override", "force");
-		mp.msg.info("Overriding subtitle styling.");
-		if (!silent) {
-			WindowSystem.Alerts.show("info",SSA.setColorYellow() + "Override Subtitle Style","has been enabled.");
-		}
-	} else if (assOverride == true) {
-		assOverride = false;
-		//mp.set_property("blend-subtitles", "yes");
-		//mp.set_property("sub-ass-scale-with-window", "no");
-		mp.set_property("sub-ass-override", "no");
-		mp.msg.info("Enabled subtitle styling.");
-		if (!silent) {
-			WindowSystem.Alerts.show("info",SSA.setColorYellow() + "Override Subtitle Style","has been disabled.");
-		}
-	}
-};
 
 // Per File Option Saving (Step 1: Cache)
 Utils.cacheWL(); // Create a copy of watch_later folder, as current file will get deleted by mpv after read
@@ -194,19 +143,18 @@ mp.msg.warn(
 	'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
 ); // because mpv does not know our custom options
 
-if(mp.utils.file_info(mp.utils.get_user_path("~~/outdated.txt")))
+if(Number(Settings.Data.currentVersion.replace(/\./g,"")) < Number(Settings.Data.newestVersion.replaceAll(/\./g,"")))
 {
-	newVersion = mp.utils.read_file(mp.utils.get_user_path("~~/outdated.txt")).trim();
-	displayVersion = SSA.setColorRed() + version + " (out of date: " + newVersion + ")";
+	displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
 }
 else
 {
-	displayVersion = SSA.setColorGreen() + version;
+	displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion;
 }
 
 // This will be executed on file-load
 var on_start = function () {
-	// TODO: give priority to user selected Shaderset/Colorset for current session
+	// done ? TODO: give priority to user selected Shaderset/Colorset for current session
 	// Per File Option Saving (Part 2: Loading for video file)
 	var wld = Utils.getWLData();
 
@@ -215,13 +163,8 @@ var on_start = function () {
 		if (!mp.get_property("path").includes("video=")) {
 			// shader will not be applied if using video device
 			if (wld == undefined) {
-				Shaders.apply(startupShader);
+				Shaders.apply(Settings.Data.defaultShaderSet);
 			}
-		}
-
-		// TODO: Fix or remove
-		if (subtitleStyleOverride) {
-			toggle_assoverride(true);
 		}
 
 		// Audio Filter
@@ -242,13 +185,14 @@ var on_start = function () {
 				"set",
 				"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
 			);
+			sofaEnabled = true;
 		}
 
 		isFirstFile = false;
 	}
 
 	if (wld != undefined) {
-		if (wld.shader != undefined) {
+		if (wld.shader != undefined && !Shaders.manualSelection) {
 			Shaders.apply(wld.shader);
 		}
 		if (wld.color != undefined) {
@@ -434,10 +378,10 @@ MainMenu.eventHandler = function (event, action) {
 	}
 	else if (event == "show")
 	{
-		if(newVersion != "")
+		if(Settings.Data.newestVersion != Settings.Data.currentVersion && Settings.Data.notifyAboutUpdates)
 		{
-			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + version,"New Version: " + newVersion);
-			newVersion = "";
+			Settings.Data.notifyAboutUpdates = false;
+			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + Settings.Data.currentVersion,"New Version: " + Settings.Data.newestVersion);
 		}
 	}
 };
@@ -639,20 +583,20 @@ var SettingsMenuItems = [
 	},
 ];
 
-if (!manual) {
+if (!Settings.Data.manualInstallation) {
 	SettingsMenuItems.splice(1, 0, {
 		title: "Check for updates",
 		item: "updater",
 	});
 }
 
-if (randomPipeNames) {
+if (Settings.Data.useRandomPipeName) {
 	SettingsMenuItems.push({
 		title: "Switch to insecure IPC server (!)@br@",
 		item: "remote",
 	});
 }
-if (!manual) {
+if (!Settings.Data.manualInstallation) {
 	SettingsMenuItems.push({
 		title: "Uninstall...",
 		item: "reset",
@@ -660,7 +604,7 @@ if (!manual) {
 	});
 }
 
-if (debug == true) {
+if (Settings.Data.debugMode == true) {
 	SettingsMenuItems.push({
 		title: "Open console",
 		item: "console",
@@ -710,7 +654,7 @@ SettingsMenu.eventHandler = function (event, action) {
 			Utils.externalUtil("debug " + randomPipeName);
 		} else if (action == "remote") {
 			randomPipeName = "mpv";
-			randomPipeNames = false;
+			Settings.Data.useRandomPipeName = false;
 			mp.set_property("input-ipc-server", "mpv");
 		}
 	}
@@ -820,19 +764,32 @@ mp.add_key_binding(null, "menu-test", function () { // its k
 	*/
 });
 
-// TODO: Remove or expand
 mp.add_key_binding("n", "toggle-sofa", function () {
-	// undocumented, woohoo!
-	var path = mp.utils
-		.get_user_path("~~/")
-		.toString()
-		.replace(/\\/g, "/")
-		.substring(2);
-	mp.commandv(
-		"af",
-		"toggle",
-		"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
-	);
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) != undefined) {
+		sofaEnabled = !sofaEnabled;
+		var path = mp.utils
+			.get_user_path("~~/")
+			.toString()
+			.replace(/\\/g, "/")
+			.substring(2);
+		mp.commandv(
+			"af",
+			"toggle",
+			"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
+		);
+		if(sofaEnabled) 
+		{
+			WindowSystem.Alerts.show("info", "Sofalizer:",SSA.setColorGreen() + "enabled")
+		}
+		else 
+		{
+			WindowSystem.Alerts.show("info", "Sofalizer:",SSA.setColorRed() + "disabled")
+		}
+	}
+	else 
+	{
+		WindowSystem.Alerts.show("warning", "File not found:",SSA.setColorYellow() + "default.sofa")
+	}
 }); 
 // Registering functions to events
 mp.register_event("file-loaded", on_start);
@@ -854,22 +811,5 @@ mp.observe_property("osd-height", undefined, function () {
 	}
 });
 
-// Mouse Input preliminary work
-/*
-mp.observe_property(
-  "mouse-pos",
-  undefined,
-  function() {
-    var json_mouse = JSON.parse(mp.get_property("mouse-pos"));
-    var x =  json_mouse.x;
-    var y =  json_mouse.y;
-    //mp.msg.info("Current mouse coords: X " + x + ", Y " + y);
-  }
-);
-*/
-// Set startup preset from file
-var startupPreset = userConfig.getValue("color");
-if (startupPreset.length) {
-	Colors.name = startupPreset;
-	Colors.apply(startupPreset);
-}
+Colors.name = Settings.Data.defaultColorProfile;
+Colors.apply(Settings.Data.defaultColorProfile);

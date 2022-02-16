@@ -11,6 +11,7 @@ var seperator = "";
 Shaders.name = "none";
 //Shaders.firsttime = true;
 Shaders.sets = [];
+Shaders.manualSelection = false;
 
 var Utils = require("./Utils");
 if (Utils.os == "win") {
@@ -26,6 +27,7 @@ Shaders.set = function (name, files) {
 };
 
 Shaders.populateSets = function () {
+	Shaders.sets = [];
 	// Parse Shaders.json and add all entries to Shaders.sets
 	var file = JSON.parse(
 		mp.utils.read_file(
@@ -76,6 +78,7 @@ Shaders.populateSets = function () {
 };
 
 Shaders.apply = function (shader) {
+	Shaders.manualSelection = true;
 	if (shader == "a4k_auto") {
 		var a4k_recommended = "Faithful";
 		//var a4k_recommended = "Improved & Deblured";
