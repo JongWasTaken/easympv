@@ -24,25 +24,56 @@ var Utils = {};
 // Determine OS: win, linux or mac
 // Uses %OS% on Windows, $OSTYPE on every other platform
 Utils.os = undefined;
-if (mp.utils.getenv("OS") == "Windows_NT") {
-	Utils.os = "win";
-	mp.msg.info("Detected operating system: Windows");
-} else if (mp.utils.getenv("OSTYPE") == "linux-gnu") {
-	Utils.os = "linux";
-	mp.msg.info("Detected operating system: Linux");
-	mp.msg.warn(
-		"Linux support is experimental. Here be dragons and all that..."
-	);
-} else if (mp.utils.getenv("OSTYPE") == "freebsd") {
-	Utils.os = "linux";
-	mp.msg.info("Detected operating system: FreeBSD");
-	mp.msg.warn(
-		"It appears that you are running on FreeBSD. I have never used that OS, so i will just assume its not much different from Linux. Don't expect anything to work at all!"
-	);
-} else if (mp.utils.getenv("OSTYPE") == "darwin") {
-	Utils.os = "mac";
-	mp.msg.info("Detected operating system: macOS");
-	mp.msg.error("macOS is not officially supported and never will be.");
+
+Utils.determineOS = function() 
+{
+	if (mp.utils.getenv("OS") == "Windows_NT") {
+		Utils.os = "win";
+		mp.msg.info("Detected operating system: Windows");
+	} else if (mp.utils.file_info("/proc/cpuinfo") != undefined) {
+		Utils.os = "unix";
+		mp.msg.info("Detected operating system: Unix");
+		mp.msg.warn(
+			"Linux/BSD support is experimental. Here be dragons and all that..."
+		);
+	} else if (mp.utils.file_info("/Library") != undefined) {
+		Utils.os = "mac";
+		mp.msg.info("Detected operating system: macOS");
+		mp.msg.error("macOS is not officially supported.");
+	} else {
+		Utils.os = "unknown";
+		mp.msg.warn("Detected operating system: unknown?");
+		mp.msg.error("Your OS is not officially supported.");
+	}
+}
+
+Utils.pipeName = "mpv";
+
+Utils.setIPCServer = function (isRandom) {
+
+	if(isRandom)
+	{
+		Utils.pipeName = Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		Utils.pipeName += Math.floor(Math.random() * 10).toString();
+		mp.msg.info("PipeName: randomized");
+	}
+	else
+	{
+		Utils.pipeName = "mpv";
+		mp.msg.info("PipeName: mpv");
+	}
+
+	if (Utils.os != "win") {
+		mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
+	} else {
+		mp.set_property("input-ipc-server", Utils.pipeName); // named pipes exist in the limbo
+	}
 }
 
 Utils.mpvVersion = mp.get_property("mpv-version").substring(4).split("-")[0];
@@ -53,15 +84,15 @@ Utils.mpvComparableVersion = Number(Utils.mpvVersion.substring(2));
 // Open file relative to config root. Could also run applications.
 Utils.openFile = function (file) {
 	file = mp.utils.get_user_path("~~/") + "/" + file;
+	file = file.replaceAll("//", "/");
 	file = file.replaceAll('"+"', "/");
 	if (Utils.os == "win") {
 		file = file.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", "start " + file);
+	} else if (Utils.os == "unix") {
+		mp.commandv("run", "bash", "-c", "xdg-open " + file);
 	} else if (Utils.os == "mac") {
-		mp.msg.info("macOS is not supported.");
-		mp.commandv("run", "zsh", "-c", '"open ' + file + '"');
-	} else if (Utils.os == "linux") {
-		mp.commandv("run", "bash", "-c", '"xdg-open ' + file + '"');
+		mp.commandv("run", "zsh", "-c", "open " + file);
 	}
 	mp.msg.info("Opening file: " + file);
 };
@@ -75,23 +106,7 @@ Utils.externalUtil = function (arg) {
 		util = util.replaceAll("+", "/");
 		util = util.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", util + " " + arg);
-	} else if (Utils.os == "mac") {
-		mp.msg.info("macOS is not supported.");
-		var util = mp.utils.get_user_path("~~/") + "/" + utilName;
-		// below is a workaround for a old mpv bug
-		// where arguments would not be passed correctly to the subprocess,
-		// it might not be needed anymore
-		var largs = arg.split(" ");
-		if (largs.length == 1) {
-			mp.commandv("run", util, largs[0]);
-		} else if (largs.length == 2) {
-			mp.commandv("run", util, largs[0], largs[1]);
-		} else if (largs.length == 3) {
-			mp.commandv("run", util, largs[0], largs[1], largs[2]);
-		} else if (largs.length == 4) {
-			mp.commandv("run", util, largs[0], largs[1], largs[2], largs[3]);
-		}
-	} else if (Utils.os == "linux") {
+	} else if (Utils.os == "unix") {
 		var util = mp.utils.get_user_path("~~/") + "/" + utilName;
 		// below is a workaround for a old mpv bug
 		// where arguments would not be passed correctly to the subprocess,
@@ -108,6 +123,17 @@ Utils.externalUtil = function (arg) {
 		}
 	}
 };
+
+Utils.executeCommand = function(command, args)
+{
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		args: [command, args]
+	})
+	return r.stdout;
+}
 
 // Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000
 Utils.clearWatchdata = function () {
@@ -141,7 +167,7 @@ Utils.clearWatchdata = function () {
 	} else if (Utils.os == "mac") {
 		mp.msg.info("macOS is not supported.");
 		//mp.commandv("run","zsh","-c","rm -rf " + folder);
-	} else if (Utils.os == "linux") {
+	} else if (Utils.os == "unix") {
 		mp.commandv(
 			"run",
 			"cp",
@@ -168,6 +194,7 @@ Utils.clearWatchdata = function () {
 // The entire section below is dedicated to implementing a fast MD5 hashing algorithm in native JS.
 // It is copy-pasted from here: https://gist.github.com/jhoff/7680711 / http://www.myersdaily.org/joseph/javascript/md5-text.html
 // There is no license for this, but the source site is ancient and has no mention of one, so i think this is fine.
+
 // MD5 block starts //
 var md5cycle = function (x, k) {
 	var a = x[0],
@@ -331,7 +358,7 @@ Utils.md5 = function (s) {
 	return hex(md51(s));
 };
 
-// This function caches the entirety of the watch_later folder
+// This function caches the entirety of the watch_later folder.
 // Because that sounds like a terrible idea, it is capped to 999 files max.
 Utils.wlCache = [];
 Utils.cacheWL = function () {

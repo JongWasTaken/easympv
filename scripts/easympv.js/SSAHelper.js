@@ -84,7 +84,7 @@ SSAHelper.setShadow = function (depth) {
 };
 
 SSAHelper.insertSymbolFA = function (symbol, size, defaultSize) {
-	var font = "Font Awesome 5 Free Solid";
+	var font = "Font Awesome 6 Free Solid";
 
 	if (size != undefined && defaultSize != undefined) {
 		return (

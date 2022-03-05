@@ -431,6 +431,8 @@ Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
 Windows.Alerts.show = function (type,line1,line2,line3) {
 
+	var maxStringLength = 30;
+
 	if(type == undefined) {
 		type = "info";
 	}
@@ -442,6 +444,16 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 	}
 	if(line3 == undefined) {
 		line3 = "";
+	}
+
+	if(line1.length >= maxStringLength) {
+		line1 = line1.substring(0, maxStringLength) + "...";
+	}
+	if(line2.length >= maxStringLength) {
+		line2 = line2.substring(0, maxStringLength) + "...";
+	}
+	if(line3.length >= maxStringLength) {
+		line3 = line3.substring(0, maxStringLength) + "...";
 	}
 
 	var osdHeight = mp.get_property("osd-height");

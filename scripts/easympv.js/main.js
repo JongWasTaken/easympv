@@ -23,6 +23,13 @@
  *          mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/")+"FILE")
  */
 
+/*
+	TODO:
+	- Remake settings menu (with save/load)
+	- Folder navigation from current directory
+	- Move away from the util as much as possible
+	- MenuSystem: fallback to message displayMethod when window too small (breaks line spacing, looks ugly)
+*/
 "use strict";
 
 // Polyfills and extensions first
@@ -76,15 +83,19 @@ var Settings = require("./Settings"),
 	Shaders = require("./Shaders"),
 	Colors = require("./Colors"),
 	Chapters = require("./Chapters"),
-	//Menu = require("./MenuDefinitions"),
 	MenuSystem = require("./MenuSystem"),
 	WindowSystem = require("./WindowSystem"),
+	Browsers = require("./Browsers"),
 	isFirstFile = true,
 	sofaEnabled = false,
 	displayVersion = "";
 
+// Set Utils.os
+Utils.determineOS();
+
 // Read easympv.conf
-Settings.update();
+Settings.reload();
+var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString());
 
 // Read JSON files early early
 Shaders.populateSets();
@@ -107,28 +118,7 @@ for (i = 0; i < imageArray.length; i++) {
 
 // IPC server startup
 mp.msg.info("Starting ipc server...");
-if (Settings.Data.useRandomPipeName) {
-	// the pipe name is randomized and passed to the utility for slightly more security
-	// 8 randomized integers
-	var randomPipeName = Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	randomPipeName = randomPipeName + Math.floor(Math.random() * 10).toString();
-	mp.msg.info("PipeName: randomized");
-} else {
-	var randomPipeName = "mpv";
-	mp.msg.info("PipeName: mpv");
-}
-
-if (Utils.os != "win") {
-	mp.set_property("input-ipc-server", "/tmp/" + randomPipeName); // sockets need a location
-} else {
-	mp.set_property("input-ipc-server", randomPipeName); // named pipes exist in the limbo
-}
+Utils.setIPCServer(Settings.Data.randomPipeName);
 
 // Automatic check for updates
 if (!Settings.Data.manualInstallation) {
@@ -201,6 +191,8 @@ var on_start = function () {
 			Colors.name = wld.color;
 		}
 	}
+
+	Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 };
 
 // This will be executed on shutdown
@@ -237,8 +229,8 @@ var descriptionColors = function (a) {
 
 var MainMenuSettings = {
 	title: SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
-	description: "I don\'t know what to put here...",
-	//descriptionColor: "4444ee",
+	description: "niggerniggerniggerniggernigger@br@niggerniggerniggerniggernigger@br@niggerniggerniggerniggernigger",
+	descriptionColor: "ff0000",
 	image: "logo",
 };
 
@@ -252,6 +244,12 @@ var MainMenuItems = [
 		item: "open",
 		description:
 			"Files, Discs, Devices & URLs",
+	},
+	{
+		title: "Open adjacent",
+		item: "open2",
+		description:
+			"...",
 	},
 	{
 		title: "Shaders",
@@ -291,16 +289,10 @@ if (Number(mp.get_property("playlist-count")) > 1) {
 }
 
 var MainMenu = new MenuSystem.Menu(MainMenuSettings, MainMenuItems, undefined);
-var w = new WindowSystem.Window({
-	xPosition: 50,
-	yPosition: 50,
-	height: 600,
-	width: 800,
-	//title: "This is a test window!",
-});
 var quitCounter = 0;
 var quitTitle = MainMenu.items[MainMenu.items.length-1].title;
 MainMenu.eventHandler = function (event, action) {
+	Utils.executeCommand();
 	if (event == "enter") {
 		//w.show();
 		if (action == "colors") {
@@ -352,7 +344,10 @@ MainMenu.eventHandler = function (event, action) {
 			mp.commandv("playlist-shuffle");
 		} else if (action == "open") {
 			MainMenu.hideMenu();
-			Utils.externalUtil("open " + randomPipeName);
+			Utils.externalUtil("open " + Utils.pipeName);
+		} else if (action == "open2") { //TODO:
+			MainMenu.hideMenu();
+			Browsers.Selector.open(MainMenu);
 		} else if (action == "quit") {
 			quitCounter++;
 			if(!quitCounter.isOdd())
@@ -366,7 +361,7 @@ MainMenu.eventHandler = function (event, action) {
 				MainMenu.redrawMenu();
 			}
 		} else if (action == "videodevice_reload") {
-			Utils.externalUtil("videoreload " + randomPipeName);
+			Utils.externalUtil("videoreload " + Utils.pipeName);
 			MainMenu.hideMenu();
 		}
 		else {MainMenu.hideMenu();}
@@ -378,9 +373,9 @@ MainMenu.eventHandler = function (event, action) {
 	}
 	else if (event == "show")
 	{
-		if(Settings.Data.newestVersion != Settings.Data.currentVersion && Settings.Data.notifyAboutUpdates)
+		if(Settings.Data.newestVersion != Settings.Data.currentVersion && notifyAboutUpdates)
 		{
-			Settings.Data.notifyAboutUpdates = false;
+			notifyAboutUpdates = false;
 			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + Settings.Data.currentVersion,"New Version: " + Settings.Data.newestVersion);
 		}
 	}
@@ -454,10 +449,22 @@ ShadersMenu.eventHandler = function (event, action) {
 			if (action != "back" && action != "select" && action != "clear") {
 				Shaders.apply(action);
 				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
-				ShadersMenu.AppendSuffixToCurrentItem();
+				ShadersMenu.appendSuffixToCurrentItem();
+			}
+			break;
+		case "left":
+			if (action != "back" && action != "select" && action != "clear") {
+				Shaders.apply(action);
+				var oldSuffix = new String(ShadersMenu.itemSuffix);
+				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
+				ShadersMenu.itemSuffix = " (default)";
+				Settings.Data.defaultShaderSet = action;
+				ShadersMenu.appendSuffixToCurrentItem();
+				ShadersMenu.itemSuffix = oldSuffix;
 			}
 			break;
 	}
+	Settings.save();
 };
 
 var ChaptersMenuSettings = {
@@ -516,7 +523,7 @@ ChaptersMenu.eventHandler = function (event, action) {
 					Chapters.mode = "skip";
 				}
 				ChaptersMenu.setDescription(descriptionChapters(Chapters.mode,Chapters.status));
-				ChaptersMenu.AppendSuffixToCurrentItem();
+				ChaptersMenu.appendSuffixToCurrentItem();
 			} else if (action == "tstatus") {
 				if (Chapters.status == "disabled") {
 					Chapters.status = "enabled";
@@ -524,7 +531,7 @@ ChaptersMenu.eventHandler = function (event, action) {
 					Chapters.status = "disabled";
 				}
 				ChaptersMenu.setDescription(descriptionChapters(Chapters.mode,Chapters.status));
-				ChaptersMenu.AppendSuffixToCurrentItem();
+				ChaptersMenu.appendSuffixToCurrentItem();
 			}
 			break;
 	}
@@ -552,10 +559,6 @@ var SettingsMenuItems = [
 	{
 		title: "Credits and Licensing",
 		item: "credits",
-	},
-	{
-		title: "Override Subtitle Style",
-		item: "ass",
 	},
 	{
 		title: "Toggle Discord RPC@br@@us10@@br@",
@@ -633,7 +636,7 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "discord") {
 			mp.commandv("script-binding", "drpc_toggle");
 		} else if (action == "easympvconf") {
-			Utils.openFile("script-opts+easympv.conf");
+			Utils.openFile("easympv.conf");
 		} else if (action == "mpvconf") {
 			Utils.openFile("mpv.conf");
 		} else if (action == "inputconf") {
@@ -643,11 +646,11 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "reset") {
 			Utils.externalUtil("reset");
 		} else if (action == "config") {
-			Utils.openFile(""); // yes, empty string, see Utils.openFile()
+			Utils.openFile("");
 		} else if (action == "clearwld") {
 			Utils.clearWatchdata();
 		} else if (action == "command") {
-			Utils.externalUtil("guicommand " + randomPipeName);
+			Utils.externalUtil("guicommand " + Utils.pipeName);
 		} else if (action == "options") {
 			Utils.externalUtil("options");
 		} else if (action == "console") {
@@ -655,14 +658,14 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "credits") {
 			Utils.externalUtil("credits");
 		} else if (action == "reload") {
-			Settings.update();
+			//Settings.reload();
+			Settings.save();
 			WindowSystem.Alerts.show("info","Configuration reloaded.");
 		} else if (action == "debug") {
-			Utils.externalUtil("debug " + randomPipeName);
+			Utils.externalUtil("debug " + Utils.pipeName);
 		} else if (action == "remote") {
-			randomPipeName = "mpv";
 			Settings.Data.useRandomPipeName = false;
-			mp.set_property("input-ipc-server", "mpv");
+			Utils.setIPCServer(Settings.Data.useRandomPipeName);
 		}
 	}
 };
@@ -728,7 +731,7 @@ ColorsMenu.eventHandler = function (event, action) {
 			if (action != "back" && action != "default") {
 				Colors.apply(action);
 				ColorsMenu.setDescription(descriptionColors(Colors.name));
-				ColorsMenu.AppendSuffixToCurrentItem();
+				ColorsMenu.appendSuffixToCurrentItem();
 			}
 
 			break;

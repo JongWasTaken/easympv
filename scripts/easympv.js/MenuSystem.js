@@ -52,6 +52,7 @@ Settings must be an object and can have the following properties:
     "borderSize"            Number, thickness of border
     "borderColor"           Hex string, color of border
     "displayMethod"         String, either "overlay" or "message", check below for explanation
+	"zIndex"				Number, on which zIndex to show this menu on, default is 999
     "keybindOverrides"      Object Array, each object has 3 properties: 
                             "key"    - Name of the key, same as input.conf
                             "id"     - A unique identifier for this keybind
@@ -209,6 +210,12 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.settings.fontName = settings.fontName;
 	} else {
 		this.settings.fontName = "Overpass";
+	}
+
+	if (settings.zIndex != undefined) {
+		this.settings.zIndex = settings.zIndex;
+	} else {
+		this.settings.zIndex = 999;
 	}
 
 	if (settings.itemSuffix != undefined) {
@@ -605,6 +612,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 	}
 
 	if (this.settings.displayMethod == "overlay") {
+		/*
+		 Known issues:
+
+		 	- Description Text Lines might overlap on low windows resolutions.
+				-> Not really a concern
+		 */ 
 		var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage
 		var transparency = this.settings.transparency;
 		var scale = SSA.setScale(scaleFactor);
@@ -821,13 +834,17 @@ Menus.Menu.prototype._handleAutoClose = function () {
 	}
 };
 
-Menus.Menu.prototype.AppendSuffixToCurrentItem = function () {
+Menus.Menu.prototype.fireEvent = function (name) {
+	this._keyPressHandler(name);
+};
+
+Menus.Menu.prototype.appendSuffixToCurrentItem = function () {
 	this.suffixCacheIndex = this.selectedItemIndex;
 	this._constructMenuCache();
 	this._drawMenu();
 };
 
-Menus.Menu.prototype.RemoveSuffix = function () {
+Menus.Menu.prototype.removeSuffix = function () {
 	this.suffixCacheIndex = -1;
 	//this._constructMenuCache();
 	//this._drawMenu();
@@ -919,7 +936,7 @@ Menus.Menu.prototype._initOSD = function () {
 			// OSD is allowed entire window space
 			this.OSD.res_y = mp.get_property("osd-height");
 			this.OSD.res_x = mp.get_property("osd-width");
-			this.OSD.z = 999;
+			this.OSD.z = this.settings.zIndex;
 		}
 	}
 };
@@ -990,7 +1007,7 @@ Menus.Menu.prototype.hideMenu = function () {
 			this._stopTimer();
 			this._revertKeybinds();
 			this.isMenuVisible = false;
-			this.RemoveSuffix();
+			this.removeSuffix();
 			//if (this.allowDrawImage) {
 			//	OSD.hide(this.settings.image);
 			//}
@@ -1014,7 +1031,7 @@ Menus.Menu.prototype.hideMenu = function () {
 			);
 			this._revertKeybinds();
 			this.isMenuVisible = false;
-			this.RemoveSuffix();
+			this.removeSuffix();
 			//if (this.allowDrawImage) {
 			//	OSD.hide(this.settings.image);
 			//}
@@ -1033,6 +1050,9 @@ Menus.Menu.prototype.toggleMenu = function () {
 	}
 };
 
-Menus.Menu.prototype.eventHandler = undefined;
+Menus.Menu.prototype.eventHandler = function ()
+{
+	mp.msg.warn("Menu \"" + this.settings.title + "\" has no event handler!");
+};
 
 module.exports = Menus;
