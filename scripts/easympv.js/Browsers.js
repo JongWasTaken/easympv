@@ -7,6 +7,7 @@
  *
  */
 
+Utils = require("./Utils");
 MenuSystem = require("./MenuSystem");
 Utils = require("./Utils");
 WindowSystem = require("./WindowSystem");
@@ -234,6 +235,40 @@ Browsers.Selector.menuEventHandler = function (event, item)
         else if(item == "url")
         {
             //TODO:
+            WindowSystem.Alerts.show("info", "URL Input window has opened!")
+            if (Utils.os == "win")
+            {
+                var r = mp.command_native({
+                    name: "subprocess",
+                    playback_only: false,
+                    capture_stdout: true,
+                    args: ["powershell", "-executionpolicy", "bypass", "%APPDATA%\\mpv\\scripts\\easympv.js\\InputBox.ps1"]
+                })
+            }
+            else
+            {
+                var r = mp.command_native({
+                    name: "subprocess",
+                    playback_only: false,
+                    capture_stdout: true,
+                    args: ["zenity", "--title=mpv", "--forms", "--text=Open URL", "--add-entry=Paste URL:"]
+                })
+            }
+            if(r.status == "0")
+            {
+                var input = r.stdout.trim();
+                if(input.includes("://"))
+                {
+                    if(input.includes("&list="))
+                    {
+                        mp.commandv("loadlist",input);
+                    }
+                    else
+                    {
+                        mp.commandv("loadfile",input);
+                    }
+                }
+            }
         }
     }
 }
@@ -270,13 +305,13 @@ Browsers.Selector.open = function (parentMenu)
         item: "device",
         color: "ffffff"
     });
-    /*
+
     items.push({
         title: SSA.insertSymbolFA(" ",26,30) + "URL",
         item: "url",
         color: "ffffff"
     });
-    */
+
 
     Browsers.Selector.menuSettings.title = "Selector placeholder title";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
@@ -488,7 +523,26 @@ Browsers.DriveBrowser.open = function (parentMenu)
     {
         Browsers.directorySeperator = "\\";
         //TODO:
+        var r = mp.command_native({
+            name: "subprocess",
+            playback_only: false,
+            capture_stdout: true,
+            args: ["powershell", "-executionpolicy", "bypass", "%APPDATA%\\mpv\\scripts\\easympv.js\\GetDiscDrives.ps1"]
+        })
 
+        if(r.status == "0")
+        {
+            drives = r.stdout.split("\n");
+            drives.sort();
+            for (var i = 0; i < drives.length; i++)
+            {
+                items.push({
+                    title: SSA.insertSymbolFA(" ",26,30) + drives[i],
+                    item: drives[i],
+                    color: "ffffff"
+                });
+            }
+        }
     }
     else
     {
@@ -556,8 +610,16 @@ Browsers.DeviceBrowser.open = function (parentMenu)
     if (Utils.os == "win")
     {
         Browsers.directorySeperator = "\\";
-        //TODO:
-
+        //TODO: Get DirectShow Devices somehow
+        var deviceList = Utils.executeCommand(["%APPDATA%\\mpv\\scripts\\easympv.js\\empv.exe","get-video-devices"]).split("|");
+        for (var i = 0; i < deviceList.length; i++)
+        {
+            items.push({
+                title: SSA.insertSymbolFA(" ",26,30) + deviceList[i],
+                item: deviceList[i],
+                color: "ffffff"
+            });
+        }
     }
     else
     {
@@ -567,8 +629,10 @@ Browsers.DeviceBrowser.open = function (parentMenu)
         {
             if(deviceList[i].includes("video"))
             {
+                var title = SSA.insertSymbolFA(" ",26,30) + deviceList[i];
+                title += " - " + Utils.executeCommand(["cat","/sys/class/video4linux/"+deviceList[i]+"/name"]).split(": ")[0];
                 items.push({
-                    title: SSA.insertSymbolFA(" ",26,30) + deviceList[i],
+                    title: title,
                     item: deviceList[i],
                     color: "ffffff"
                 });

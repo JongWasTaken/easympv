@@ -24,10 +24,22 @@
  */
 
 /*
+
+Current dependencies:
+mpv 33+
+Windows only:
+	PowerShell
+	wmic
+Linux only:
+	GNU coreutils
+	zenity
+*/
+
+/*
 	TODO:
-	- Remake settings menu (with save/load)
-	- Folder navigation from current directory
-	- Move away from the util as much as possible
+	(DONEish) - Remake settings menu (with save/load)
+	(DONE) - Folder navigation from current directory
+	(ONGOING) - Move away from the util as much as possible
 	- MenuSystem: fallback to message displayMethod when window too small (breaks line spacing, looks ugly)
 */
 "use strict";
@@ -242,14 +254,8 @@ var MainMenuItems = [
 	{
 		title: "Open...",
 		item: "open",
-		description:
-			"Files, Discs, Devices & URLs",
-	},
-	{
-		title: "Open adjacent",
-		item: "open2",
-		description:
-			"...",
+		description: "Files, Discs & Devices",
+		//description: "Files, Discs, Devices & URLs",
 	},
 	{
 		title: "Shaders",
@@ -342,10 +348,7 @@ MainMenu.eventHandler = function (event, action) {
 		} else if (action == "shuffle") {
 			MainMenu.hideMenu();
 			mp.commandv("playlist-shuffle");
-		} else if (action == "open") {
-			MainMenu.hideMenu();
-			Utils.externalUtil("open " + Utils.pipeName);
-		} else if (action == "open2") { //TODO:
+		} else if (action == "open") { //TODO:
 			MainMenu.hideMenu();
 			Browsers.Selector.open(MainMenu);
 		} else if (action == "quit") {

@@ -124,19 +124,35 @@ Utils.externalUtil = function (arg) {
 	}
 };
 
-Utils.executeCommand = function(command, args)
+/*
+This function executes a given command/arg array and returns its stdout.
+While this is very powerful, it might not be right approach for most problems.
+*/
+Utils.executeCommand = function(line)
 {
+	if (line == undefined)
+	{
+		line = ["echo","\"No line specified!\""];
+	}
+
 	var r = mp.command_native({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
-		args: [command, args]
+		args: line
 	})
-	return r.stdout;
+	if (r.stdout != undefined || r != undefined)
+	{
+		return r.stdout;
+	}
+	else
+	{
+		return "error";
+	}
 }
 
 // Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000
-Utils.clearWatchdata = function () {
+Utils.clearWatchdata = function () { //TODO: rewrite this ugly thing
 	mp.msg.info("Clearing watchdata");
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	if (Utils.os == "win") {
