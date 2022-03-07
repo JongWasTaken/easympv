@@ -26,17 +26,17 @@ Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
 Browsers.FileBrowser.menu = undefined;
-Browsers.FileBrowser.menuSettings = {};
+Browsers.FileBrowser.menuSettings = {"scrollingEnabled": true};
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
 Browsers.DriveBrowser.menu = undefined;
-Browsers.DriveBrowser.menuSettings = {};
+Browsers.DriveBrowser.menuSettings = {"scrollingEnabled": true, "scrollingPosition": 8};
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
 Browsers.DriveBrowser.cachedDriveName = "";
 
 Browsers.DeviceBrowser.menu = undefined;
-Browsers.DeviceBrowser.menuSettings = {};
+Browsers.DeviceBrowser.menuSettings = {"scrollingEnabled": true, "scrollingPosition": 8};
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
 Browsers.directorySeperator = "/";

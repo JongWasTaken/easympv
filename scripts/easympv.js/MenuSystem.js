@@ -13,6 +13,7 @@ Possible TODO
 Mouse support?
 --> Calculate boundaries for each menuitem
 --> Hook MouseClick mpv event, check if in any boundary, handle as 'open' event if yes
+--> scrolling: Figure out pixel height from font size, compare with window height?
 */
 
 /*----------------------------------------------------------------
@@ -49,10 +50,14 @@ Settings must be an object and can have the following properties:
     "selectedItemColor"     Hex string, color of selected item
     "transparency"          Percentage, 0 -> solid, 100 -> invisible, default is 0
                             (Does not apply to the image)
+    "scrollingEnabled"      Boolean, whether to scroll when items overflow, default is false
+    "scrollingPosition"     Number, where to "freeze" the cursor on screen, default is 1
+                            0 -> 10 are allowed, lower number is higher on screen
     "borderSize"            Number, thickness of border
     "borderColor"           Hex string, color of border
     "displayMethod"         String, either "overlay" or "message", check below for explanation
-	"zIndex"				Number, on which zIndex to show this menu on, default is 999
+                            "message" displayMethod is intended as a fallback only, it is not really maintained
+    "zIndex"                Number, on which zIndex to show this menu on, default is 999
     "keybindOverrides"      Object Array, each object has 3 properties: 
                             "key"    - Name of the key, same as input.conf
                             "id"     - A unique identifier for this keybind
@@ -147,12 +152,6 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.settings.descriptionColor = "FFFFFF";
 	}
 
-	if (settings.itemPrefix != undefined) {
-		this.settings.itemPrefix = settings.itemPrefix + " ";
-	} else {
-		this.settings.itemPrefix = SSA.insertSymbolFA(" ");
-	} // "➤ "
-
 	if (settings.itemColor != undefined) {
 		this.settings.itemColor = settings.itemColor;
 	} else {
@@ -164,6 +163,18 @@ Menus.Menu = function (settings, items, parentMenu) {
 	} else {
 		this.settings.selectedItemColor = "ba0f8d";//"740A58";
 	} //"EB4034"
+
+	if (settings.scrollingEnabled != undefined) {
+		this.settings.scrollingEnabled = settings.scrollingEnabled;
+	} else {
+		this.settings.scrollingEnabled = false;
+	}
+
+	if (settings.scrollingPosition != undefined) {
+		this.settings.scrollingPosition = settings.scrollingPosition;
+	} else {
+		this.settings.scrollingPosition = 1;
+	}
 
 	if (settings.transparency != undefined) {
 		this.settings.transparency = settings.transparency;
@@ -205,6 +216,12 @@ Menus.Menu = function (settings, items, parentMenu) {
 			this.settings.fontSize = 35;
 		}
 	}
+
+	if (settings.itemPrefix != undefined) {
+		this.settings.itemPrefix = settings.itemPrefix + " ";
+	} else {
+		this.settings.itemPrefix = SSA.insertSymbolFA(" ",this.settings.fontSize-2,this.settings.fontSize);
+	} // "➤ "
 
 	if (settings.fontName != undefined) {
 		this.settings.fontName = settings.fontName;
@@ -454,23 +471,23 @@ Menus.Menu.prototype._constructMenuCache = function () {
         Differences between displayMethods
 
         "message" displayMethod:
-        +  Easier to work with
-        +- Line spacing by default, but cannot be changed
+        +  Easier to work with internally
+        +- Line spacing works by default, but cannot be changed
         -  Automatic scaling is busted
             (there might be some universal offset to fix it)
         -  Sizes do not translate 1:1 
-            (default font size has to be 35 intead of 11 to look the same as overlay displayMethod)
+            (default font size has to be 35 intead of 11 to look similar to "overlay" displayMethod)
         -  Will fight over display space (basically like Z-fighting)
-        -  I might drop support for this in the future, seeing how much better the other one is
+        -  Deprecated
 
         "overlay" displayMethod:
         +  Automatically scales to window size
-        +  More fine-grained sizings
+        +  More fine-grained sizings (fontSize is just height in pixels)
         +  will always be on top of every mp.osd_message (no Z-fighting)
         -  A pain to program, but the work is already done and works well
         ?  Requires at least mpv v0.33.0
 
-        Both _should_ look the same, but ensuring that is not easy.
+        Both _should_ look the same (they don't), but ensuring that is not easy.
 
         Documentation for SSA specification
         http://www.tcax.org/docs/ass-specs.htm
@@ -526,8 +543,29 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		}
 
 		// Items
-		for (var i = 0; i < this.items.length; i++) {
-			var currentItem = this.items[i];
+		if (this.settings.scrollingEnabled)
+		{
+			var drawItems = [];
+			var allowedItemCount = Math.floor(mp.get_property("osd-height") / this.settings.fontSize) + 5;
+		
+			var startItem = this.selectedItemIndex - Math.percentage(this.settings.scrollingPosition,allowedItemCount);
+			while(startItem < 0) {startItem++};
+	
+			var endItem = this.selectedItemIndex + allowedItemCount;
+			while(endItem > this.items.length) {endItem = endItem-1};
+	
+			for (var r = startItem; r < endItem; r++) {
+				drawItems.push(this.items[r]);
+			}
+		}
+		else
+		{
+			var drawItems = this.items;
+			var startItem = 0;
+			var endItem = 0;
+		}
+		for (var i = 0; i < drawItems.length; i++) {
+			var currentItem = drawItems[i];
 			var title = currentItem.title;
 
 			var postItemActions = [""];
@@ -561,12 +599,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					"\n";
 			}
 
-			if (this.selectedItemIndex == i) {
+			if (this.selectedItemIndex-startItem == i) {
 				color = SSA.setColor(this.settings.selectedItemColor);
 				title = this.settings.itemPrefix + title;
 			}
 
-			if (i == this.suffixCacheIndex) {
+			if (this.suffixCacheIndex-startItem == i) {
 				var count = (title.match(/\n/g) || []).length;
 				if (count > 0) {
 					title =
@@ -745,12 +783,33 @@ Menus.Menu.prototype._constructMenuCache = function () {
 			}
 		}
 		this.cachedMenuText += mainDescription;
+
 		// Items
-		for (var i = 0; i < this.items.length; i++) {
-			var currentItem = this.items[i];
+		if (this.settings.scrollingEnabled)
+		{
+			var drawItems = [];
+			var allowedItemCount = Math.floor(mp.get_property("osd-height") / this.settings.fontSize) + 5;
+		
+			var startItem = this.selectedItemIndex - Math.percentage(this.settings.scrollingPosition,allowedItemCount);
+			while(startItem < 0) {startItem++};
+	
+			var endItem = this.selectedItemIndex + allowedItemCount;
+			while(endItem > this.items.length) {endItem = endItem-1};
+	
+			for (var r = startItem; r < endItem; r++) {
+				drawItems.push(this.items[r]);
+			}
+		}
+		else
+		{
+			var drawItems = this.items;
+			var startItem = 0;
+			var endItem = 0;
+		}
 
+		for (var i = 0; i < drawItems.length; i++) {
+			var currentItem = drawItems[i];
 			var title = currentItem.title;
-
 			var postItemActions = [""];
 			if (
 				title.includes("@") &&
@@ -768,12 +827,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 				color = SSA.setColor(this.settings.itemColor);
 			}
 
-			if (this.selectedItemIndex == i) {
+			if (this.selectedItemIndex-startItem == i) {
 				color = SSA.setColor(this.settings.selectedItemColor);
 				title = this.settings.itemPrefix + title;
 			}
 
-			if (i == this.suffixCacheIndex) {
+			if (this.suffixCacheIndex-startItem == i) {
 				title += this.settings.itemSuffix;
 			}
 
@@ -904,7 +963,7 @@ Menus.Menu.prototype._keyPressHandler = function (action) {
 			this._drawMenu();
 			this.eventLocked = false;
 		} else if (action == "down") {
-			if (this.selectedItemIndex != this.items.length - 1) {
+			if (this.selectedItemIndex < this.items.length - 1) {
 				this.selectedItemIndex += 1;
 			}
 			this._constructMenuCache();

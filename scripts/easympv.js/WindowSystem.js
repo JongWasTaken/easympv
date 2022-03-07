@@ -94,6 +94,24 @@ Windows.Window = function (settings) {
 		this.settings.fadeOutTime = 50;
 	}
 
+	if (settings.drawBaseOSD != undefined) {
+		this.settings.drawBaseOSD = settings.drawBaseOSD;
+	} else {
+		this.settings.drawBaseOSD = true;
+	}
+
+	if (settings.drawContentOSD != undefined) {
+		this.settings.drawContentOSD = settings.drawContentOSD;
+	} else {
+		this.settings.drawContentOSD = true;
+	}
+
+	if (settings.drawEffectOSD != undefined) {
+		this.settings.drawEffectOSD = settings.drawEffectOSD;
+	} else {
+		this.settings.drawEffectOSD = true;
+	}
+
 	if (settings.keybindOverrides != undefined) {
 		this.settings.keybindOverrides = settings.keybindOverrides;
 	} else {
@@ -327,12 +345,22 @@ Windows.Window.prototype._draw = function () {
 		this.effectOSD.z = this.zStart;
 	}
 
-	this.baseOSD.data = this.cachedWindowBaseText;
-	this.contentOSD.data = this.cachedWindowContentText;
-	this.effectOSD.data = this.cachedWindowEffectText;
-	this.baseOSD.update();
-	this.contentOSD.update();
-	this.effectOSD.update();
+	if(this.settings.drawBaseOSD)
+	{
+		this.baseOSD.data = this.cachedWindowBaseText;
+		this.baseOSD.update();
+	}
+	if(this.settings.drawContentOSD)
+	{
+		this.contentOSD.data = this.cachedWindowContentText;
+		this.contentOSD.update();
+	}
+	if(this.settings.drawEffectOSD)
+	{
+		this.effectOSD.data = this.cachedWindowEffectText;
+		this.effectOSD.update();
+	}
+
 };
 
 Windows.Window.prototype.show = function () {
@@ -517,7 +545,41 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 			window.hide();
 		}
 	});
+
+	mp.observe_property("osd-width", undefined, function () {
+		if(
+			mp.get_property("osd-height") != osdHeight
+			||
+			mp.get_property("osd-width") != osdWidth
+			)
+		{
+			window.settings.fadeOut = false;
+			window.hide();
+		}
+	});
+
 	Windows.Alerts.onScreen.push(window);
+
+	mp.msg.warn(mp.get_property("osd-height"));
+
+	if(
+		mp.get_property("osd-height") < 1090 && mp.get_property("osd-height") > 1070 &&
+		mp.get_property("osd-width") < 1930 && mp.get_property("osd-width") > 1910
+		)
+	{
+		mp.msg.warn("true");
+		window.settings.drawBaseOSD = true;
+		window.settings.drawEffectOSD = true;
+		window.settings.transparency = "40";
+	}
+	else
+	{
+		mp.msg.warn("false");
+		window.settings.drawBaseOSD = false;
+		window.settings.drawEffectOSD = false;
+		window.settings.transparency = "0";
+	}
+
 	window.show();
 	window.onClose = function () {
 		for(var i = 0; i <= Windows.Alerts.onScreen.length-1;i++)

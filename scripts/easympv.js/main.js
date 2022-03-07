@@ -40,7 +40,9 @@ Linux only:
 	(DONEish) - Remake settings menu (with save/load)
 	(DONE) - Folder navigation from current directory
 	(ONGOING) - Move away from the util as much as possible
-	- MenuSystem: fallback to message displayMethod when window too small (breaks line spacing, looks ugly)
+	- DirectShow readout in Utility
+	- Figure out updating without utility GUI
+	(DONE) MenuSystem: scrolling
 */
 "use strict";
 
@@ -85,6 +87,10 @@ String.prototype.insertAt = function(index, string)
 Number.prototype.isOdd = function () {
 	return this % 2 == 1;
 };
+
+Math.percentage = function (partialValue, totalValue) {
+	return Math.round((100 * partialValue) / totalValue);
+} 
 
 // Lets Go!
 mp.msg.info("Starting!");
@@ -815,11 +821,21 @@ mp.observe_property(
 	Chapters.Handler
 );
 
-// Registering an observer to redraw Menus on window size change
+// Registering an observer to fix Menus on window size change
 mp.observe_property("osd-height", undefined, function () {
 	var currentmenu = MenuSystem.getDisplayedMenu();
 	if (currentmenu != undefined) {
 		currentmenu.hideMenu();
+		/*
+		if (mp.get_property("osd-height") < 600)
+		{
+			currentmenu.settings.displayMethod = "message";
+		}
+		else
+		{
+			currentmenu.settings.displayMethod = "overlay";
+		}
+		*/
 		currentmenu.showMenu();
 	}
 });
