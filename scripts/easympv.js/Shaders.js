@@ -52,9 +52,9 @@ Shaders.populateSets = function () {
 	var sorttemp_hd = [];
 	var sorttemp2 = [];
 	for (i = 0; i < Shaders.sets.length; i++) {
-		if (Shaders.sets[i].name.includes("SD")) {
+		if (Shaders.sets[i].name.includes("Worse, but Faster")) {
 			sorttemp_sd.push(Shaders.sets[i]);
-		} else if (Shaders.sets[i].name.includes("HD")) {
+		} else if (Shaders.sets[i].name.includes("Better, but slower")) {
 			sorttemp_hd.push(Shaders.sets[i]);
 		} else {
 			sorttemp2.push(Shaders.sets[i]);
@@ -80,23 +80,7 @@ Shaders.populateSets = function () {
 Shaders.apply = function (shader) {
 	Shaders.manualSelection = true;
 	if (shader == "a4k_auto") {
-		var a4k_recommended = "Faithful";
-		//var a4k_recommended = "Improved & Deblured";
-		var height = mp.get_property("osd-height");
-		if (height == 0) {
-			height = mp.get_property("height");
-		}
-		var isHD;
-		if (height <= 720) {
-			isHD = false;
-		} else if (height > 720) {
-			isHD = true;
-		}
-		if (isHD) {
-			Shaders.apply("HD Anime4K " + a4k_recommended);
-		} else {
-			Shaders.apply("SD Anime4K " + a4k_recommended);
-		}
+		Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
 	} else if (shader == "la_auto") {
 		Shaders.apply("NNEDI3 (128 Neurons)");
 	} else if (

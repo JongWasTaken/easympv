@@ -459,7 +459,7 @@ Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
 Windows.Alerts.show = function (type,line1,line2,line3) {
 
-	var maxStringLength = 30;
+	var maxStringLength = 45;
 
 	if(type == undefined) {
 		type = "info";

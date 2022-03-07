@@ -13,7 +13,6 @@ Possible TODO
 Mouse support?
 --> Calculate boundaries for each menuitem
 --> Hook MouseClick mpv event, check if in any boundary, handle as 'open' event if yes
---> scrolling: Figure out pixel height from font size, compare with window height?
 */
 
 /*----------------------------------------------------------------

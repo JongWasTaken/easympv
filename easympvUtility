@@ -1,4 +1,0 @@
-#!/bin/bash
-GDK_BACKEND=x11
-cd ~/.config/mpv/
-./easympv2 "$@"

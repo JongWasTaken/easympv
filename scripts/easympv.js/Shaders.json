@@ -1,44 +1,53 @@
 {
-	"SD Anime4K Faithful": [
-		"Anime4K_Upscale_CNN_L_x2_Denoise.glsl",
-		"Anime4K_Auto_Downscale_Pre_x4.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for HD and SD media (Worse, but Faster)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Restore_CNN_M.glsl",
+		"Anime4K_Upscale_CNN_x2_M.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_S.glsl"
 	],
-	"SD Anime4K Improved": [
-		"Anime4K_Upscale_CNN_L_x2_Denoise.glsl",
-		"Anime4K_Auto_Downscale_Pre_x4.glsl",
-		"Anime4K_DarkLines_HQ.glsl",
-		"Anime4K_ThinLines_HQ.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for 720p media (Worse, but Faster)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Restore_CNN_Soft_M.glsl",
+		"Anime4K_Upscale_CNN_x2_M.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_S.glsl"
 	],
-	"SD Anime4K Improved & Deblured": [
-		"Anime4K_Upscale_CNN_L_x2_Denoise.glsl",
-		"Anime4K_Auto_Downscale_Pre_x4.glsl",
-		"Anime4K_Deblur_DoG.glsl",
-		"Anime4K_DarkLines_HQ.glsl",
-		"Anime4K_ThinLines_HQ.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for downscaled media (Worse, but Faster)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Upscale_Denoise_CNN_x2_M.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_S.glsl"
 	],
-	"HD Anime4K Faithful": [
-		"Anime4K_Denoise_Bilateral_Mode.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for HD and SD media (Better, but slower)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Restore_CNN_VL.glsl",
+		"Anime4K_Upscale_CNN_x2_VL.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_M.glsl"
 	],
-	"HD Anime4K Improved": [
-		"Anime4K_Denoise_Bilateral_Mode.glsl",
-		"Anime4K_DarkLines_HQ.glsl",
-		"Anime4K_ThinLines_HQ.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for 720p media (Better, but slower)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Restore_CNN_Soft_VL.glsl",
+		"Anime4K_Upscale_CNN_x2_VL.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_M.glsl"
 	],
-	"HD Anime4K Improved & Deblured": [
-		"Anime4K_Denoise_Bilateral_Mode.glsl",
-		"Anime4K_Deblur_DoG.glsl",
-		"Anime4K_DarkLines_HQ.glsl",
-		"Anime4K_ThinLines_HQ.glsl",
-		"Anime4K_Upscale_CNN_M_x2_Deblur.glsl"
+	"Anime4K for downscaled media (Better, but slower)": [
+		"Anime4K_Clamp_Highlights.glsl",
+		"Anime4K_Upscale_Denoise_CNN_x2_VL.glsl",
+		"Anime4K_AutoDownscalePre_x2.glsl",
+		"Anime4K_AutoDownscalePre_x4.glsl",
+		"Anime4K_Upscale_CNN_x2_M.glsl"
 	],
 	"KrigBilateral": ["KrigBilateral.glsl"],
 	"Adaptive Sharpen": ["adaptive-sharpen.glsl", "KrigBilateral.glsl"],
-	"A4K Denoiser": ["Anime4K_Denoise_Heavy_CNN_L.glsl"],
+	"A4K Denoiser": ["Anime4K_Upscale_Denoise_CNN_x2_L.glsl"],
 	"FSRCNNX (High x16)": ["FSRCNNX_x2_16-0-4-1.glsl"],
 	"SSimSuperRes": ["SSimSuperRes.glsl"],
 	"NNEDI3 (128 Neurons)": ["nnedi3-nns128-win8x6.hook"],

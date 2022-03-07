@@ -43,6 +43,9 @@ Linux only:
 	- DirectShow readout in Utility
 	- Figure out updating without utility GUI
 	(DONE) MenuSystem: scrolling
+	- Reimplement autosave.lua
+	- Reimplement betterchapters.lua
+	- Reimplement autosave.lua
 */
 "use strict";
 
