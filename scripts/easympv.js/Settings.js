@@ -17,8 +17,8 @@ Settings.Data = {
 	manualInstallation: false,
 	notifyAboutUpdates: true,
 	debugMode: false,
-	currentVersion: "1.8.0",
-	newestVersion: "1.8.0",
+	currentVersion: "0.0.0",
+	newestVersion: "0.0.1",
 }
 
 Settings.load = function () {
@@ -120,7 +120,7 @@ Settings.save = function () {
 		} catch (x) { } }
 		this.DataCopy = this.DataCopy + lines[i] + "\n";
 	}
-
+	this.DataCopy = this.DataCopy.replace(new RegExp("\\n$"), "");
 	mp.utils.write_file(
 		"file://" + mp.utils.get_user_path("~~/easympv.conf"),
 		this.DataCopy

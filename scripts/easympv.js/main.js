@@ -29,7 +29,6 @@ Current dependencies:
 mpv 33+
 Windows only:
 	PowerShell
-	wmic
 Linux only:
 	GNU coreutils
 	zenity
@@ -40,8 +39,10 @@ Linux only:
 	(DONEish) - Remake settings menu (with save/load)
 	(DONE) - Folder navigation from current directory
 	(ONGOING) - Move away from the util as much as possible
-	- DirectShow readout in Utility
+	- Utility: DirectShow readout to stdout 
+	- Utility: return version in stdout on check
 	- Figure out updating without utility GUI
+		Using a menu?
 	(DONE) MenuSystem: scrolling
 	- Reimplement autosave.lua
 	- Reimplement betterchapters.lua
@@ -144,8 +145,7 @@ Utils.setIPCServer(Settings.Data.randomPipeName);
 // Automatic check for updates
 if (!Settings.Data.manualInstallation) {
 	mp.msg.info("Checking for updates...");
-	// Utility will check for updates and write a short lua script to scripts folder if outdated
-	Utils.externalUtil("check");
+	Settings.Data.newestVersion = Utils.checkForUpdates();
 }
 
 // Per File Option Saving (Step 1: Cache)
@@ -154,7 +154,7 @@ mp.msg.warn(
 	'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
 ); // because mpv does not know our custom options
 
-if(Number(Settings.Data.currentVersion.replace(/\./g,"")) < Number(Settings.Data.newestVersion.replaceAll(/\./g,"")))
+if(Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion))
 {
 	displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
 }
@@ -162,6 +162,8 @@ else
 {
 	displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion;
 }
+
+Settings.save();
 
 // This will be executed on file-load
 var on_start = function () {
@@ -385,7 +387,7 @@ MainMenu.eventHandler = function (event, action) {
 	}
 	else if (event == "show")
 	{
-		if(Settings.Data.newestVersion != Settings.Data.currentVersion && notifyAboutUpdates)
+		if(Utils.compareVersions(Settings.Data.currentVersion, Settings.Data.newestVersion) && notifyAboutUpdates)
 		{
 			notifyAboutUpdates = false;
 			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + Settings.Data.currentVersion,"New Version: " + Settings.Data.newestVersion);

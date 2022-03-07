@@ -141,7 +141,7 @@ Utils.executeCommand = function(line)
 		capture_stdout: true,
 		args: line
 	})
-	if (r.stdout != undefined || r != undefined)
+	if (r != undefined)
 	{
 		return r.stdout;
 	}
@@ -149,6 +149,39 @@ Utils.executeCommand = function(line)
 	{
 		return "error";
 	}
+}
+
+Utils.checkForUpdates = function () {
+
+	if (Utils.os == "win") {
+		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv.exe";
+		util = util.replaceAll("/", "\\");
+	} else {
+		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv";
+	}
+
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		args: [util,"check"]
+	})
+	//TODO: remove line below once util is done
+	r = undefined;
+	
+	if (r != undefined)
+	{
+		return r.stdout;
+	}
+	else
+	{
+		return "0.0.0";
+	}
+}
+
+Utils.compareVersions = function (currentVersion,newestVersion)
+{
+	return Number(currentVersion.replace(/\./g,"")) < Number(newestVersion.replaceAll(/\./g,""));
 }
 
 // Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000

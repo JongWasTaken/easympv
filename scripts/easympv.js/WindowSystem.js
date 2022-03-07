@@ -560,21 +560,17 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 
 	Windows.Alerts.onScreen.push(window);
 
-	mp.msg.warn(mp.get_property("osd-height"));
-
 	if(
 		mp.get_property("osd-height") < 1090 && mp.get_property("osd-height") > 1070 &&
 		mp.get_property("osd-width") < 1930 && mp.get_property("osd-width") > 1910
 		)
 	{
-		mp.msg.warn("true");
 		window.settings.drawBaseOSD = true;
 		window.settings.drawEffectOSD = true;
 		window.settings.transparency = "40";
 	}
 	else
 	{
-		mp.msg.warn("false");
 		window.settings.drawBaseOSD = false;
 		window.settings.drawEffectOSD = false;
 		window.settings.transparency = "0";
