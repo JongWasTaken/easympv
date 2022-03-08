@@ -1,7 +1,5 @@
-*.exe
 *.ico
 *.bat
-*.txt
 *.log
 *.code-workspace
 *.conf
@@ -22,3 +20,4 @@ easympv
 easympv-cli
 ./easympvUtility
 easympvUtility
+outdated.txt

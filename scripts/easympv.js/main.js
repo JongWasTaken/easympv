@@ -41,8 +41,7 @@ Linux only:
 	(ONGOING) - Move away from the util as much as possible
 	- Utility: DirectShow readout to stdout 
 	- Utility: return version in stdout on check
-	- Figure out updating without utility GUI
-		Using a menu?
+	- UpdateMenu: display changelog in the top right corner
 	(DONE) MenuSystem: scrolling
 	- Reimplement autosave.lua
 	- Reimplement betterchapters.lua
@@ -164,7 +163,7 @@ else
 }
 
 Settings.save();
-
+mp.msg.warn(Utils.getChangelog());
 // This will be executed on file-load
 var on_start = function () {
 	// done ? TODO: give priority to user selected Shaderset/Colorset for current session
@@ -290,14 +289,6 @@ var MainMenuItems = [
 	},
 ];
 
-if (mp.get_property("path") != null) {
-	if (mp.get_property("path").includes("video=")) {
-		MainMenuItems.splice(1, 0, {
-			title: "[Reload Video Device]@br@",
-			item: "videodevice_reload",
-		});
-	}
-}
 if (Number(mp.get_property("playlist-count")) > 1) {
 	MainMenuItems.splice(2, 0, {
 		title: "[Shuffle playlist]@br@",
@@ -374,9 +365,6 @@ MainMenu.eventHandler = function (event, action) {
 				MainMenu.getSelectedItem().title = SSA.setColorRed() + "Are you sure?";
 				MainMenu.redrawMenu();
 			}
-		} else if (action == "videodevice_reload") {
-			Utils.externalUtil("videoreload " + Utils.pipeName);
-			MainMenu.hideMenu();
 		}
 		else {MainMenu.hideMenu();}
 	}
@@ -446,7 +434,7 @@ ShadersMenu.eventHandler = function (event, action) {
 		case "enter":
 			ShadersMenu.hideMenu();
 			if (action == "select") {
-				Utils.externalUtil("a4k");
+				//TODO: change to save
 			} else {
 				Shaders.apply(action);
 				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
@@ -656,27 +644,22 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "inputconf") {
 			Utils.openFile("input.conf");
 		} else if (action == "updater") {
-			Utils.externalUtil("update");
+			//TODO: Utils.extrnalUtil("update");
 		} else if (action == "reset") {
-			Utils.externalUtil("reset");
+			//TODO: if win invoke registered uninstaller Utils.eternalUtil("reset");
 		} else if (action == "config") {
 			Utils.openFile("");
 		} else if (action == "clearwld") {
 			Utils.clearWatchdata();
 		} else if (action == "command") {
-			Utils.externalUtil("guicommand " + Utils.pipeName);
-		} else if (action == "options") {
-			Utils.externalUtil("options");
-		} else if (action == "console") {
-			Utils.externalUtil("console");
+			//TODO: replace with ps1 Utils.eternalUtil("guicommand " + Utils.pipeName);
+
 		} else if (action == "credits") {
-			Utils.externalUtil("credits");
+			//TODO: Utils.exernalUtil("credits");
 		} else if (action == "reload") {
 			//Settings.reload();
 			Settings.save();
 			WindowSystem.Alerts.show("info","Configuration reloaded.");
-		} else if (action == "debug") {
-			Utils.externalUtil("debug " + Utils.pipeName);
 		} else if (action == "remote") {
 			Settings.Data.useRandomPipeName = false;
 			Utils.setIPCServer(Settings.Data.useRandomPipeName);
@@ -728,7 +711,7 @@ ColorsMenu.eventHandler = function (event, action) {
 		case "enter":
 			ColorsMenu.hideMenu();
 			if (action == "default") {
-				Utils.externalUtil("color");
+				//TODO: change to save
 			} else {
 				Colors.apply(action);
 				if(action == "none")

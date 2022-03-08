@@ -610,7 +610,6 @@ Browsers.DeviceBrowser.open = function (parentMenu)
     if (Utils.os == "win")
     {
         Browsers.directorySeperator = "\\";
-        //TODO: Get DirectShow Devices somehow
         var deviceList = Utils.executeCommand(["%APPDATA%\\mpv\\scripts\\easympv.js\\empv.exe","get-video-devices"]).split("|");
         for (var i = 0; i < deviceList.length; i++)
         {

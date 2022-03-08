@@ -164,10 +164,8 @@ Utils.checkForUpdates = function () {
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
-		args: [util,"check"]
+		args: [util,"get-newest-version"]
 	})
-	//TODO: remove line below once util is done
-	r = undefined;
 	
 	if (r != undefined)
 	{
@@ -179,9 +177,42 @@ Utils.checkForUpdates = function () {
 	}
 }
 
+Utils.getChangelog = function () {
+
+	if (Utils.os == "win") {
+		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv.exe";
+		util = util.replaceAll("/", "\\");
+	} else {
+		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv";
+	}
+
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		args: [util,"get-changelog"]
+	})
+	
+	if (r != undefined)
+	{
+		return r.stdout;
+	}
+	else
+	{
+		return "Error whilst getting the changelog!";
+	}
+}
+
 Utils.compareVersions = function (currentVersion,newestVersion)
 {
 	return Number(currentVersion.replace(/\./g,"")) < Number(newestVersion.replaceAll(/\./g,""));
+}
+
+Utils.getCredits = function ()
+{
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined)
+		return;
+	return mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv.js/Credits.txt"));
 }
 
 // Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000
