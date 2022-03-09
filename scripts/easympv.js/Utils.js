@@ -90,7 +90,7 @@ Utils.openFile = function (file) {
 		file = file.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", "start " + file);
 	} else if (Utils.os == "unix") {
-		mp.commandv("run", "bash", "-c", "xdg-open " + file);
+		mp.commandv("run", "sh", "-c", "xdg-open " + file);
 	} else if (Utils.os == "mac") {
 		mp.commandv("run", "zsh", "-c", "open " + file);
 	}
@@ -215,59 +215,36 @@ Utils.getCredits = function ()
 	return mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv.js/Credits.txt"));
 }
 
+Utils.createWLDummy = function ()
+{
+	var folder = mp.utils.get_user_path("~~/watch_later");
+	var name = "00000000000000000000000000000000";
+	if(Utils.os == "win")
+	{
+		folder = folder.replaceAll("/", "\\");
+		Utils.executeCommand(["copy","nul",folder+"\\"+ name,">","nul"]);
+	}
+	else
+	{
+		Utils.executeCommand(["touch",folder + "/" + name])
+	}
+}
+
 // Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000
 Utils.clearWatchdata = function () { //TODO: rewrite this ugly thing
 	mp.msg.info("Clearing watchdata");
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	if (Utils.os == "win") {
 		folder = folder.replaceAll("/", "\\");
-		mp.commandv(
-			"run",
-			"cmd",
-			"/c",
-			"" +
-				"copy " +
-				folder.replaceAll("/", "\\") +
-				"\\00000000000000000000000000000000 " +
-				mp.utils.get_user_path("~~/").replaceAll("/", "\\") +
-				" && " +
-				"del /Q /S " +
-				folder.replaceAll("/", "\\") +
-				" && " +
-				"copy " +
-				mp.utils.get_user_path("~~/").replaceAll("/", "\\") +
-				"\\00000000000000000000000000000000 " +
-				folder.replaceAll("/", "\\") +
-				"\\00000000000000000000000000000000" +
-				" && " +
-				"del /Q " +
-				mp.utils.get_user_path("~~/").replaceAll("/", "\\") +
-				"\\00000000000000000000000000000000"
-		);
+		Utils.executeCommand(["del","/Q","/S",folder]);
+		Utils.executeCommand(["mkdir",folder]);
+		Utils.createWLDummy();
 	} else if (Utils.os == "mac") {
 		mp.msg.info("macOS is not supported.");
-		//mp.commandv("run","zsh","-c","rm -rf " + folder);
 	} else if (Utils.os == "unix") {
-		mp.commandv(
-			"run",
-			"cp",
-			folder + "/00000000000000000000000000000000",
-			mp.utils.get_user_path("~~/")
-		);
-		mp.commandv("run", "rm", "-rf", folder);
-		mp.commandv("run", "mkdir", folder);
-		mp.commandv(
-			"run",
-			"cp",
-			mp.utils.get_user_path("~~/") + "/00000000000000000000000000000000",
-			folder
-		);
-		mp.commandv(
-			"run",
-			"rm",
-			"-rf",
-			mp.utils.get_user_path("~~/") + "/00000000000000000000000000000000"
-		);
+		Utils.executeCommand(["rm","-rf",folder]);
+		Utils.executeCommand(["mkdir",folder]);
+		Utils.createWLDummy();
 	}
 };
 

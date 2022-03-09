@@ -7,11 +7,10 @@
  *
  */
 
-Utils = require("./Utils");
-MenuSystem = require("./MenuSystem");
-Utils = require("./Utils");
-WindowSystem = require("./WindowSystem");
-SSA = require("./SSAHelper");
+var MenuSystem = require("./MenuSystem");
+var Utils = require("./Utils");
+var WindowSystem = require("./WindowSystem");
+var SSA = require("./SSAHelper");
 
 var Browsers = {};
 
@@ -234,7 +233,6 @@ Browsers.Selector.menuEventHandler = function (event, item)
         }
         else if(item == "url")
         {
-            //TODO:
             WindowSystem.Alerts.show("info", "URL Input window has opened!")
             if (Utils.os == "win")
             {
@@ -242,7 +240,7 @@ Browsers.Selector.menuEventHandler = function (event, item)
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
-                    args: ["powershell", "-executionpolicy", "bypass", "%APPDATA%\\mpv\\scripts\\easympv.js\\InputBox.ps1"]
+                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/InputBox.ps1").replaceAll("/","\\")]
                 })
             }
             else
@@ -337,31 +335,38 @@ Browsers.FileBrowser.openFileSafe = function (filename)
 
 Browsers.FileBrowser.getParentDirectory = function ()
 {
-    var newDir = "";
-    var workDir = Browsers.FileBrowser.currentLocation;
-    if (workDir.charAt(workDir.length - 1) == Browsers.directorySeperator) {
-        workDir = workDir.substring(0, workDir.length - 1);
-    }
-    var workDirTree = workDir.split(Browsers.directorySeperator);
-
-    if(workDirTree.length < 3) 
+    if(Utils.os == "win" && Browsers.FileBrowser.currentLocation.charAt(Browsers.FileBrowser.currentLocation.length-1) == ":") // 
     {
-        workDirTree[0] = "/";
+        return "@DRIVESELECTOR@";
     }
-
-    for (var i = 0; i < workDirTree.length-1; i++)
+    else
     {
-        if(i == 0)
-        {
-            newDir = workDirTree[0];
+        var newDir = "";
+        var workDir = Browsers.FileBrowser.currentLocation;
+        if (workDir.charAt(workDir.length - 1) == Browsers.directorySeperator) {
+            workDir = workDir.substring(0, workDir.length - 1);
         }
-        else
+        var workDirTree = workDir.split(Browsers.directorySeperator);
+    
+        if(workDirTree.length < 3) 
         {
-            newDir = newDir + Browsers.directorySeperator + workDirTree[i];
+            workDirTree[0] = "/";
         }
+    
+        for (var i = 0; i < workDirTree.length-1; i++)
+        {
+            if(i == 0)
+            {
+                newDir = workDirTree[0];
+            }
+            else
+            {
+                newDir = newDir + Browsers.directorySeperator + workDirTree[i];
+            }
+        }
+        mp.msg.warn(newDir);
+        return newDir;
     }
-    mp.msg.warn(newDir);
-    return newDir;
 }
 
 Browsers.FileBrowser.changeDirectory = function (directory)
@@ -396,7 +401,6 @@ Browsers.FileBrowser.menuEventHandler = function (event,item)
         }
     }
 }
-
 Browsers.FileBrowser.open = function (parentMenu)
 {
     if (parentMenu == undefined)
@@ -412,58 +416,85 @@ Browsers.FileBrowser.open = function (parentMenu)
         Browsers.directorySeperator = "\\";
     }
     var items = [];
-    var currentLocationFolders = mp.utils.readdir(Browsers.FileBrowser.currentLocation,"dirs");
-    currentLocationFolders.sort();
 
-    if (Utils.os == "unix" && Browsers.FileBrowser.currentLocation == "/")
-    {}
-    else if (Utils.os == "win" && Browsers.FileBrowser.currentLocation.includes(":\\"))
-    {}
+    if(Utils.os == "win" && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
+    {
+        Browsers.directorySeperator = "\\";
+        var r = mp.command_native({
+            name: "subprocess",
+            playback_only: false,
+            capture_stdout: true,
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/GetDrives.ps1").replaceAll("/","\\"),"-type 2"]
+        })
+
+        if(r.status == "0")
+        {
+            drives = r.stdout.split("|");
+            drives.sort();
+            for (var i = 0; i < drives.length; i++)
+            {
+                items.push({
+                    title: SSA.insertSymbolFA(" ",26,30) + drives[i].trim() + "\\",
+                    item: drives[i].trim() + "\\",
+                    color: "ffffff"
+                });
+            }
+        }
+    }
     else
     {
-        items.push({
-            title: SSA.insertSymbolFA(" ",30,30) + ".." + Browsers.directorySeperator,
-            item: ".." + Browsers.directorySeperator,
-            color: "909090"
-        });
-    }
-    for (var i = 0; i < currentLocationFolders.length; i++)
-    {
-        if(currentLocationFolders[i].charAt(0) != ".")
+        var currentLocationFolders = mp.utils.readdir(Browsers.FileBrowser.currentLocation,"dirs");
+        currentLocationFolders.sort();
+    
+        if (Utils.os == "unix" && Browsers.FileBrowser.currentLocation == "/")
+        {}
+        else
         {
             items.push({
-                title: SSA.insertSymbolFA(" ",26,30) + currentLocationFolders[i] + Browsers.directorySeperator,
-                item: currentLocationFolders[i] + Browsers.directorySeperator,
-                color: "FFFF90"
+                title: SSA.insertSymbolFA(" ",30,30) + ".." + Browsers.directorySeperator,
+                item: ".." + Browsers.directorySeperator,
+                color: "909090"
             });
         }
-    }
-    var currentLocationFiles = mp.utils.readdir(Browsers.FileBrowser.currentLocation,"files");
-    currentLocationFiles.sort();
-    for (var i = 0; i < currentLocationFiles.length; i++)
-    {
-        if(currentLocationFiles[i].charAt(0) != ".")
+        for (var i = 0; i < currentLocationFolders.length; i++)
         {
-            var color = "909090";
-
-            for(var j = 0; j < Browsers.FileBrowser.fileExtensionWhitelist.length; j++)
+            if(currentLocationFolders[i].charAt(0) != ".")
             {
-                if(currentLocationFiles[i].includes(Browsers.FileBrowser.fileExtensionWhitelist[j].extension))
-                {
-                    color = "ffffff";
-                    break;
-                }
+                items.push({
+                    title: SSA.insertSymbolFA(" ",26,30) + currentLocationFolders[i] + Browsers.directorySeperator,
+                    item: currentLocationFolders[i] + Browsers.directorySeperator,
+                    color: "FFFF90"
+                });
             }
-
-            items.push({
-                title: SSA.insertSymbolFA(" ",26,30) + currentLocationFiles[i],
-                item: currentLocationFiles[i],
-                color: color
-            });
+        }
+        var currentLocationFiles = mp.utils.readdir(Browsers.FileBrowser.currentLocation,"files");
+        currentLocationFiles.sort();
+        for (var i = 0; i < currentLocationFiles.length; i++)
+        {
+            if(currentLocationFiles[i].charAt(0) != ".")
+            {
+                var color = "909090";
+    
+                for(var j = 0; j < Browsers.FileBrowser.fileExtensionWhitelist.length; j++)
+                {
+                    if(currentLocationFiles[i].includes(Browsers.FileBrowser.fileExtensionWhitelist[j].extension))
+                    {
+                        color = "ffffff";
+                        break;
+                    }
+                }
+    
+                items.push({
+                    title: SSA.insertSymbolFA(" ",26,30) + currentLocationFiles[i],
+                    item: currentLocationFiles[i],
+                    color: color
+                });
+            }
         }
     }
+
     Browsers.FileBrowser.menuSettings.title = "FileBrowser placeholder title";
-    Browsers.FileBrowser.menuSettings.description = "Select a file to open.@br@Current directory: " + Browsers.FileBrowser.currentLocation;
+    Browsers.FileBrowser.menuSettings.description = "Select a file to open.@br@Current directory: " + Browsers.FileBrowser.currentLocation.replaceAll("@DRIVESELECTOR@","Drive Selection");
     Browsers.FileBrowser.menu = new MenuSystem.Menu(Browsers.FileBrowser.menuSettings,items,parentMenu);
     Browsers.FileBrowser.menu.eventHandler = Browsers.FileBrowser.menuEventHandler;
     Browsers.FileBrowser.menu.showMenu();
@@ -498,9 +529,16 @@ Browsers.DriveBrowser.menuEventHandler = function (event,item)
     }
     else if (event == "enter" && Browsers.DriveBrowser.menuMode == "ask")
     {
-        //TODO: windows
-        mp.commandv("loadfile", item + "://longest//dev/" + Browsers.DriveBrowser.cachedDriveName);
-        WindowSystem.Alerts.show("info", "Opening disc drive " + Browsers.DriveBrowser.cachedDriveName + "...","","");
+        if (Utils.os == "win")
+        {
+            mp.commandv("loadfile", item + "://longest/" + Browsers.DriveBrowser.cachedDriveName);
+            WindowSystem.Alerts.show("info", "Opening disc drive " + Browsers.DriveBrowser.cachedDriveName + "...","","");    
+        }
+        else
+        {
+            mp.commandv("loadfile", item + "://longest//dev/" + Browsers.DriveBrowser.cachedDriveName);
+            WindowSystem.Alerts.show("info", "Opening disc drive " + Browsers.DriveBrowser.cachedDriveName + "...","","");    
+        }        
         Browsers.DriveBrowser.cachedDriveName = "";
         Browsers.DriveBrowser.menuMode = "list";
         Browsers.DriveBrowser.menu.hideMenu();
@@ -522,23 +560,22 @@ Browsers.DriveBrowser.open = function (parentMenu)
     if (Utils.os == "win")
     {
         Browsers.directorySeperator = "\\";
-        //TODO:
         var r = mp.command_native({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: ["powershell", "-executionpolicy", "bypass", "%APPDATA%\\mpv\\scripts\\easympv.js\\GetDiscDrives.ps1"]
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/GetDrives.ps1").replaceAll("/","\\"),"-type 5"]
         })
 
         if(r.status == "0")
         {
-            drives = r.stdout.split("\n");
+            drives = r.stdout.split("|");
             drives.sort();
             for (var i = 0; i < drives.length; i++)
             {
                 items.push({
-                    title: SSA.insertSymbolFA(" ",26,30) + drives[i],
-                    item: drives[i],
+                    title: SSA.insertSymbolFA(" ",26,30) + drives[i].trim() + "\\",
+                    item: drives[i].trim() + "\\",
                     color: "ffffff"
                 });
             }
@@ -572,14 +609,6 @@ Browsers.DeviceBrowser.menuEventHandler = function (event,item)
 {
     if(event == "enter")
     {
-        /*
-        var tmp = JSON.parse(mp.get_property("profile-list"));
-
-        for(var i = 0; i < tmp.length; i++)
-        {
-            mp.msg.warn(tmp[i].name);
-        }
-        */
         mp.commandv("apply-profile", "low-latency");
         
         if (Utils.os == "win")
@@ -610,14 +639,25 @@ Browsers.DeviceBrowser.open = function (parentMenu)
     if (Utils.os == "win")
     {
         Browsers.directorySeperator = "\\";
-        var deviceList = Utils.executeCommand(["%APPDATA%\\mpv\\scripts\\easympv.js\\empv.exe","get-video-devices"]).split("|");
-        for (var i = 0; i < deviceList.length; i++)
+        var r = mp.command_native({
+            name: "subprocess",
+            playback_only: false,
+            capture_stdout: true,
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/GetDevices.ps1").replaceAll("/","\\")]
+        })
+
+        if(r.status == "0")
         {
-            items.push({
-                title: SSA.insertSymbolFA(" ",26,30) + deviceList[i],
-                item: deviceList[i],
-                color: "ffffff"
-            });
+            devices = r.stdout.split("|");
+            devices.sort();
+            for (var i = 0; i < devices.length; i++)
+            {
+                items.push({
+                    title: SSA.insertSymbolFA(" ",26,30) + devices[i].trim(),
+                    item: devices[i].trim(),
+                    color: "ffffff"
+                });
+            }
         }
     }
     else
