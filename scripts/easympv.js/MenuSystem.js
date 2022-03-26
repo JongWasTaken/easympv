@@ -40,7 +40,8 @@ Settings must be an object and can have the following properties:
     "image"                 String, name of indexed image object
                             Requires OSD.js, as well as 3 versions of the image in different scales
     "title"                 String, title gets displayed when no image or impossible to draw image
-    "titleColor"            Hex string, color of title
+    "titleColor"            Hex string, name of font
+    "titleFont"             String, color of title
     "description"           String, supports special substrings (see below)
     "descriptionColor"      Hex string, color of description
     "itemPrefix"            String, gets prepended to selected item
@@ -113,7 +114,13 @@ Menus.Menu = function (settings, items, parentMenu) {
 	}
 
 	this.settings = {};
-	this.items = items;
+	
+
+	if (items != undefined) {
+		this.items = items;
+	} else {
+		this.items = [];
+	}
 
 	if (settings.autoClose != undefined) {
 		this.settings.autoClose = settings.autoClose;
@@ -137,6 +144,12 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.settings.titleColor = settings.titleColor;
 	} else {
 		this.settings.titleColor = "FFFFFF";
+	}
+
+	if (settings.titleFont != undefined) {
+		this.settings.titleFont = settings.titleFont;
+	} else {
+		this.settings.titleFont = "Roboto";
 	}
 
 	if (settings.description != undefined) {
@@ -216,17 +229,17 @@ Menus.Menu = function (settings, items, parentMenu) {
 		}
 	}
 
-	if (settings.itemPrefix != undefined) {
-		this.settings.itemPrefix = settings.itemPrefix + " ";
-	} else {
-		this.settings.itemPrefix = SSA.insertSymbolFA(" ",this.settings.fontSize-2,this.settings.fontSize);
-	} // "➤ "
-
 	if (settings.fontName != undefined) {
 		this.settings.fontName = settings.fontName;
 	} else {
-		this.settings.fontName = "Overpass";
+		this.settings.fontName = "Overpass Light";
 	}
+
+	if (settings.itemPrefix != undefined) {
+		this.settings.itemPrefix = settings.itemPrefix + " ";
+	} else {
+		this.settings.itemPrefix = SSA.insertSymbolFA(" ",this.settings.fontSize-2,this.settings.fontSize,this.settings.fontName);
+	} // "➤ "
 
 	if (settings.zIndex != undefined) {
 		this.settings.zIndex = settings.zIndex;
@@ -527,6 +540,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		this.cachedMenuText +=
 			SSA.setSize(this.settings.fontSize + 2) +
 			SSA.setColor(this.settings.titleColor) +
+			SSA.setFont(this.settings.titleFont) +
 			title +
 			SSA.setSize(this.settings.fontSize) +
 			"\n \n";
@@ -639,6 +653,10 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					) {
 						this.cachedMenuText += "─";
 					}
+					this.cachedMenuText += "\n";
+				}
+				if (postItemActions[q].includes("@t")) {
+					this.cachedMenuText +=  postItemActions[q].replaceAll("@t", "").replaceAll("@", "");
 					this.cachedMenuText += "\n";
 				}
 			}
@@ -761,6 +779,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		this.cachedMenuText +=
 			lineStart(0, 2) +
 			SSA.setColor(this.settings.titleColor) +
+			SSA.setFont(this.settings.titleFont) +
 			title +
 			lineEnd();
 
@@ -862,7 +881,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					this.cachedMenuText += lineBlank();
 				}
 				if (postItemActions[q].includes("@us")) {
-					this.cachedMenuText += lineStart(1, 0);
+					this.cachedMenuText += lineStart(4, 0,0.0003);
 
 					for (
 						var h = 0;
@@ -874,6 +893,11 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					) {
 						this.cachedMenuText += "─";
 					}
+					this.cachedMenuText += lineEnd();
+				}
+				if (postItemActions[q].includes("@t")) {
+					this.cachedMenuText += lineStart(4, 0,0.0005);
+					this.cachedMenuText += SSA.setSize(this.settings.fontSize-9) + postItemActions[q].replaceAll("@t", "").replaceAll("@", "");
 					this.cachedMenuText += lineEnd();
 				}
 			}

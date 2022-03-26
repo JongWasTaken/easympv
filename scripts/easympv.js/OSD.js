@@ -6,7 +6,20 @@
  * License:        MIT License
  */
 
+/*----------------------------------------------------------------
+The OSD.js module
+
+This file handles drawing images to the screen and manages them. 
+----------------------------------------------------------------*/
+
+/**
+ * This module handles drawing images to the screen and manages them. 
+ */
 var OSD = {};
+
+/**
+ * This array contains all images added with OSD.addImage(). 
+ */
 var Files = [];
 
 /* 
@@ -20,7 +33,6 @@ If the file is not found, defaults will be used instead.
 This is needed because there is no way to check image metadata.
 */
 __getImageInfo = function (file) {
-	//mp.msg.info("Checking for image info file: " + file);
 	file = mp.utils.get_user_path("~~/images/") + file + ".info";
 	var h, w;
 	if (mp.utils.file_info(file) != undefined) {
@@ -33,16 +45,13 @@ __getImageInfo = function (file) {
 				w = Number(pair[1]);
 			}
 		}
-		//mp.msg.info("Image info found! (H: " + h + ", W: " + w + ")");
 	} else {
-		//mp.msg.info("Image info not found! Assuming default. (H: 60, W: 200)");
 		h = 60;
 		w = 200;
 	}
 	return (result = { h: h, w: w });
 };
 
-// self explanatory
 __getFilebyName = function (name) {
 	for (i = 0; i < Files.length; i++) {
 		if (Files[i].name == name) {
@@ -51,11 +60,11 @@ __getFilebyName = function (name) {
 	}
 };
 
-/* 
-Structs are not possible, so we use functions instead.
-This 'struct' represents an image file.
+/** 
+ * Represents an image.
+ * You probably want to call OSD.addImage() instead.
 */
-OSD.File = function (active, id, file, width, height, offset, x, y) {
+OSD.Image = function (active, id, file, width, height, offset, x, y) {
 	this.id = id;
 	this.file = mp.utils.get_user_path("~~/images/") + file;
 	this.width = width;
@@ -67,14 +76,13 @@ OSD.File = function (active, id, file, width, height, offset, x, y) {
 	return this;
 };
 
-/* 
-This function will add an image file in ~~/images/ to the file array.
-    name: internal name for image file, used when drawing/removing overlay.
-    file: file name with extension
-    width/height: dimensions of image file
-The offset gets calculated from file size.
+/** 
+ * Adds an image file to the file array.
+ * Place the correctly formated image file in ~~/images/.
+ * @param {string} name internal name for image file, used when drawing/removing overlay
+ * @param {string} file file name with extension
 */
-OSD.addFile = function (name, file) {
+OSD.addImage = function (name, file) {
 	var imgdata = __getImageInfo(file);
 	height = imgdata.h;
 	width = imgdata.w;
@@ -84,7 +92,7 @@ OSD.addFile = function (name, file) {
 		4 * width * height;
 	var image = {
 		name: name,
-		data: new OSD.File(
+		data: new OSD.Image(
 			false,
 			Files.length,
 			file,
@@ -98,7 +106,10 @@ OSD.addFile = function (name, file) {
 	Files.push(image);
 };
 
-// Checks if image is beeing displayed.
+/** 
+ * @param {string} name internal name of image
+ * @return {Boolean} true if image is currently on screen
+*/
 OSD.status = function (name) {
 	var image = __getFilebyName(name);
 	return image.data.active;
@@ -121,7 +132,11 @@ OSD.getScale = function () {
 	return scale;
 };
 
-// Draw image to screen at specified coordinates.
+/**
+ * Draws image to screen at specified coordinates.
+ * x = 0, y = 0 is the top left corner!
+ * @param {string} name internal name of image
+ */
 OSD.show = function (name, x, y) {
 	if (name != undefined && x != undefined && y != undefined) {
 		var scale = OSD.getScale();
@@ -147,7 +162,11 @@ OSD.show = function (name, x, y) {
 	}
 };
 
-// Draws/hides image to/from screen.
+/**
+ * Either draws or hides image, depending on its current state.
+ * x = 0, y = 0 is the top left corner!
+ * @param {string} name internal name of image
+ */ 
 OSD.toggle = function (name, x, y) {
 	var scale = "";
 	var height = mp.get_property("osd-height");
@@ -172,7 +191,10 @@ OSD.toggle = function (name, x, y) {
 	}
 };
 
-// Hides image.
+/**
+ * Removes image from screen.
+ * @param {string} name internal name of image
+ */
 OSD.hide = function (name) {
 	if (name != null) {
 		var image;
@@ -213,6 +235,9 @@ OSD.hide = function (name) {
 	}
 };
 
+/**
+ * Removes all images from screen.
+ */
 OSD.hideAll = function () {
 	for (i = 0; i < Files.length; i++) {
 		if (Files[i].data.active == true) {

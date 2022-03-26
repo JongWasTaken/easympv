@@ -13,63 +13,61 @@ This file contains all the miscellaneous functions that
 don't really fit anywhere else, such as opening/executing files,
 hashing strings to MD5, operations on the watch_later folder,
 and other "nice to have" things.
-
-It also determines the current Operating System.
 ----------------------------------------------------------------*/
 
 "use strict";
 
+/**
+ * Collection of miscellaneous functions used throughout all of easympv.
+ */
 var Utils = {};
 
-// Determine OS: win, linux or mac
-// Uses %OS% on Windows, $OSTYPE on every other platform
-Utils.os = undefined;
+/**
+ * undefined by default. After calling Utils.determineOS, this variable will be one of these values:
+ * win, unix, mac, unknown
+ */
+Utils.OS = undefined;
 
+Utils.directorySeperator = "/";
+Utils.updateInProgress = false;
+
+/**
+ * Determines OS by checking environment variables (%OS% on Windows, $OSTYPE on every other platform).
+ * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
+ */
 Utils.determineOS = function() 
 {
 	if (mp.utils.getenv("OS") == "Windows_NT") {
-		Utils.os = "win";
+		Utils.OS = "win";
+		Utils.directorySeperator = "\\";
 		mp.msg.info("Detected operating system: Windows");
 	} else if (mp.utils.file_info("/proc/cpuinfo") != undefined) {
-		Utils.os = "unix";
+		Utils.OS = "unix";
 		mp.msg.info("Detected operating system: Unix");
 		mp.msg.warn(
 			"Linux/BSD support is experimental. Here be dragons and all that..."
 		);
 	} else if (mp.utils.file_info("/Library") != undefined) {
-		Utils.os = "mac";
+		Utils.OS = "mac";
 		mp.msg.info("Detected operating system: macOS");
 		mp.msg.error("macOS is not officially supported.");
 	} else {
-		Utils.os = "unknown";
-		mp.msg.warn("Detected operating system: unknown?");
+		Utils.OS = "unknown";
+		mp.msg.warn("Detected operating system: unknown");
 		mp.msg.error("Your OS is not officially supported.");
 	}
 }
 
 Utils.pipeName = "mpv";
 
-Utils.setIPCServer = function (isRandom) {
-
-	if(isRandom)
-	{
-		Utils.pipeName = Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		Utils.pipeName += Math.floor(Math.random() * 10).toString();
-		mp.msg.info("PipeName: randomized");
-	}
-	else
-	{
-		Utils.pipeName = "mpv";
-		mp.msg.info("PipeName: mpv");
-	}
-
-	if (Utils.os != "win") {
+/**
+ * Opens mpv IPC server with the name mpv or /tmp/mpv on Linux systems.
+ */
+Utils.setIPCServer = function () 
+{
+	Utils.pipeName = "mpv";
+	mp.msg.info("PipeName: mpv");
+	if (Utils.OS != "win") {
 		mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
 	} else {
 		mp.set_property("input-ipc-server", Utils.pipeName); // named pipes exist in the limbo
@@ -78,56 +76,33 @@ Utils.setIPCServer = function (isRandom) {
 
 Utils.mpvVersion = mp.get_property("mpv-version").substring(4).split("-")[0];
 Utils.mpvComparableVersion = Number(Utils.mpvVersion.substring(2));
-//Utils.ffmpegVersion = mp.get_property("ffmpeg-version");
-//Utils.libassVersion = mp.get_property("libass-version");
+Utils.ffmpegVersion = mp.get_property("ffmpeg-version");
+Utils.libassVersion = mp.get_property("libass-version");
 
-// Open file relative to config root. Could also run applications.
-Utils.openFile = function (file) {
+/**
+ * Open file relative to config root. Can also run applications.
+ */
+Utils.openFile = function (file) 
+{
 	file = mp.utils.get_user_path("~~/") + "/" + file;
 	file = file.replaceAll("//", "/");
 	file = file.replaceAll('"+"', "/");
-	if (Utils.os == "win") {
+	if (Utils.OS == "win") {
 		file = file.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", "start " + file);
-	} else if (Utils.os == "unix") {
+	} else if (Utils.OS == "unix") {
 		mp.commandv("run", "sh", "-c", "xdg-open " + file);
-	} else if (Utils.os == "mac") {
+	} else if (Utils.OS == "mac") {
 		mp.commandv("run", "zsh", "-c", "open " + file);
 	}
 	mp.msg.info("Opening file: " + file);
 };
 
-// Run the external Utility with arguments
-Utils.externalUtil = function (arg) {
-	var utilName = "easympv-cli";
-	mp.msg.info("Starting utility with arguments: " + arg);
-	if (Utils.os == "win") {
-		var util = mp.utils.get_user_path("~~/") + "/" + utilName + ".exe";
-		util = util.replaceAll("+", "/");
-		util = util.replaceAll("/", "\\");
-		mp.commandv("run", "cmd", "/c", util + " " + arg);
-	} else if (Utils.os == "unix") {
-		var util = mp.utils.get_user_path("~~/") + "/" + utilName;
-		// below is a workaround for a old mpv bug
-		// where arguments would not be passed correctly to the subprocess,
-		// it might not be needed anymore
-		var largs = arg.split(" ");
-		if (largs.length == 1) {
-			mp.commandv("run", util, largs[0]);
-		} else if (largs.length == 2) {
-			mp.commandv("run", util, largs[0], largs[1]);
-		} else if (largs.length == 3) {
-			mp.commandv("run", util, largs[0], largs[1], largs[2]);
-		} else if (largs.length == 4) {
-			mp.commandv("run", util, largs[0], largs[1], largs[2], largs[3]);
-		}
-	}
-};
-
-/*
-This function executes a given command/arg array and returns its stdout.
-While this is very powerful, it might not be right approach for most problems.
-*/
+/**
+ * This function executes a given command string / argument string array and returns its stdout.
+ * While this is very powerful, it might not be right approach for most problems.
+ * @returns {string} stdout
+ */
 Utils.executeCommand = function(line)
 {
 	if (line == undefined)
@@ -151,25 +126,57 @@ Utils.executeCommand = function(line)
 	}
 }
 
-Utils.checkForUpdates = function () {
-
-	if (Utils.os == "win") {
-		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv.exe";
-		util = util.replaceAll("/", "\\");
+/**
+ * Checks if the device can connect to the internet.
+ * @returns {boolean} True if the device can connect to the internet
+ */
+Utils.checkInternetConnection = function()
+{
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-connection-status"];
 	} else {
-		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv";
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-connection-status"];
 	}
 
 	var r = mp.command_native({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
-		args: [util,"get-newest-version"]
+		capture_stderr: false,
+		args: args
 	})
-	
 	if (r != undefined)
 	{
-		return r.stdout;
+		return Boolean(r.stdout.trim());
+	}
+	else
+	{
+		return false;
+	}
+}
+
+/**
+ * Fetches newest version number.
+ * @returns {string} version string
+ */
+Utils.checkForUpdates = function () {
+
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest"];
+	} else {
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest"];
+	}
+
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		capture_stderr: false,
+		args: args
+	})
+	if (r != undefined)
+	{
+		return r.stdout.trim();
 	}
 	else
 	{
@@ -177,25 +184,29 @@ Utils.checkForUpdates = function () {
 	}
 }
 
+/**
+ * Fetches newest changelog.
+ * @returns {string} changelog
+ */
 Utils.getChangelog = function () {
 
-	if (Utils.os == "win") {
-		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv.exe";
-		util = util.replaceAll("/", "\\");
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-changelog"];
 	} else {
-		var util = mp.utils.get_user_path("~~/") + "/scripts/easympv.js/empv";
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-changelog"];
 	}
 
 	var r = mp.command_native({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
-		args: [util,"get-changelog"]
+		capture_stderr: false,
+		args: args
 	})
 	
 	if (r != undefined)
 	{
-		return r.stdout;
+		return r.stdout.trim().replaceAll("\n","@br@");
 	}
 	else
 	{
@@ -203,11 +214,83 @@ Utils.getChangelog = function () {
 	}
 }
 
+/**
+ * Queries system to get list of installed GPUs.
+ * @returns {array} installed GPUs
+ */
+Utils.getGPUs = function () {
+
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-gpus"];
+	} else {
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-gpus"];
+	}
+
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		capture_stderr: false,
+		args: args
+	})
+	
+	if (r != undefined)
+	{
+		return r.stdout.trim().split("|");
+	}
+	else
+	{
+		return [];
+	}
+}
+
+/**
+ * Exits mpv, but only if no update is currently in progress.
+ */
+Utils.exitMpv = function ()
+{
+	if (Utils.updateInProgress)
+	{
+		WindowSystem.Alerts.show("warning","An update is in progress.","","You cannot close mpv now!")
+	}
+	else
+	{
+		mp.commandv("quit-watch-later");
+	}
+}
+
+/**
+ * Updates easympv. Blocks quitting the application.
+ */
+Utils.doUpdate = function ()
+{
+	Utils.updateInProgress = true;
+	mp.add_forced_key_binding("q","prevent_close_1",Utils.exitMpv);
+	mp.add_forced_key_binding("Q","prevent_close_2",Utils.exitMpv);
+
+	//TODO:
+
+
+
+	
+	Utils.updateInProgress = false;
+	mp.remove_key_binding("prevent_close_1");
+	mp.remove_key_binding("prevent_close_2");
+}
+
+/**
+ * Compares two version strings.
+ * @return {boolean} True if currentVersion is lower than newestVersion
+ */
 Utils.compareVersions = function (currentVersion,newestVersion)
 {
 	return Number(currentVersion.replace(/\./g,"")) < Number(newestVersion.replaceAll(/\./g,""));
 }
 
+/**
+ * Reads and returns content of Credits file.
+ * @return {string} credits 
+ */
 Utils.getCredits = function ()
 {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined)
@@ -215,11 +298,14 @@ Utils.getCredits = function ()
 	return mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv.js/Credits.txt"));
 }
 
+/**
+ * Creates a dummy file in watch_later folder.
+ */
 Utils.createWLDummy = function ()
 {
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	var name = "00000000000000000000000000000000";
-	if(Utils.os == "win")
+	if(Utils.OS == "win")
 	{
 		folder = folder.replaceAll("/", "\\");
 		Utils.executeCommand(["copy","nul",folder+"\\"+ name,">","nul"]);
@@ -230,18 +316,20 @@ Utils.createWLDummy = function ()
 	}
 }
 
-// Clears watch_later folder but keeps the dummy file 00000000000000000000000000000000
-Utils.clearWatchdata = function () { //TODO: rewrite this ugly thing
+/**
+ * Clears watch_later folder and creates a dummy file.
+ */
+Utils.clearWatchdata = function () {
 	mp.msg.info("Clearing watchdata");
 	var folder = mp.utils.get_user_path("~~/watch_later");
-	if (Utils.os == "win") {
+	if (Utils.OS == "win") {
 		folder = folder.replaceAll("/", "\\");
 		Utils.executeCommand(["del","/Q","/S",folder]);
 		Utils.executeCommand(["mkdir",folder]);
 		Utils.createWLDummy();
-	} else if (Utils.os == "mac") {
+	} else if (Utils.OS == "mac") {
 		mp.msg.info("macOS is not supported.");
-	} else if (Utils.os == "unix") {
+	} else if (Utils.OS == "unix") {
 		Utils.executeCommand(["rm","-rf",folder]);
 		Utils.executeCommand(["mkdir",folder]);
 		Utils.createWLDummy();
@@ -410,14 +498,20 @@ var hex = function (x) {
 };
 // MD5 block ends //
 
-// Call this function to get a MD5 hash
+/**
+ * Calculates MD5 hash of given string.
+ * @return {string} Hash
+ */
 Utils.md5 = function (s) {
 	return hex(md51(s));
 };
 
-// This function caches the entirety of the watch_later folder.
-// Because that sounds like a terrible idea, it is capped to 999 files max.
 Utils.wlCache = [];
+
+/**
+ * Caches watch_later folder to memory. Limited to 999 entries.
+ * Access cache with Utils.wlCache
+ */
 Utils.cacheWL = function () {
 	if (
 		mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
@@ -444,8 +538,10 @@ Utils.cacheWL = function () {
 	}
 };
 
-// This function parses the wlCache and returns the parsed values.
-// (currently only the shaderset and colorset)
+/**
+ * Fetches data of current file from previously cached watch_later data.
+ * @return {object} shader, color
+ */
 Utils.getWLData = function () {
 	var cFile;
 	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
@@ -480,9 +576,9 @@ Utils.getWLData = function () {
 	}
 };
 
-// This function finds the current videos wlFile and writes a shaderset and colorset to it.
-// (this causes mpv to report unknown values the next time it parses the file,
-//  but thats only cosmetic)
+/**
+ * This function finds the current videos wlFile and writes a shaderset and colorset to it.
+ */
 Utils.writeWLData = function (shader, color) {
 	var cFile;
 	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
@@ -504,4 +600,5 @@ Utils.writeWLData = function (shader, color) {
 		}
 	}
 };
+
 module.exports = Utils;

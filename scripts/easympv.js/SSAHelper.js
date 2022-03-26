@@ -6,8 +6,20 @@
  * License:                 MIT License
  */
 
+/*----------------------------------------------------------------
+The SSAHelper.js module
+
+This file contains helper functions for making working with 
+SSA/ASS easier, such as basic text formatting, setting colors
+and a few hardcoded SSA images.
+----------------------------------------------------------------*/
+
 "use strict";
 
+/**
+* This module consists of helper functions for making working with 
+* SSA/ASS easier.
+*/
 var SSAHelper = {};
 
 SSAHelper.startSequence = function () {
@@ -83,19 +95,24 @@ SSAHelper.setShadow = function (depth) {
 	return "{\\shad" + depth + "}";
 };
 
-SSAHelper.insertSymbolFA = function (symbol, size, defaultSize) {
+/** Inserts given Font Awesome symbol with given size, then sets font back to Roboto. 
+ * @returns {string} SSA string 
+ * */
+SSAHelper.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
 	var font = "Font Awesome 6 Free Solid";
+
+	if (fontNameAfter == undefined) { fontNameAfter = "Roboto" };
 
 	if (size != undefined && defaultSize != undefined) {
 		return (
 			SSAHelper.setSize(size) +
 			SSAHelper.setFont(font) +
 			symbol +
-			SSAHelper.setFont("Roboto") +
+			SSAHelper.setFont(fontNameAfter) +
 			SSAHelper.setSize(defaultSize)
 		);
 	} else {
-		return SSAHelper.setFont(font) + symbol + SSAHelper.setFont("Roboto");
+		return SSAHelper.setFont(font) + symbol + SSAHelper.setFont(fontNameAfter);
 	}
 };
 
@@ -171,19 +188,16 @@ SSAHelper.setColorBlack = function () {
 	return SSAHelper.setColor("000000");
 };
 
-/*
-
-Displaying vector images with SSA:
-
-Using https://qgustavor.github.io/svg2ass-gui/ , any svg file can
-be displayed. However mpv has a quirk with this, files that consist
-of multiple shapes will be missaligned. Those same lines will look
-perfect in AegiSub.
-This is why all images below are a single shape/SSA draw command.
-
+/**
+* Using https://qgustavor.github.io/svg2ass-gui/ , any svg file can
+* be displayed. However mpv has a quirk with this, files that consist
+* of multiple shapes will be missaligned. Those same lines will look
+* perfect in AegiSub.
+* This is why all images here are a single shape/SSA draw command.
 */
-
 SSAHelper.Images = {};
+
+/** Blue round info symbol. */
 SSAHelper.Images.info = function () {
 	var symbol = "";
 	symbol += "{\\an7\\1c&HF39621&\\bord2\\shad0\\p1}m 24 4 b 13 4 4 13 4 24 b 4 35 13 44 24 44 b 35 44 44 35 44 24 b 44 13 35 4 24 4 ";
@@ -192,6 +206,7 @@ SSAHelper.Images.info = function () {
 	return symbol + SSAHelper.reset();
 }
 
+/** Yellow triangular warning symbol. */
 SSAHelper.Images.warning = function () {
 	var symbol = "";
 	symbol += "{\\an7\\1c&H1CEEFD&\\bord2\\shad0\\p1}m 58.1 0.3 b 56.2 0.6 54.6 1.7 53.6 3.3 l 1 94.5 b -0.1 96.4 -0.1 98.8 1 100.8 ";
@@ -205,6 +220,7 @@ SSAHelper.Images.warning = function () {
 	return symbol + SSAHelper.reset();
 }
 
+/** Red round error symbol. */
 SSAHelper.Images.error = function () {
 	var symbol = "";
 	symbol += "{\\an7\\1c&H0000EC&\\bord2.8\\shad0\\p1}m 128 2 b 58.5 2 2 58.5 2 128 b 2 197.5 58.5 254 128 254 b 197.5 254 254 197.5 254 128 ";
@@ -215,6 +231,5 @@ SSAHelper.Images.error = function () {
 	symbol += "l 108.2 128 l 73 92.8 b 67.5 87.3 67.5 78.5 73 73 b 75.7 70.3 79.3 68.9 82.9 68.9 {\\p0}";
 	return symbol + SSAHelper.reset();
 }
-
 
 module.exports = SSAHelper;

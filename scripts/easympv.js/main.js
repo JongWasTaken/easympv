@@ -4,48 +4,53 @@
  * Author:              Jong
  * URL:                 https://smto.pw/mpv
  * License:             Apache License, Version 2.0
- *
- * Useful links:
- * LUA documentation, most functions are the same in javascript:
- *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
- * JavaScript documentation, for the few odd ones out:
- *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
- * input.conf documentation, for commands, properties, events and other tidbits
- *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
- *     https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list
- *
- * Important!
- *     mpv uses MuJS, which is ES5 compliant, but not ES6!
- *     Most IE polyfills will probably work.
- *
- * Snippets:
- *     how to check for a file (check for undefined)
- *          mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/")+"FILE")
  */
 
 /*
+	Useful links:
+		LUA documentation, most functions are the same in javascript:
+			https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
+		JavaScript documentation, for the few odd ones out:
+			https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
+		input.conf documentation, for commands, properties, events and other tidbits
+			https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
+			https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list
 
-Current dependencies:
-mpv 33+
-Windows only:
-	PowerShell
-Linux only:
-	GNU coreutils
-	zenity
-*/
+	Important good-to-knows:
+		mpv uses MuJS, which is ES5 compliant, but not ES6!
+			Most IE polyfills will probably work.
+		Windows is more picky with font names, in case of issues
+			open the .ttf file of your font and use the "Font name:" at the top.
 
-/*
-	TODO:
-	(DONEish) - Remake settings menu (with save/load)
-	(DONE) - Folder navigation from current directory
-	(ONGOING) - Move away from the util as much as possible
-	- Utility: DirectShow readout to stdout 
-	- Utility: return version in stdout on check
-	- UpdateMenu: display changelog in the top right corner
-	(DONE) MenuSystem: scrolling
-	- Reimplement autosave.lua
-	- Reimplement betterchapters.lua
-	- Reimplement autosave.lua
+	Snippets:
+		how to check for a file
+			mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/FILE")) != undefined
+
+	Current dependencies:
+		mpv 33+
+		Windows only:
+			PowerShell
+		Linux only:
+			GNU coreutils
+			either wget or curl
+			zenity
+
+	TODO :
+		(DONE) Remake settings menu (with save/load)
+		(DONE) Folder navigation from current directory
+		(ONGOING) Move away from the util as much as possible
+		(DONE) Utility: DirectShow readout to stdout 
+		(DONE) Utility: return version in stdout on check
+		(DONE) UpdateMenu: display changelog
+		(DONE) MenuSystem: scrolling
+		Implement Updater
+		Reimplement autosave.lua
+		Reimplement betterchapters.lua
+		Reimplement autosave.lua
+		Replace placeholder titles
+
+	KNOWN ISSUES:
+		none
 */
 "use strict";
 
@@ -95,36 +100,32 @@ Math.percentage = function (partialValue, totalValue) {
 	return Math.round((100 * partialValue) / totalValue);
 } 
 
-// Lets Go!
 mp.msg.info("Starting!");
-var Settings = require("./Settings"),
-	Utils = require("./Utils"),
-	SSA = require("./SSAHelper"),
-	OSD = require("./OSD"),
-	Shaders = require("./Shaders"),
-	Colors = require("./Colors"),
-	Chapters = require("./Chapters"),
-	MenuSystem = require("./MenuSystem"),
-	WindowSystem = require("./WindowSystem"),
-	Browsers = require("./Browsers"),
-	isFirstFile = true,
-	sofaEnabled = false,
-	displayVersion = "";
+var Settings = require("./Settings");
+var Utils = require("./Utils");
+var SSA = require("./SSAHelper");
+var OSD = require("./OSD");
+var Shaders = require("./Shaders");
+var Colors = require("./Colors");
+var Chapters = require("./Chapters");
+var MenuSystem = require("./MenuSystem");
+var WindowSystem = require("./WindowSystem");
+var Browsers = require("./Browsers");
 
-// Set Utils.os
+var isFirstFile = true;
+var sofaEnabled = false;
+var displayVersion = "";
+var updateAvailable = false;
+
 Utils.determineOS();
+var isOnline = Utils.checkInternetConnection();
 
-// Read easympv.conf
-Settings.reload();
+Settings.load();
 var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString());
 
-// Read JSON files early early
 Shaders.populateSets();
 Colors.populateSets();
 
-// Image indexing for later display (like menus)
-mp.msg.info("Indexing images...");
-// add every bmp file in .mpv/images/ to OSD. Name = Filename without .bmp, Image Dimensions must be 200 x 60 (w x h),
 var imageArray = mp.utils.readdir(
 		mp.utils.get_user_path("~~/images/"),
 		"files"
@@ -132,56 +133,32 @@ var imageArray = mp.utils.readdir(
 	i;
 for (i = 0; i < imageArray.length; i++) {
 	if (imageArray[i].includes(".bmp") && !imageArray[i].includes(".info")) {
-		OSD.addFile(imageArray[i].replace(".bmp", ""), imageArray[i]);
-		//mp.msg.info("Indexed image: " + imageArray[i]);
+		OSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
 	}
 }
 
-// IPC server startup
-mp.msg.info("Starting ipc server...");
-Utils.setIPCServer(Settings.Data.randomPipeName);
-
-// Automatic check for updates
-if (!Settings.Data.manualInstallation) {
+Settings.Data.newestVersion = "0.0.0";
+if (!Settings.Data.manualInstallation && isOnline) {
 	mp.msg.info("Checking for updates...");
 	Settings.Data.newestVersion = Utils.checkForUpdates();
+	updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
 }
 
-// Per File Option Saving (Step 1: Cache)
-Utils.cacheWL(); // Create a copy of watch_later folder, as current file will get deleted by mpv after read
-mp.msg.warn(
-	'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
-); // because mpv does not know our custom options
+Utils.cacheWL();
 
-if(Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion))
+displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
+if(updateAvailable)
 {
 	displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
 }
-else
-{
-	displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion;
-}
 
 Settings.save();
-mp.msg.warn(Utils.getChangelog());
-// This will be executed on file-load
-var on_start = function () {
-	// done ? TODO: give priority to user selected Shaderset/Colorset for current session
-	// Per File Option Saving (Part 2: Loading for video file)
+Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+
+var onFileLoad = function () {
 	var wld = Utils.getWLData();
-
 	if (isFirstFile) {
-		// will only be applied for the first file
-		if (!mp.get_property("path").includes("video=")) {
-			// shader will not be applied if using video device
-			if (wld == undefined) {
-				Shaders.apply(Settings.Data.defaultShaderSet);
-			}
-		}
-
-		// Audio Filter
 		if (
-			// Checks for default.sofa and applies it as an audio filter if found
 			mp.utils.file_info(
 				mp.utils.get_user_path("~~/") + "/default.sofa"
 			) != undefined
@@ -204,54 +181,71 @@ var on_start = function () {
 	}
 
 	if (wld != undefined) {
+		mp.msg.warn(
+			'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
+		);
 		if (wld.shader != undefined && !Shaders.manualSelection) {
 			Shaders.apply(wld.shader);
 		}
 		if (wld.color != undefined) {
 			// We dont Colors.apply this, because mpv already does that by itself.
-			// Instead we just set it to Colors.name, achieving the same result.
+			// Instead we just set Colors.name, achieving the same result.
 			Colors.name = wld.color;
 		}
 	}
+	var cFile;
+	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+		if (mp.get_property("playlist/" + i + "/current") == "yes") {
+			cFile = mp.get_property("playlist/" + i + "/filename");
+		}
+	}
 
-	Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+	if (cFile != undefined)
+	{
+		Browsers.FileBrowser.currentLocation = cFile;
+		Browsers.FileBrowser.currentLocation = Browsers.FileBrowser.getParentDirectory();
+	}
 };
 
 // This will be executed on shutdown
-var on_shutdown = function () {
-	// Per File Option Saving (Part 3: Saving for video file)
+var onShutdown = function () {
 	// This is not ideal, as data will only be saved when mpv is being closed.
 	// Ideally, this would be in the on_startup block, after a file change.
 	mp.msg.info("Writing data to watch_later...");
 	Utils.writeWLData(Shaders.name, Colors.name);
 };
 
-////////////////////////////////////////////////////////////////////////
-
-
-var descriptionShaders = function (a) {
+var descriptionShaders = function (a,b) {
 	return "Shaders post-process video to improve image quality.@br@" +
-	"Use the right arrow key to preview a profile. Use Enter to confirm.@br@Currently enabled Shaders: " + SSA.setColorYellow() + a;
+	"Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@"+
+	"Current default Shaders: " + SSA.setColorYellow() + b +"@br@"+
+	"Currently enabled Shaders: " + SSA.setColorYellow() + a;
 };
 var descriptionChapters = function (a,b) {
 	var b1;
+	b1 = SSA.setColorRed();
 	if(b == "enabled")
 	{
 		b1 = SSA.setColorGreen();
-	} else { b1 = SSA.setColorRed();};
+	};
 	return '(Use the Right Arrow Key to change settings.)@br@'+
 	'@br@This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.@br@' +
 	SSA.setColorYellow() + "Current Mode: " + a + "@br@" +
 	SSA.setColorYellow()+"Currently " + b1 + b;
 };
-var descriptionColors = function (a) {
-	return "Use the right arrow key to preview a profile. Use Enter to confirm.@br@"+
-	"Profiles can be customized in the preferences.@br@Current Profile: " + SSA.setColorYellow() + a;
+var descriptionColors = function (a,b) {
+	return "Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@"+
+	"Current default Profile: " + SSA.setColorYellow() + b +"@br@"+
+	"Current Profile: " + SSA.setColorYellow() + a;
 };
+var descriptionSettings = function (a) {
+	return "mpv " + Utils.mpvVersion + "@br@" +
+	"easympv " + a + "@br@"
+}
 
 var MainMenuSettings = {
 	title: SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
-	description: "niggerniggerniggerniggernigger@br@niggerniggerniggerniggernigger@br@niggerniggerniggerniggernigger",
+	description: "",
 	descriptionColor: "ff0000",
 	image: "logo",
 };
@@ -264,8 +258,7 @@ var MainMenuItems = [
 	{
 		title: "Open...",
 		item: "open",
-		description: "Files, Discs & Devices",
-		//description: "Files, Discs, Devices & URLs",
+		description: "Files, Discs, Devices & URLs",
 	},
 	{
 		title: "Shaders",
@@ -300,9 +293,7 @@ var MainMenu = new MenuSystem.Menu(MainMenuSettings, MainMenuItems, undefined);
 var quitCounter = 0;
 var quitTitle = MainMenu.items[MainMenu.items.length-1].title;
 MainMenu.eventHandler = function (event, action) {
-	Utils.executeCommand();
 	if (event == "enter") {
-		//w.show();
 		if (action == "colors") {
 			MainMenu.hideMenu();
 			if (!ColorsMenu.isMenuVisible) {
@@ -350,14 +341,15 @@ MainMenu.eventHandler = function (event, action) {
 		} else if (action == "shuffle") {
 			MainMenu.hideMenu();
 			mp.commandv("playlist-shuffle");
-		} else if (action == "open") { //TODO:
+		} else if (action == "open") {
 			MainMenu.hideMenu();
 			Browsers.Selector.open(MainMenu);
 		} else if (action == "quit") {
 			quitCounter++;
 			if(!quitCounter.isOdd())
 			{ 
-				mp.commandv("quit_watch_later"); 
+				Utils.exitMpv();
+				MainMenu.hideMenu();
 			}
 			else
 			{
@@ -375,7 +367,7 @@ MainMenu.eventHandler = function (event, action) {
 	}
 	else if (event == "show")
 	{
-		if(Utils.compareVersions(Settings.Data.currentVersion, Settings.Data.newestVersion) && notifyAboutUpdates)
+		if(updateAvailable && notifyAboutUpdates)
 		{
 			notifyAboutUpdates = false;
 			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + Settings.Data.currentVersion,"New Version: " + Settings.Data.newestVersion);
@@ -389,26 +381,22 @@ var ShadersMenuSettings = {
 		SSA.insertSymbolFA("") +
 		SSA.setColorWhite() +
 		"Shaders",
-	description: descriptionShaders(Shaders.name),
+	description: descriptionShaders(Shaders.name,Settings.Data.defaultShaderSet),
 	image: "shaders",
 };
 
 var ShadersMenuItems = [
 	{
-		title: "[Disable All Shaders]",
-		item: "clear",
-	},
-	{
-		title: "[Select Default Shader]@br@@us10@@br@",
-		item: "select",
+		title: "[Disable All Shaders]@br@@us10@@br@",
+		item: "none",
 	},
 	{
 		title: "Recommended Live Action Settings",
-		item: "la_auto",
+		item: "Automatic Live Action",
 	},
 	{
 		title: "Recommended Anime4K Settings@br@@us10@@br@",
-		item: "a4k_auto",
+		item: "Automatic Anime4K",
 	},
 ];
 
@@ -426,18 +414,15 @@ var ShadersMenu = new MenuSystem.Menu(
 );
 
 ShadersMenu.eventHandler = function (event, action) {
-	//mp.msg.warn(event + " - " + action)
 	switch (event) {
 		case "show":
-			ShadersMenu.setDescription(descriptionShaders(Shaders.name));
+			ShadersMenu.setDescription(descriptionShaders(Shaders.name,Settings.Data.defaultShaderSet));
 			break;
 		case "enter":
 			ShadersMenu.hideMenu();
-			if (action == "select") {
-				//TODO: change to save
-			} else {
+			if (action != "@back@") {
 				Shaders.apply(action);
-				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
+				ShadersMenu.setDescription(descriptionShaders(Shaders.name,Settings.Data.defaultShaderSet));
 				if (action == "clear") {
 					WindowSystem.Alerts.show("info","Shaders have been disabled.");
 				}
@@ -448,25 +433,21 @@ ShadersMenu.eventHandler = function (event, action) {
 			}
 			break;
 		case "right":
-			if (action != "back" && action != "select" && action != "clear") {
+			if (action != "@back@" && action != "clear") {
 				Shaders.apply(action);
-				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
+				ShadersMenu.setDescription(descriptionShaders(Shaders.name,Settings.Data.defaultShaderSet));
 				ShadersMenu.appendSuffixToCurrentItem();
 			}
 			break;
 		case "left":
-			if (action != "back" && action != "select" && action != "clear") {
-				Shaders.apply(action);
-				var oldSuffix = new String(ShadersMenu.itemSuffix);
-				ShadersMenu.setDescription(descriptionShaders(Shaders.name));
-				ShadersMenu.itemSuffix = " (default)";
+			if (action != "@back@") {
 				Settings.Data.defaultShaderSet = action;
-				ShadersMenu.appendSuffixToCurrentItem();
-				ShadersMenu.itemSuffix = oldSuffix;
+				Settings.save();
+				WindowSystem.Alerts.show("info","Default shader changed to:","",Settings.Data.defaultShaderSet);
+				ShadersMenu.setDescription(descriptionShaders(Shaders.name,Settings.Data.defaultShaderSet));
 			}
 			break;
 	}
-	Settings.save();
 };
 
 var ChaptersMenuSettings = {
@@ -546,20 +527,16 @@ var SettingsMenuSettings = {
 		SSA.insertSymbolFA("") +
 		SSA.setColorWhite() +
 		"Settings",
-	description: "easympv-scripts " + displayVersion,
+	description: descriptionSettings(displayVersion),
 };
 
 var SettingsMenuItems = [
 	{
-		title: "More Options...",
-		item: "options",
-	},
-	{
-		title: "Reload config@br@@us10@@br@",
+		title: "Reload config",
 		item: "reload",
 	},
 	{
-		title: "Credits and Licensing",
+		title: "Credits",
 		item: "credits",
 	},
 	{
@@ -592,7 +569,7 @@ var SettingsMenuItems = [
 	},
 ];
 
-if (!Settings.Data.manualInstallation) {
+if (isOnline) {
 	SettingsMenuItems.splice(2, 0, {
 		title: "Check for updates",
 		item: "updater",
@@ -605,23 +582,8 @@ if (Settings.Data.useRandomPipeName) {
 		item: "remote",
 	});
 }
-if (!Settings.Data.manualInstallation) {
-	SettingsMenuItems.push({
-		title: "Uninstall...",
-		item: "reset",
-		color: "ff0000",
-	});
-}
 
 if (Settings.Data.debugMode == true) {
-	SettingsMenuItems.push({
-		title: "Open console",
-		item: "console",
-	});
-	SettingsMenuItems.push({
-		title: "Open debug screen",
-		item: "debug",
-	});
 }
 
 var SettingsMenu = new MenuSystem.Menu(
@@ -644,25 +606,91 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "inputconf") {
 			Utils.openFile("input.conf");
 		} else if (action == "updater") {
-			//TODO: Utils.extrnalUtil("update");
-		} else if (action == "reset") {
-			//TODO: if win invoke registered uninstaller Utils.eternalUtil("reset");
+			mp.msg.warn(Utils.getChangelog());
+			var updateConfirmation = false;
+			var umenu = new MenuSystem.Menu({
+				title: "Update",
+				autoClose: "0",
+				description: "You are on version " + SSA.setColorYellow() + Settings.Data.currentVersion + "@br@" +
+				"The latest available version is " + SSA.setColorYellow() + Settings.Data.newestVersion + "@br@@br@" +
+				Utils.getChangelog(),
+			},
+			[
+				{
+					title: "Update to version " + SSA.setColorYellow() + Settings.Data.newestVersion,
+					item: "update"
+				}
+			],
+			SettingsMenu);
+			umenu.eventHandler = function(event,action) 
+			{
+				if(event == "hide")
+				{
+					umenu = undefined;
+					updateConfirmation = false;
+				}
+				if(event == "enter" && action != "@back@")
+				{
+					if(updateConfirmation)
+					{
+						umenu.hideMenu();
+						Utils.doUpdate();
+					}
+					else
+					{
+						umenu.items[1].title = SSA.setColorRed() + "Are you sure? Playback will be stopped to update!";
+						umenu.redrawMenu();
+						updateConfirmation = true;
+					}
+				}
+			}
+			umenu.showMenu();
 		} else if (action == "config") {
 			Utils.openFile("");
 		} else if (action == "clearwld") {
 			Utils.clearWatchdata();
 		} else if (action == "command") {
-			//TODO: replace with ps1 Utils.eternalUtil("guicommand " + Utils.pipeName);
+
+			WindowSystem.Alerts.show("info", "Command Input window has opened!")
+            if (Utils.OS == "win")
+            {
+                var r = mp.command_native({
+                    name: "subprocess",
+                    playback_only: false,
+                    capture_stdout: true,
+                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"show-command-box"]
+                })
+            }
+            else
+            {
+                var r = mp.command_native({
+                    name: "subprocess",
+                    playback_only: false,
+                    capture_stdout: true,
+                    args: ["zenity", "--title=mpv", "--forms", "--text=Execute command", "--add-entry=mpv command:"]
+                })
+            }
+            if(r.status == "0")
+            {
+                var input = r.stdout.trim();
+				mp.command(input);
+            }
 
 		} else if (action == "credits") {
-			//TODO: Utils.exernalUtil("credits");
+			var cmenu = new MenuSystem.Menu({
+				title: "Credits",
+				autoClose: "0",
+				description: Utils.getCredits().replaceAll("\n", "@br@"),
+			},[],SettingsMenu);
+			cmenu.eventHandler = function(event,action) {if(event == "hide"){cmenu = undefined;}}
+			cmenu.showMenu();
 		} else if (action == "reload") {
-			//Settings.reload();
-			Settings.save();
+			Settings.reload();
 			WindowSystem.Alerts.show("info","Configuration reloaded.");
 		} else if (action == "remote") {
 			Settings.Data.useRandomPipeName = false;
 			Utils.setIPCServer(Settings.Data.useRandomPipeName);
+			Settings.save();
 		}
 	}
 };
@@ -672,20 +700,14 @@ var ColorsMenuSettings = {
 	title:
 		SSA.insertSymbolFA("") +
 		"{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
-	description:
-		"Use the right arrow key to preview a profile. Use Enter to confirm.@br@Profiles can be customized in the preferences.@br@Current Profile: " +
-		Colors.name,
+	description: descriptionColors(Colors.name,Settings.Data.defaultColorProfile)
 };
 
 var ColorsMenuItems = [
 	{
-		title: "[Disable All Presets]",
+		title: "[Disable All Presets]@br@@us10@@br@",
 		item: "none",
-	},
-	{
-		title: "[Select Default Preset]@br@@us10@@br@",
-		item: "default",
-	},
+	}
 ];
 
 for (var i = 0; i < Colors.sets.length; i++) {
@@ -702,35 +724,37 @@ var ColorsMenu = new MenuSystem.Menu(
 );
 
 ColorsMenu.eventHandler = function (event, action) {
-	var selection = ColorsMenu.getSelectedItem();
-
 	switch (event) {
 		case "show":
-			ColorsMenu.setDescription(descriptionColors(Colors.name));
+			ColorsMenu.setDescription(descriptionColors(Colors.name,Settings.Data.defaultColorProfile));
 			break;
 		case "enter":
 			ColorsMenu.hideMenu();
-			if (action == "default") {
-				//TODO: change to save
-			} else {
-				Colors.apply(action);
-				if(action == "none")
-				{
-					WindowSystem.Alerts.show("info", "Color profile has been disabled.")
-				}
-				else
-				{
-					WindowSystem.Alerts.show("info", "Color profile has been enabled:",SSA.setColorYellow() + Colors.name);
-				}
+			Colors.apply(action);
+			if(action == "none")
+			{
+				WindowSystem.Alerts.show("info", "Color profile has been disabled.");
 			}
+			else
+			{
+				WindowSystem.Alerts.show("info", "Color profile has been enabled:",SSA.setColorYellow() + Colors.name);
+			}
+			
 			break;
 		case "right":
-			if (action != "back" && action != "default") {
+			if (action != "@back@") {
 				Colors.apply(action);
-				ColorsMenu.setDescription(descriptionColors(Colors.name));
+				ColorsMenu.setDescription(descriptionColors(Colors.name,Settings.Data.defaultColorProfile));
 				ColorsMenu.appendSuffixToCurrentItem();
 			}
-
+			break;
+		case "left":
+			if (action != "@back@") {
+				Settings.Data.defaultColorProfile = action;
+				ColorsMenu.setDescription(descriptionColors(Colors.name,Settings.Data.defaultColorProfile));
+				WindowSystem.Alerts.show("info","Default color profile changed to:","",Settings.Data.defaultColorProfile);
+				Settings.save();
+			}
 			break;
 	}
 };
@@ -799,8 +823,8 @@ mp.add_key_binding("n", "toggle-sofa", function () {
 	}
 }); 
 // Registering functions to events
-mp.register_event("file-loaded", on_start);
-mp.register_event("shutdown", on_shutdown);
+mp.register_event("file-loaded", onFileLoad);
+mp.register_event("shutdown", onShutdown);
 
 // Registering an observer to check for chapter changes (Chapters.js)
 mp.observe_property(

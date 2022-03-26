@@ -6,10 +6,29 @@
  * License:					MIT License
  */
 
+/*----------------------------------------------------------------
+The Settings.js module
+
+This file handles serialization and deserialization of the 
+easympv.conf file located in the mpv config root directory.
+It also provides sane defaults in case configuration files
+are missing.
+----------------------------------------------------------------*/
+
 "use strict";
 
-var Settings = require = {};
+/**
+ * This module handles serialization and deserialization of the 
+ * easympv.conf file located in the mpv config root directory.
+ * It also provides sane defaults in case configuration files
+ * are missing.
+ */
+var Settings = {};
 
+/**
+ * This object contains deserialized data from easympv.conf.
+ * Call Settings.reload() to update it.
+ */
 Settings.Data = {
 	defaultShaderSet: "none",
 	defaultColorProfile: "none",
@@ -21,10 +40,16 @@ Settings.Data = {
 	newestVersion: "0.0.1",
 }
 
+/**
+ * Same as Settings.reload().
+ */
 Settings.load = function () {
 	Settings.reload();
 }
 
+/**
+ * Deserializes easympv.conf and updates Settings.Data.
+ */
 Settings.reload = function () {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined)
 		return;
@@ -56,6 +81,9 @@ Settings.reload = function () {
 	}
 }
 
+/**
+ * Serializes Settings.Data into easympv.conf.
+*/
 Settings.save = function () {
 	this.DataCopy = "";
 	var lines = [];

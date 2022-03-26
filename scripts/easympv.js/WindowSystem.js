@@ -240,9 +240,121 @@ Windows.Window.prototype._constructCaches = function () {
 	}
 	if(this.settings.item != undefined)
 	{
-		if (this.settings.item.type == "text")
+		if (this.settings.item.type == "raw")
 		{
 			this.cachedWindowContentText += this.settings.item.data;
+		}
+		else if (this.settings.item.type == "text")
+		{
+			var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8);
+			var scale = SSA.setScale(scaleFactor);
+			var border =
+				SSA.setBorderColor(this.settings.item.borderColor) +
+				SSA.setBorder(this.settings.item.borderSize);
+			var font = SSA.setFont(this.settings.item.fontName);
+			var fontSize = (this.settings.item.fontSize);
+			var currentLinePosition = 0;
+			var descriptionSizeModifier = -10;
+			var ypos = 0;
+			var yposmod = 30;
+	
+			var findLinePosition = function (size, custom) {
+				// How this works:
+				// https://www.md-subs.com/line-spacing-in-ssa (Method 5/Conclusion)
+	
+				var origin = "-2000000";
+				var modifier = 0;
+				if (size == undefined) {
+					size = 1;
+				}
+				if (custom == undefined) {
+					custom = 0;
+				}
+				switch (size) {
+					// These number define the line spacings
+					case 0:
+						modifier = 0.0007;
+						break; // small
+					case 1:
+						modifier = 0.0009;
+						break; // normal
+					case 2:
+						modifier = 0.0015;
+						break; // big
+					case 3:
+						modifier = 0.002;
+						break; // huge
+					case 4:
+						modifier = custom;
+						break; // custom
+				}
+				modifier = modifier * (0.01 * scaleFactor);
+				currentLinePosition = currentLinePosition - modifier;
+				return (
+					"{\\org(" +
+					origin +
+					",0)\\fr" +
+					currentLinePosition.toFixed(5) +
+					"}"
+				);
+			};
+	
+			var lineStart = function (
+				positionType,
+				fontSizeModifier,
+				customPositionModifier
+			) {
+				if (fontSizeModifier == undefined) {
+					fontSizeModifier = 0;
+				}
+				if (customPositionModifier == undefined) {
+					customPositionModifier = 0;
+				}
+				if (positionType == undefined) {
+					positionType = 1;
+				}
+
+				ypos = ypos + yposmod;
+
+				var s = "";
+				s +=
+					scale +
+					"{\\posy"+ypos+"}" + 
+					findLinePosition(positionType, customPositionModifier) +
+					border +
+					font +
+					SSA.setSize(fontSize + fontSizeModifier);
+				return s;
+			};
+	
+			var lineEnd = function () {
+				var s = "\n";
+				return s;
+			};
+	
+			var lineBlank = function () {
+				var s;
+				s = lineStart(4, 0, 0.0005) + lineEnd();
+				return s;
+			};
+
+			var text = "";
+
+			var mdLines = this.settings.item.text.split("@br@");
+			text =
+				lineStart(2, descriptionSizeModifier) +
+				SSA.setColor(this.settings.item.color) +
+				mdLines[0] +
+				lineEnd();
+			for (var i = 1; i < mdLines.length; i++) {
+				text +=
+					lineStart(0, descriptionSizeModifier) +
+					SSA.setColor(this.settings.item.color) +
+					mdLines[i] +
+					lineEnd();
+			}
+			
+			this.cachedWindowContentText += text;
 		}
 		else if (this.settings.item.type == "alert")
 		{
@@ -455,6 +567,69 @@ Windows.Window.prototype._stopTimer = function () {
 	}
 };
 
+//TODO: textwall
+Windows.TextWall = {};
+Windows.TextWall.create = function (text)
+{
+	var osdHeight = mp.get_property("osd-height");
+	var osdWidth = mp.get_property("osd-width");
+
+	text = text.replaceAll("\n","@br@");
+
+	var window = new Windows.Window({
+		xPosition: 0,
+		yPosition: 0,
+		width: 0,
+		height: 0,
+		keybindOverrides: [],
+		autoClose: 0,
+		fadeOut: false,
+		fadeOutTime: 35,
+		transparency: "0",
+		item: {
+			xPositionOverride: (osdWidth / 2),
+			yPositionOverride: 0,
+			type: "text",
+			color: "ffffff",
+			fontName: "Overpass Light",
+			fontSize: "33",
+			borderColor: "000000",
+			borderSize: "1",
+			text: text
+		}
+	});
+
+	window.settings.drawBaseOSD = false;
+	window.settings.drawEffectOSD = false;
+
+	mp.observe_property("osd-height", undefined, function () {
+		if(
+			mp.get_property("osd-height") != osdHeight
+			||
+			mp.get_property("osd-width") != osdWidth
+			)
+		{
+			window.hide();
+			window.show();
+		}
+	});
+
+	mp.observe_property("osd-width", undefined, function () {
+		if(
+			mp.get_property("osd-height") != osdHeight
+			||
+			mp.get_property("osd-width") != osdWidth
+			)
+		{
+			window.hide();
+			window.show();
+		}
+	});
+
+
+	return window;
+}
+
 Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
 Windows.Alerts.show = function (type,line1,line2,line3) {
@@ -497,11 +672,11 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 	var message = "";
 	var messageXPosition = osdWidth - (width + (xOffset + 100));
 
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 40) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass");
+	message += SSA.setPosition(messageXPosition + 250,yOffset + 40) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
 	message += line1 + "@br@";
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 67.5) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass");
+	message += SSA.setPosition(messageXPosition + 250,yOffset + 67.5) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
 	message += line2 + "@br@";
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 95) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass");
+	message += SSA.setPosition(messageXPosition + 250,yOffset + 95) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
 	message += line3;
 	var image = "";
 

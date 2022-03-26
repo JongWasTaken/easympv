@@ -1,34 +1,36 @@
 mpv by the mpv team (mpv.io)
+  licensed under the GPLv2+ License
 easympv by Jong (smto.pw/mpv)
+  licensed under the MIT License
 
 Scripts used:
 autoload.lua by the mpv team
-  licensed under the GPLv2+ License
+  licensed under the GPLv2+ License
 mpvcord by Yuto Takano
-  licensed under the MIT License
+  licensed under the MIT License
 mpv-mpris
-  licensed under the MIT License
+  licensed under the MIT License
 
 Fonts used:
 Roboto Font by Christian Robertson,
-  licensed under the Apache License 2.0
+  licensed under the Apache License 2.0
 Overpass Font by Delve Fonts
-  licensed under the SIL Open Font License 1.1
+  licensed under the SIL Open Font License 1.1
 Font Awesome 6
-  licensed under the SIL Open Font License 1.1
+  licensed under the SIL Open Font License 1.1
 
 Shaders used:
 Anime4K
-  licensed under the MIT License
+  licensed under the MIT License
 KrigBilateral by Shiandow
-  licensed under the LGPLv3+ License
+  licensed under the LGPLv3+ License
 SSimSuperRes by Shiandow
-  licensed under the LGPLv3+ License
+  licensed under the LGPLv3+ License
 adaptive-sharpen by bacondither
-  licensed under custom License
+  licensed under custom License
 FSRCNNX
-  licensed under the GPLv3+ License
+  licensed under the GPLv3+ License
 nnedi13
-  licensed under the LGPLv3+ License
+  licensed under the LGPLv3+ License
 
 Inspired by VideoPlayerCode's scripts.

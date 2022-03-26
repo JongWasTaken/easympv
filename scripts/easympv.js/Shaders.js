@@ -6,15 +6,22 @@
  * License:        MIT License
  */
 
+/*----------------------------------------------------------------
+The Shaders.js module
+
+This file handles all things shader, such as parsing Shaders.json,
+keeping track of the current shaderset and applying a shaderset.
+----------------------------------------------------------------*/
+
+/** This module handles all things shader.*/
 var Shaders = {};
 var seperator = "";
 Shaders.name = "none";
-//Shaders.firsttime = true;
 Shaders.sets = [];
 Shaders.manualSelection = false;
 
 var Utils = require("./Utils");
-if (Utils.os == "win") {
+if (Utils.OS == "win") {
 	seperator = ";";
 } else {
 	seperator = ":";
@@ -73,15 +80,46 @@ Shaders.populateSets = function () {
 		sorttemp_master.push(sorttemp2[i]);
 	}
 
-	// Done.
 	Shaders.sets = sorttemp_master;
 };
 
+/** 
+ * Applies shaderset.
+ * @param {string} shader name of a shaderset in Shaders.json
+*/
 Shaders.apply = function (shader) {
 	Shaders.manualSelection = true;
-	if (shader == "a4k_auto") {
-		Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
-	} else if (shader == "la_auto") {
+	if (shader == "Automatic Anime4K") {
+
+		var resolutions = [300, 480, 720, 1080, 1440, 2560, 3000],
+  		file_resolution = Number(mp.get_property("video-params/h"));
+
+		var closest = resolutions.reduce(function(prev, curr) {
+			return (Math.abs(curr - file_resolution) < Math.abs(prev - file_resolution) ? curr : prev);
+		});
+
+		if(closest == 480)
+		{
+			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+		}
+		else if(closest == 720)
+		{
+			Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
+		}
+		else if(closest == 1080)
+		{
+			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+		}
+		else if(closest == 1440)
+		{
+			Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
+		}
+		else
+		{
+			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+		}
+		
+	} else if (shader == "Automatic Live Action") {
 		Shaders.apply("NNEDI3 (128 Neurons)");
 	} else if (
 		shader == "clear" ||
