@@ -7,25 +7,13 @@
  *
  */
 
-/*
-    TODO    
+/*----------------------------------------------------------------
+The WindowSystem.js module
 
- - "Widgets"
-    -> Labels?
-    -> Text Input?
-    -> spinBoxes?
-    -> Buttons?
-    -> bound calculation for click event
-
- - Storing "widgets" and displaying them properly
-    -> Zones - Top/Middle/Bottom:
-        -> Top is Label by default, displaying window title, maybe (x) Button
-        -> Middle is undefined by default
-        -> Bottom is an OK button
-
- - Window customizations
-    -> Colors, borders, scaling, etc
-*/
+This file was an attempt at creating full-fledged windows within
+mpv, but it is now on hold because of issues. 
+Currently it is only used to show alerts.
+----------------------------------------------------------------*/
 
 var SSA = require("./SSAHelper");
 var OSD = require("./OSD");
@@ -567,7 +555,7 @@ Windows.Window.prototype._stopTimer = function () {
 	}
 };
 
-//TODO: textwall
+/* // Does not work
 Windows.TextWall = {};
 Windows.TextWall.create = function (text)
 {
@@ -629,6 +617,7 @@ Windows.TextWall.create = function (text)
 
 	return window;
 }
+*/
 
 Windows.Alerts = {};
 Windows.Alerts.onScreen = [];

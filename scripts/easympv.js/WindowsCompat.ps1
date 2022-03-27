@@ -17,6 +17,13 @@ if($command -eq "get-version-latest")
     exit 0
 }
 
+if($command -eq "get-version-latest-mpv")
+{
+    $latest = $webclient.DownloadString("https://smto.pw/mpv/meta/mpv")
+    Write-Output $latest.Trim()
+    exit 0
+}
+
 if($command -eq "get-changelog")
 {
     $latest = $webclient.DownloadString("https://smto.pw/mpv/meta/latest")

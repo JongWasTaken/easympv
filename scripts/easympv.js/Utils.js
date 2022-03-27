@@ -32,7 +32,7 @@ Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
 
 /**
- * Determines OS by checking environment variables (%OS% on Windows, $OSTYPE on every other platform).
+ * Determines OS by checking for OS-specific traits.
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
  */
 Utils.determineOS = function() 
@@ -43,18 +43,15 @@ Utils.determineOS = function()
 		mp.msg.info("Detected operating system: Windows");
 	} else if (mp.utils.file_info("/proc/cpuinfo") != undefined) {
 		Utils.OS = "unix";
-		mp.msg.info("Detected operating system: Unix");
-		mp.msg.warn(
-			"Linux/BSD support is experimental. Here be dragons and all that..."
-		);
+		mp.msg.info("Detected operating system: Unix-like");
 	} else if (mp.utils.file_info("/Library") != undefined) {
 		Utils.OS = "mac";
 		mp.msg.info("Detected operating system: macOS");
-		mp.msg.error("macOS is not officially supported.");
+		mp.msg.error("macOS is currently not supported. Expect issues.");
 	} else {
 		Utils.OS = "unknown";
 		mp.msg.warn("Detected operating system: unknown");
-		mp.msg.error("Your OS is not officially supported.");
+		mp.msg.error("Your OS is not supported.");
 	}
 }
 
@@ -185,6 +182,35 @@ Utils.checkForUpdates = function () {
 }
 
 /**
+ * Fetches newest mpv version number.
+ * @returns {string} version string
+ */
+ Utils.getLatestMpvVersion = function () {
+
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest-mpv"];
+	} else {
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest-mpv"];
+	}
+
+	var r = mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: true,
+		capture_stderr: false,
+		args: args
+	})
+	if (r != undefined)
+	{
+		return r.stdout.trim();
+	}
+	else
+	{
+		return "0.0.0";
+	}
+}
+
+/**
  * Fetches newest changelog.
  * @returns {string} changelog
  */
@@ -215,36 +241,6 @@ Utils.getChangelog = function () {
 }
 
 /**
- * Queries system to get list of installed GPUs.
- * @returns {array} installed GPUs
- */
-Utils.getGPUs = function () {
-
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-gpus"];
-	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-gpus"];
-	}
-
-	var r = mp.command_native({
-		name: "subprocess",
-		playback_only: false,
-		capture_stdout: true,
-		capture_stderr: false,
-		args: args
-	})
-	
-	if (r != undefined)
-	{
-		return r.stdout.trim().split("|");
-	}
-	else
-	{
-		return [];
-	}
-}
-
-/**
  * Exits mpv, but only if no update is currently in progress.
  */
 Utils.exitMpv = function ()
@@ -265,17 +261,36 @@ Utils.exitMpv = function ()
 Utils.doUpdate = function ()
 {
 	Utils.updateInProgress = true;
-	mp.add_forced_key_binding("q","prevent_close_1",Utils.exitMpv);
-	mp.add_forced_key_binding("Q","prevent_close_2",Utils.exitMpv);
 
-	//TODO:
+	// Block quit keys
+	var bindings = JSON.parse(mp.get_property("input-bindings"));
+	var keysToBlock = [];
+	var idsToUnblock = [];
+	for(i = 0; i < bindings.length; i++)
+	{
+		if(bindings[i].cmd.includes("quit-watch-later") || bindings[i].cmd.includes("quit"))
+		{
+			keysToBlock.push(bindings[i]);
+		}
+	}
+	for(i = 0; i < keysToBlock.length; i++)
+	{
+		mp.add_forced_key_binding(keysToBlock[i].key,"prevent_close_" + i,Utils.exitMpv);
+		idsToUnblock.push("prevent_close_" + i);
+	}
+
+	//TODO: Updater
 
 
 
-	
+
 	Utils.updateInProgress = false;
-	mp.remove_key_binding("prevent_close_1");
-	mp.remove_key_binding("prevent_close_2");
+
+	// Unblock quit keys
+	for(i = 0; i < idsToUnblock.length; i++)
+	{
+		mp.remove_key_binding(idsToUnblock[i]);
+	}
 }
 
 /**
@@ -299,9 +314,109 @@ Utils.getCredits = function ()
 }
 
 /**
+ * Reads, writes and modifies watch_later folder. 
+ */
+Utils.WL = {};
+
+Utils.WL.cache = [];
+
+/**
+ * Caches watch_later folder to memory. Limited to 999 entries.
+ * Access cache with Utils.wlCache
+ */
+Utils.WL.populateCache = function () {
+	if (
+		mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
+		undefined
+	) {
+		var wlFilesCache = mp.utils.readdir(
+			mp.utils.get_user_path("~~/watch_later/"),
+			"files"
+		);
+		for (i = 0; i < wlFilesCache.length; i++) {
+			if (i < 1000) {
+				var file = {
+					name: wlFilesCache[i],
+					content: mp.utils.read_file(
+						mp.utils.get_user_path("~~/watch_later/") +
+							wlFilesCache[i]
+					),
+				};
+				Utils.WL.cache.push(file);
+			} else {
+				break;
+			}
+		}
+	}
+};
+
+/**
+ * Fetches data of current file from previously cached watch_later data.
+ * @return {object} shader, color
+ */
+Utils.WL.getData = function () {
+	var cFile;
+	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+		if (mp.get_property("playlist/" + i + "/current") == "yes") {
+			cFile = mp.get_property("playlist/" + i + "/filename");
+		}
+	}
+	cFile = Utils.md5(cFile).toUpperCase();
+	var wlName;
+	var wlContent;
+	for (i = 0; i < Utils.WL.cache.length; i++) {
+		if (Utils.WL.cache[i].name == cFile) {
+			wlName = Utils.WL.cache[i].name;
+			wlContent = Utils.WL.cache[i].content;
+		}
+	}
+	if (wlContent != undefined) {
+		var WLtmp = wlContent.split("\n");
+		var cShader;
+		var cColor;
+		for (i = 0; i < WLtmp.length; i++) {
+			var WLtmp2 = WLtmp[i].split("=");
+			if (WLtmp2[0].includes("shader")) {
+				cShader = WLtmp2[1];
+			}
+			if (WLtmp2[0].includes("color")) {
+				cColor = WLtmp2[1];
+			}
+		}
+		var results = { shader: cShader, color: cColor };
+		return results;
+	}
+};
+
+/**
+ * This function finds the current videos wlFile and writes a shaderset and colorset to it.
+ */
+Utils.WL.writeData = function (shader, color) {
+	var cFile;
+	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+		if (mp.get_property("playlist/" + i + "/current") == "yes") {
+			cFile = mp.get_property("playlist/" + i + "/filename");
+		}
+	}
+	if (cFile != undefined) {
+		var WLfile =
+			mp.utils.get_user_path("~~/") +
+			"/watch_later/" +
+			Utils.md5(cFile).toUpperCase();
+
+		if (mp.utils.file_info(WLfile) != undefined) {
+			var WLtmp = mp.utils.read_file(WLfile);
+			var WLtmp =
+				WLtmp + "shader=" + shader + "\n" + "color=" + color + "\n";
+			mp.utils.write_file("file://" + WLfile, WLtmp);
+		}
+	}
+};
+
+/**
  * Creates a dummy file in watch_later folder.
  */
-Utils.createWLDummy = function ()
+Utils.WL.createDummy = function ()
 {
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	var name = "00000000000000000000000000000000";
@@ -319,20 +434,20 @@ Utils.createWLDummy = function ()
 /**
  * Clears watch_later folder and creates a dummy file.
  */
-Utils.clearWatchdata = function () {
+Utils.WL.clear = function () {
 	mp.msg.info("Clearing watchdata");
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	if (Utils.OS == "win") {
 		folder = folder.replaceAll("/", "\\");
 		Utils.executeCommand(["del","/Q","/S",folder]);
 		Utils.executeCommand(["mkdir",folder]);
-		Utils.createWLDummy();
+		Utils.WL.createDummy();
 	} else if (Utils.OS == "mac") {
 		mp.msg.info("macOS is not supported.");
 	} else if (Utils.OS == "unix") {
 		Utils.executeCommand(["rm","-rf",folder]);
 		Utils.executeCommand(["mkdir",folder]);
-		Utils.createWLDummy();
+		Utils.WL.createDummy();
 	}
 };
 
@@ -504,101 +619,6 @@ var hex = function (x) {
  */
 Utils.md5 = function (s) {
 	return hex(md51(s));
-};
-
-Utils.wlCache = [];
-
-/**
- * Caches watch_later folder to memory. Limited to 999 entries.
- * Access cache with Utils.wlCache
- */
-Utils.cacheWL = function () {
-	if (
-		mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
-		undefined
-	) {
-		var wlFilesCache = mp.utils.readdir(
-			mp.utils.get_user_path("~~/watch_later/"),
-			"files"
-		);
-		for (i = 0; i < wlFilesCache.length; i++) {
-			if (i < 1000) {
-				var file = {
-					name: wlFilesCache[i],
-					content: mp.utils.read_file(
-						mp.utils.get_user_path("~~/watch_later/") +
-							wlFilesCache[i]
-					),
-				};
-				Utils.wlCache.push(file);
-			} else {
-				break;
-			}
-		}
-	}
-};
-
-/**
- * Fetches data of current file from previously cached watch_later data.
- * @return {object} shader, color
- */
-Utils.getWLData = function () {
-	var cFile;
-	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-		if (mp.get_property("playlist/" + i + "/current") == "yes") {
-			cFile = mp.get_property("playlist/" + i + "/filename");
-		}
-	}
-	cFile = Utils.md5(cFile).toUpperCase();
-	var wlName;
-	var wlContent;
-	for (i = 0; i < Utils.wlCache.length; i++) {
-		if (Utils.wlCache[i].name == cFile) {
-			wlName = Utils.wlCache[i].name;
-			wlContent = Utils.wlCache[i].content;
-		}
-	}
-	if (wlContent != undefined) {
-		var WLtmp = wlContent.split("\n");
-		var cShader;
-		var cColor;
-		for (i = 0; i < WLtmp.length; i++) {
-			var WLtmp2 = WLtmp[i].split("=");
-			if (WLtmp2[0].includes("shader")) {
-				cShader = WLtmp2[1];
-			}
-			if (WLtmp2[0].includes("color")) {
-				cColor = WLtmp2[1];
-			}
-		}
-		var results = { shader: cShader, color: cColor };
-		return results;
-	}
-};
-
-/**
- * This function finds the current videos wlFile and writes a shaderset and colorset to it.
- */
-Utils.writeWLData = function (shader, color) {
-	var cFile;
-	for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-		if (mp.get_property("playlist/" + i + "/current") == "yes") {
-			cFile = mp.get_property("playlist/" + i + "/filename");
-		}
-	}
-	if (cFile != undefined) {
-		var WLfile =
-			mp.utils.get_user_path("~~/") +
-			"/watch_later/" +
-			Utils.md5(cFile).toUpperCase();
-
-		if (mp.utils.file_info(WLfile) != undefined) {
-			var WLtmp = mp.utils.read_file(WLfile);
-			var WLtmp =
-				WLtmp + "shader=" + shader + "\n" + "color=" + color + "\n";
-			mp.utils.write_file("file://" + WLfile, WLtmp);
-		}
-	}
 };
 
 module.exports = Utils;

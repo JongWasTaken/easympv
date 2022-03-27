@@ -23,9 +23,18 @@ fi
 get_version_latest()
 {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/latest | grep '.\..\..')
+        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/latest)
     elif [ -f "/usr/bin/curl" ]; then
         version=$(curl https://smto.pw/mpv/meta/latest | grep '.\..\..')
+    fi
+}
+
+get-version-latest-mpv()
+{
+    if [ -f "/usr/bin/wget" ]; then
+        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/mpv)
+    elif [ -f "/usr/bin/curl" ]; then
+        version=$(curl https://smto.pw/mpv/meta/mpv | grep '.\...\..')
     fi
 }
 
@@ -47,6 +56,13 @@ fi
 
 if [ "$command" == "get-version-latest" ]; then
     get_version_latest
+    echo $version
+    exit 0
+fi
+
+
+if [ "$command" == "get-version-latest-mpv" ]; then
+    get-version-latest-mpv
     echo $version
     exit 0
 fi

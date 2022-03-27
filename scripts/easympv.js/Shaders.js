@@ -119,7 +119,7 @@ Shaders.apply = function (shader) {
 			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
 		}
 		
-	} else if (shader == "Automatic Live Action") {
+	} else if (shader == "Automatic All-Purpose") {
 		Shaders.apply("NNEDI3 (128 Neurons)");
 	} else if (
 		shader == "clear" ||

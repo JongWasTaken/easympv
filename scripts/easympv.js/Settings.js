@@ -32,7 +32,7 @@ var Settings = {};
 Settings.Data = {
 	defaultShaderSet: "none",
 	defaultColorProfile: "none",
-	useRandomPipeName: true,
+	startIPCServer: false,
 	manualInstallation: false,
 	notifyAboutUpdates: true,
 	debugMode: false,
@@ -103,10 +103,12 @@ Settings.save = function () {
 		defaultConfigString += "# Default: none\n";
 		defaultConfigString += "# Use the full name of a profile as it appears in the colors menu!\n";
 		defaultConfigString += "defaultColorProfile=x\n";
-		defaultConfigString += "# Wether to obscure the pipe name for slightly more security\n";
-		defaultConfigString += "# Default: true\n";
-		defaultConfigString += "# You should disable this if you use external scripts such as remotes, the pipename will be mpv.\n";
-		defaultConfigString += "useRandomPipeName=x\n";
+		defaultConfigString += "# Wether to start the mpv IPC server on startup.\n";
+		defaultConfigString += "# Default: false\n";
+		defaultConfigString += "# You should only enable this if you use external scripts such as remotes.\n";
+		defaultConfigString += "# On Windows, a named pipe \"mpv\" will be created.\n";
+		defaultConfigString += "# On Unix-likes a socket will be created: /tmp/mpv\n";
+		defaultConfigString += "startIPCServer=x\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Wether this installation is manual or automatic.\n";
 		defaultConfigString += "# If you installed easympv via the executable, this will be false.\n";

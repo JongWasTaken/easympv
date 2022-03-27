@@ -7,50 +7,56 @@
  */
 
 /*
-	Useful links:
-		LUA documentation, most functions are the same in javascript:
-			https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
-		JavaScript documentation, for the few odd ones out:
-			https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
-		input.conf documentation, for commands, properties, events and other tidbits
-			https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
-			https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list
+Useful links:
+	LUA documentation, most functions are the same in javascript:
+		https://github.com/mpv-player/mpv/blob/master/DOCS/man/lua.rst
+	JavaScript documentation, for the few odd ones out:
+		https://github.com/mpv-player/mpv/blob/master/DOCS/man/javascript.rst
+	input.conf documentation, for commands, properties, events and other tidbits
+		https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst
+		https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list
 
-	Important good-to-knows:
-		mpv uses MuJS, which is ES5 compliant, but not ES6!
-			Most IE polyfills will probably work.
-		Windows is more picky with font names, in case of issues
-			open the .ttf file of your font and use the "Font name:" at the top.
+Important good-to-knows:
+	mpv uses MuJS, which is ES5 compliant, but not ES6!
+		Most IE polyfills will probably work.
+	Windows is more picky with font names, in case of issues
+		open the .ttf file of your font and use the "Font name:" at the top.
 
-	Snippets:
-		how to check for a file
-			mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/FILE")) != undefined
+Snippets:
+	how to check for a file
+		mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/FILE")) != undefined
 
-	Current dependencies:
-		mpv 33+
-		Windows only:
-			PowerShell
-		Linux only:
-			GNU coreutils
-			either wget or curl
-			zenity
+Current dependencies:
+	mpv 33+
+	Windows only:
+		PowerShell
+	Linux only:
+		GNU coreutils
+		either wget or curl
+		zenity
 
-	TODO :
-		(DONE) Remake settings menu (with save/load)
-		(DONE) Folder navigation from current directory
-		(ONGOING) Move away from the util as much as possible
-		(DONE) Utility: DirectShow readout to stdout 
-		(DONE) Utility: return version in stdout on check
-		(DONE) UpdateMenu: display changelog
-		(DONE) MenuSystem: scrolling
-		Implement Updater
-		Reimplement autosave.lua
-		Reimplement betterchapters.lua
-		Reimplement autosave.lua
-		Replace placeholder titles
+TODO :
+	(DONE) Remake settings menu (with save/load)
+	(DONE) Folder navigation from current directory
+	(ONGOING) Move away from the util as much as possible
+	(DONE) Utility: DirectShow readout to stdout 
+	(DONE) Utility: return version in stdout on check
+	(DONE) UpdateMenu: display changelog
+	(DONE) MenuSystem: scrolling
+	(ONGOING) Update comments/documentation
+	Implement Updater
+	Reimplement autosave.lua
+	Reimplement betterchapters.lua
+	Reimplement autoload.lua
+	Replace placeholder titles
+	Implement version comparison for base mpv
+	First time configuration wizard
 
-	KNOWN ISSUES:
-		none
+IDEAS:
+	Advanced settings, like the utility had before
+
+KNOWN ISSUES:
+	none
 */
 "use strict";
 
@@ -100,7 +106,7 @@ Math.percentage = function (partialValue, totalValue) {
 	return Math.round((100 * partialValue) / totalValue);
 } 
 
-mp.msg.info("Starting!");
+mp.msg.verbose("Starting!");
 var Settings = require("./Settings");
 var Utils = require("./Utils");
 var SSA = require("./SSAHelper");
@@ -115,8 +121,11 @@ var Browsers = require("./Browsers");
 var isFirstFile = true;
 var sofaEnabled = false;
 var displayVersion = "";
+var displayVersionMpv = "";
 var updateAvailable = false;
+var updateAvailableMpv = false;
 
+// Setup
 Utils.determineOS();
 var isOnline = Utils.checkInternetConnection();
 
@@ -138,32 +147,43 @@ for (i = 0; i < imageArray.length; i++) {
 }
 
 Settings.Data.newestVersion = "0.0.0";
+var mpvLatestVersion = Utils.getLatestMpvVersion();
 if (!Settings.Data.manualInstallation && isOnline) {
-	mp.msg.info("Checking for updates...");
+	mp.msg.verbose("Checking for updates...");
 	Settings.Data.newestVersion = Utils.checkForUpdates();
 	updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
+	updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,mpvLatestVersion);
 }
 
-Utils.cacheWL();
+Utils.WL.populateCache();
 
 displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
+displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
+
 if(updateAvailable)
 {
 	displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
 }
 
+if(updateAvailableMpv)
+{
+	displayVersionMpv = SSA.setColorRed() + Utils.mpvVersion + " (" + mpvLatestVersion + " available)";
+}
+
 Settings.save();
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
+mp.msg.info("easympv " + Settings.Data.currentVersion + " loaded");
+
 var onFileLoad = function () {
-	var wld = Utils.getWLData();
+	var wld = Utils.WL.getData();
 	if (isFirstFile) {
 		if (
 			mp.utils.file_info(
 				mp.utils.get_user_path("~~/") + "/default.sofa"
 			) != undefined
 		) {
-			mp.msg.info("Sofa file found!");
+			mp.msg.verbose("Sofa file found!");
 			var path = mp.utils
 				.get_user_path("~~/")
 				.toString()
@@ -212,7 +232,7 @@ var onShutdown = function () {
 	// This is not ideal, as data will only be saved when mpv is being closed.
 	// Ideally, this would be in the on_startup block, after a file change.
 	mp.msg.info("Writing data to watch_later...");
-	Utils.writeWLData(Shaders.name, Colors.name);
+	Utils.WL.writeData(Shaders.name, Colors.name);
 };
 
 var descriptionShaders = function (a,b) {
@@ -238,9 +258,11 @@ var descriptionColors = function (a,b) {
 	"Current default Profile: " + SSA.setColorYellow() + b +"@br@"+
 	"Current Profile: " + SSA.setColorYellow() + a;
 };
-var descriptionSettings = function (a) {
-	return "mpv " + Utils.mpvVersion + "@br@" +
-	"easympv " + a + "@br@"
+var descriptionSettings = function (a, b) {
+	return "mpv " + b + "@br@" +
+	"easympv " + a + "@br@" +
+	"ffmpeg " + Utils.ffmpegVersion + "@br@" +
+	"libass" + Utils.libassVersion;
 }
 
 var MainMenuSettings = {
@@ -391,8 +413,8 @@ var ShadersMenuItems = [
 		item: "none",
 	},
 	{
-		title: "Recommended Live Action Settings",
-		item: "Automatic Live Action",
+		title: "Recommended All-Purpose Settings",
+		item: "Automatic All-Purpose",
 	},
 	{
 		title: "Recommended Anime4K Settings@br@@us10@@br@",
@@ -527,7 +549,7 @@ var SettingsMenuSettings = {
 		SSA.insertSymbolFA("") +
 		SSA.setColorWhite() +
 		"Settings",
-	description: descriptionSettings(displayVersion),
+	description: descriptionSettings(displayVersion, displayVersionMpv),
 };
 
 var SettingsMenuItems = [
@@ -606,7 +628,6 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "inputconf") {
 			Utils.openFile("input.conf");
 		} else if (action == "updater") {
-			mp.msg.warn(Utils.getChangelog());
 			var updateConfirmation = false;
 			var umenu = new MenuSystem.Menu({
 				title: "Update",
@@ -648,7 +669,7 @@ SettingsMenu.eventHandler = function (event, action) {
 		} else if (action == "config") {
 			Utils.openFile("");
 		} else if (action == "clearwld") {
-			Utils.clearWatchdata();
+			Utils.WL.clear();
 		} else if (action == "command") {
 
 			WindowSystem.Alerts.show("info", "Command Input window has opened!")
@@ -763,7 +784,7 @@ ColorsMenu.eventHandler = function (event, action) {
 
 // Add menu key binding and its logic
 mp.add_key_binding(null, "easympv", function () {
-	mp.msg.info("Menu key pressed!");
+	mp.msg.verbose("Menu key pressed!");
 	// If no menu is active, show main menum
 	if (
 		//!ColorsMenu.isMenuVisible &&
@@ -783,17 +804,13 @@ mp.add_key_binding(null, "easympv", function () {
 	}
 });
 
-mp.add_key_binding(null, "menu-test", function () { // its k
-	mp.msg.info("Window key pressed!");
-	WindowSystem.Alerts.show("error","You pressed the window key!","AAAAAAAAAAAaaaa","Congratulations!");
-	/*
-	if (!w.isWindowVisible) {
-		w.show();
-	} else {
-		w.hide();
-	}
-	*/
+// below was used to test alerts
+/*
+mp.add_key_binding("k", "menu-test", function () {
+	mp.msg.verbose("Window key pressed!");
+	WindowSystem.Alerts.show("error","You pressed the window key!","XXXXXXXXXXXXXXX","Congratulations!");
 });
+*/
 
 mp.add_key_binding("n", "toggle-sofa", function () {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) != undefined) {
@@ -838,16 +855,6 @@ mp.observe_property("osd-height", undefined, function () {
 	var currentmenu = MenuSystem.getDisplayedMenu();
 	if (currentmenu != undefined) {
 		currentmenu.hideMenu();
-		/*
-		if (mp.get_property("osd-height") < 600)
-		{
-			currentmenu.settings.displayMethod = "message";
-		}
-		else
-		{
-			currentmenu.settings.displayMethod = "overlay";
-		}
-		*/
 		currentmenu.showMenu();
 	}
 });

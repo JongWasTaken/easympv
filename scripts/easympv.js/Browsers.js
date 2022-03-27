@@ -702,7 +702,9 @@ Browsers.DeviceBrowser.menuEventHandler = function (event,item)
 {
     if(event == "enter")
     {
-        mp.commandv("apply-profile", "low-latency");
+        //TODO: test on windows
+        //mp.commandv("apply-profile", "low-latency");
+        mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file
         
         if (Utils.OS == "win")
         {
