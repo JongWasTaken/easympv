@@ -33,3 +33,9 @@ Due to the modular nature of Linux, you will need to install a few dependencies:
 ### Manual
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
 Adjust .conf files to your liking.
+
+## License
+All easympv code (everything in `scripts/easympv.js/` and `images/`) is licensed under the MIT License.  
+Other files in this repository use different licenses, such as fonts and shaders.  
+See `scripts/easympv.js/Credits.txt` for all attributions.  
+Special thanks to VideoPlayerCode for their awesome plugins, though none of their code has been used.  
