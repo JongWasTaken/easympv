@@ -1,6 +1,6 @@
 # easympv (mpv plugin)
 ## (WORK IN PROGRESS; DO NOT USE)  
-![](https://raw.githubusercontent.com/JongWasTaken/easympv-scripts/master/images/logo.bmp)
+![](https://raw.githubusercontent.com/JongWasTaken/easympv/master/images/logo.bmp)
 
 
 Extends base mpv with more features and makes it a bit more user-friendly.
@@ -14,19 +14,19 @@ macOS support is planned, but currently not implemented.
 - Automated applying of shadersets, such as Anime4K
 - Color profiles
 - Automatic skipping of certain chapters (such as Openings/Endings)
-- Automatic Updates (not implemented yet!)
-
+- Automatic Updates
+#### and more!
 ## Installation
 #### Windows Dependencies
-- Windows 8 or higher (Windows 7 might work if you install Powershell and .NET)
+- Windows 8 or higher (Windows 7 might work if you update Powershell and .NET Framework to v4.5+)
 - mpv, the newest version from [here](https://sourceforge.net/projects/mpv-player-windows/files/64bit/)
 
 #### Linux Dependencies
 Due to the modular nature of Linux, you will need to install a few dependencies:
-- mpv, the newest possible version (0.34.1 at the time of writing) [AUR](https://aur.archlinux.org/packages/mpv-build-git)
-- GNU coreutils (should be preinstalled on every distibution)
-- either `wget`(preferred) or `curl`
-- `zenity` (optional, required for URL input)
+- mpv, preferably the newest possible version (0.34.1 at the time of writing) [AUR](https://aur.archlinux.org/packages/mpv-build-git)
+- GNU coreutils (usually preinstalled on every distibution)
+- either `wget`(preferred) or `curl` (both are usually preinstalled)
+- `zenity` (required for inputs)
 
 ### Automatic
 (Not yet:) Download the latest version from [here](https://smto.pw/mpv/?#downloads).
