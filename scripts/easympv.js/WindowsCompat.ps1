@@ -104,8 +104,8 @@ if($command -eq "apply-package")
 {
     if(Test-Path -Path "$env:APPDATA\mpv\extractedPackage" -PathType Any)
     {
-        Copy-Item -Path "$env:APPDATA\mpv\extractedPackage\*" -Destination "$env:APPDATA\mpv" -Recurse
-        Remove-Item -Path "$env:APPDATA\mpv\extractedPackage" -Force
+        Copy-Item -Path "$env:APPDATA\mpv\extractedPackage\*" -Destination "$env:APPDATA\mpv" -Recurse -Force
+        Remove-Item -Path "$env:APPDATA\mpv\extractedPackage" -Force -Recurse
     }
 }
 

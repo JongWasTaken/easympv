@@ -349,8 +349,6 @@ Utils.doUpdateStage3 = function () // delete package
  */
 Utils.doUpdateStage4 = function () // apply extracted package
 {
-	Utils.unblockQuitButtons();
-	return;
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) == undefined)
 	{
 		
