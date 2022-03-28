@@ -17,7 +17,7 @@ and other "nice to have" things.
 
 "use strict";
 
-const Settings = require("./Settings");
+var Settings = require("./Settings");
 
 /**
  * Collection of miscellaneous functions used throughout all of easympv.
