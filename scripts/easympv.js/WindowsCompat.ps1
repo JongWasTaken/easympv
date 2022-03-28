@@ -19,7 +19,7 @@ if($command -eq "get-version-latest")
 
 if($command -eq "get-version-latest-mpv")
 {
-    $latest = $webclient.DownloadString("https://smto.pw/mpv/meta/mpv")
+    $latest = $webclient.DownloadString("https://smto.pw/mpv/hosted/mpvLatestVersion")
     Write-Output $latest.Trim()
     exit 0
 }
@@ -31,16 +31,47 @@ if($command -eq "get-connection-status")
     exit 0
 }
 
+if($command -eq "elevate")
+{
+    $processOptions = @{
+        FilePath = "powershell.exe"
+        Verb = "runAs"
+        ArgumentList = "cmd", "/c", $arguments, "/u"
+    }
+    try 
+    {
+        Start-Process @processOptions
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
 
+if($command -eq "update-mpv")
+{
+    $processOptions = @{
+        FilePath = "powershell.exe"
+        Verb = "runAs"
+        ArgumentList = "powershell", "-Command {cd $arguments ; .\installer\updater.ps1}", "-NoExit", "-ExecutionPolicy bypass"
+    }
+    try 
+    {
+        Start-Process @processOptions
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
 
 if($command -eq "get-package")
 {
 
     if(Test-Path -Path "$env:APPDATA\mpv\package.zip" -PathType Any)
     {Remove-Item -Path "$env:APPDATA\mpv\package.zip" -Force}
-    try 
+
+    try
     {
-        $webclient.DownloadFile("https://smto.pw/mpv/hosted/$arguments")
+        $webclient.DownloadFile("https://smto.pw/mpv/hosted/$arguments","$env:appdata\mpv\package.zip")
     }
     Catch [system.exception]
     {exit 1}

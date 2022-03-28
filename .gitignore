@@ -23,3 +23,5 @@ easympvUtility
 outdated.txt
 shaders/testFile2.txt
 testFile1.txt
+extractedPackage/*
+package.zip

@@ -276,9 +276,7 @@ Utils.doUpdateStage1 = function () // download
 	} else {
 		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.package];
 	}
-	mp.msg.warn(args[0]);
-	mp.msg.warn(args[1]);
-	mp.msg.warn(args[2]);
+
 	mp.command_native_async({
 		name: "subprocess",
 		playback_only: false,
@@ -351,7 +349,8 @@ Utils.doUpdateStage3 = function () // delete package
  */
 Utils.doUpdateStage4 = function () // apply extracted package
 {
-
+	Utils.unblockQuitButtons();
+	return;
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) == undefined)
 	{
 		
@@ -441,26 +440,22 @@ Utils.doUpdate = function ()
 /**
  * Updates mpv on Windows only.
  */
- Utils.updateMpv = function ()
- {
-	var onFinished = function()
-	{
-		WindowSystem.Alerts.show("info","mpv has been updated.","","Please restart to see changes.");
-	}
+Utils.updateMpv = function ()
+{
 	if(Utils.OS == "win")
 	{
 		if(Settings.Data.mpvLocation != "unknown")
 		{
 			if(Utils.updateAvailableMpv)
 			{
-				var args = ["cmd", "/c", Settings.Data.mpvLocation + "\\update.bat"];
-				mp.command_native_async({
+				var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"update-mpv", Settings.Data.mpvLocation];
+				mp.command_native({
 					name: "subprocess",
 					playback_only: false,
 					capture_stdout: true,
 					capture_stderr: false,
 					args: args
-				},onFinished)
+				})
 			}
 			else
 			{
@@ -471,12 +466,84 @@ Utils.doUpdate = function ()
 		{
 			WindowSystem.Alerts.show("error","mpv location is unknown.","","Please update easympv.conf!");
 		}
+		}
+	else
+	{
+		WindowSystem.Alerts.show("error","Only supported on Windows.","","");
+	}
+	return;
+}
+
+/**
+ * Registers mpv on Windows only.
+ */
+Utils.registerMpv = function ()
+{
+
+	var onFinished = function ()
+	{
+		WindowSystem.Alerts.show("info","Successfully registered mpv!","Do not close any windows that have"," opened. They will close themselves.");
+	}
+
+	 if(Utils.OS == "win")
+	 {
+		 if(Settings.Data.mpvLocation != "unknown")
+		 {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-install.bat"];
+			mp.command_native_async({
+				name: "subprocess",
+				playback_only: false,
+				capture_stdout: true,
+				capture_stderr: false,
+				args: args
+			},onFinished)
+		 }
+		 else
+		 {
+			 WindowSystem.Alerts.show("error","mpv location is unknown.","","Please update easympv.conf!");
+		 }
 	}
 	else
 	{
-	WindowSystem.Alerts.show("error","Only supported on Windows.","","");
+		WindowSystem.Alerts.show("error","Only supported on Windows.","","");
 	}
 	return;
+}
+
+/**
+ * Unregisters mpv on Windows only.
+ */
+ Utils.unregisterMpv = function ()
+ {
+ 
+	 var onFinished = function ()
+	 {
+		 WindowSystem.Alerts.show("info","Successfully unregistered mpv!","Do not close any windows that have"," opened. They will close themselves.");
+	 }
+ 
+	  if(Utils.OS == "win")
+	  {
+		  if(Settings.Data.mpvLocation != "unknown")
+		  {
+			 var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat"];
+			 mp.command_native_async({
+				 name: "subprocess",
+				 playback_only: false,
+				 capture_stdout: true,
+				 capture_stderr: false,
+				 args: args
+			 },onFinished)
+		  }
+		  else
+		  {
+			  WindowSystem.Alerts.show("error","mpv location is unknown.","","Please update easympv.conf!");
+		  }
+	 }
+	 else
+	 {
+		 WindowSystem.Alerts.show("error","Only supported on Windows.","","");
+	 }
+	 return;
  }
 
 /**
