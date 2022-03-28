@@ -26,7 +26,7 @@ if($command -eq "get-version-latest-mpv")
 
 if($command -eq "get-connection-status")
 {
-    $status = Test-Connection smto.pw -Quiet
+    $status = Test-Connection smto.pw -Quiet -Count 1
     Write-Output $status
     exit 0
 }

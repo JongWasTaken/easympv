@@ -44,14 +44,16 @@ TODO :
 	(DONE) UpdateMenu: display changelog
 	(DONE) MenuSystem: scrolling
 	(ONGOING) Update comments/documentation
-	Implement Updater
+	(DONE) Implement Updater
 	Reimplement autosave.lua
 	Reimplement betterchapters.lua
 	Reimplement autoload.lua
 	Replace placeholder titles
-	Implement version comparison for base mpv
+	(DONE) Implement version comparison for base mpv
 	First time configuration wizard
 	Dependency downloader
+	(DONE) Windows (un)registration
+	Change more command_native -> command_native_async to speed up launch times
 
 IDEAS:
 	Advanced settings, like the utility had before
