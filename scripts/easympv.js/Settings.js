@@ -30,6 +30,7 @@ var Settings = {};
  * Call Settings.reload() to update it.
  */
 Settings.Data = {
+	mpvLocation: "unknown",
 	defaultShaderSet: "none",
 	defaultColorProfile: "none",
 	startIPCServer: false,
@@ -93,6 +94,12 @@ Settings.save = function () {
 		
 		defaultConfigString += "#!!v3\n";
 		defaultConfigString += "### easympv.conf, regenerated ###\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# Location of mpv executable.\n";
+		defaultConfigString += "# Default: none\n";
+		defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
+		defaultConfigString += "# Use a full path. Only required on Windows!\n";
+		defaultConfigString += "mpvLocation=unknown\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Default shader set to load at runtime.\n";
 		defaultConfigString += "# Default: none\n";

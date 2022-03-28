@@ -123,8 +123,6 @@ var isFirstFile = true;
 var sofaEnabled = false;
 var displayVersion = "";
 var displayVersionMpv = "";
-var updateAvailable = false;
-var updateAvailableMpv = false;
 
 // Setup
 Utils.determineOS();
@@ -149,28 +147,35 @@ for (i = 0; i < imageArray.length; i++) {
 
 Settings.Data.newestVersion = "0.0.0";
 var mpvLatestVersion = Utils.getLatestMpvVersion();
+
+var setDisplayVersion = function ()
+{
+	displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
+	displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
+
+	if(Utils.updateAvailable)
+	{
+		displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
+	}
+
+	if(Utils.updateAvailableMpv)
+	{
+		displayVersionMpv = SSA.setColorRed() + Utils.mpvVersion + " (" + mpvLatestVersion + " available)";
+	}
+}
+
 if (!Settings.Data.manualInstallation && isOnline) {
 	mp.msg.verbose("Checking for updates...");
 	Utils.latestUpdateData = Utils.getLatestUpdateData();
 	Settings.Data.newestVersion = Utils.latestUpdateData.version;
-	updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
-	updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,mpvLatestVersion);
+	Utils.updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
+	Utils.updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,mpvLatestVersion);
+	setDisplayVersion();
 }
 
 Utils.WL.populateCache();
 
-displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
-displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
 
-if(updateAvailable)
-{
-	displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
-}
-
-if(updateAvailableMpv)
-{
-	displayVersionMpv = SSA.setColorRed() + Utils.mpvVersion + " (" + mpvLatestVersion + " available)";
-}
 
 Settings.save();
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
@@ -391,7 +396,7 @@ MainMenu.eventHandler = function (event, action) {
 	}
 	else if (event == "show")
 	{
-		if(updateAvailable && notifyAboutUpdates)
+		if(Utils.updateAvailable && notifyAboutUpdates)
 		{
 			notifyAboutUpdates = false;
 			WindowSystem.Alerts.show("info","An update is available.","Current Version: " + Settings.Data.currentVersion,"New Version: " + Settings.Data.newestVersion);
@@ -715,6 +720,9 @@ SettingsMenu.eventHandler = function (event, action) {
 			Utils.setIPCServer(Settings.Data.useRandomPipeName);
 			Settings.save();
 		}
+	} else if (action == "show") {
+		setDisplayVersion();
+		SettingsMenu.setDescription(descriptionSettings(displayVersion, displayVersionMpv));
 	}
 };
 

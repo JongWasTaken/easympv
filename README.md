@@ -35,7 +35,7 @@ Download the master branch and put all files into `%appdata%\mpv` (Windows) or `
 Adjust .conf files to your liking.
 
 ## License
-All easympv code (everything in `scripts/easympv.js/` and `images/`) is licensed under the MIT License.  
+All easympv code and assets (everything in `scripts/easympv.js/` and `images/`) is licensed under the MIT License.  
 Other files in this repository use different licenses, such as fonts and shaders.  
 See `scripts/easympv.js/Credits.txt` for all attributions.  
 Special thanks to VideoPlayerCode for their awesome plugins, though none of their code has been used.  

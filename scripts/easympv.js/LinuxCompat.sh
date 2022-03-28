@@ -45,9 +45,9 @@ get-package()
     fi
 
     if [ -f "/usr/bin/wget" ]; then
-        /usr/bin/wget -q -O ../../package.zip https://smto.pw/mpv/hosted/$1
+        /usr/bin/wget -q -O "$HOME/.config/mpv/package.zip" https://smto.pw/mpv/hosted/$1
     elif [ -f "/usr/bin/curl" ]; then
-        /usr/bin/curl https://smto.pw/mpv/hosted/$1 -o ../../package.zip
+        /usr/bin/curl https://smto.pw/mpv/hosted/$1 -o "$HOME/.config/mpv/package.zip"
     fi
 }
 

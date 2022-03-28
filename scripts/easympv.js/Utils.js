@@ -34,6 +34,8 @@ Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
 
 Utils.latestUpdateData = undefined;
+Utils.updateAvailable = false;
+Utils.updateAvailableMpv = false;
 
 /**
  * Determines OS by checking for OS-specific traits.
@@ -226,22 +228,14 @@ Utils.exitMpv = function ()
 }
 
 /**
- * Updates easympv. Blocks quitting the application.
+ * Finds and blocks all quit bindings. Used with updater.
  */
-Utils.doUpdate = function ()
+Utils.blockQuitButtons = function ()
 {
-
-	if(Utils.latestUpdateData == undefined)
-	{
-		return "Not connected to the internet!";
-	}
-
 	Utils.updateInProgress = true;
-
-	// Block quit keys
 	var bindings = JSON.parse(mp.get_property("input-bindings"));
 	var keysToBlock = [];
-	var idsToUnblock = [];
+	Utils.idsToUnblock = [];
 	for(i = 0; i < bindings.length; i++)
 	{
 		if(bindings[i].cmd.includes("quit-watch-later") || bindings[i].cmd.includes("quit"))
@@ -252,45 +246,83 @@ Utils.doUpdate = function ()
 	for(i = 0; i < keysToBlock.length; i++)
 	{
 		mp.add_forced_key_binding(keysToBlock[i].key,"prevent_close_" + i,Utils.exitMpv);
-		idsToUnblock.push("prevent_close_" + i);
+		Utils.idsToUnblock.push("prevent_close_" + i);
 	}
+}
 
-	// download Utils.latestUpdateData.package
+/**
+ * Removes previously blocked quit bindings. Used with updater.
+ */
+Utils.unblockQuitButtons = function ()
+{
+	Utils.updateInProgress = false;
+
+	if(Utils.idsToUnblock.length == 0) {return;}
+
+	// Unblock quit keys
+	for(i = 0; i < Utils.idsToUnblock.length; i++)
+	{
+		mp.remove_key_binding(Utils.idsToUnblock[i]);
+	}
+}
+
+/**
+ * Stage 1 of the update chain. Downloads newest package.
+ */
+Utils.doUpdateStage1 = function () // download
+{
 	if (Utils.OS == "win") {
 		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-package " + Utils.latestUpdateData.package];
 	} else {
 		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.package];
 	}
-
-	var r = mp.command_native({
+	mp.msg.warn(args[0]);
+	mp.msg.warn(args[1]);
+	mp.msg.warn(args[2]);
+	mp.command_native_async({
 		name: "subprocess",
 		playback_only: false,
-		capture_stdout: true,
+		capture_stdout: false,
 		capture_stderr: false,
 		args: args
-	})
+	},Utils.doUpdateStage2)
+}
 
-	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) == undefined)
-	{
-		return "Download error!";
-	}
-
-	// unzip using powershell/unzip to new dir
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"extract-package"];
-	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" extract-package"];
-	}
-
-	var r = mp.command_native({
-		name: "subprocess",
-		playback_only: false,
-		capture_stdout: true,
-		capture_stderr: false,
-		args: args
-	})
-
+/**
+ * Stage 2 of the update chain. Extracts downloaded package.
+ */
+Utils.doUpdateStage2 = function () // extract
+{
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined)
+	{
+		if (Utils.OS == "win") {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"extract-package"];
+		} else {
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" extract-package"];
+		}
+	
+		mp.command_native_async({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: true,
+			capture_stderr: false,
+			args: args
+		},Utils.doUpdateStage3)
+	}
+	else
+	{
+		Utils.unblockQuitButtons();
+		WindowSystem.Alerts.show("error","Update has failed.","","Download error!");
+		return;
+	}
+}
+
+/**
+ * Stage 3 of the update chain. Removes downloaded package.
+ */
+Utils.doUpdateStage3 = function () // delete package
+{
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined && mp.utils.file_info(mp.utils.get_user_path("~~/extractedPackage/")) != undefined)
 	{
 		if (Utils.OS == "win") {
 			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-package"];
@@ -298,78 +330,154 @@ Utils.doUpdate = function ()
 			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-package"];
 		}
 	
-		var r = mp.command_native({
+		mp.command_native_async({
 			name: "subprocess",
 			playback_only: false,
 			capture_stdout: true,
 			capture_stderr: false,
 			args: args
-		})
+		},Utils.doUpdateStage4)
 	}
-
-	if(mp.utils.file_info(mp.utils.get_user_path("~~/package/")) == undefined)
+	else
 	{
-		return "Extraction error!";
+		Utils.unblockQuitButtons();
+		WindowSystem.Alerts.show("error","Update has failed.","","Extraction error!");
+		return;
 	}
+}
 
-	// copy from new dir to conf root and overwrite everything
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package"];
-	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" apply-package"];
-	}
+/**
+ * Stage 4 of the update chain. Copies extracted files into place and deletes the temporary directory.
+ */
+Utils.doUpdateStage4 = function () // apply extracted package
+{
 
-	var r = mp.command_native({
-		name: "subprocess",
-		playback_only: false,
-		capture_stdout: true,
-		capture_stderr: false,
-		args: args
-	})
-
-	if(mp.utils.file_info(mp.utils.get_user_path("~~/extractedPackage")) != undefined)
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) == undefined)
 	{
-		return "Apply error!";
-	}
-
-	// delete everything in Utils.latestUpdateData.removeFiles
-	if (Utils.latestUpdateData.removeFiles.length != 0)
-	{
-		var file = "";
-		for (var i = 0; i < Utils.latestUpdateData.removeFiles.length; i++)
-		{
-			file = Utils.latestUpdateData.removeFiles[i];
-
-			if (Utils.OS == "win") {
-				var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
-			} else {
-				var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
-			}
 		
-			var r = mp.command_native({
-				name: "subprocess",
-				playback_only: false,
-				capture_stdout: true,
-				capture_stderr: false,
-				args: args
-			})
+		if (Utils.OS == "win") {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package"];
+		} else {
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" apply-package"];
+		}
+	
+		mp.command_native_async({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: true,
+			capture_stderr: false,
+			args: args
+		},Utils.doUpdateStage5)
+	}
+	else
+	{
+		Utils.unblockQuitButtons();
+		WindowSystem.Alerts.show("error","Update has failed.","","Deletion error!");
+		return;
+	}
+
+}
+
+/**
+ * Stage 5 of the update chain. Removes all files in Utils.latestUpdateData.removeFiles.
+ */
+Utils.doUpdateStage5 = function()
+{
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/extractedPackage")) == undefined)
+	{
+		if (Utils.latestUpdateData.removeFiles.length != 0)
+		{
+			var file = "";
+			for (var i = 0; i < Utils.latestUpdateData.removeFiles.length; i++)
+			{
+				file = Utils.latestUpdateData.removeFiles[i];
+	
+				if (Utils.OS == "win") {
+					var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+				} else {
+					var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+				}
+			
+				mp.command_native({
+					name: "subprocess",
+					playback_only: false,
+					capture_stdout: true,
+					capture_stderr: false,
+					args: args
+				})
+			}
+			Settings.Data.currentVersion = Utils.latestUpdateData.version;
+			Settings.save();
+			Utils.unblockQuitButtons();
+			WindowSystem.Alerts.show("info","Finished updating!","","Restart mpv to see changes.");
+			Utils.updateAvailable = false;
 		}
 	}
-
-	// update easympv.conf
-	Settings.Data.currentVersion = Utils.latestUpdateData.version;
-	Settings.save();
-
-	Utils.updateInProgress = false;
-
-	// Unblock quit keys
-	for(i = 0; i < idsToUnblock.length; i++)
+	else
 	{
-		mp.remove_key_binding(idsToUnblock[i]);
+		Utils.unblockQuitButtons();
+		WindowSystem.Alerts.show("error","Update has failed.","","Apply error!");
+		return;
+	}
+}
+
+/**
+ * Updates easympv. Blocks quitting the application.
+ */
+Utils.doUpdate = function ()
+{
+
+	if(Utils.latestUpdateData == undefined)
+	{
+		return "Not connected to the internet!";
 	}
 
-	WindowSystem.Alerts.show("info","Finished updating!","","Restart mpv to see changes.");
+	Utils.blockQuitButtons();
+	Utils.doUpdateStage1();
+
+	return "";
 }
+
+/**
+ * Updates mpv on Windows only.
+ */
+ Utils.updateMpv = function ()
+ {
+	var onFinished = function()
+	{
+		WindowSystem.Alerts.show("info","mpv has been updated.","","Please restart to see changes.");
+	}
+	if(Utils.OS == "win")
+	{
+		if(Settings.Data.mpvLocation != "unknown")
+		{
+			if(Utils.updateAvailableMpv)
+			{
+				var args = ["cmd", "/c", Settings.Data.mpvLocation + "\\update.bat"];
+				mp.command_native_async({
+					name: "subprocess",
+					playback_only: false,
+					capture_stdout: true,
+					capture_stderr: false,
+					args: args
+				},onFinished)
+			}
+			else
+			{
+				WindowSystem.Alerts.show("info","mpv is up to date.","","");
+			}
+		}
+		else
+		{
+			WindowSystem.Alerts.show("error","mpv location is unknown.","","Please update easympv.conf!");
+		}
+	}
+	else
+	{
+	WindowSystem.Alerts.show("error","Only supported on Windows.","","");
+	}
+	return;
+ }
 
 /**
  * Compares two version strings.
