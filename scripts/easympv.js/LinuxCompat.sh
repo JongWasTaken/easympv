@@ -20,6 +20,24 @@ if [ -z "$curl_or_wget" ]; then
     exit 1
 fi
 
+get-dependencies()
+{
+    if [ -f "/usr/bin/wget" ]; then
+        version=$(wget -q -O - https://smto.pw/mpv/hosted/dependencies.json)
+    elif [ -f "/usr/bin/curl" ]; then
+        version=$(curl https://smto.pw/mpv/hosted/dependencies.json | grep '.\..\..')
+    fi
+}
+
+download-dependency()
+{
+    if [ -f "/usr/bin/wget" ]; then
+        wget -q -O "$HOME/.config/mpv/$2" $1
+    elif [ -f "/usr/bin/curl" ]; then
+        curl $1 -o "$HOME/.config/mpv/$2"
+    fi
+}
+
 get-version-latest()
 {
     if [ -f "/usr/bin/wget" ]; then
@@ -88,6 +106,16 @@ if [ "$command" == "get-version-latest" ]; then
     exit 0
 fi
 
+if [ "$command" == "get-dependencies" ]; then
+    get-dependencies
+    echo $version
+    exit 0
+fi
+
+if [ "$command" == "download-dependency" ]; then
+    download-dependency $2 $3
+    exit 0
+fi
 
 if [ "$command" == "get-version-latest-mpv" ]; then
     get-version-latest-mpv

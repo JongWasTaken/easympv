@@ -40,6 +40,7 @@ Settings.Data = {
 	currentVersion: "0.0.0",
 	newestVersion: "0.0.1",
 	doMigration: false,
+	downloadDependencies: false,
 }
 
 /**
@@ -144,6 +145,11 @@ Settings.save = function () {
 		defaultConfigString += "# Usually false, unless you just updated, in which case it will be true.\n";
 		defaultConfigString += "# This is modified automatically and should not be changed!\n";
 		defaultConfigString += "doMigration=x\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# Wether to download dependencies on the next startup.\n";
+		defaultConfigString += "# Usually false. You may set this to true if you changed your operating system.\n";
+		defaultConfigString += "# This is modified automatically and should not be changed!\n";
+		defaultConfigString += "downloadDependencies=x\n";
 
 		lines = defaultConfigString.split('\n');
 	}

@@ -6,9 +6,27 @@
 #
 # This file does all the windows-specific things that are not possible using mpv.
 
-param([string]$command="",[string]$arguments="")
+param([string]$command="",[string]$arguments="",[string]$arguments2="")
 
 $webclient = New-Object System.Net.WebClient
+
+if($command -eq "get-dependencies")
+{
+    $latest = $webclient.DownloadString("https://smto.pw/mpv/hosted/dependencies.json")
+    Write-Output $latest.Trim()
+    exit 0
+}
+
+if($command -eq "download-dependency")
+{
+    try
+    {
+        $webclient.DownloadFile("$arguments","$env:appdata\mpv\$arguments2")
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
 
 if($command -eq "get-version-latest")
 {
@@ -113,6 +131,12 @@ if($command -eq "remove-file")
 {
     if(Test-Path -Path "$env:APPDATA\mpv\$arguments" -PathType Any)
     {Remove-Item -Path "$env:APPDATA\mpv\$arguments" -Force}
+}
+
+if($command -eq "remove-file-generic")
+{
+    if(Test-Path -Path "$arguments" -PathType Any)
+    {Remove-Item -Path "$arguments" -Force}
 }
 
 if($command -eq "get-gpus")

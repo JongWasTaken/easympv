@@ -49,9 +49,6 @@ TODO :
 	(DONE) Change more command_native -> command_native_async to speed up launch times
 	(DONE) Migrate Config on update
 	(DONE) Implement version comparison for base mpv
-	Reimplement autosave.lua
-	Reimplement betterchapters.lua
-	Reimplement autoload.lua
 	Replace placeholder titles
 	First time configuration wizard
 	Dependency downloader
