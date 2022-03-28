@@ -6,13 +6,13 @@
 #
 # This file does all the windows-specific things that are not possible using mpv.
 
-param([string]$command="")
+param([string]$command="",[string]$arguments="")
 
 $webclient = New-Object System.Net.WebClient
 
 if($command -eq "get-version-latest")
 {
-    $latest = $webclient.DownloadString("https://smto.pw/mpv/meta/latest")
+    $latest = $webclient.DownloadString("https://smto.pw/mpv/hosted/latest.json")
     Write-Output $latest.Trim()
     exit 0
 }
@@ -24,19 +24,64 @@ if($command -eq "get-version-latest-mpv")
     exit 0
 }
 
-if($command -eq "get-changelog")
-{
-    $latest = $webclient.DownloadString("https://smto.pw/mpv/meta/latest")
-    $changelog = $webclient.DownloadString("https://smto.pw/mpv/meta/changelog_"+$latest)
-    Write-Output $changelog.Trim()
-    exit 0
-}
-
 if($command -eq "get-connection-status")
 {
     $status = Test-Connection smto.pw -Quiet
     Write-Output $status
     exit 0
+}
+
+
+
+if($command -eq "get-package")
+{
+
+    if(Test-Path -Path "$env:APPDATA\mpv\package.zip" -PathType Any)
+    {Remove-Item -Path "$env:APPDATA\mpv\package.zip" -Force}
+    try 
+    {
+        $webclient.DownloadFile("https://smto.pw/mpv/hosted/$arguments")
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
+
+if($command -eq "extract-package")
+{
+    try 
+    {
+        New-Item -ItemType directory -Path "$env:APPDATA\mpv\extractedPackage" -Force
+
+        $shell = New-Object -ComObject Shell.Application
+        $zip = $shell.Namespace("$env:APPDATA\mpv\package.zip")
+        $items = $zip.items()
+        $shell.Namespace("$env:APPDATA\mpv\extractedPackage").CopyHere($items, 1556)
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
+
+if($command -eq "remove-package")
+{
+    if(Test-Path -Path "$env:APPDATA\mpv\package.zip" -PathType Any)
+    {Remove-Item -Path "$env:APPDATA\mpv\package.zip" -Force}
+}
+
+if($command -eq "apply-package")
+{
+    if(Test-Path -Path "$env:APPDATA\mpv\extractedPackage" -PathType Any)
+    {
+        Copy-Item -Path "$env:APPDATA\mpv\extractedPackage\*" -Destination "$env:APPDATA\mpv" -Recurse
+        Remove-Item -Path "$env:APPDATA\mpv\extractedPackage" -Force
+    }
+}
+
+if($command -eq "remove-file")
+{
+    if(Test-Path -Path "$env:APPDATA\mpv\$arguments" -PathType Any)
+    {Remove-Item -Path "$env:APPDATA\mpv\$arguments" -Force}
 }
 
 if($command -eq "get-gpus")
@@ -49,13 +94,6 @@ if($command -eq "get-gpus")
     }
     $fstring = $fstring -replace "(.*)\|(.*)", '$1$2'
     Write-Output $fstring
-}
-
-if($command -eq "update")
-{
-    # 1. read easympv.conf, find mpv location
-    # 2. call the update script in that folder, let it do its thing
-    # 3. do the whole update spiel
 }
 
 if($command -eq "get-drive-usb")

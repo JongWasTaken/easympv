@@ -3,7 +3,7 @@
  *
  * Author:              Jong
  * URL:                 https://smto.pw/mpv
- * License:             Apache License, Version 2.0
+ * License:             MIT License
  */
 
 /*
@@ -20,7 +20,7 @@ Important good-to-knows:
 	mpv uses MuJS, which is ES5 compliant, but not ES6!
 		Most IE polyfills will probably work.
 	Windows is more picky with font names, in case of issues
-		open the .ttf file of your font and use the "Font name:" at the top.
+		open the .ttf file of your font and use the value of "Font name:" at the top.
 
 Snippets:
 	how to check for a file
@@ -51,6 +51,7 @@ TODO :
 	Replace placeholder titles
 	Implement version comparison for base mpv
 	First time configuration wizard
+	Dependency downloader
 
 IDEAS:
 	Advanced settings, like the utility had before
@@ -150,7 +151,8 @@ Settings.Data.newestVersion = "0.0.0";
 var mpvLatestVersion = Utils.getLatestMpvVersion();
 if (!Settings.Data.manualInstallation && isOnline) {
 	mp.msg.verbose("Checking for updates...");
-	Settings.Data.newestVersion = Utils.checkForUpdates();
+	Utils.latestUpdateData = Utils.getLatestUpdateData();
+	Settings.Data.newestVersion = Utils.latestUpdateData.version;
 	updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
 	updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,mpvLatestVersion);
 }
@@ -634,7 +636,7 @@ SettingsMenu.eventHandler = function (event, action) {
 				autoClose: "0",
 				description: "You are on version " + SSA.setColorYellow() + Settings.Data.currentVersion + "@br@" +
 				"The latest available version is " + SSA.setColorYellow() + Settings.Data.newestVersion + "@br@@br@" +
-				Utils.getChangelog(),
+				Utils.latestUpdateData.changelog,
 			},
 			[
 				{

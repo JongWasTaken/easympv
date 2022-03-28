@@ -23,36 +23,64 @@ fi
 get_version_latest()
 {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/latest)
+        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/hosted/latest.json)
     elif [ -f "/usr/bin/curl" ]; then
-        version=$(curl https://smto.pw/mpv/meta/latest | grep '.\..\..')
+        version=$(curl https://smto.pw/mpv/hosted/latest.json | grep '.\..\..')
     fi
 }
 
 get-version-latest-mpv()
 {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/mpv)
+        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/hosted/mpvLatestVersion)
     elif [ -f "/usr/bin/curl" ]; then
-        version=$(curl https://smto.pw/mpv/meta/mpv | grep '.\...\..')
+        version=$(curl https://smto.pw/mpv/hosted/mpvLatestVersion | grep '.\...\..')
     fi
 }
 
-get_changelog()
+get-package()
 {
-    get_version_latest
+    if [ -f "$HOME/.config/mpv/package.zip" ]; then
+        /usr/bin/rm -rf "$HOME/.config/mpv/package.zip"
+    fi
+
     if [ -f "/usr/bin/wget" ]; then
-        changelog=$(/usr/bin/wget -q -O - https://smto.pw/mpv/meta/changelog_$version)
+        /usr/bin/wget -q -O ../../package.zip https://smto.pw/mpv/hosted/$1
     elif [ -f "/usr/bin/curl" ]; then
-        changelog=$(curl https://smto.pw/mpv/meta/changelog_$version)
+        /usr/bin/curl https://smto.pw/mpv/hosted/$1 -o ../../package.zip
     fi
 }
 
-if [ "$command" == "get-changelog" ]; then
-    get_changelog
-    echo $changelog
-    exit 0
-fi
+extract-package()
+{
+    if [ -f "$HOME/.config/mpv/package.zip" ]; then
+        if [ -f "/usr/bin/unzip" ]; then
+            /usr/bin/unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/extractedPackage/"
+        fi
+    fi
+}
+
+remove-package()
+{
+    if [ -f "$HOME/.config/mpv/package.zip" ]; then
+        /usr/bin/rm -rf "$HOME/.config/mpv/package.zip"
+    fi
+}
+
+apply-package()
+{
+    if [ -d "$HOME/.config/mpv/extractedPackage" ]; then
+        /usr/bin/cp -r "$HOME/.config/mpv/extractedPackage/"* "$HOME/.config/mpv/"
+        /usr/bin/rm -rf "$HOME/.config/mpv/extractedPackage"
+    fi
+}
+
+remove-file()
+{
+    if [ -f "$HOME/.config/mpv/$1" ]; then
+        /usr/bin/rm -rf "$HOME/.config/mpv/$1"
+    fi
+}
 
 if [ "$command" == "get-version-latest" ]; then
     get_version_latest
@@ -65,6 +93,31 @@ if [ "$command" == "get-version-latest-mpv" ]; then
     get-version-latest-mpv
     echo $version
     exit 0
+fi
+
+if [ "$command" == "get-package" ]; then
+    get-package $2
+    exit $?
+fi
+
+if [ "$command" == "extract-package" ]; then
+    extract-package
+    exit $?
+fi
+
+if [ "$command" == "remove-package" ]; then
+    remove-package
+    exit $?
+fi
+
+if [ "$command" == "apply-package" ]; then
+    apply-package
+    exit $?
+fi
+
+if [ "$command" == "remove-file" ]; then
+    remove-file $2
+    exit $?
 fi
 
 if [ "$command" == "get-gpus" ]; then
