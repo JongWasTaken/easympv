@@ -32,10 +32,13 @@ Utils.OS = undefined;
 
 Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
-
+Utils.isOnline = false;
 Utils.latestUpdateData = undefined;
 Utils.updateAvailable = false;
 Utils.updateAvailableMpv = false;
+Utils.mpvLatestVersion = "0.0.0";
+Utils.displayVersion = "";
+Utils.displayVersionMpv = "";
 
 /**
  * Determines OS by checking for OS-specific traits.
@@ -65,26 +68,48 @@ Utils.pipeName = "mpv";
 
 Utils.getLatestUpdateData = function()
 {
+	var callback = function (success, result, error)
+	{
+		if(result != undefined)
+		{
+			Utils.latestUpdateData = JSON.parse(result.stdout.trim());
+			Settings.Data.newestVersion = Utils.latestUpdateData.version;
+			Utils.updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
+			Utils.updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,Utils.mpvLatestVersion);
+			Utils.setDisplayVersion();
+		}
+		else
+		{
+			Utils.latestUpdateData = undefined;
+		}
+	}
+
 	if (Utils.OS == "win") {
 		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest"];
 	} else {
 		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest"];
 	}
 
-	var r = mp.command_native({
+	var r = mp.command_native_async({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
 		capture_stderr: false,
 		args: args
-	})
-	if (r != undefined)
+	},callback)
+}
+
+Utils.setDisplayVersion = function ()
+{
+	Utils.displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
+	Utils.displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
+	if(Utils.updateAvailable)
 	{
-		return JSON.parse(r.stdout.trim());
+		Utils.displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
 	}
-	else
+	if(Utils.updateAvailableMpv)
 	{
-		return undefined;
+		Utils.displayVersionMpv = SSA.setColorRed() + Utils.mpvVersion + " (" + Utils.mpvLatestVersion + " available)";
 	}
 }
 
@@ -160,34 +185,48 @@ Utils.executeCommand = function(line)
  */
 Utils.checkInternetConnection = function()
 {
+
+	var callback = function(success, result, error)
+	{
+		if (result != undefined)
+		{
+			Utils.isOnline = Boolean(result.stdout.trim());
+			if (!Settings.Data.manualInstallation) {
+				mp.msg.verbose("Checking for updates...");
+				Utils.getLatestUpdateData();
+			}
+		}
+	}
+
 	if (Utils.OS == "win") {
 		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-connection-status"];
 	} else {
 		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-connection-status"];
 	}
 
-	var r = mp.command_native({
+	var r = mp.command_native_async({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
 		capture_stderr: false,
 		args: args
-	})
-	if (r != undefined)
-	{
-		return Boolean(r.stdout.trim());
-	}
-	else
-	{
-		return false;
-	}
+	},callback)
+
 }
 
 /**
  * Fetches newest mpv version number.
  * @returns {string} version string
  */
- Utils.getLatestMpvVersion = function () {
+ Utils.getLatestMpvVersion = function () 
+ {
+	var callback = function (success, result, error)
+	{
+		if (result != undefined)
+		{
+			Utils.mpvLatestVersion = r.stdout.trim();
+		}
+	}
 
 	if (Utils.OS == "win") {
 		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest-mpv"];
@@ -195,21 +234,14 @@ Utils.checkInternetConnection = function()
 		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest-mpv"];
 	}
 
-	var r = mp.command_native({
+	var r = mp.command_native_async({
 		name: "subprocess",
 		playback_only: false,
 		capture_stdout: true,
 		capture_stderr: false,
 		args: args
-	})
-	if (r != undefined)
-	{
-		return r.stdout.trim();
-	}
-	else
-	{
-		return "0.0.0";
-	}
+	},callback)
+
 }
 
 /**
@@ -395,15 +427,16 @@ Utils.doUpdateStage5 = function()
 					var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
 				}
 			
-				mp.command_native({
+				mp.command_native_async({
 					name: "subprocess",
 					playback_only: false,
-					capture_stdout: true,
+					capture_stdout: false,
 					capture_stderr: false,
 					args: args
 				})
 			}
 			Settings.Data.currentVersion = Utils.latestUpdateData.version;
+			Settings.Data.doMigration = true;
 			Settings.save();
 			Utils.unblockQuitButtons();
 			WindowSystem.Alerts.show("info","Finished updating!","","Restart mpv to see changes.");
@@ -447,7 +480,7 @@ Utils.updateMpv = function ()
 			if(Utils.updateAvailableMpv)
 			{
 				var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"update-mpv", Settings.Data.mpvLocation];
-				mp.command_native({
+				mp.command_native_async({
 					name: "subprocess",
 					playback_only: false,
 					capture_stdout: true,

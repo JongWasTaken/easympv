@@ -20,10 +20,10 @@ if [ -z "$curl_or_wget" ]; then
     exit 1
 fi
 
-get_version_latest()
+get-version-latest()
 {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/hosted/latest.json)
+        version=$(wget -q -O - https://smto.pw/mpv/hosted/latest.json)
     elif [ -f "/usr/bin/curl" ]; then
         version=$(curl https://smto.pw/mpv/hosted/latest.json | grep '.\..\..')
     fi
@@ -32,7 +32,7 @@ get_version_latest()
 get-version-latest-mpv()
 {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(/usr/bin/wget -q -O - https://smto.pw/mpv/hosted/mpvLatestVersion)
+        version=$(wget -q -O - https://smto.pw/mpv/hosted/mpvLatestVersion)
     elif [ -f "/usr/bin/curl" ]; then
         version=$(curl https://smto.pw/mpv/hosted/mpvLatestVersion | grep '.\...\..')
     fi
@@ -41,21 +41,21 @@ get-version-latest-mpv()
 get-package()
 {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        /usr/bin/rm -rf "$HOME/.config/mpv/package.zip"
+        rm -rf "$HOME/.config/mpv/package.zip"
     fi
 
-    if [ -f "/usr/bin/wget" ]; then
-        /usr/bin/wget -q -O "$HOME/.config/mpv/package.zip" https://smto.pw/mpv/hosted/$1
-    elif [ -f "/usr/bin/curl" ]; then
-        /usr/bin/curl https://smto.pw/mpv/hosted/$1 -o "$HOME/.config/mpv/package.zip"
+    if [ -f "wget" ]; then
+        wget -q -O "$HOME/.config/mpv/package.zip" https://smto.pw/mpv/hosted/$1
+    elif [ -f "curl" ]; then
+        curl https://smto.pw/mpv/hosted/$1 -o "$HOME/.config/mpv/package.zip"
     fi
 }
 
 extract-package()
 {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        if [ -f "/usr/bin/unzip" ]; then
-            /usr/bin/unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/extractedPackage/"
+        if [ -f "unzip" ]; then
+            unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/extractedPackage/"
         fi
     fi
 }
@@ -63,27 +63,27 @@ extract-package()
 remove-package()
 {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        /usr/bin/rm -rf "$HOME/.config/mpv/package.zip"
+        rm -rf "$HOME/.config/mpv/package.zip"
     fi
 }
 
 apply-package()
 {
     if [ -d "$HOME/.config/mpv/extractedPackage" ]; then
-        /usr/bin/cp -r "$HOME/.config/mpv/extractedPackage/"* "$HOME/.config/mpv/"
-        /usr/bin/rm -rf "$HOME/.config/mpv/extractedPackage"
+        cp -r "$HOME/.config/mpv/extractedPackage/"* "$HOME/.config/mpv/"
+        rm -rf "$HOME/.config/mpv/extractedPackage"
     fi
 }
 
 remove-file()
 {
     if [ -f "$HOME/.config/mpv/$1" ]; then
-        /usr/bin/rm -rf "$HOME/.config/mpv/$1"
+        rm -rf "$HOME/.config/mpv/$1"
     fi
 }
 
 if [ "$command" == "get-version-latest" ]; then
-    get_version_latest
+    get-version-latest
     echo $version
     exit 0
 fi

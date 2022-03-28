@@ -45,15 +45,17 @@ TODO :
 	(DONE) MenuSystem: scrolling
 	(ONGOING) Update comments/documentation
 	(DONE) Implement Updater
+	(DONE) Windows (un)registration
+	(DONE) Change more command_native -> command_native_async to speed up launch times
+	(DONE) Migrate Config on update
+	(DONE) Implement version comparison for base mpv
 	Reimplement autosave.lua
 	Reimplement betterchapters.lua
 	Reimplement autoload.lua
 	Replace placeholder titles
-	(DONE) Implement version comparison for base mpv
 	First time configuration wizard
 	Dependency downloader
-	(DONE) Windows (un)registration
-	Change more command_native -> command_native_async to speed up launch times
+	Fix input.conf if needed
 
 IDEAS:
 	Advanced settings, like the utility had before
@@ -123,14 +125,14 @@ var Browsers = require("./Browsers");
 
 var isFirstFile = true;
 var sofaEnabled = false;
-var displayVersion = "";
-var displayVersionMpv = "";
 
 // Setup
 Utils.determineOS();
-var isOnline = Utils.checkInternetConnection();
+Utils.checkInternetConnection();
 
 Settings.load();
+if(Settings.Data.doMigration) { Settings.migrate(); }
+
 var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString());
 
 Shaders.populateSets();
@@ -148,36 +150,8 @@ for (i = 0; i < imageArray.length; i++) {
 }
 
 Settings.Data.newestVersion = "0.0.0";
-var mpvLatestVersion = Utils.getLatestMpvVersion();
-
-var setDisplayVersion = function ()
-{
-	displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion
-	displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
-
-	if(Utils.updateAvailable)
-	{
-		displayVersion = SSA.setColorRed() + Settings.Data.currentVersion + " (" + Settings.Data.newestVersion + " available)";
-	}
-
-	if(Utils.updateAvailableMpv)
-	{
-		displayVersionMpv = SSA.setColorRed() + Utils.mpvVersion + " (" + mpvLatestVersion + " available)";
-	}
-}
-
-if (!Settings.Data.manualInstallation && isOnline) {
-	mp.msg.verbose("Checking for updates...");
-	Utils.latestUpdateData = Utils.getLatestUpdateData();
-	Settings.Data.newestVersion = Utils.latestUpdateData.version;
-	Utils.updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
-	Utils.updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,mpvLatestVersion);
-	setDisplayVersion();
-}
 
 Utils.WL.populateCache();
-
-
 
 Settings.save();
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
@@ -558,7 +532,7 @@ var SettingsMenuSettings = {
 		SSA.insertSymbolFA("") +
 		SSA.setColorWhite() +
 		"Settings",
-	description: descriptionSettings(displayVersion, displayVersionMpv),
+	description: descriptionSettings(Utils.displayVersion, Utils.displayVersionMpv),
 };
 
 var SettingsMenuItems = [
@@ -600,21 +574,11 @@ var SettingsMenuItems = [
 	},
 ];
 
-if (isOnline) {
+if (Utils.isOnline) {
 	SettingsMenuItems.splice(2, 0, {
 		title: "Check for updates",
 		item: "updater",
 	});
-}
-
-if (Settings.Data.useRandomPipeName) {
-	SettingsMenuItems.push({
-		title: "Switch to insecure IPC server (!)@br@",
-		item: "remote",
-	});
-}
-
-if (Settings.Data.debugMode == true) {
 }
 
 var SettingsMenu = new MenuSystem.Menu(
@@ -645,12 +609,7 @@ SettingsMenu.eventHandler = function (event, action) {
 				"The latest available version is " + SSA.setColorYellow() + Settings.Data.newestVersion + "@br@@br@" +
 				Utils.latestUpdateData.changelog,
 			},
-			[
-				{
-					title: "Update to version " + SSA.setColorYellow() + Settings.Data.newestVersion,
-					item: "update"
-				}
-			],
+			[],
 			SettingsMenu);
 			umenu.eventHandler = function(event,action) 
 			{
@@ -659,7 +618,7 @@ SettingsMenu.eventHandler = function (event, action) {
 					umenu = undefined;
 					updateConfirmation = false;
 				}
-				if(event == "enter" && action != "@back@")
+				else if(event == "enter" && action != "@back@")
 				{
 					if(updateConfirmation)
 					{
@@ -668,9 +627,17 @@ SettingsMenu.eventHandler = function (event, action) {
 					}
 					else
 					{
-						umenu.items[1].title = SSA.setColorRed() + "Are you sure? Playback will be stopped to update!";
+						umenu.items[1].title = SSA.setColorRed() + "Are you sure?";
 						umenu.redrawMenu();
 						updateConfirmation = true;
+					}
+				}
+				else if (event == "show" && Utils.updateAvailable)
+				{
+					if(umenu.items.length == 1)
+					{
+						umenu.items.push({title: "Update to version " + SSA.setColorYellow() + Settings.Data.newestVersion,
+						item: "update"});
 					}
 				}
 			}
@@ -681,29 +648,32 @@ SettingsMenu.eventHandler = function (event, action) {
 			Utils.WL.clear();
 		} else if (action == "command") {
 
+			var readCommand = function (success, result, error)
+			{
+				if(result.status == "0")
+				{
+					mp.command(result.stdout.trim());
+				}
+			}
+
 			WindowSystem.Alerts.show("info", "Command Input window has opened!")
             if (Utils.OS == "win")
             {
-                var r = mp.command_native({
+                var r = mp.command_native_async({
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
                     args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"show-command-box"]
-                })
+                },readCommand)
             }
             else
             {
-                var r = mp.command_native({
+                var r = mp.command_native_async({
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
                     args: ["zenity", "--title=mpv", "--forms", "--text=Execute command", "--add-entry=mpv command:"]
-                })
-            }
-            if(r.status == "0")
-            {
-                var input = r.stdout.trim();
-				mp.command(input);
+                },readCommand)
             }
 
 		} else if (action == "credits") {
@@ -722,9 +692,15 @@ SettingsMenu.eventHandler = function (event, action) {
 			Utils.setIPCServer(Settings.Data.useRandomPipeName);
 			Settings.save();
 		}
-	} else if (action == "show") {
-		setDisplayVersion();
-		SettingsMenu.setDescription(descriptionSettings(displayVersion, displayVersionMpv));
+	} else if (event == "show") {
+		if (Utils.isOnline && SettingsMenuItems[2].item != "updater") {
+			SettingsMenuItems.splice(2, 0, {
+				title: "Check for updates",
+				item: "updater",
+			});
+		}
+		Utils.setDisplayVersion();
+		SettingsMenu.setDescription(descriptionSettings(Utils.displayVersion, Utils.displayVersionMpv));
 	}
 };
 
