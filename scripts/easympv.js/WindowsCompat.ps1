@@ -21,7 +21,7 @@ if($command -eq "download-dependency")
 {
     try
     {
-        $webclient.DownloadFile("$arguments","$env:appdata\mpv\$arguments2")
+        $webclient.DownloadFile("$arguments","$arguments2")
     }
     Catch [system.exception]
     {exit 1}
@@ -89,7 +89,7 @@ if($command -eq "get-package")
 
     try
     {
-        $webclient.DownloadFile("https://smto.pw/mpv/hosted/$arguments","$env:appdata\mpv\package.zip")
+        $webclient.DownloadFile("https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/$arguments","$env:appdata\mpv\package.zip")
     }
     Catch [system.exception]
     {exit 1}
@@ -100,12 +100,12 @@ if($command -eq "extract-package")
 {
     try 
     {
-        New-Item -ItemType directory -Path "$env:APPDATA\mpv\extractedPackage" -Force
+        #New-Item -ItemType directory -Path "$env:APPDATA\mpv\extractedPackage" -Force
 
         $shell = New-Object -ComObject Shell.Application
         $zip = $shell.Namespace("$env:APPDATA\mpv\package.zip")
         $items = $zip.items()
-        $shell.Namespace("$env:APPDATA\mpv\extractedPackage").CopyHere($items, 1556)
+        $shell.Namespace("$env:APPDATA\mpv").CopyHere($items, 1556)
     }
     Catch [system.exception]
     {exit 1}
@@ -120,10 +120,10 @@ if($command -eq "remove-package")
 
 if($command -eq "apply-package")
 {
-    if(Test-Path -Path "$env:APPDATA\mpv\extractedPackage" -PathType Any)
+    if(Test-Path -Path "$env:APPDATA\mpv\easympv-$arguments" -PathType Any)
     {
-        Copy-Item -Path "$env:APPDATA\mpv\extractedPackage\*" -Destination "$env:APPDATA\mpv" -Recurse -Force
-        Remove-Item -Path "$env:APPDATA\mpv\extractedPackage" -Force -Recurse
+        Copy-Item -Path "$env:APPDATA\mpv\easympv-$arguments\*" -Destination "$env:APPDATA\mpv" -Recurse -Force
+        Remove-Item -Path "$env:APPDATA\mpv\easympv-$arguments" -Force -Recurse
     }
 }
 

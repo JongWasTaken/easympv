@@ -857,7 +857,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 			this.cachedMenuText += lineStart(1, 0) + color + title + lineEnd();
 
 			if (currentItem.description != undefined) {
-				var dLines = currentItem.description.split("@br@"); // 4 spaces in description = line break
+				var dLines = currentItem.description.split("@br@");
 				description =
 					lineStart(1, descriptionSizeModifier) +
 					color +
@@ -869,7 +869,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 						lineStart(0, descriptionSizeModifier) +
 						color +
 						" " +
-						dLines[i] +
+						dLines[l] +
 						lineEnd();
 				}
 			}

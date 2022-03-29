@@ -41,6 +41,16 @@ Settings.Data = {
 	newestVersion: "0.0.1",
 	doMigration: false,
 	downloadDependencies: false,
+	fixInputs: false,
+	firstTimeStartup: false,
+}
+
+/**
+ * This object contains deserialized data from easympv.conf.
+ * Call Settings.reload() to update it.
+ */
+ Settings.x = {
+	mpvLocation: "unknown",
 }
 
 /**
@@ -132,6 +142,8 @@ Settings.save = function () {
 		defaultConfigString += "# Default: false\n";
 		defaultConfigString += "debugMode=x\n";
 		defaultConfigString += "\n";
+		defaultConfigString += "# ! Settings below are set automatically, though some might be of interest !\n";
+		defaultConfigString += "\n";
 		defaultConfigString += "# The currently installed version of easympv.\n";
 		defaultConfigString += "# This is modified automatically and should not be changed!\n";
 		defaultConfigString += "currentVersion=x\n";
@@ -142,14 +154,27 @@ Settings.save = function () {
 		defaultConfigString += "newestVersion=x\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Wether to migrate this configuration on the next startup.\n";
+		defaultConfigString += "# This means that the config will be regenerated while preserving your settings.\n";
 		defaultConfigString += "# Usually false, unless you just updated, in which case it will be true.\n";
-		defaultConfigString += "# This is modified automatically and should not be changed!\n";
+		defaultConfigString += "# This is modified automatically!\n";
 		defaultConfigString += "doMigration=x\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Wether to download dependencies on the next startup.\n";
 		defaultConfigString += "# Usually false. You may set this to true if you changed your operating system.\n";
-		defaultConfigString += "# This is modified automatically and should not be changed!\n";
+		defaultConfigString += "# This is modified automatically!\n";
 		defaultConfigString += "downloadDependencies=x\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# Wether to check the input.conf file for missing entries on the next startup.\n";
+		defaultConfigString += "# Default: false.\n";
+		defaultConfigString += "# This is NOT modified automatically, set this to true as troubleshooting!\n";
+		defaultConfigString += "fixInputs=x\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# Wether to show the First Time configuration Wizard on the next startup.\n";
+		defaultConfigString += "# Usually false, unless you just installed easympv.\n"; 
+		defaultConfigString += "# Some updates might enable this too.\n";
+		defaultConfigString += "# ! THIS WILL DISCARD YOUR CONFIGURATION !\n";
+		defaultConfigString += "# This is modified automatically and should not be changed!\n";
+		defaultConfigString += "firstTimeStartup=x\n";
 
 		lines = defaultConfigString.split('\n');
 	}

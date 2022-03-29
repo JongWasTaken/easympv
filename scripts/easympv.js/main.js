@@ -49,10 +49,10 @@ TODO :
 	(DONE) Change more command_native -> command_native_async to speed up launch times
 	(DONE) Migrate Config on update
 	(DONE) Implement version comparison for base mpv
+	(DONE) Dependency downloader
 	Replace placeholder titles
-	First time configuration wizard
-	Dependency downloader
-	Fix input.conf if needed
+	First time configuration wizard | A bunch of menus basically, new module would be nice
+	(ONGOING) Fix input.conf if needed | Utils.FixInputs(), Settings.Data.fixInputs
 
 IDEAS:
 	Advanced settings, like the utility had before
@@ -119,6 +119,7 @@ var Chapters = require("./Chapters");
 var MenuSystem = require("./MenuSystem");
 var WindowSystem = require("./WindowSystem");
 var Browsers = require("./Browsers");
+var Wizard = require("./FirstTimeWizard");
 
 var isFirstFile = true;
 var sofaEnabled = false;
@@ -154,6 +155,8 @@ Settings.save();
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
 mp.msg.info("easympv " + Settings.Data.currentVersion + " loaded");
+
+//Wizard.Start();
 
 var onFileLoad = function () {
 	var wld = Utils.WL.getData();
@@ -608,6 +611,7 @@ SettingsMenu.eventHandler = function (event, action) {
 			},
 			[],
 			SettingsMenu);
+
 			umenu.eventHandler = function(event,action) 
 			{
 				if(event == "hide")
@@ -636,6 +640,20 @@ SettingsMenu.eventHandler = function (event, action) {
 						umenu.items.push({title: "Update to version " + SSA.setColorYellow() + Settings.Data.newestVersion,
 						item: "update"});
 					}
+				}
+			}
+			if(Settings.Data.debugMode)
+			{
+				umenu.settings.description += "@br@@br@[Debug Mode Information]@br@These files will be removed:@br@";
+
+				for(var i = 0; i < Utils.latestUpdateData.removeFiles.length; i++)
+				{
+					umenu.settings.description += " - " + Utils.latestUpdateData.removeFiles[i] + "@br@";
+				}
+				umenu.settings.description += "@br@These settings will be enabled:@br@";
+				for(var i = 0; i < Utils.latestUpdateData.enableSettings.length; i++)
+				{
+					umenu.settings.description += " - " + Utils.latestUpdateData.enableSettings[i] + "@br@";
 				}
 			}
 			umenu.showMenu();

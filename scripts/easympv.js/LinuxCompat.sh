@@ -62,18 +62,18 @@ get-package()
         rm -rf "$HOME/.config/mpv/package.zip"
     fi
 
-    if [ -f "wget" ]; then
-        wget -q -O "$HOME/.config/mpv/package.zip" https://smto.pw/mpv/hosted/$1
-    elif [ -f "curl" ]; then
-        curl https://smto.pw/mpv/hosted/$1 -o "$HOME/.config/mpv/package.zip"
+    if [ -f "/usr/bin/wget" ]; then
+        wget --content-disposition -q -O "$HOME/.config/mpv/package.zip" https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/$1
+    elif [ -f "/usr/bin/curl" ]; then
+        curl -LJ https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/$1 -o "$HOME/.config/mpv/package.zip"
     fi
 }
 
 extract-package()
 {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        if [ -f "unzip" ]; then
-            unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/extractedPackage/"
+        if [ -f "/usr/bin/unzip" ]; then
+            unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/"
         fi
     fi
 }
@@ -87,9 +87,9 @@ remove-package()
 
 apply-package()
 {
-    if [ -d "$HOME/.config/mpv/extractedPackage" ]; then
-        cp -r "$HOME/.config/mpv/extractedPackage/"* "$HOME/.config/mpv/"
-        rm -rf "$HOME/.config/mpv/extractedPackage"
+    if [ -d "$HOME/.config/mpv/easympv-$1" ]; then
+        cp -r "$HOME/.config/mpv/easympv-$1/"* "$HOME/.config/mpv/"
+        rm -rf "$HOME/.config/mpv/easympv-$1"
     fi
 }
 
@@ -139,7 +139,7 @@ if [ "$command" == "remove-package" ]; then
 fi
 
 if [ "$command" == "apply-package" ]; then
-    apply-package
+    apply-package $2
     exit $?
 fi
 

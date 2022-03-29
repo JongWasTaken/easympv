@@ -283,6 +283,7 @@ Utils.blockQuitButtons = function ()
 	}
 }
 
+
 /**
  * Removes previously blocked quit bindings. Used with updater.
  */
@@ -305,9 +306,9 @@ Utils.unblockQuitButtons = function ()
 Utils.doUpdateStage1 = function () // download
 {
 	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-package " + Utils.latestUpdateData.package];
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-package " + Utils.latestUpdateData.version];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.package];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.version];
 	}
 
 	mp.command_native_async({
@@ -353,7 +354,7 @@ Utils.doUpdateStage2 = function () // extract
  */
 Utils.doUpdateStage3 = function () // delete package
 {
-	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined && mp.utils.file_info(mp.utils.get_user_path("~~/extractedPackage/")) != undefined)
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined && mp.utils.file_info(mp.utils.get_user_path("~~/easympv-"+Utils.latestUpdateData.version+"/")) != undefined)
 	{
 		if (Utils.OS == "win") {
 			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-package"];
@@ -386,9 +387,9 @@ Utils.doUpdateStage4 = function () // apply extracted package
 	{
 		
 		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package"];
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package",Utils.latestUpdateData.version];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" apply-package"];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" apply-package " + Utils.latestUpdateData.version];
 		}
 	
 		mp.command_native_async({
@@ -409,7 +410,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
 }
 
 /**
- * Stage 5 of the update chain. Removes all files in Utils.latestUpdateData.removeFiles.
+ * Stage 5 of the update chain. Removes all files in Utils.latestUpdateData.removeFiles and finishes the update.
  */
 Utils.doUpdateStage5 = function()
 {
@@ -436,13 +437,27 @@ Utils.doUpdateStage5 = function()
 					args: args
 				})
 			}
-			Settings.Data.currentVersion = Utils.latestUpdateData.version;
-			Settings.Data.doMigration = true;
-			Settings.save();
-			Utils.unblockQuitButtons();
-			WindowSystem.Alerts.show("info","Finished updating!","","Restart mpv to see changes.");
-			Utils.updateAvailable = false;
 		}
+
+		if (Utils.latestUpdateData.enableSettings.length != 0)
+		{
+			// set specified settings
+			for (var i = 0; i < Utils.latestUpdateData.enableSettings.length; i++)
+			{
+				Settings.Data[Utils.latestUpdateData.enableSettings[i]] = true;
+			}
+		}
+		// update version
+		Settings.Data.currentVersion = Utils.latestUpdateData.version;
+
+		// save to file
+		Settings.save();
+
+		// done
+		Utils.unblockQuitButtons();
+		WindowSystem.Alerts.show("info","Finished updating!","","Restart mpv to see changes.");
+		Utils.updateAvailable = false;
+		
 	}
 	else
 	{
@@ -552,7 +567,7 @@ Utils.downloadDependencies = function()
 		if(Utils.OS == "win")
 		{
 			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file-generic",
-			Settings.mpvLocation + "\\" + dependencies.windows[i].location];
+			Settings.Data.mpvLocation + "\\" + dependencies.windows[i].location];
 	
 			mp.command_native({
 				name: "subprocess",
@@ -601,7 +616,7 @@ Utils.downloadDependencies = function()
 	for(var i = 0; i < installList.length; i++)
 	{
 		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"download-dependency",installList[i].url,installList[i].location];
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"download-dependency",installList[i].url,Settings.Data.mpvLocation + "\\" + installList[i].location];
 		} else {
 			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" download-dependency " + installList[i].url + " " + installList[i].location];
 		}
