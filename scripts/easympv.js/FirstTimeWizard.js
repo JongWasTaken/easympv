@@ -6,6 +6,18 @@ Wizard.idsToUnblock = [];
 
 Wizard.Menus = {};
 
+/*
+TODO:
+
+Add options for:
+
+These depend on implementing a mpv.conf serializer/deserializer first
+- Subtitle Language: "English" or "none", maybe more?
+- Audio Language: "Japanese" or "English", maybe more?
+
+
+*/
+
 // temp
 var unblock = function ()
 {

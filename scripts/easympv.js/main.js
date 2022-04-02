@@ -185,7 +185,7 @@ var onFileLoad = function () {
 
 	if (wld != undefined) {
 		mp.msg.warn(
-			'Please ignore "Error parsing option shader (option not found)" errors. These are expected.'
+			'Please ignore "Error parsing option x (option not found)" errors. These are expected.'
 		);
 		if (wld.shader != undefined && !Shaders.manualSelection) {
 			Shaders.apply(wld.shader);

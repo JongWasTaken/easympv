@@ -74,6 +74,7 @@ Utils.getLatestUpdateData = function()
 		{
 			Utils.latestUpdateData = JSON.parse(result.stdout.trim());
 			Settings.Data.newestVersion = Utils.latestUpdateData.version;
+			Settings.save();
 			Utils.updateAvailable = Utils.compareVersions(Settings.Data.currentVersion,Settings.Data.newestVersion);
 			Utils.updateAvailableMpv = Utils.compareVersions(Utils.mpvVersion,Utils.mpvLatestVersion);
 			Utils.setDisplayVersion();
