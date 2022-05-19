@@ -38,6 +38,7 @@ Settings.Data = {
 	mpvLocation: "unknown",
 	defaultShaderSet: "none",
 	defaultColorProfile: "none",
+	showHiddenFiles: false,
 	startIPCServer: false,
 	manualInstallation: false,
 	notifyAboutUpdates: true,
@@ -66,7 +67,7 @@ Settings.reload = function () {
 		return;
 	var lines = mp.utils.read_file(
 		mp.utils.get_user_path("~~/easympv.conf")
-	).split('\n');
+	).replaceAll("\r\n","\n").split('\n');
 	
 	for (var i = 0; i <= lines.length-1; i++) {
 		if(lines[i].substring(0,1) != "#")
@@ -120,6 +121,10 @@ Settings.save = function () {
 		defaultConfigString += "# Default: none\n";
 		defaultConfigString += "# Use the full name of a profile as it appears in the colors menu!\n";
 		defaultConfigString += "defaultColorProfile=x\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# Whether to show hidden files and folders in the file browser.\n";
+		defaultConfigString += "# Default: false\n";
+		defaultConfigString += "showHiddenFiles=x\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Whether to start the mpv IPC server on startup.\n";
 		defaultConfigString += "# Default: false\n";
@@ -180,13 +185,13 @@ Settings.save = function () {
 		defaultConfigString += "# This is modified automatically and should not be changed!\n";
 		defaultConfigString += "firstTimeStartup=x\n";
 
-		lines = defaultConfigString.split('\n');
+		lines = defaultConfigString.replaceAll("\r\n","\n").split('\n');
 	}
 	else
 	{
 		lines = mp.utils.read_file(
 			mp.utils.get_user_path("~~/easympv.conf")
-		).split('\n');
+		).replaceAll("\r\n","\n").split('\n');
 	}
 
 	for (var i = 0; i <= lines.length-1; i++) {
@@ -214,7 +219,7 @@ Settings.migrate = function ()
 	{
 		var lines = mp.utils.read_file(
 			mp.utils.get_user_path("~~/easympv.conf")
-		).split('\n');
+		).replaceAll("\r\n","\n").split('\n');
 	
 		for (var i = 0; i <= lines.length-1; i++) {
 			if(lines[i].substring(0,1) != "#")
@@ -278,7 +283,15 @@ Settings.migrate = function ()
  * Call Settings.mpvConfig.reload() to update it.
  */
 Settings.mpvConfig.Data = {
-	placeholder: "unknown",
+	no_input_default_bindings: "@empty@",
+	no_osd_bar: "@empty@",
+	alang: "Japanese,ja,jap,jpn",
+	slang: "Full,English,eng,en,Subtitles",
+	scale: "ewa_lanczossharp",
+	cscale: "ewa_lanczossoft",
+	dscale: "mitchell",
+	title: "${filename}",
+	video_sync: "audio",
 }
 
 /**
@@ -292,12 +305,148 @@ Settings.mpvConfig.load = function () {
  * Deserializes mpv.conf and updates Settings.mpvConfig.Data.
 */
 Settings.mpvConfig.reload = function () {
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
+		return;
+	}
+	else
+	{
+		var confFile = mp.utils.read_file(
+			mp.utils.get_user_path("~~/mpv.conf")
+		).replaceAll("\r\n","\n").split('\n');
+	}
+		
+	for (var i = 0; i <= confFile.length-1; i++) {
+		if(confFile[i].trim().substring(0,1) != "#")
+		{
+			if(confFile[i].includes('='))
+			{
+				var temp = confFile[i].split('=');
+				var option = temp[0].trim().replaceAll("-","_");
+				var value = temp[1].trim().split('#')[0];
+
+				if(value == "true")
+				{
+					value = true;
+				}
+				if(value == "false")
+				{
+					value = false;
+				}
+				Settings.mpvConfig.Data[option] = value;
+
+			}
+			else
+			{
+				var option = confFile[i].trim().replaceAll("-","_");
+				var value = "@empty@";
+				Settings.mpvConfig.Data[option] = value;
+			}
+		}
+	}
+
+}
+
+Settings.mpvConfig.reset = function () {
+
+	var file = "mpv.conf"
+	if (Utils.OS == "win") {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+	} else {
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+	}
+	mp.command_native({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: false,
+		capture_stderr: false,
+		args: args
+	})
+
+	Settings.mpvConfig.save();
 }
 
 /**
  * Serializes Settings.mpvConfig.Data into mpv.conf.
 */
 Settings.mpvConfig.save = function () {
+	// fuck i need to write this down
+
+	// IF file DOES NOT exist:
+	// - Generate new file with sane defaults
+	// - Replace Values
+
+	// IF file DOES exist:
+	// - Check if an option exists, if yes replace, else append
+	var copy = "";
+	var lines = [];
+
+	if(mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
+		var defaultConfigString = "";
+		
+		defaultConfigString += "#!!v3\n";
+		defaultConfigString += "### mpv.conf ###\n";
+
+		lines = defaultConfigString.replaceAll("\r\n","\n").split('\n');
+	}
+	else
+	{
+		lines = mp.utils.read_file(
+			mp.utils.get_user_path("~~/mpv.conf")
+		).replaceAll("\r\n","\n").split('\n');
+	}
+
+	for (var i = 0; i <= lines.length-1; i++) {
+		var option = "";
+		var value = "";
+		var string = "";
+		if(lines[i].includes('=')) {
+			option = lines[i].split('=')[0];
+		} else { option = lines[i]; }
+
+		if (Settings.mpvConfig.Data[option] != undefined) {
+			value = Settings.mpvConfig.Data[option];
+			option = option.replaceAll("_","-");
+			if (value == "@empty@")
+			{
+				string = option;
+			} else
+			{
+				string = option + "=" + value;
+			}
+		}
+		else
+		{
+			string = lines[i];
+		}
+		copy = copy + string + "\n";
+	}
+
+	for (var item in Settings.mpvConfig.Data)
+	{
+		if (!copy.includes(item))
+		{
+			var val = Settings.mpvConfig.Data[item];
+			item = item.replaceAll("_","-");
+			if (val == "@empty@")
+			{
+				copy = copy + item + "\n";
+			}
+			else
+			{
+				copy = copy + item + "=" + val + "\n";
+			}
+		}
+	}
+
+	copy = copy.replace(new RegExp("\\n$"), "");
+	mp.utils.write_file(
+		"file://" + mp.utils.get_user_path("~~/mpv.conf"),
+		copy
+	);
+
+	Settings.Data.resetMpvConfig = false;
+	Settings.save();
+
 }
 
 /////////////////////////////////////////// input.conf
@@ -322,7 +471,6 @@ Settings.inputConfig.reset = function () {
 		args: args
 	})
 
-	var lines = [];
 	var defaultConfigString = "";
 	defaultConfigString += "### input.conf ###\n";
 	defaultConfigString += "MBTN_LEFT cycle pause\n";
@@ -342,8 +490,10 @@ Settings.inputConfig.reset = function () {
 	defaultConfigString += "LEFT script_binding chapter_prev\n";
 	defaultConfigString += "RIGHT script_binding chapter_next\n";
 	defaultConfigString += "s async screenshot\n";
+	defaultConfigString += "tab async screenshot\n";
 	defaultConfigString += "q quit-watch-later\n";
 	defaultConfigString += "m script_binding easympv\n";
+	defaultConfigString += "esc script_binding easympv\n";
 	defaultConfigString += "k script_binding menu-test\n";
 	defaultConfigString += "i script-binding stats/display-stats-toggle\n";
 	defaultConfigString += "a cycle-values video-aspect \"16:9\" \"4:3\" \"1024:429\"\n";
@@ -356,12 +506,20 @@ Settings.inputConfig.reset = function () {
 	defaultConfigString += "d script-binding drpc_toggle\n";
 	defaultConfigString += "x show-text \"${playlist}\"\n";
 	defaultConfigString += "n seek 90\n";
-	lines = defaultConfigString.split('\n');
+	defaultConfigString += "\n";
+	defaultConfigString += "PGDWN add volume -5\n";
+	defaultConfigString += "PGUP add volume 5\n";
+	defaultConfigString += "Shift+PGUP cycle-values sub-scale \"0.8\" \"0.9\" \"1\" \"1.1\" \"1.2\"\n";
+	defaultConfigString += "Shift+PGDWN cycle-values video-aspect \"16:9\" \"4:3\" \"1024:429\"\n";
+	lines = defaultConfigString.replaceAll("\r\n","\n").split('\n');
 
 	mp.utils.write_file(
-		"file://" + mp.utils.get_user_path("~~/easympv.conf"),
-		this.DataCopy
+		"file://" + mp.utils.get_user_path("~~/input.conf"),
+		defaultConfigString
 	);
+
+	Settings.Data.resetInputConfig = false;
+	Settings.save();
 }
 
 module.exports = Settings;

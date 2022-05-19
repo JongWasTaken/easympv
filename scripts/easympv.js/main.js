@@ -46,16 +46,17 @@ TODO :
 	(ONGOING) Update comments/documentation
 	(DONE) Implement Updater
 	(DONE) Windows (un)registration
-	(DONE) Change more command_native -> command_native_async to speed up launch times
+	(DONE) Change command_native -> command_native_async to speed up launch times
 	(DONE) Migrate Config on update
 	(DONE) Implement version comparison for base mpv
 	(DONE) Dependency downloader
 	Replace placeholder titles
 	First time configuration wizard | A bunch of menus basically, new module would be nice
-	(ONGOING) Fix input.conf if needed | Utils.FixInputs(), Settings.Data.fixInputs
+	(ONGOING) Fix input.conf if needed | Settings.inputConfig.reset(), Settings.Data.resetInputConfig
 
 IDEAS:
 	Advanced settings, like the utility had before
+	FFI.js -> easympv-ffi.lua
 
 KNOWN ISSUES:
 	none
@@ -130,6 +131,8 @@ Utils.checkInternetConnection();
 
 Settings.load();
 if(Settings.Data.doMigration) { Settings.migrate(); }
+if(Settings.Data.resetMpvConfig) { Settings.mpvConfig.reset(); }
+if(Settings.Data.resetInputConfig) { Settings.inputConfig.reset(); }
 
 var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString());
 
@@ -156,7 +159,8 @@ Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
 mp.msg.info("easympv " + Settings.Data.currentVersion + " loaded");
 
-//Wizard.Start();
+//TODO: do not ship this
+Wizard.Start();
 
 var onFileLoad = function () {
 	var wld = Utils.WL.getData();

@@ -18,6 +18,8 @@ These depend on implementing a mpv.conf serializer/deserializer first
 
 */
 
+var menuColor = "#77dd11";
+
 // temp
 var unblock = function ()
 {
@@ -34,7 +36,7 @@ Wizard.Menus.Page1 = new MenuSystem.Menu(
     {
         title: "Welcome!",
         description: "Thank you for trying out easympv!@br@Since this is the first time easympv has been loaded, we will have to set a few settings.@br@You can navigate menus like this one using your mousewheel or arrow keys and enter.",
-        selectedItemColor: "#77dd11",
+        selectedItemColor: menuColor,
         autoClose: 0
     },
     [
@@ -59,15 +61,27 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
     {
         title: "Initial Settings",
         description: "X",
-        selectedItemColor: "#77dd11",
+        selectedItemColor: menuColor,
         autoClose: 0
     },
     [
         {
-            title: "Performance Preset",
+            title: "Performance Preset@us10@@br@",
             item: "toggle-performance",
             description: "Laptop / integrated GPU@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@",
-            data: 2
+            data: 1
+        },
+        {
+            title: "Default Audio Language",
+            item: "toggle-audio-language",
+            description: "none@br@Set to \"none\" to use the default language specified by a video file.@br@",
+            data: 1
+        },
+        {
+            title: "Default Subtitle Language@us10@@br@",
+            item: "toggle-sub-language",
+            description: "none@br@Set to \"none\" to not display subtitles by default.@br@",
+            data: 1
         },
         {
             title: "Continue",
@@ -84,27 +98,73 @@ Wizard.Menus.Page2.eventHandler = function (event, action)
         if(action == "toggle-performance")
         {
             var item = Wizard.Menus.Page2.items[0];
-            if(item.data == 1)
+            if(item.data == 0)
             {
                 item.description = "Laptop / integrated GPU@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@";
+                item.data = 1;
+            }
+            else if(item.data == 1)
+            {
+                item.description = "Desktop / good dedicated GPU@br@Choose this preset if your PC can play videogames well.@br@";
                 item.data = 2;
             }
             else if(item.data == 2)
             {
-                item.description = "Desktop / good dedicated GPU@br@Choose this preset if your PC can play videogames.@br@"
+                item.description = "Lowest / \"Potato\"@br@Choose this if your PC is old.@br@At this point you should probably use your phone instead.@br@";
+                item.data = 0;
+            }
+            Wizard.Menus.Page2.redrawMenu();
+        }
+        else if(action == "toggle-audio-language")
+        {
+            var item = Wizard.Menus.Page2.items[1];
+            if(item.data == 0)
+            {
+                item.description = "none@br@Set to \"none\" to use the default language specified by a video file.@br@";
+                item.data = 1;
+            }
+            else if(item.data == 1)
+            {
+                item.description = "Japanese@br@Set to \"none\" to use the default language specified by a video file.@br@";
+                item.data = 2;
+            }
+            else if(item.data == 2)
+            {
+                item.description = "English@br@Set to \"none\" to use the default language specified by a video file.@br@";
                 item.data = 3;
             }
             else if(item.data == 3)
             {
-                item.description = "Lowest / \"Potato\"@br@Choose this if your PC is old.@br@At this point you should probably use your phone instead."
+                item.description = "German@br@Set to \"none\" to use the default language specified by a video file.@br@";
+                item.data = 0;
+            }
+            Wizard.Menus.Page2.redrawMenu();
+        }
+        else if(action == "toggle-sub-language")
+        {
+            var item = Wizard.Menus.Page2.items[2];
+            if(item.data == 0)
+            {
+                item.description = "none@br@Set to \"none\" to not display subtitles by default.@br@";
                 item.data = 1;
+            }
+            else if(item.data == 1)
+            {
+                item.description = "English@br@Set to \"none\" to not display subtitles by default.@br@";
+                item.data = 2;
+            }
+            else if(item.data == 2)
+            {
+                item.description = "German@br@Set to \"none\" to not display subtitles by default.@br@";
+                item.data = 0;
             }
             Wizard.Menus.Page2.redrawMenu();
         }
         else if(action == "continue")
         {
-            Wizard.Menus.Page1.hideMenu();
-            Wizard.Menus.Page2.showMenu();
+            Wizard.Menus.Page2.hideMenu();
+            //Wizard.Menus.Page3.showMenu();
+            unblock();
         }
     }
 };

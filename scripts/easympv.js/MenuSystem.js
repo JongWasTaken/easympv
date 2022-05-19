@@ -30,7 +30,7 @@ How to use:
 
 Create a new instance of MenuSystem.Menu(Settings,Items[,Parent])
 
-Settings must be an object and can have the following properties:
+Settings can be an object with the following properties:
     "autoClose"             Number, how many to wait after the last input before closing the menu
                             Set to 0 to disable
     "fontSize"              Number, default font size
@@ -39,13 +39,16 @@ Settings must be an object and can have the following properties:
                             message displayMethod default value is 35
     "image"                 String, name of indexed image object
                             Requires OSD.js, as well as 3 versions of the image in different scales
+							(It is probably better to to just load custom fonts for things like logos)
     "title"                 String, title gets displayed when no image or impossible to draw image
     "titleColor"            Hex string, name of font
     "titleFont"             String, color of title
     "description"           String, supports special substrings (see below)
     "descriptionColor"      Hex string, color of description
     "itemPrefix"            String, gets prepended to selected item
-    "itemSuffix"            String, gets added to an item when it gets activated (right event)
+							Used as selector
+    "itemSuffix"            String, gets added to selected item
+							Used to show activation of item (feedback)
     "itemColor"             Hex string, default color of all items
     "selectedItemColor"     Hex string, color of selected item
     "transparency"          Percentage, 0 -> solid, 100 -> invisible, default is 0
@@ -58,11 +61,16 @@ Settings must be an object and can have the following properties:
     "displayMethod"         String, either "overlay" or "message", check below for explanation
                             "message" displayMethod is intended as a fallback only, it is not really maintained
     "zIndex"                Number, on which zIndex to show this menu on, default is 999
+	"maxTitleLength"		Number, number of characters before a title gets cut off
+							set to 0 to disable (default)
+							! It is recommended to cut strings manually instead of using this,
+							  as SSA tags could be cut as well, which will break the menu. !
     "keybindOverrides"      Object Array, each object has 3 properties: 
                             "key"    - Name of the key, same as input.conf
                             "id"     - A unique identifier for this keybind
                             "action" - Which event to fire when it gets pressed
 All of these have default values.
+Alternatively leave Settings undefined to use all default values.
 
 Items is an array of objects that can have the following properties:
     "title"                 String, gets displayed, supports special substrings (see below)
@@ -73,7 +81,7 @@ Items is an array of objects that can have the following properties:
 
 "title" and "description" can include these special substrings:
     @br@ - Insert blank line after item
-    @us1@ - Insert line after item , replace 1 with amount of line characters
+    (title only) @us1@ - Insert line after item , replace 1 with amount of line characters
 
 Parent is another instance of MenuSystem.Menu, if provided, a Back button
 will appear as the first item of the Menu.
@@ -93,10 +101,11 @@ Possible events:
     "right"     User pressed right(or equivalent) on an item
                 "action" will be the selected items "item" property
 
-Optional: Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way)
+If you previously used VideoPlayerCode's menu implementation, the following might be of interest:
 By default we use mpv's new osd-overlay system instead of just using the regular mp.osd_message().
 The main benefit is that all other messages will appear below the menu,
-making it "unbreakable". It also scales with the window size!
+making it "unbreakable". It will also scale with the window size (1080p is 100%).
+Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
 
 The definition of Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
@@ -245,6 +254,12 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.settings.zIndex = settings.zIndex;
 	} else {
 		this.settings.zIndex = 999;
+	}
+
+	if (settings.maxTitleLength != undefined) {
+		this.settings.maxTitleLength = settings.maxTitleLength;
+	} else {
+		this.settings.maxTitleLength = 0;
 	}
 
 	if (settings.itemSuffix != undefined) {
@@ -456,6 +471,15 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.parentMenu = undefined;
 	}
 
+	if(this.settings.maxTitleLength != 0){
+		for(var i = 0; i < this.items.length; i++) 
+		{
+			if(this.items[i].title.length >= this.settings.maxTitleLength) {
+				this.items[i].title = this.items[i].title.substring(0, this.settings.maxTitleLength) + "...";
+			}
+		}
+	}
+
 	this.cachedMenuText = "";
 	this.isMenuVisible = false;
 	this.suffixCacheIndex = -1;
@@ -490,7 +514,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
         -  Sizes do not translate 1:1 
             (default font size has to be 35 intead of 11 to look similar to "overlay" displayMethod)
         -  Will fight over display space (basically like Z-fighting)
-        -  Deprecated
+        -  Deprecated, not maintained
 
         "overlay" displayMethod:
         +  Automatically scales to window size
@@ -503,6 +527,8 @@ Menus.Menu.prototype._constructMenuCache = function () {
 
         Documentation for SSA specification
         http://www.tcax.org/docs/ass-specs.htm
+
+		The code below is quite messy, sorry.
     */
 
 	this.allowDrawImage = false;
@@ -697,7 +723,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 				custom = 0;
 			}
 			switch (size) {
-				// These number define the line spacings
+				// These numbers define the line spacings
 				case 0:
 					modifier = 0.0007;
 					break; // small
@@ -786,7 +812,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		// Description
 		var mainDescription = "";
 		if (this.settings.description != undefined) {
-			var mdLines = this.settings.description.split("@br@"); // 4 spaces in description = line break
+			var mdLines = this.settings.description.split("@br@");
 			mainDescription =
 				lineStart(2, descriptionSizeModifier) +
 				SSA.setColor(this.settings.descriptionColor) +

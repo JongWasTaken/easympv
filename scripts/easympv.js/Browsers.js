@@ -37,17 +37,17 @@ Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
 Browsers.FileBrowser.menu = undefined;
-Browsers.FileBrowser.menuSettings = {"scrollingEnabled": true};
+Browsers.FileBrowser.menuSettings = {"autoClose": 0, "scrollingEnabled": true};
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
 Browsers.DriveBrowser.menu = undefined;
-Browsers.DriveBrowser.menuSettings = {"scrollingEnabled": true, "scrollingPosition": 8};
+Browsers.DriveBrowser.menuSettings = {"autoClose": 0, "scrollingEnabled": true, "scrollingPosition": 8};
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
 Browsers.DriveBrowser.cachedDriveName = "";
 
 Browsers.DeviceBrowser.menu = undefined;
-Browsers.DeviceBrowser.menuSettings = {"scrollingEnabled": true, "scrollingPosition": 8};
+Browsers.DeviceBrowser.menuSettings = {"autoClose": 0, "scrollingEnabled": true, "scrollingPosition": 8};
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
 
@@ -332,7 +332,7 @@ Browsers.Selector.open = function (parentMenu)
     }
 
 
-    Browsers.Selector.menuSettings.title = "Selector placeholder title";
+    Browsers.Selector.menuSettings.title = "Select Content";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
     Browsers.Selector.menu = new MenuSystem.Menu(Browsers.Selector.menuSettings,items,parentMenu);
     Browsers.Selector.menu.eventHandler = Browsers.Selector.menuEventHandler;
@@ -552,10 +552,31 @@ Browsers.FileBrowser.open = function (parentMenu)
         }
         for (var i = 0; i < currentLocationFolders.length; i++)
         {
-            if(currentLocationFolders[i].charAt(0) != ".")
+            if(currentLocationFolders[i].charAt(0) == ".")
             {
+                if(Settings.Data.showHiddenFiles)
+                {
+                    var title = currentLocationFolders[i];
+                    if(title.length >= 32) {
+                        title = title.substring(0, 32) + "...";
+                    }
+    
+                    items.push({
+                        title: SSA.insertSymbolFA(" ",26,30) + title + Utils.directorySeperator,
+                        item: currentLocationFolders[i] + Utils.directorySeperator,
+                        color: "FFFF90"
+                    });
+                }
+            }
+            else
+            {
+                var title = currentLocationFolders[i];
+                if(title.length >= 32) {
+                    title = title.substring(0, 32) + "...";
+                }
+
                 items.push({
-                    title: SSA.insertSymbolFA(" ",26,30) + currentLocationFolders[i] + Utils.directorySeperator,
+                    title: SSA.insertSymbolFA(" ",26,30) + title + Utils.directorySeperator,
                     item: currentLocationFolders[i] + Utils.directorySeperator,
                     color: "FFFF90"
                 });
@@ -565,7 +586,34 @@ Browsers.FileBrowser.open = function (parentMenu)
         currentLocationFiles.sort();
         for (var i = 0; i < currentLocationFiles.length; i++)
         {
-            if(currentLocationFiles[i].charAt(0) != ".")
+            if(currentLocationFiles[i].charAt(0) == ".")
+            {
+                if(Settings.Data.showHiddenFiles)
+                {
+                    var color = "909090";
+    
+                    for(var t = 0; t < Browsers.FileBrowser.fileExtensionWhitelist.length; t++)
+                    {
+                        if(currentLocationFiles[i].includes(Browsers.FileBrowser.fileExtensionWhitelist[t].extension))
+                        {
+                            color = "ffffff";
+                            break;
+                        }
+                    }
+    
+                    var title = currentLocationFiles[i];
+                    if(title.length >= 32) {
+                        title = title.substring(0, 32) + "...";
+                    }
+        
+                    items.push({
+                        title: SSA.insertSymbolFA(" ",26,30) + title,
+                        item: currentLocationFiles[i],
+                        color: color
+                    });
+                }
+            }
+            else
             {
                 var color = "909090";
     
@@ -577,9 +625,14 @@ Browsers.FileBrowser.open = function (parentMenu)
                         break;
                     }
                 }
+
+                var title = currentLocationFiles[i];
+                if(title.length >= 32) {
+                    title = title.substring(0, 32) + "...";
+                }
     
                 items.push({
-                    title: SSA.insertSymbolFA(" ",26,30) + currentLocationFiles[i],
+                    title: SSA.insertSymbolFA(" ",26,30) + title,
                     item: currentLocationFiles[i],
                     color: color
                 });
@@ -587,7 +640,7 @@ Browsers.FileBrowser.open = function (parentMenu)
         }
     }
 
-    Browsers.FileBrowser.menuSettings.title = "FileBrowser placeholder title";
+    Browsers.FileBrowser.menuSettings.title = "File Browser";
     Browsers.FileBrowser.menuSettings.description = "Select a file to open.@br@Current directory: " + Browsers.FileBrowser.currentLocation.replaceAll("@DRIVESELECTOR@","Drive Selection");
     Browsers.FileBrowser.menu = new MenuSystem.Menu(Browsers.FileBrowser.menuSettings,items,parentMenu);
     Browsers.FileBrowser.menu.eventHandler = Browsers.FileBrowser.menuEventHandler;
@@ -691,7 +744,7 @@ Browsers.DriveBrowser.open = function (parentMenu)
         }
     }
     Browsers.DriveBrowser.menuMode = "list";
-    Browsers.DriveBrowser.menuSettings.title = "DriveBrowser placeholder title";
+    Browsers.DriveBrowser.menuSettings.title = "Drive Browser";
     Browsers.DriveBrowser.menuSettings.description = "Select a drive to open.";
     Browsers.DriveBrowser.menu = new MenuSystem.Menu(Browsers.DriveBrowser.menuSettings,items,parentMenu);
     Browsers.DriveBrowser.menu.eventHandler = Browsers.DriveBrowser.menuEventHandler;
@@ -771,7 +824,7 @@ Browsers.DeviceBrowser.open = function (parentMenu)
             }
         }
     }
-    Browsers.DeviceBrowser.menuSettings.title = "DeviceBrowser placeholder title";
+    Browsers.DeviceBrowser.menuSettings.title = "Device Browser";
     Browsers.DeviceBrowser.menuSettings.description = "Select a device to open.@br@Important: If you play a file after playing a device, there might be issues.@br@ It is recommended to restart mpv first!";
     Browsers.DeviceBrowser.menu = new MenuSystem.Menu(Browsers.DeviceBrowser.menuSettings,items,parentMenu);
     Browsers.DeviceBrowser.menu.eventHandler = Browsers.DeviceBrowser.menuEventHandler;
