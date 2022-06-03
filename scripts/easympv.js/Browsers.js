@@ -260,7 +260,7 @@ Browsers.Selector.menuEventHandler = function (event, item)
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
-                    args: ["zenity", "--title=mpv", "--forms", "--text=Open URL", "--add-entry=Paste URL:"]
+                    args: [mp.utils.get_user_path("~~/scripts/easympv.js/yad"), "--title=mpv", "--entry", "--text=Paste URL"]
                 })
             }
             if(r.status == "0")
@@ -332,7 +332,7 @@ Browsers.Selector.open = function (parentMenu)
     }
 
 
-    Browsers.Selector.menuSettings.title = "Select Content";
+    Browsers.Selector.menuSettings.title = "Select Content Type";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
     Browsers.Selector.menu = new MenuSystem.Menu(Browsers.Selector.menuSettings,items,parentMenu);
     Browsers.Selector.menu.eventHandler = Browsers.Selector.menuEventHandler;

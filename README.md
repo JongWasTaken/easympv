@@ -1,10 +1,10 @@
 # easympv (mpv plugin)
 ## (WORK IN PROGRESS; DO NOT USE)  
-![](https://raw.githubusercontent.com/JongWasTaken/easympv/master/images/logo.bmp)
+![](https://smto.pw/mpv/images/preview.png)
 
 
-Extends base mpv with more features and makes it a bit more user-friendly.
-Currently supports Windows and Linux (and probably BSD).
+Extends base mpv with more features and makes it a bit more user-friendly.  
+Currently supports Windows and Linux (and probably BSD).  
 macOS support is planned, but currently not implemented.
 
 ## Features

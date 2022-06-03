@@ -802,6 +802,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 				this.allowDrawImage = true;
 			}
 		}
+
 		this.cachedMenuText +=
 			lineStart(0, 2) +
 			SSA.setColor(this.settings.titleColor) +

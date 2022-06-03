@@ -5,6 +5,8 @@
 # License:             MIT License
 #
 # This file does all the windows-specific things that are not possible using mpv.
+# Some of these are unused, or might be used in a future release.
+# Additionally, the source code of GetDevices.exe is included at the bottom of this file.
 
 param([string]$command="",[string]$arguments="",[string]$arguments2="")
 
@@ -239,10 +241,26 @@ if($command -eq "get-drive-network")
     exit 0
 }
 
+if($command -eq "get-image-info")
+{
+    Add-Type -AssemblyName System.Drawing
+    $fstring = ""
+    try 
+    {
+        $bmp = New-Object System.Drawing.Bitmap "$env:APPDATA\mpv\images\" + $arguments
+        $fstring += $bmp.Width + "|"
+        $fstring += $bmp.Height
+        $bmp.Dispose()
+    }
+    Catch [system.exception]
+    {exit 1}
+    Write-Output $fstring
+    exit 0
+}
+
 if($command -eq "show-url-box")
 {
     # From https://docs.microsoft.com/en-us/powershell/scripting/samples/creating-a-custom-input-box?view=powershell-7.2
-    # This is basically the windows equivalent of zenity --forms
 
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
@@ -359,8 +377,8 @@ if($command -eq "show-command-box")
 exit 1
 
 # Below is the source code for the included GetDevices.exe application:
-# Slightly modified DShow example code from MSDN
-# Remove the first # and compile with Visual Studio
+# Slightly modified DShow example code from MSDN.
+# Remove the first # and compile with Visual Studio.
 
 ##include <windows.h>
 ##include <dshow.h>

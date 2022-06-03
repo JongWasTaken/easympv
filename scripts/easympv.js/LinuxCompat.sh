@@ -100,6 +100,13 @@ remove-file()
     fi
 }
 
+get-image-info()
+{
+    if [ -f "$HOME/.config/mpv/images/$1" ]; then
+        file -b "$HOME/.config/mpv/images/$1"
+    fi
+}
+
 if [ "$command" == "get-version-latest" ]; then
     get-version-latest
     echo $version
@@ -145,6 +152,11 @@ fi
 
 if [ "$command" == "remove-file" ]; then
     remove-file $2
+    exit $?
+fi
+
+if [ "$command" == "get-image-info" ]; then
+    get-image-info $2
     exit $?
 fi
 

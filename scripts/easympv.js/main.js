@@ -38,24 +38,27 @@ Current dependencies:
 TODO :
 	(DONE) Remake settings menu (with save/load)
 	(DONE) Folder navigation from current directory
-	(ONGOING) Move away from the util as much as possible
 	(DONE) Utility: DirectShow readout to stdout 
 	(DONE) Utility: return version in stdout on check
 	(DONE) UpdateMenu: display changelog
 	(DONE) MenuSystem: scrolling
-	(ONGOING) Update comments/documentation
 	(DONE) Implement Updater
 	(DONE) Windows (un)registration
 	(DONE) Change command_native -> command_native_async to speed up launch times
 	(DONE) Migrate Config on update
 	(DONE) Implement version comparison for base mpv
 	(DONE) Dependency downloader
-	Replace placeholder titles
-	First time configuration wizard | A bunch of menus basically, new module would be nice
-	(ONGOING) Fix input.conf if needed | Settings.inputConfig.reset(), Settings.Data.resetInputConfig
+	(DONE) Replace placeholder titles
+	(DONE) Fix input.conf if needed -> Settings.inputConfig.reset(), Settings.Data.resetInputConfig
+	First time configuration wizard -> A bunch of menus basically, new module would be nice
+	Finish Settings.mpvSettings.*
+	Advanced settings menu
+	(ALWAYS ONGOING) Update comments/documentation
+	(ALWAYS ONGOING) Move away from the util as much as possible
 
 IDEAS:
 	Advanced settings, like the utility had before
+		BONUS IDEA: use PWSH on windows/zenity on linux for this
 	FFI.js -> easympv-ffi.lua
 
 KNOWN ISSUES:
@@ -126,10 +129,11 @@ var isFirstFile = true;
 var sofaEnabled = false;
 
 // Setup
+Settings.load();
+mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
 Utils.determineOS();
 Utils.checkInternetConnection();
 
-Settings.load();
 if(Settings.Data.doMigration) { Settings.migrate(); }
 if(Settings.Data.resetMpvConfig) { Settings.mpvConfig.reset(); }
 if(Settings.Data.resetInputConfig) { Settings.inputConfig.reset(); }
@@ -139,11 +143,7 @@ var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString()
 Shaders.populateSets();
 Colors.populateSets();
 
-var imageArray = mp.utils.readdir(
-		mp.utils.get_user_path("~~/images/"),
-		"files"
-	),
-	i;
+var imageArray = mp.utils.readdir(mp.utils.get_user_path("~~/images/"),"files"), i;
 for (i = 0; i < imageArray.length; i++) {
 	if (imageArray[i].includes(".bmp") && !imageArray[i].includes(".info")) {
 		OSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
@@ -157,10 +157,8 @@ Utils.WL.populateCache();
 Settings.save();
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
-mp.msg.info("easympv " + Settings.Data.currentVersion + " loaded");
-
-//TODO: do not ship this
-Wizard.Start();
+//TODO: do not commit this
+//Wizard.Start();
 
 var onFileLoad = function () {
 	var wld = Utils.WL.getData();

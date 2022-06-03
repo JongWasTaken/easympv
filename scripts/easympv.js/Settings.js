@@ -369,8 +369,6 @@ Settings.mpvConfig.reset = function () {
  * Serializes Settings.mpvConfig.Data into mpv.conf.
 */
 Settings.mpvConfig.save = function () {
-	// fuck i need to write this down
-
 	// IF file DOES NOT exist:
 	// - Generate new file with sane defaults
 	// - Replace Values
@@ -511,7 +509,7 @@ Settings.inputConfig.reset = function () {
 	defaultConfigString += "PGUP add volume 5\n";
 	defaultConfigString += "Shift+PGUP cycle-values sub-scale \"0.8\" \"0.9\" \"1\" \"1.1\" \"1.2\"\n";
 	defaultConfigString += "Shift+PGDWN cycle-values video-aspect \"16:9\" \"4:3\" \"1024:429\"\n";
-	lines = defaultConfigString.replaceAll("\r\n","\n").split('\n');
+	//defaultConfigString = defaultConfigString.replaceAll("\r\n","\n");
 
 	mp.utils.write_file(
 		"file://" + mp.utils.get_user_path("~~/input.conf"),
@@ -520,6 +518,10 @@ Settings.inputConfig.reset = function () {
 
 	Settings.Data.resetInputConfig = false;
 	Settings.save();
+	
+	//TODO: system alert here
+	mp.msg.info("Input file has been reset! mpv will now terminate.");
+	mp.commandv("quit-watch-later");
 }
 
 module.exports = Settings;
