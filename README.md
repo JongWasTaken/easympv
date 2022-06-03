@@ -33,7 +33,8 @@ Due to the modular nature of Linux, you will need to install a few dependencies:
 ### Manual
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
 Add `m script_binding easympv` to your input.conf. Launch mpv once to generate `easympv.conf`. Adjust to your liking.  
-If no `input.conf` is present, easympv will generate one with sane defaults.  
+If no `input.conf` is present, easympv will generate one with sane defaults and terminate.  
+Launch it again to see the setup.  
 
 ## License
 All easympv code and assets (everything in `scripts/easympv.js/` and `images/`) is licensed under the MIT License.  

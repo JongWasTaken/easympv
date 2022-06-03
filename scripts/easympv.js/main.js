@@ -137,6 +137,7 @@ Utils.checkInternetConnection();
 if(Settings.Data.doMigration) { Settings.migrate(); }
 if(Settings.Data.resetMpvConfig) { Settings.mpvConfig.reset(); }
 if(Settings.Data.resetInputConfig) { Settings.inputConfig.reset(); }
+if(mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) { Settings.inputConfig.reset(); }
 
 var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString());
 
