@@ -16,7 +16,7 @@ Currently it is only used to show alerts.
 ----------------------------------------------------------------*/
 
 var SSA = require("./SSAHelper");
-var OSD = require("./OSD");
+var OSD = require("./ImageOSD");
 
 var Windows = {};
 

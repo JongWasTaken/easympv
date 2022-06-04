@@ -102,8 +102,8 @@ remove-file()
 
 get-image-info()
 {
-    if [ -f "$HOME/.config/mpv/images/$1" ]; then
-        file -b "$HOME/.config/mpv/images/$1"
+    if [ -f "$HOME/.config/mpv/scripts/easympv/images/$1" ]; then
+        file -b "$HOME/.config/mpv/scripts/easympv/images/$1"
     fi
 }
 

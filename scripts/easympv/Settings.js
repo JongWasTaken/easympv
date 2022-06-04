@@ -246,10 +246,10 @@ Settings.migrate = function ()
 
 	// delete easympv.conf
 	var file = "easympv.conf"
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + file];
 	}
 	mp.command_native({
 		name: "subprocess",
@@ -349,10 +349,10 @@ Settings.mpvConfig.reload = function () {
 Settings.mpvConfig.reset = function () {
 
 	var file = "mpv.conf"
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + file];
 	}
 	mp.command_native({
 		name: "subprocess",
@@ -456,10 +456,10 @@ Settings.inputConfig.reset = function () {
 
 	// delete input.conf
 	var file = "input.conf"
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + file];
 	}
 	mp.command_native({
 		name: "subprocess",

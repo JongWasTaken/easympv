@@ -21,7 +21,7 @@ Shaders.sets = [];
 Shaders.manualSelection = false;
 
 var Utils = require("./Utils");
-if (Utils.OS == "win") {
+if (Utils.OSisWindows) {
 	seperator = ";";
 } else {
 	seperator = ":";
@@ -38,7 +38,7 @@ Shaders.populateSets = function () {
 	// Parse Shaders.json and add all entries to Shaders.sets
 	var file = JSON.parse(
 		mp.utils.read_file(
-			mp.utils.get_user_path("~~/scripts/easympv.js/Shaders.json")
+			mp.utils.get_user_path("~~/scripts/easympv/Shaders.json")
 		)
 	);
 	for (var set in file) {

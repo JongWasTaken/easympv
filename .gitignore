@@ -10,16 +10,6 @@ testfolder/
 testfolder/*
 script-opts/
 script-opts/*
-./easympv2
-easympv2
-./easympvUtility
-easympvUtility
-./easympv
-easympv
-./easympv-cli
-easympv-cli
-./easympvUtility
-easympvUtility
 outdated.txt
 shaders/testFile2.txt
 testFile1.txt

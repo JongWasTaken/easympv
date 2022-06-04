@@ -19,11 +19,11 @@ Useful links:
 Important good-to-knows:
 	mpv uses MuJS, which is ES5 compliant, but not ES6!
 		Most IE polyfills will probably work.
-	Windows is more picky with font names, in case of issues
-		open the .ttf file of your font and use the value of "Font name:" at the top.
+	Windows is more picky with font names, in case of issues:
+		Open the .ttf file of your font and use the value of "Font name:" at the top.
 
 Snippets:
-	how to check for a file
+	How to check for a file
 		mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/FILE")) != undefined
 
 Current dependencies:
@@ -116,7 +116,7 @@ mp.msg.verbose("Starting!");
 var Settings = require("./Settings");
 var Utils = require("./Utils");
 var SSA = require("./SSAHelper");
-var OSD = require("./OSD");
+var ImageOSD = require("./ImageOSD");
 var Shaders = require("./Shaders");
 var Colors = require("./Colors");
 var Chapters = require("./Chapters");
@@ -144,10 +144,10 @@ var notifyAboutUpdates = new Boolean(Settings.Data.notifyAboutUpdates.toString()
 Shaders.populateSets();
 Colors.populateSets();
 
-var imageArray = mp.utils.readdir(mp.utils.get_user_path("~~/images/"),"files"), i;
+var imageArray = mp.utils.readdir(mp.utils.get_user_path("~~/scripts/easympv/images/"),"files"), i;
 for (i = 0; i < imageArray.length; i++) {
 	if (imageArray[i].includes(".bmp") && !imageArray[i].includes(".info")) {
-		OSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
+		ImageOSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
 	}
 }
 
@@ -208,8 +208,14 @@ var onFileLoad = function () {
 
 	if (cFile != undefined)
 	{
+		if(!Utils.OSisWindows && mp.utils.file_info(mp.get_property("working-directory") + "/" + cFile) != undefined)
+		{
+			cFile = mp.get_property("working-directory") + "/" + cFile.replaceAll("./","");
+			mp.msg.warn(cFile)
+		}
 		Browsers.FileBrowser.currentLocation = cFile;
 		Browsers.FileBrowser.currentLocation = Browsers.FileBrowser.getParentDirectory();
+
 	}
 };
 
@@ -675,13 +681,13 @@ SettingsMenu.eventHandler = function (event, action) {
 			}
 
 			WindowSystem.Alerts.show("info", "Command Input window has opened!")
-            if (Utils.OS == "win")
+            if (Utils.OSisWindows)
             {
                 var r = mp.command_native_async({
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
-                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"show-command-box"]
+                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"show-command-box"]
                 },readCommand)
             }
             else

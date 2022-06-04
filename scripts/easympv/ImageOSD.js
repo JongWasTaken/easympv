@@ -15,7 +15,7 @@ This file handles drawing images to the screen and manages them.
 /**
  * This module handles drawing images to the screen and manages them. 
  */
-var OSD = {};
+var ImageOSD = {};
 
 /**
  * This array contains all images added with OSD.addImage(). 
@@ -31,13 +31,13 @@ var Files = [];
 __getImageInfo = function (file) {
 	var h, w, offset;
 	// try using system tools to get image metadata
-	if (Utils.OS == "win")
+	if (Utils.OSisWindows)
 	{
 		var r = mp.command_native({
 			name: "subprocess",
 			playback_only: false,
 			capture_stdout: true,
-			args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"get-image-info", file]
+			args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"get-image-info", file]
 		})
 	}
 	else
@@ -46,18 +46,18 @@ __getImageInfo = function (file) {
 			name: "subprocess",
 			playback_only: false,
 			capture_stdout: true,
-			args: [mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh"), "get-image-info", file]
+			args: [mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh"), "get-image-info", file]
 		})
 	}
 	if(r.status == "0")
 	{
 		var input = r.stdout.trim();
-		if(Utils.OS == "win")
+		if(Utils.OSisWindows)
 		{
 			var data = input.split("|");
 			w = data[0];
 			h = data[1];
-			offset = mp.utils.file_info(mp.utils.get_user_path("~~/images/") + file).size - 4 * w * h;
+			offset = mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/images/") + file).size - 4 * w * h;
 		}
 		else
 		{
@@ -89,7 +89,7 @@ __getImageInfo = function (file) {
 	// otherwise try to use old way (parsing a .info file)
 	else
 	{
-		filex = mp.utils.get_user_path("~~/images/") + file + ".info";
+		filex = mp.utils.get_user_path("~~/scripts/easympv/images/") + file + ".info";
 		if (mp.utils.file_info(filex) != undefined) {
 			var data = mp.utils.read_file(filex).split(";");
 			for (var i = 0; i < data.length; i++) {
@@ -105,7 +105,7 @@ __getImageInfo = function (file) {
 			h = 60;
 			w = 200;
 		}
-		offset = mp.utils.file_info(mp.utils.get_user_path("~~/images/") + file).size - 4 * w * h;
+		offset = mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/images/") + file).size - 4 * w * h;
 	}
 
 	return (result = { h: h, w: w , offset: offset});
@@ -123,9 +123,9 @@ __getFilebyName = function (name) {
  * Represents an image.
  * You probably want to call OSD.addImage() instead.
 */
-OSD.Image = function (active, id, file, width, height, offset, x, y) {
+ImageOSD.Image = function (active, id, file, width, height, offset, x, y) {
 	this.id = id;
-	this.file = mp.utils.get_user_path("~~/images/") + file;
+	this.file = mp.utils.get_user_path("~~/scripts/easympv/images/") + file;
 	this.width = width;
 	this.height = height;
 	this.x = x;
@@ -136,19 +136,19 @@ OSD.Image = function (active, id, file, width, height, offset, x, y) {
 };
 
 /** 
- * Adds an image file to the file array.
- * Place the correctly formated image file in ~~/images/.
+ * Adds an image file to the internal file array.
+ * Place the correctly formated image file in ~~/scripts/easympv/images/.
  * @param {string} name internal name for image file, used when drawing/removing overlay
  * @param {string} file file name with extension
 */
-OSD.addImage = function (name, file) {
+ImageOSD.addImage = function (name, file) {
 	var imgdata = __getImageInfo(file);
 	var height = imgdata.h;
 	var width = imgdata.w;
 	var offset = imgdata.offset;
 	var image = {
 		name: name,
-		data: new OSD.Image(
+		data: new ImageOSD.Image(
 			false,
 			Files.length,
 			file,
@@ -166,12 +166,12 @@ OSD.addImage = function (name, file) {
  * @param {string} name internal name of image
  * @return {Boolean} true if image is currently on screen
 */
-OSD.status = function (name) {
+ImageOSD.status = function (name) {
 	var image = __getFilebyName(name);
 	return image.data.active;
 };
 
-OSD.getScale = function () {
+ImageOSD.getScale = function () {
 	var scale = "";
 	var height = mp.get_property("osd-height");
 	if (height == 0) {
@@ -193,9 +193,9 @@ OSD.getScale = function () {
  * x = 0, y = 0 is the top left corner!
  * @param {string} name internal name of image
  */
-OSD.show = function (name, x, y) {
+ImageOSD.show = function (name, x, y) {
 	if (name != undefined && x != undefined && y != undefined) {
-		var scale = OSD.getScale();
+		var scale = ImageOSD.getScale();
 		var image = __getFilebyName(scale + name);
 
 		image.data.x = x;
@@ -223,7 +223,7 @@ OSD.show = function (name, x, y) {
  * x = 0, y = 0 is the top left corner!
  * @param {string} name internal name of image
  */ 
-OSD.toggle = function (name, x, y) {
+ImageOSD.toggle = function (name, x, y) {
 	var scale = "";
 	var height = mp.get_property("osd-height");
 	if (height == 0) {
@@ -240,7 +240,7 @@ OSD.toggle = function (name, x, y) {
 
 	var image = __getFilebyName(scale + name);
 	if (!image.data.active) {
-		OSD.show(image.name, x, y);
+		ImageOSD.show(image.name, x, y);
 	} else {
 		mp.commandv("overlay-remove", image.data.id);
 		image.data.active = false;
@@ -251,7 +251,7 @@ OSD.toggle = function (name, x, y) {
  * Removes image from screen.
  * @param {string} name internal name of image
  */
-OSD.hide = function (name) {
+ImageOSD.hide = function (name) {
 	if (name != null) {
 		var image;
 		//var scale = "";
@@ -294,12 +294,12 @@ OSD.hide = function (name) {
 /**
  * Removes all images from screen.
  */
-OSD.hideAll = function () {
+ImageOSD.hideAll = function () {
 	for (i = 0; i < Files.length; i++) {
 		if (Files[i].data.active == true) {
-			OSD.hide(Files[i].name);
+			ImageOSD.hide(Files[i].name);
 		}
 	}
 };
 
-module.exports = OSD;
+module.exports = ImageOSD;

@@ -29,6 +29,7 @@ var Utils = {};
  * win, unix, mac, unknown
  */
 Utils.OS = undefined;
+Utils.OSisWindows = false;
 
 Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
@@ -48,6 +49,7 @@ Utils.determineOS = function()
 {
 	if (mp.utils.getenv("OS") == "Windows_NT") {
 		Utils.OS = "win";
+		Utils.OSisWindows = true;
 		Utils.directorySeperator = "\\";
 		mp.msg.info("Detected operating system: Windows");
 	} 
@@ -72,7 +74,7 @@ Utils.determineOS = function()
 			var output = uname.stdout.trim();
 			if(output.includes("Darwin"))
 			{
-				Utils.OS = "mac";
+				Utils.OS = "macos";
 				mp.msg.info("Detected operating system: macOS");
 				mp.msg.error("macOS is currently not supported. Expect issues.");
 			}
@@ -92,7 +94,7 @@ Utils.determineOS = function()
 				playback_only: false,
 				capture_stdout: true,
 				capture_stderr: false,
-				args: ["sh","-c","chmod +x " + mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")]
+				args: ["sh","-c","chmod +x " + mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")]
 			})
 			/*
 			mp.command_native({
@@ -100,7 +102,7 @@ Utils.determineOS = function()
 				playback_only: false,
 				capture_stdout: true,
 				capture_stderr: false,
-				args: ["sh","-c","chmod +x " + mp.utils.get_user_path("~~/scripts/easympv.js/yad")]
+				args: ["sh","-c","chmod +x " + mp.utils.get_user_path("~~/scripts/easympv/yad")]
 			})
 			*/
 		}
@@ -135,10 +137,10 @@ Utils.getLatestUpdateData = function()
 		}
 	}
 
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest"];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest"];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest"];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" get-version-latest"];
 	}
 
 	var r = mp.command_native_async({
@@ -191,7 +193,7 @@ Utils.openFile = function (file)
 	file = mp.utils.get_user_path("~~/") + "/" + file;
 	file = file.replaceAll("//", "/");
 	file = file.replaceAll('"+"', "/");
-	if (Utils.OS == "win") {
+	if (Utils.OSisWindows) {
 		file = file.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", "start " + file);
 	} else if (Utils.OS == "unix") {
@@ -249,10 +251,10 @@ Utils.checkInternetConnection = function()
 		}
 	}
 
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-connection-status"];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"get-connection-status"];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-connection-status"];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" get-connection-status"];
 	}
 
 	var r = mp.command_native_async({
@@ -279,10 +281,10 @@ Utils.checkInternetConnection = function()
 		}
 	}
 
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest-mpv"];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"get-version-latest-mpv"];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-version-latest-mpv"];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" get-version-latest-mpv"];
 	}
 
 	var r = mp.command_native_async({
@@ -355,10 +357,10 @@ Utils.unblockQuitButtons = function ()
  */
 Utils.doUpdateStage1 = function () // download
 {
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-package " + Utils.latestUpdateData.version];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"get-package " + Utils.latestUpdateData.version];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.version];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" get-package " + Utils.latestUpdateData.version];
 	}
 
 	mp.command_native_async({
@@ -377,10 +379,10 @@ Utils.doUpdateStage2 = function () // extract
 {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined)
 	{
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"extract-package"];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"extract-package"];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" extract-package"];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" extract-package"];
 		}
 	
 		mp.command_native_async({
@@ -406,10 +408,10 @@ Utils.doUpdateStage3 = function () // delete package
 {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) != undefined && mp.utils.file_info(mp.utils.get_user_path("~~/easympv-"+Utils.latestUpdateData.version+"/")) != undefined)
 	{
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-package"];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-package"];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-package"];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-package"];
 		}
 	
 		mp.command_native_async({
@@ -436,10 +438,10 @@ Utils.doUpdateStage4 = function () // apply extracted package
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) == undefined)
 	{
 		
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package",Utils.latestUpdateData.version];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"apply-package",Utils.latestUpdateData.version];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" apply-package " + Utils.latestUpdateData.version];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" apply-package " + Utils.latestUpdateData.version];
 		}
 	
 		mp.command_native_async({
@@ -473,10 +475,10 @@ Utils.doUpdateStage5 = function()
 			{
 				file = Utils.latestUpdateData.removeFiles[i];
 	
-				if (Utils.OS == "win") {
-					var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
+				if (Utils.OSisWindows) {
+					var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file " + file];
 				} else {
-					var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + file];
+					var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + file];
 				}
 			
 				mp.command_native_async({
@@ -539,13 +541,13 @@ Utils.doUpdate = function ()
  */
 Utils.updateMpv = function ()
 {
-	if(Utils.OS == "win")
+	if(Utils.OSisWindows)
 	{
 		if(Settings.Data.mpvLocation != "unknown")
 		{
 			if(Utils.updateAvailableMpv)
 			{
-				var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"update-mpv", Settings.Data.mpvLocation];
+				var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"update-mpv", Settings.Data.mpvLocation];
 				mp.command_native_async({
 					name: "subprocess",
 					playback_only: false,
@@ -576,10 +578,10 @@ Utils.downloadDependencies = function()
 	var dependencies = undefined;
 	var installList = undefined;
 
-	if (Utils.OS == "win") {
-		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"get-dependencies"];
+	if (Utils.OSisWindows) {
+		var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"get-dependencies"];
 	} else {
-		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" get-dependencies"];
+		var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" get-dependencies"];
 	}
 
 	var r = mp.command_native({
@@ -599,7 +601,7 @@ Utils.downloadDependencies = function()
 	if(dependencies == undefined)
 		return;
 	
-	if(Utils.OS == "win")
+	if(Utils.OSisWindows)
 	{
 		installList = dependencies.windows;
 	}
@@ -614,9 +616,9 @@ Utils.downloadDependencies = function()
 
 	for(var i = 0; i < dependencies.windows.length; i++)
 	{
-		if(Utils.OS == "win")
+		if(Utils.OSisWindows)
 		{
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file-generic",
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file-generic",
 			dependencies.windows[i].location.replaceAll("@mpvdir@",Settings.Data.mpvLocation)];
 			mp.command_native({
 				name: "subprocess",
@@ -628,7 +630,7 @@ Utils.downloadDependencies = function()
 		} else {
 			if(!dependencies.windows[i].location.includes("@mpvdir@"))
 			{
-				var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + dependencies.linux[i].location];
+				var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + dependencies.linux[i].location];
 				mp.command_native({
 					name: "subprocess",
 					playback_only: false,
@@ -644,10 +646,10 @@ Utils.downloadDependencies = function()
 
 	for(var i = 0; i < dependencies.linux.length; i++)
 	{
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file",dependencies.linux[i].location];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file",dependencies.linux[i].location];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + dependencies.linux[i].location];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + dependencies.linux[i].location];
 		}
 	
 		var r = mp.command_native({
@@ -661,10 +663,10 @@ Utils.downloadDependencies = function()
 
 	for(var i = 0; i < dependencies.macos.length; i++)
 	{
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file",dependencies.macos[i].location];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"remove-file",dependencies.macos[i].location];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" remove-file " + dependencies.macos[i].location];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" remove-file " + dependencies.macos[i].location];
 		}
 	
 		var r = mp.command_native({
@@ -678,10 +680,10 @@ Utils.downloadDependencies = function()
 
 	for(var i = 0; i < installList.length; i++)
 	{
-		if (Utils.OS == "win") {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"download-dependency",installList[i].url,installList[i].location.replaceAll("@mpvdir@",Settings.Data.mpvLocation)];
+		if (Utils.OSisWindows) {
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"download-dependency",installList[i].url,installList[i].location.replaceAll("@mpvdir@",Settings.Data.mpvLocation)];
 		} else {
-			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv.js/LinuxCompat.sh")+" download-dependency " + installList[i].url + " " + installList[i].location];
+			var args = ["sh","-c",mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh")+" download-dependency " + installList[i].url + " " + installList[i].location];
 		}
 	
 		var r = mp.command_native({
@@ -709,11 +711,11 @@ Utils.registerMpv = function ()
 		WindowSystem.Alerts.show("info","Successfully registered mpv!","Do not close any windows that have"," opened. They will close themselves.");
 	}
 
-	 if(Utils.OS == "win")
+	 if(Utils.OSisWindows)
 	 {
 		 if(Settings.Data.mpvLocation != "unknown")
 		 {
-			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-install.bat"];
+			var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-install.bat"];
 			mp.command_native_async({
 				name: "subprocess",
 				playback_only: false,
@@ -745,11 +747,11 @@ Utils.registerMpv = function ()
 		 WindowSystem.Alerts.show("info","Successfully unregistered mpv!","Do not close any windows that have"," opened. They will close themselves.");
 	 }
  
-	  if(Utils.OS == "win")
+	  if(Utils.OSisWindows)
 	  {
 		  if(Settings.Data.mpvLocation != "unknown")
 		  {
-			 var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat"];
+			 var args = ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/", "\\"),"elevate", Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat"];
 			 mp.command_native_async({
 				 name: "subprocess",
 				 playback_only: false,
@@ -787,7 +789,7 @@ Utils.getCredits = function ()
 {
 	if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined)
 		return;
-	return mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv.js/Credits.txt"));
+	return mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Credits.txt"));
 }
 
 /**
@@ -897,7 +899,7 @@ Utils.WL.createDummy = function ()
 {
 	var folder = mp.utils.get_user_path("~~/watch_later");
 	var name = "00000000000000000000000000000000";
-	if(Utils.OS == "win")
+	if(Utils.OSisWindows)
 	{
 		folder = folder.replaceAll("/", "\\");
 		Utils.executeCommand(["copy","nul",folder+"\\"+ name,">","nul"]);
@@ -914,7 +916,7 @@ Utils.WL.createDummy = function ()
 Utils.WL.clear = function () {
 	mp.msg.info("Clearing watchdata");
 	var folder = mp.utils.get_user_path("~~/watch_later");
-	if (Utils.OS == "win") {
+	if (Utils.OSisWindows) {
 		folder = folder.replaceAll("/", "\\");
 		Utils.executeCommand(["del","/Q","/S",folder]);
 		Utils.executeCommand(["mkdir",folder]);

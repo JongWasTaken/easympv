@@ -247,7 +247,7 @@ if($command -eq "get-image-info")
     $fstring = ""
     try 
     {
-        $bmp = New-Object System.Drawing.Bitmap "$env:APPDATA\mpv\images\" + $arguments
+        $bmp = New-Object System.Drawing.Bitmap "$env:APPDATA\mpv\scripts\easympv\images\" + $arguments
         $fstring += $bmp.Width + "|"
         $fstring += $bmp.Height
         $bmp.Dispose()

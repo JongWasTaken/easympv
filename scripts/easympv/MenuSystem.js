@@ -111,7 +111,7 @@ The definition of Menus.Menu.prototype._constructMenuCache has even more informa
 ----------------------------------------------------------------*/
 
 var SSA = require("./SSAHelper");
-var OSD = require("./OSD");
+var ImageOSD = require("./ImageOSD");
 
 var Menus = {};
 
@@ -1104,7 +1104,7 @@ Menus.Menu.prototype.showMenu = function () {
 		this._drawMenu();
 		this._startTimer();
 		if (this.allowDrawImage) {
-			OSD.show(this.settings.image, 25, 25);
+			ImageOSD.show(this.settings.image, 25, 25);
 		}
 	}
 };
@@ -1147,7 +1147,7 @@ Menus.Menu.prototype.hideMenu = function () {
 			this.OSD = undefined;
 		}
 	}
-	OSD.hide(this.settings.image);
+	ImageOSD.hide(this.settings.image);
 	//OSD.hideAll();
 };
 

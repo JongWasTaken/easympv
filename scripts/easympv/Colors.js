@@ -23,7 +23,7 @@ Colors.populateSets = function () {
 	Colors.sets = [];
 	var file = JSON.parse(
 		mp.utils.read_file(
-			mp.utils.get_user_path("~~/scripts/easympv.js/Colors.json")
+			mp.utils.get_user_path("~~/scripts/easympv/Colors.json")
 		)
 	);
 	

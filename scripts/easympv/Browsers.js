@@ -245,13 +245,13 @@ Browsers.Selector.menuEventHandler = function (event, item)
         else if(item == "url")
         {
             WindowSystem.Alerts.show("info", "URL Input window has opened!")
-            if (Utils.OS == "win")
+            if (Utils.OSisWindows)
             {
                 var r = mp.command_native({
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
-                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"show-url-box"]
+                    args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"show-url-box"]
                 })
             }
             else
@@ -260,7 +260,7 @@ Browsers.Selector.menuEventHandler = function (event, item)
                     name: "subprocess",
                     playback_only: false,
                     capture_stdout: true,
-                    args: [mp.utils.get_user_path("~~/scripts/easympv.js/yad"), "--title=mpv", "--entry", "--text=Paste URL"]
+                    args: [mp.utils.get_user_path("/usr/bin/zenity"), "--title=mpv", "--entry", "--text=Paste URL"]
                 })
             }
             if(r.status == "0")
@@ -311,7 +311,7 @@ Browsers.Selector.open = function (parentMenu)
         color: "ffffff"
     });
 
-    if(Utils.OS == "win")
+    if(Utils.OSisWindows)
     {
         items.push({
             title: SSA.insertSymbolFA(" ",26,30) + "URL",
@@ -404,7 +404,7 @@ Browsers.FileBrowser.menuEventHandler = function (event,item)
     {
         if(item == ".." + Utils.directorySeperator)
         {
-            if(Utils.OS == "win" && Browsers.FileBrowser.currentLocation.charAt(Browsers.FileBrowser.currentLocation.length-2) == ":")
+            if(Utils.OSisWindows && Browsers.FileBrowser.currentLocation.charAt(Browsers.FileBrowser.currentLocation.length-2) == ":")
             {
                 Browsers.FileBrowser.changeDirectory("@DRIVESELECTOR@");
             }
@@ -416,7 +416,7 @@ Browsers.FileBrowser.menuEventHandler = function (event,item)
         }
         else
         {
-            if(Utils.OS == "win" && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
+            if(Utils.OSisWindows && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
             {
                 var isFolder = true;
             }
@@ -428,7 +428,7 @@ Browsers.FileBrowser.menuEventHandler = function (event,item)
 
             if(isFolder)
             {
-                if(Utils.OS == "win" && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
+                if(Utils.OSisWindows && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
                 {
                     Browsers.FileBrowser.changeDirectory(item);
                 }
@@ -458,14 +458,14 @@ Browsers.FileBrowser.open = function (parentMenu)
 
     var items = [];
 
-    if(Utils.OS == "win" && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
+    if(Utils.OSisWindows && Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@")
     {
         // Local Drives are type 3
         var r = mp.command_native({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-local"]
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-local"]
         })
 
         if(r.status == "0")
@@ -490,7 +490,7 @@ Browsers.FileBrowser.open = function (parentMenu)
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-usb"]
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-usb"]
         })
 
         if(r.status == "0")
@@ -515,7 +515,7 @@ Browsers.FileBrowser.open = function (parentMenu)
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-network"]
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-network"]
         })
 
         if(r.status == "0")
@@ -540,7 +540,7 @@ Browsers.FileBrowser.open = function (parentMenu)
         var currentLocationFolders = mp.utils.readdir(Browsers.FileBrowser.currentLocation,"dirs");
         currentLocationFolders.sort();
     
-        if (Utils.OS == "unix" && Browsers.FileBrowser.currentLocation == "/")
+        if (Utils.OS != "win" && Browsers.FileBrowser.currentLocation == "/")
         {}
         else
         {
@@ -676,7 +676,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event,item)
     }
     else if (event == "enter" && Browsers.DriveBrowser.menuMode == "ask")
     {
-        if (Utils.OS == "win")
+        if (Utils.OSisWindows)
         {
             mp.commandv("loadfile", item + "://longest/" + Browsers.DriveBrowser.cachedDriveName);
             WindowSystem.Alerts.show("info", "Opening disc drive " + Browsers.DriveBrowser.cachedDriveName + "...","","");    
@@ -704,13 +704,13 @@ Browsers.DriveBrowser.open = function (parentMenu)
     {
         Browsers.DriveBrowser.cachedParentMenu = parentMenu;
     }
-    if (Utils.OS == "win")
+    if (Utils.OSisWindows)
     {
         var r = mp.command_native({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv.js/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-disc"]
+            args: ["powershell", "-executionpolicy", "bypass", mp.utils.get_user_path("~~/scripts/easympv/WindowsCompat.ps1").replaceAll("/","\\"),"get-drive-disc"]
         })
 
         if(r.status == "0")
@@ -759,7 +759,7 @@ Browsers.DeviceBrowser.menuEventHandler = function (event,item)
         //mp.commandv("apply-profile", "low-latency");
         mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file
         
-        if (Utils.OS == "win")
+        if (Utils.OSisWindows)
         {
             mp.commandv("loadfile", "av://dshow:video=" + item);
         }
@@ -784,13 +784,13 @@ Browsers.DeviceBrowser.open = function (parentMenu)
     {
         Browsers.DeviceBrowser.cachedParentMenu = parentMenu;
     }
-    if (Utils.OS == "win")
+    if (Utils.OSisWindows)
     {
         var r = mp.command_native({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
-            args: [mp.utils.get_user_path("~~/scripts/easympv.js/GetDevices.exe").replaceAll("/","\\")]
+            args: [mp.utils.get_user_path("~~/scripts/easympv/GetDevices.exe").replaceAll("/","\\")]
         })
 
         if(r.status == "0")
