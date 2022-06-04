@@ -172,14 +172,19 @@ Windows.Window.prototype._keyPressHandler = function (action) {
 };
 
 Windows.Window.prototype._constructCaches = function () {
-
 	this.cachedWindowBaseText = "";
 	this.cachedWindowContentText = "";
 	this.cachedWindowEffectText = "";
 
-	this.cachedWindowBaseText += SSA.setTransparencyPercentage(this.settings.transparency);
-	this.cachedWindowContentText += SSA.setTransparencyPercentage(this.settings.transparency);
-	this.cachedWindowEffectText  += SSA.setTransparencyPercentage(this.settings.transparency);
+	this.cachedWindowBaseText += SSA.setTransparencyPercentage(
+		this.settings.transparency
+	);
+	this.cachedWindowContentText += SSA.setTransparencyPercentage(
+		this.settings.transparency
+	);
+	this.cachedWindowEffectText += SSA.setTransparencyPercentage(
+		this.settings.transparency
+	);
 
 	this.cachedWindowBaseText += SSA.setBorder(0);
 	this.cachedWindowBaseText += SSA.setShadow(2);
@@ -192,7 +197,7 @@ Windows.Window.prototype._constructCaches = function () {
 	// draw box
 	this.cachedWindowBaseText +=
 		"m " +
-		this.x1 + 
+		this.x1 +
 		" " +
 		this.y1 +
 		" l " +
@@ -210,46 +215,40 @@ Windows.Window.prototype._constructCaches = function () {
 	// end draw mode
 	this.cachedWindowBaseText += "{\\p0}";
 
-
 	// move to title
-	if(this.settings.title != undefined)
-	{ 
+	if (this.settings.title != undefined) {
 		this.cachedWindowContentText +=
-		"{\\pos(" +
-		(this.x1 + this.titleOffset) +
-		"," +
-		(this.y1 + this.titleOffset - 5) +
-		")}";
+			"{\\pos(" +
+			(this.x1 + this.titleOffset) +
+			"," +
+			(this.y1 + this.titleOffset - 5) +
+			")}";
 		this.cachedWindowContentText +=
 			SSA.setBorder(0) +
 			SSA.setShadow(0) +
 			SSA.setColorBlack() +
 			this.settings.title;
 	}
-	if(this.settings.item != undefined)
-	{
-		if (this.settings.item.type == "raw")
-		{
+	if (this.settings.item != undefined) {
+		if (this.settings.item.type == "raw") {
 			this.cachedWindowContentText += this.settings.item.data;
-		}
-		else if (this.settings.item.type == "text")
-		{
+		} else if (this.settings.item.type == "text") {
 			var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8);
 			var scale = SSA.setScale(scaleFactor);
 			var border =
 				SSA.setBorderColor(this.settings.item.borderColor) +
 				SSA.setBorder(this.settings.item.borderSize);
 			var font = SSA.setFont(this.settings.item.fontName);
-			var fontSize = (this.settings.item.fontSize);
+			var fontSize = this.settings.item.fontSize;
 			var currentLinePosition = 0;
 			var descriptionSizeModifier = -10;
 			var ypos = 0;
 			var yposmod = 30;
-	
+
 			var findLinePosition = function (size, custom) {
 				// How this works:
 				// https://www.md-subs.com/line-spacing-in-ssa (Method 5/Conclusion)
-	
+
 				var origin = "-2000000";
 				var modifier = 0;
 				if (size == undefined) {
@@ -286,7 +285,7 @@ Windows.Window.prototype._constructCaches = function () {
 					"}"
 				);
 			};
-	
+
 			var lineStart = function (
 				positionType,
 				fontSizeModifier,
@@ -307,19 +306,21 @@ Windows.Window.prototype._constructCaches = function () {
 				var s = "";
 				s +=
 					scale +
-					"{\\posy"+ypos+"}" + 
+					"{\\posy" +
+					ypos +
+					"}" +
 					findLinePosition(positionType, customPositionModifier) +
 					border +
 					font +
 					SSA.setSize(fontSize + fontSizeModifier);
 				return s;
 			};
-	
+
 			var lineEnd = function () {
 				var s = "\n";
 				return s;
 			};
-	
+
 			var lineBlank = function () {
 				var s;
 				s = lineStart(4, 0, 0.0005) + lineEnd();
@@ -341,39 +342,39 @@ Windows.Window.prototype._constructCaches = function () {
 					mdLines[i] +
 					lineEnd();
 			}
-			
+
 			this.cachedWindowContentText += text;
-		}
-		else if (this.settings.item.type == "alert")
-		{
+		} else if (this.settings.item.type == "alert") {
 			this.cachedWindowEffectText += this.settings.item.image;
-			this.cachedWindowContentText += this.settings.item.text.replaceAll("@br@","\n" + SSA.setTransparencyPercentage(this.settings.transparency));
+			this.cachedWindowContentText += this.settings.item.text.replaceAll(
+				"@br@",
+				"\n" + SSA.setTransparencyPercentage(this.settings.transparency)
+			);
 		}
 	}
 
-	if(this.settings.title != undefined)
-	{
-		this.cachedWindowEffectText += SSA.setBorder(1) + SSA.setColorGreen() + SSA.drawLine(
-			this.x1,
-			this.y1+this.titleOffset,
-			this.x2,
-			this.y1+this.titleOffset);
-	};
-
+	if (this.settings.title != undefined) {
+		this.cachedWindowEffectText +=
+			SSA.setBorder(1) +
+			SSA.setColorGreen() +
+			SSA.drawLine(
+				this.x1,
+				this.y1 + this.titleOffset,
+				this.x2,
+				this.y1 + this.titleOffset
+			);
+	}
 };
 
 Windows.Window.prototype._fadeOut = function () {
 	var x = this;
 	this.transparencyBackup = this.settings.transparency.valueOf();
 	this.fadeOutInterval = setInterval(function () {
-		if(x.settings.transparency != 100)
-		{
+		if (x.settings.transparency != 100) {
 			x.settings.transparency = Number(x.settings.transparency) + 1;
 			x._constructCaches();
 			x._draw();
-		}
-		else
-		{
+		} else {
 			mp.commandv(
 				"osd-overlay",
 				x.baseOSD.id,
@@ -415,10 +416,9 @@ Windows.Window.prototype._fadeOut = function () {
 			x.settings.transparency = this.transparencyBackup;
 			clearInterval(x.fadeOutInterval);
 		}
-
 	}, this.settings.fadeOutTime);
-	this.fadeOutInterval.start
-}
+	this.fadeOutInterval.start;
+};
 
 Windows.Window.prototype._draw = function () {
 	if (this.baseOSD == undefined) {
@@ -445,22 +445,18 @@ Windows.Window.prototype._draw = function () {
 		this.effectOSD.z = this.zStart;
 	}
 
-	if(this.settings.drawBaseOSD)
-	{
+	if (this.settings.drawBaseOSD) {
 		this.baseOSD.data = this.cachedWindowBaseText;
 		this.baseOSD.update();
 	}
-	if(this.settings.drawContentOSD)
-	{
+	if (this.settings.drawContentOSD) {
 		this.contentOSD.data = this.cachedWindowContentText;
 		this.contentOSD.update();
 	}
-	if(this.settings.drawEffectOSD)
-	{
+	if (this.settings.drawEffectOSD) {
 		this.effectOSD.data = this.cachedWindowEffectText;
 		this.effectOSD.update();
 	}
-
 };
 
 Windows.Window.prototype.show = function () {
@@ -474,18 +470,15 @@ Windows.Window.prototype.show = function () {
 	}
 };
 
-Windows.Window.prototype.onClose = function () {}
+Windows.Window.prototype.onClose = function () {};
 
 Windows.Window.prototype.hide = function () {
 	if (this.isWindowVisible) {
 		this._stopTimer();
 		this.onClose();
-		if(this.settings.fadeOut)
-		{
+		if (this.settings.fadeOut) {
 			this._fadeOut();
-		}
-		else
-		{
+		} else {
 			mp.commandv(
 				"osd-overlay",
 				this.baseOSD.id,
@@ -545,7 +538,6 @@ Windows.Window.prototype._startTimer = function () {
 	this.windowInterval = setInterval(function () {
 		x._handleAutoClose();
 	}, 1000);
-	
 };
 
 Windows.Window.prototype._stopTimer = function () {
@@ -621,30 +613,29 @@ Windows.TextWall.create = function (text)
 
 Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
-Windows.Alerts.show = function (type,line1,line2,line3) {
-
+Windows.Alerts.show = function (type, line1, line2, line3) {
 	var maxStringLength = 45;
 
-	if(type == undefined) {
+	if (type == undefined) {
 		type = "info";
 	}
-	if(line1 == undefined) {
+	if (line1 == undefined) {
 		line1 = "";
 	}
-	if(line2 == undefined) {
+	if (line2 == undefined) {
 		line2 = "";
 	}
-	if(line3 == undefined) {
+	if (line3 == undefined) {
 		line3 = "";
 	}
 
-	if(line1.length >= maxStringLength) {
+	if (line1.length >= maxStringLength) {
 		line1 = line1.substring(0, maxStringLength) + "...";
 	}
-	if(line2.length >= maxStringLength) {
+	if (line2.length >= maxStringLength) {
 		line2 = line2.substring(0, maxStringLength) + "...";
 	}
-	if(line3.length >= maxStringLength) {
+	if (line3.length >= maxStringLength) {
 		line3 = line3.substring(0, maxStringLength) + "...";
 	}
 
@@ -653,37 +644,56 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 	//var xScale = 1 - Math.floor(osdWidth / 1920);
 	//var yScale = 1 - Math.floor(osdHeight / 1080);
 
-	var xOffset = 80;// * (Math.floor(osdWidth) / 1920) / 2);
+	var xOffset = 80; // * (Math.floor(osdWidth) / 1920) / 2);
 
-	var width = 500;// * xScale;
-	var height = 100;// * yScale;
-	var yOffset = 10 + (height * Windows.Alerts.onScreen.length) + (10 * Windows.Alerts.onScreen.length);
+	var width = 500; // * xScale;
+	var height = 100; // * yScale;
+	var yOffset =
+		10 +
+		height * Windows.Alerts.onScreen.length +
+		10 * Windows.Alerts.onScreen.length;
 	var message = "";
 	var messageXPosition = osdWidth - (width + (xOffset + 100));
 
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 40) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
+	message +=
+		SSA.setPosition(messageXPosition + 250, yOffset + 40) +
+		SSA.setBorder(1) +
+		SSA.setSize("33") +
+		SSA.setFont("Overpass Light");
 	message += line1 + "@br@";
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 67.5) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
+	message +=
+		SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
+		SSA.setBorder(1) +
+		SSA.setSize("33") +
+		SSA.setFont("Overpass Light");
 	message += line2 + "@br@";
-	message += SSA.setPosition(messageXPosition + 250,yOffset + 95) + SSA.setBorder(1) + SSA.setSize("33") + SSA.setFont("Overpass Light");
+	message +=
+		SSA.setPosition(messageXPosition + 250, yOffset + 95) +
+		SSA.setBorder(1) +
+		SSA.setSize("33") +
+		SSA.setFont("Overpass Light");
 	message += line3;
 	var image = "";
 
-	if(type == "info")
-	{
-		image = SSA.setPosition(messageXPosition + 145,yOffset + 35) + SSA.setScale("200") + SSA.Images.info();
+	if (type == "info") {
+		image =
+			SSA.setPosition(messageXPosition + 145, yOffset + 35) +
+			SSA.setScale("200") +
+			SSA.Images.info();
+	} else if (type == "warning") {
+		image =
+			SSA.setPosition(messageXPosition + 150, yOffset + 45) +
+			SSA.setScale("75") +
+			SSA.Images.warning();
+	} else if (type == "error") {
+		image =
+			SSA.setPosition(messageXPosition + 150, yOffset + 40) +
+			SSA.setScale("33") +
+			SSA.Images.error();
 	}
-	else if(type == "warning")
-	{
-		image = SSA.setPosition(messageXPosition + 150,yOffset + 45) + SSA.setScale("75") + SSA.Images.warning();
-	}
-	else if(type == "error")
-	{
-		image = SSA.setPosition(messageXPosition + 150,yOffset + 40) + SSA.setScale("33") + SSA.Images.error();
-	}
-	
+
 	var window = new Windows.Window({
-		xPosition: osdWidth - (width + (xOffset)),
+		xPosition: osdWidth - (width + xOffset),
 		yPosition: yOffset,
 		width: width,
 		height: height,
@@ -695,28 +705,24 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 		item: {
 			type: "alert",
 			image: image,
-			text: message
-		}
+			text: message,
+		},
 	});
 	mp.observe_property("osd-height", undefined, function () {
-		if(
-			mp.get_property("osd-height") != osdHeight
-			||
+		if (
+			mp.get_property("osd-height") != osdHeight ||
 			mp.get_property("osd-width") != osdWidth
-			)
-		{
+		) {
 			window.settings.fadeOut = false;
 			window.hide();
 		}
 	});
 
 	mp.observe_property("osd-width", undefined, function () {
-		if(
-			mp.get_property("osd-height") != osdHeight
-			||
+		if (
+			mp.get_property("osd-height") != osdHeight ||
 			mp.get_property("osd-width") != osdWidth
-			)
-		{
+		) {
 			window.settings.fadeOut = false;
 			window.hide();
 		}
@@ -724,17 +730,16 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 
 	Windows.Alerts.onScreen.push(window);
 
-	if(
-		mp.get_property("osd-height") < 1090 && mp.get_property("osd-height") > 1070 &&
-		mp.get_property("osd-width") < 1930 && mp.get_property("osd-width") > 1910
-		)
-	{
+	if (
+		mp.get_property("osd-height") < 1090 &&
+		mp.get_property("osd-height") > 1070 &&
+		mp.get_property("osd-width") < 1930 &&
+		mp.get_property("osd-width") > 1910
+	) {
 		window.settings.drawBaseOSD = true;
 		window.settings.drawEffectOSD = true;
 		window.settings.transparency = "40";
-	}
-	else
-	{
+	} else {
 		window.settings.drawBaseOSD = false;
 		window.settings.drawEffectOSD = false;
 		window.settings.transparency = "0";
@@ -742,14 +747,12 @@ Windows.Alerts.show = function (type,line1,line2,line3) {
 
 	window.show();
 	window.onClose = function () {
-		for(var i = 0; i <= Windows.Alerts.onScreen.length-1;i++)
-		{
-			if (Windows.Alerts.onScreen[i] == window)
-			{
-				Windows.Alerts.onScreen.splice(i,1);
+		for (var i = 0; i <= Windows.Alerts.onScreen.length - 1; i++) {
+			if (Windows.Alerts.onScreen[i] == window) {
+				Windows.Alerts.onScreen.splice(i, 1);
 			}
 		}
-	}
-}
+	};
+};
 
 module.exports = Windows;

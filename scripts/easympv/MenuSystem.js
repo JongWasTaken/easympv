@@ -123,7 +123,6 @@ Menus.Menu = function (settings, items, parentMenu) {
 	}
 
 	this.settings = {};
-	
 
 	if (items != undefined) {
 		this.items = items;
@@ -182,7 +181,7 @@ Menus.Menu = function (settings, items, parentMenu) {
 	if (settings.selectedItemColor != undefined) {
 		this.settings.selectedItemColor = settings.selectedItemColor;
 	} else {
-		this.settings.selectedItemColor = "ba0f8d";//"740A58";
+		this.settings.selectedItemColor = "ba0f8d"; //"740A58";
 	} //"EB4034"
 
 	if (settings.scrollingEnabled != undefined) {
@@ -247,7 +246,12 @@ Menus.Menu = function (settings, items, parentMenu) {
 	if (settings.itemPrefix != undefined) {
 		this.settings.itemPrefix = settings.itemPrefix + " ";
 	} else {
-		this.settings.itemPrefix = SSA.insertSymbolFA(" ",this.settings.fontSize-2,this.settings.fontSize,this.settings.fontName);
+		this.settings.itemPrefix = SSA.insertSymbolFA(
+			" ",
+			this.settings.fontSize - 2,
+			this.settings.fontSize,
+			this.settings.fontName
+		);
 	} // "➤ "
 
 	if (settings.zIndex != undefined) {
@@ -461,8 +465,9 @@ Menus.Menu = function (settings, items, parentMenu) {
 					"",
 					this.settings.fontSize - 3,
 					this.settings.fontSize
-				) + SSA.setFont(this.settings.fontName)
-				+ " Back@br@@br@", // ↑
+				) +
+				SSA.setFont(this.settings.fontName) +
+				" Back@br@@br@", // ↑
 			item: "@back@",
 			color: "999999",
 		});
@@ -471,11 +476,14 @@ Menus.Menu = function (settings, items, parentMenu) {
 		this.parentMenu = undefined;
 	}
 
-	if(this.settings.maxTitleLength != 0){
-		for(var i = 0; i < this.items.length; i++) 
-		{
-			if(this.items[i].title.length >= this.settings.maxTitleLength) {
-				this.items[i].title = this.items[i].title.substring(0, this.settings.maxTitleLength) + "...";
+	if (this.settings.maxTitleLength != 0) {
+		for (var i = 0; i < this.items.length; i++) {
+			if (this.items[i].title.length >= this.settings.maxTitleLength) {
+				this.items[i].title =
+					this.items[i].title.substring(
+						0,
+						this.settings.maxTitleLength
+					) + "...";
 			}
 		}
 	}
@@ -582,23 +590,32 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		}
 
 		// Items
-		if (this.settings.scrollingEnabled)
-		{
+		if (this.settings.scrollingEnabled) {
 			var drawItems = [];
-			var allowedItemCount = Math.floor(mp.get_property("osd-height") / this.settings.fontSize) + 5;
-		
-			var startItem = this.selectedItemIndex - Math.percentage(this.settings.scrollingPosition,allowedItemCount);
-			while(startItem < 0) {startItem++};
-	
+			var allowedItemCount =
+				Math.floor(
+					mp.get_property("osd-height") / this.settings.fontSize
+				) + 5;
+
+			var startItem =
+				this.selectedItemIndex -
+				Math.percentage(
+					this.settings.scrollingPosition,
+					allowedItemCount
+				);
+			while (startItem < 0) {
+				startItem++;
+			}
+
 			var endItem = this.selectedItemIndex + allowedItemCount;
-			while(endItem > this.items.length) {endItem = endItem-1};
-	
+			while (endItem > this.items.length) {
+				endItem = endItem - 1;
+			}
+
 			for (var r = startItem; r < endItem; r++) {
 				drawItems.push(this.items[r]);
 			}
-		}
-		else
-		{
+		} else {
 			var drawItems = this.items;
 			var startItem = 0;
 			var endItem = 0;
@@ -638,12 +655,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					"\n";
 			}
 
-			if (this.selectedItemIndex-startItem == i) {
+			if (this.selectedItemIndex - startItem == i) {
 				color = SSA.setColor(this.settings.selectedItemColor);
 				title = this.settings.itemPrefix + title;
 			}
 
-			if (this.suffixCacheIndex-startItem == i) {
+			if (this.suffixCacheIndex - startItem == i) {
 				var count = (title.match(/\n/g) || []).length;
 				if (count > 0) {
 					title =
@@ -682,7 +699,9 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					this.cachedMenuText += "\n";
 				}
 				if (postItemActions[q].includes("@t")) {
-					this.cachedMenuText +=  postItemActions[q].replaceAll("@t", "").replaceAll("@", "");
+					this.cachedMenuText += postItemActions[q]
+						.replaceAll("@t", "")
+						.replaceAll("@", "");
 					this.cachedMenuText += "\n";
 				}
 			}
@@ -698,7 +717,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 
 		 	- Description Text Lines might overlap on low windows resolutions.
 				-> Not really a concern
-		 */ 
+		 */
 		var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage
 		var transparency = this.settings.transparency;
 		var scale = SSA.setScale(scaleFactor);
@@ -830,23 +849,32 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		this.cachedMenuText += mainDescription;
 
 		// Items
-		if (this.settings.scrollingEnabled)
-		{
+		if (this.settings.scrollingEnabled) {
 			var drawItems = [];
-			var allowedItemCount = Math.floor(mp.get_property("osd-height") / this.settings.fontSize) + 5;
-		
-			var startItem = this.selectedItemIndex - Math.percentage(this.settings.scrollingPosition,allowedItemCount);
-			while(startItem < 0) {startItem++};
-	
+			var allowedItemCount =
+				Math.floor(
+					mp.get_property("osd-height") / this.settings.fontSize
+				) + 5;
+
+			var startItem =
+				this.selectedItemIndex -
+				Math.percentage(
+					this.settings.scrollingPosition,
+					allowedItemCount
+				);
+			while (startItem < 0) {
+				startItem++;
+			}
+
 			var endItem = this.selectedItemIndex + allowedItemCount;
-			while(endItem > this.items.length) {endItem = endItem-1};
-	
+			while (endItem > this.items.length) {
+				endItem = endItem - 1;
+			}
+
 			for (var r = startItem; r < endItem; r++) {
 				drawItems.push(this.items[r]);
 			}
-		}
-		else
-		{
+		} else {
 			var drawItems = this.items;
 			var startItem = 0;
 			var endItem = 0;
@@ -872,12 +900,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 				color = SSA.setColor(this.settings.itemColor);
 			}
 
-			if (this.selectedItemIndex-startItem == i) {
+			if (this.selectedItemIndex - startItem == i) {
 				color = SSA.setColor(this.settings.selectedItemColor);
 				title = this.settings.itemPrefix + title;
 			}
 
-			if (this.suffixCacheIndex-startItem == i) {
+			if (this.suffixCacheIndex - startItem == i) {
 				title += this.settings.itemSuffix;
 			}
 
@@ -908,7 +936,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					this.cachedMenuText += lineBlank();
 				}
 				if (postItemActions[q].includes("@us")) {
-					this.cachedMenuText += lineStart(4, 0,0.0003);
+					this.cachedMenuText += lineStart(4, 0, 0.0003);
 
 					for (
 						var h = 0;
@@ -923,8 +951,12 @@ Menus.Menu.prototype._constructMenuCache = function () {
 					this.cachedMenuText += lineEnd();
 				}
 				if (postItemActions[q].includes("@t")) {
-					this.cachedMenuText += lineStart(4, 0,0.0005);
-					this.cachedMenuText += SSA.setSize(this.settings.fontSize-9) + postItemActions[q].replaceAll("@t", "").replaceAll("@", "");
+					this.cachedMenuText += lineStart(4, 0, 0.0005);
+					this.cachedMenuText +=
+						SSA.setSize(this.settings.fontSize - 9) +
+						postItemActions[q]
+							.replaceAll("@t", "")
+							.replaceAll("@", "");
 					this.cachedMenuText += lineEnd();
 				}
 			}
@@ -1159,9 +1191,8 @@ Menus.Menu.prototype.toggleMenu = function () {
 	}
 };
 
-Menus.Menu.prototype.eventHandler = function ()
-{
-	mp.msg.warn("Menu \"" + this.settings.title + "\" has no event handler!");
+Menus.Menu.prototype.eventHandler = function () {
+	mp.msg.warn('Menu "' + this.settings.title + '" has no event handler!');
 };
 
 module.exports = Menus;

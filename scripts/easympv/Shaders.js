@@ -83,42 +83,34 @@ Shaders.populateSets = function () {
 	Shaders.sets = sorttemp_master;
 };
 
-/** 
+/**
  * Applies shaderset.
  * @param {string} shader name of a shaderset in Shaders.json
-*/
+ */
 Shaders.apply = function (shader) {
 	Shaders.manualSelection = true;
 	if (shader == "Automatic Anime4K") {
-
 		var resolutions = [300, 480, 720, 1080, 1440, 2560, 3000],
-  		file_resolution = Number(mp.get_property("video-params/h"));
+			file_resolution = Number(mp.get_property("video-params/h"));
 
-		var closest = resolutions.reduce(function(prev, curr) {
-			return (Math.abs(curr - file_resolution) < Math.abs(prev - file_resolution) ? curr : prev);
+		var closest = resolutions.reduce(function (prev, curr) {
+			return Math.abs(curr - file_resolution) <
+				Math.abs(prev - file_resolution)
+				? curr
+				: prev;
 		});
 
-		if(closest == 480)
-		{
+		if (closest == 480) {
 			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
-		}
-		else if(closest == 720)
-		{
+		} else if (closest == 720) {
 			Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
-		}
-		else if(closest == 1080)
-		{
+		} else if (closest == 1080) {
 			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
-		}
-		else if(closest == 1440)
-		{
+		} else if (closest == 1440) {
 			Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
-		}
-		else
-		{
+		} else {
 			Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
 		}
-		
 	} else if (shader == "Automatic All-Purpose") {
 		Shaders.apply("NNEDI3 (128 Neurons)");
 	} else if (

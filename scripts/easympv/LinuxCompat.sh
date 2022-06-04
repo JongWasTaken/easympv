@@ -13,15 +13,14 @@ command=$1
 version=""
 changelog=""
 
-curl_or_wget=$(if hash curl 2>/dev/null; then echo "curl -s"; elif hash wget 2>/dev/null; then echo "wget -qO-"; fi);
+curl_or_wget=$(if hash curl 2>/dev/null; then echo "curl -s"; elif hash wget 2>/dev/null; then echo "wget -qO-"; fi)
 
 if [ -z "$curl_or_wget" ]; then
     echo "Neither curl nor wget found." >&2
     exit 1
 fi
 
-get-dependencies()
-{
+get-dependencies() {
     if [ -f "/usr/bin/wget" ]; then
         version=$(wget -q -O - https://smto.pw/mpv/hosted/dependencies.json)
     elif [ -f "/usr/bin/curl" ]; then
@@ -29,8 +28,7 @@ get-dependencies()
     fi
 }
 
-download-dependency()
-{
+download-dependency() {
     if [ -f "/usr/bin/wget" ]; then
         wget -q -O "$HOME/.config/mpv/$2" $1
     elif [ -f "/usr/bin/curl" ]; then
@@ -38,8 +36,7 @@ download-dependency()
     fi
 }
 
-get-version-latest()
-{
+get-version-latest() {
     if [ -f "/usr/bin/wget" ]; then
         version=$(wget -q -O - https://smto.pw/mpv/hosted/latest.json)
     elif [ -f "/usr/bin/curl" ]; then
@@ -47,8 +44,7 @@ get-version-latest()
     fi
 }
 
-get-version-latest-mpv()
-{
+get-version-latest-mpv() {
     if [ -f "/usr/bin/wget" ]; then
         version=$(wget -q -O - https://smto.pw/mpv/hosted/mpvLatestVersion)
     elif [ -f "/usr/bin/curl" ]; then
@@ -56,8 +52,7 @@ get-version-latest-mpv()
     fi
 }
 
-get-package()
-{
+get-package() {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
         rm -rf "$HOME/.config/mpv/package.zip"
     fi
@@ -69,8 +64,7 @@ get-package()
     fi
 }
 
-extract-package()
-{
+extract-package() {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
         if [ -f "/usr/bin/unzip" ]; then
             unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/"
@@ -78,30 +72,26 @@ extract-package()
     fi
 }
 
-remove-package()
-{
+remove-package() {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
         rm -rf "$HOME/.config/mpv/package.zip"
     fi
 }
 
-apply-package()
-{
+apply-package() {
     if [ -d "$HOME/.config/mpv/easympv-$1" ]; then
         cp -r "$HOME/.config/mpv/easympv-$1/"* "$HOME/.config/mpv/"
         rm -rf "$HOME/.config/mpv/easympv-$1"
     fi
 }
 
-remove-file()
-{
+remove-file() {
     if [ -f "$HOME/.config/mpv/$1" ]; then
         rm -rf "$HOME/.config/mpv/$1"
     fi
 }
 
-get-image-info()
-{
+get-image-info() {
     if [ -f "$HOME/.config/mpv/scripts/easympv/images/$1" ]; then
         file -b "$HOME/.config/mpv/scripts/easympv/images/$1"
     fi
@@ -163,20 +153,19 @@ fi
 if [ "$command" == "get-gpus" ]; then
     gpu_count=$(lspci | grep ' VGA ' | wc -l)
     gpus=""
-    for i in {1..99..1}
-        do
-            if  (( $i > $gpu_count )); then
-                break
-            else
-                gpus+=$(lspci | grep ' VGA ' | cut -c36- | sed -n "$i"p)
-                gpus+="|"
-            fi
-        done
+    for i in {1..99..1}; do
+        if (($i > $gpu_count)); then
+            break
+        else
+            gpus+=$(lspci | grep ' VGA ' | cut -c36- | sed -n "$i"p)
+            gpus+="|"
+        fi
+    done
     echo $(echo "$gpus" | rev | cut -c 2- | rev)
 fi
 
 if [ "$command" == "get-connection-status" ]; then
-    echo -e "GET http://smto.pw HTTP/1.0\n\n" | nc google.com 80 > /dev/null 2>&1
+    echo -e "GET http://smto.pw HTTP/1.0\n\n" | nc google.com 80 >/dev/null 2>&1
     if [ $? -eq 0 ]; then
         echo "True"
     else
