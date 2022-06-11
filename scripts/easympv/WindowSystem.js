@@ -17,6 +17,7 @@ Currently it is only used to show alerts.
 
 var SSA = require("./SSAHelper");
 var OSD = require("./ImageOSD");
+var Utils = require("./Utils");
 
 var Windows = {};
 
@@ -571,7 +572,7 @@ Windows.TextWall.create = function (text)
 			yPositionOverride: 0,
 			type: "text",
 			color: "ffffff",
-			fontName: "Overpass Light",
+			fontName: Utils.commonFontName,
 			fontSize: "33",
 			borderColor: "000000",
 			borderSize: "1",
@@ -659,19 +660,19 @@ Windows.Alerts.show = function (type, line1, line2, line3) {
 		SSA.setPosition(messageXPosition + 250, yOffset + 40) +
 		SSA.setBorder(1) +
 		SSA.setSize("33") +
-		SSA.setFont("Overpass Light");
+		SSA.setFont(Utils.commonFontName);
 	message += line1 + "@br@";
 	message +=
 		SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
 		SSA.setBorder(1) +
 		SSA.setSize("33") +
-		SSA.setFont("Overpass Light");
+		SSA.setFont(Utils.commonFontName);
 	message += line2 + "@br@";
 	message +=
 		SSA.setPosition(messageXPosition + 250, yOffset + 95) +
 		SSA.setBorder(1) +
 		SSA.setSize("33") +
-		SSA.setFont("Overpass Light");
+		SSA.setFont(Utils.commonFontName);
 	message += line3;
 	var image = "";
 

@@ -31,6 +31,8 @@ var Utils = {};
 Utils.OS = undefined;
 Utils.OSisWindows = false;
 
+Utils.commonFontName = "Overpass SemiBold";
+
 Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
 Utils.isOnline = false;
@@ -46,10 +48,12 @@ Utils.displayVersionMpv = "";
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
  */
 Utils.determineOS = function () {
+	mp.msg.verbose("[startup] determineOS");
 	if (mp.utils.getenv("OS") == "Windows_NT") {
 		Utils.OS = "win";
 		Utils.OSisWindows = true;
 		Utils.directorySeperator = "\\";
+		Utils.commonFontName = "Overpass Light";
 		mp.msg.info("Detected operating system: Windows");
 	} else {
 		var uname = mp.command_native({
@@ -308,6 +312,7 @@ Utils.executeCommand = function (line) {
  * @returns {boolean} True if the device can connect to the internet
  */
 Utils.checkInternetConnection = function () {
+	mp.msg.verbose("[startup] checkInternetConnection");
 	var callback = function (success, result, error) {
 		if (result != undefined) {
 			Utils.isOnline = Boolean(result.stdout.trim());

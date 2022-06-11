@@ -137,23 +137,24 @@ var sofaEnabled = false;
 Settings.load();
 mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
 
-mp.msg.verbose("[startup] determineOS");
 Utils.determineOS();
-
-mp.msg.verbose("[startup] checkInternetConnection");
 Utils.checkInternetConnection();
 
-mp.msg.verbose("[startup] startupTasks");
+
 if (Settings.Data.doMigration) {
+	mp.msg.verbose("[startup] startupTask: migration");
 	Settings.migrate();
 }
 if (Settings.Data.resetMpvConfig) {
+	mp.msg.verbose("[startup] startupTask: reset mpvConfig");
 	Settings.mpvConfig.reset();
 }
 if (Settings.Data.resetInputConfig) {
+	mp.msg.verbose("[startup] startupTask: reset inputConfig");
 	Settings.inputConfig.reset();
 }
 if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
+	mp.msg.verbose("[startup] startupTask: reset inputConfig");
 	Settings.inputConfig.reset();
 }
 
@@ -163,6 +164,7 @@ var notifyAboutUpdates = new Boolean(
 
 Shaders.readFile();
 Colors.readFile();
+ImageOSD.readFile();
 
 /*
 mp.msg.verbose("[startup] indexImages");
@@ -178,7 +180,6 @@ for (i = 0; i < imageArray.length; i++) {
 }
 */
 
-ImageOSD.readFile();
 Settings.Data.newestVersion = "0.0.0";
 Utils.WL.createCache();
 
@@ -187,8 +188,10 @@ Settings.save();
 
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
-//TODO: do not commit this
-//Wizard.Start();
+if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
+	mp.msg.verbose("[startup] startupTask: start Wizard");
+	Wizard.Start();
+}
 
 var onFileLoad = function () {
 	var wld = Utils.WL.getData();

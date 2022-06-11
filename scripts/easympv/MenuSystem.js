@@ -112,6 +112,7 @@ The definition of Menus.Menu.prototype._constructMenuCache has even more informa
 
 var SSA = require("./SSAHelper");
 var ImageOSD = require("./ImageOSD");
+var Utils = require("./Utils");
 
 var Menus = {};
 
@@ -240,7 +241,7 @@ Menus.Menu = function (settings, items, parentMenu) {
 	if (settings.fontName != undefined) {
 		this.settings.fontName = settings.fontName;
 	} else {
-		this.settings.fontName = "Overpass Light";
+		this.settings.fontName = Utils.commonFontName;
 	}
 
 	if (settings.itemPrefix != undefined) {
