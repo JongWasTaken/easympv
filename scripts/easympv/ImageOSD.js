@@ -155,7 +155,7 @@ ImageOSD.Image = function (active, id, file, width, height, offset, x, y) {
  * Place the correctly formated image file in ~~/scripts/easympv/images/.
  * @param {string} name internal name for image file, used when drawing/removing overlay
  * @param {string} file file name with extension
- */
+ 
 ImageOSD.addImage = function (name, file) {
 	var imgdata = __getImageInfo(file);
 	var height = imgdata.h;
@@ -175,7 +175,23 @@ ImageOSD.addImage = function (name, file) {
 		),
 	};
 	Files.push(image);
+	mp.msg.warn(JSON.stringify(image));
 };
+ */
+
+/**
+ * Reads Images.json and adds its contents to the Files array.
+ */
+ImageOSD.readFile = function () {
+	mp.msg.verbose("[startup] ImageOSD.readFile");
+	var file = JSON.parse(
+		mp.utils.read_file(
+			mp.utils.get_user_path("~~/scripts/easympv/Images.json")
+		)
+	);
+
+	Files = file.images;
+}
 
 /**
  * @param {string} name internal name of image
@@ -221,7 +237,7 @@ ImageOSD.show = function (name, x, y) {
 				image.data.id,
 				image.data.x,
 				image.data.y,
-				image.data.file,
+				mp.utils.get_user_path(image.data.file),
 				image.data.offset,
 				"bgra",
 				image.data.width,

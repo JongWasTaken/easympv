@@ -1115,7 +1115,8 @@ Utils.WL.cache = [];
  * Caches watch_later folder to memory. Limited to 999 entries.
  * Access cache with Utils.wlCache
  */
-Utils.WL.populateCache = function () {
+Utils.WL.createCache = function () {
+	mp.msg.verbose("[startup] Utils.WL.createCache");
 	if (
 		mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
 		undefined

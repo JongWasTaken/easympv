@@ -1,0 +1,238 @@
+{
+    "images": [
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4warning.bmp",
+                "height": 82,
+                "id": 0,
+                "offset": 122,
+                "width": 90,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4warning"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/shaders.bmp",
+                "height": 60,
+                "id": 1,
+                "offset": 54,
+                "width": 200,
+                "x": 0,
+                "y": 0
+            },
+            "name": "shaders"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2warning.bmp",
+                "height": 82,
+                "id": 2,
+                "offset": 122,
+                "width": 90,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2warning"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2logo.bmp",
+                "height": 90,
+                "id": 3,
+                "offset": 54,
+                "width": 300,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2logo"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/colors.bmp",
+                "height": 60,
+                "id": 4,
+                "offset": 54,
+                "width": 200,
+                "x": 0,
+                "y": 0
+            },
+            "name": "colors"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2chapters.bmp",
+                "height": 90,
+                "id": 5,
+                "offset": 54,
+                "width": 300,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2chapters"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2colors.bmp",
+                "height": 90,
+                "id": 6,
+                "offset": 54,
+                "width": 300,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2colors"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/chapters.bmp",
+                "height": 60,
+                "id": 7,
+                "offset": 54,
+                "width": 200,
+                "x": 0,
+                "y": 0
+            },
+            "name": "chapters"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2shaders.bmp",
+                "height": 90,
+                "id": 8,
+                "offset": 54,
+                "width": 300,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2shaders"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4shaders.bmp",
+                "height": 120,
+                "id": 9,
+                "offset": 54,
+                "width": 400,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4shaders"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/settings.bmp",
+                "height": 60,
+                "id": 10,
+                "offset": 54,
+                "width": 200,
+                "x": 0,
+                "y": 0
+            },
+            "name": "settings"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4chapters.bmp",
+                "height": 120,
+                "id": 11,
+                "offset": 54,
+                "width": 400,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4chapters"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/logo.bmp",
+                "height": 60,
+                "id": 12,
+                "offset": 54,
+                "width": 200,
+                "x": 0,
+                "y": 0
+            },
+            "name": "logo"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4colors.bmp",
+                "height": 120,
+                "id": 13,
+                "offset": 54,
+                "width": 400,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4colors"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/warning.bmp",
+                "height": 82,
+                "id": 14,
+                "offset": 54,
+                "width": 90,
+                "x": 0,
+                "y": 0
+            },
+            "name": "warning"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/2settings.bmp",
+                "height": 90,
+                "id": 15,
+                "offset": 54,
+                "width": 300,
+                "x": 0,
+                "y": 0
+            },
+            "name": "2settings"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4logo.bmp",
+                "height": 120,
+                "id": 16,
+                "offset": 54,
+                "width": 400,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4logo"
+        },
+        {
+            "data": {
+                "active": false,
+                "file": "~~/scripts/easympv/images/4settings.bmp",
+                "height": 120,
+                "id": 17,
+                "offset": 54,
+                "width": 400,
+                "x": 0,
+                "y": 0
+            },
+            "name": "4settings"
+        }
+    ]
+}

@@ -136,9 +136,14 @@ var sofaEnabled = false;
 // Setup
 Settings.load();
 mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
+
+mp.msg.verbose("[startup] determineOS");
 Utils.determineOS();
+
+mp.msg.verbose("[startup] checkInternetConnection");
 Utils.checkInternetConnection();
 
+mp.msg.verbose("[startup] startupTasks");
 if (Settings.Data.doMigration) {
 	Settings.migrate();
 }
@@ -156,9 +161,11 @@ var notifyAboutUpdates = new Boolean(
 	Settings.Data.notifyAboutUpdates.toString()
 );
 
-Shaders.populateSets();
-Colors.populateSets();
+Shaders.readFile();
+Colors.readFile();
 
+/*
+mp.msg.verbose("[startup] indexImages");
 var imageArray = mp.utils.readdir(
 		mp.utils.get_user_path("~~/scripts/easympv/images/"),
 		"files"
@@ -169,12 +176,15 @@ for (i = 0; i < imageArray.length; i++) {
 		ImageOSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
 	}
 }
+*/
 
+ImageOSD.readFile();
 Settings.Data.newestVersion = "0.0.0";
+Utils.WL.createCache();
 
-Utils.WL.populateCache();
-
+mp.msg.verbose("[startup] Settings.save");
 Settings.save();
+
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
 //TODO: do not commit this
