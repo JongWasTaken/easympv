@@ -559,7 +559,7 @@ Settings.inputConfig.reset = function () {
 	defaultConfigString += "d script-binding drpc_toggle\n";
 	defaultConfigString += 'x show-text "${playlist}"\n';
 	defaultConfigString += "n seek 90\n";
-	defaultConfigString += "\n";
+	defaultConfigString += "\n";Handler
 	defaultConfigString += "PGDWN add volume -5\n";
 	defaultConfigString += "PGUP add volume 5\n";
 	defaultConfigString +=
@@ -576,8 +576,7 @@ Settings.inputConfig.reset = function () {
 	Settings.Data.resetInputConfig = false;
 	Settings.save();
 
-	//TODO: system alert here
-	mp.msg.info("Input file has been reset! mpv will now terminate.");
+	Utils.showSystemAlert("Input file has been reset! mpv will now terminate.");
 	mp.commandv("quit-watch-later");
 };
 

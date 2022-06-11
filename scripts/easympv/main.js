@@ -63,7 +63,12 @@ IDEAS:
 	FFI.js -> easympv-ffi.lua
 
 KNOWN ISSUES:
-	none
+	none?
+
+UNNAMED LIST OF "things to test on Windows specifically":
+	(WORKS) Utils.showSystemAlert -> Powershell implementation of 'alert'
+	(WORKS) ImageOSD -> get image dimensions using powershell
+	Browsers.DeviceBrowser.menuEventHandler -> low latency profile
 */
 "use strict";
 
@@ -242,7 +247,7 @@ var onFileLoad = function () {
 // This will be executed on shutdown
 var onShutdown = function () {
 	// This is not ideal, as data will only be saved when mpv is being closed.
-	// Ideally, this would be in the on_startup block, after a file change.
+	// Ideally, this would be in the on_startup block, before a file change.
 	mp.msg.info("Writing data to watch_later...");
 	Utils.WL.writeData(Shaders.name, Colors.name);
 };

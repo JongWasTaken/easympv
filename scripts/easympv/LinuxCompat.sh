@@ -97,6 +97,17 @@ get-image-info() {
     fi
 }
 
+alert() {
+    TEXT=$(echo $@ | cut -c7-)
+    if [ -f "/usr/bin/zenity" ]; then
+        #echo "$TEXT"
+        /usr/bin/zenity --info --text="$TEXT"
+    else
+        echo "zenity is not installed!"
+        echo $TEXT
+    fi
+}
+
 if [ "$command" == "get-version-latest" ]; then
     get-version-latest
     echo $version
@@ -147,6 +158,11 @@ fi
 
 if [ "$command" == "get-image-info" ]; then
     get-image-info $2
+    exit $?
+fi
+
+if [ "$command" == "alert" ]; then
+    alert "$@"
     exit $?
 fi
 

@@ -248,6 +248,62 @@ Utils.executeCommand = function (line) {
 };
 
 /**
+ * X.
+ */
+ Utils.showSystemAlert = function (text, blockThread) {
+
+	if(blockThread == undefined) { blockThread = true; }
+
+	if(!Utils.OSisWindows)
+	{
+		var isTerminal = (mp.utils.getenv("TERM") != undefined);
+		if(isTerminal) {mp.msg.info(text); return;}
+		else
+		{ 
+			var args = [
+				"sh",
+				"-c",
+				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+					" alert \"" + text + "\""
+			];
+		}
+	}
+	else
+	{ 
+		var args = [
+			"powershell",
+			"-executionpolicy",
+			"bypass",
+			mp.utils
+				.get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
+				.replaceAll("/", "\\"),
+			"alert \"" + text + "\"",
+		];
+	}
+
+	if(blockThread)
+	{
+		mp.command_native({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: false,
+			capture_stderr: false,
+			args: args,
+		});
+	}
+	else
+	{
+		mp.command_native_async({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: false,
+			capture_stderr: false,
+			args: args,
+		});
+	}
+};
+
+/**
  * Checks if the device can connect to the internet.
  * @returns {boolean} True if the device can connect to the internet
  */

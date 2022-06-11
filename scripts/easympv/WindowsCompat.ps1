@@ -374,6 +374,16 @@ if($command -eq "show-command-box")
     }
 }
 
+if($command -eq "alert")
+{
+    Add-Type -AssemblyName System.Windows.Forms
+    $result = [System.Windows.Forms.MessageBox]::Show($arguments,"mpv",[System.Windows.Forms.MessageBoxButtons]::OK)
+    if ($result -eq "OK")
+    {
+        exit 0
+    }
+}
+
 exit 1
 
 # Below is the source code for the included GetDevices.exe application:

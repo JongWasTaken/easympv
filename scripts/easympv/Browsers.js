@@ -833,7 +833,6 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 
 Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
 	if (event == "enter") {
-		//TODO: test on windows
 		//mp.commandv("apply-profile", "low-latency");
 		mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file
 
@@ -844,7 +843,7 @@ Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
 		}
 		WindowSystem.Alerts.show(
 			"info",
-			"Opening device " + item + "...",
+			"Opening device " + item,
 			"",
 			""
 		);
