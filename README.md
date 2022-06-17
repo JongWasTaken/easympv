@@ -4,8 +4,9 @@
 
 
 Extends base mpv with more features and makes it a bit more user-friendly.  
-Currently supports Windows and Linux (and probably BSD).  
-macOS support is planned, but currently not implemented.
+Currently supports Windows and Linux.  
+macOS (and probably BSD) support is planned, but currently not fully tested.
+Most features should work though.
 
 ## Features
 - Menus with custom Fonts
@@ -24,20 +25,23 @@ macOS support is planned, but currently not implemented.
 #### Linux Dependencies
 Due to the modular nature of Linux, you will need to install a few dependencies:
 - mpv, preferably the newest possible version (0.34.1 at the time of writing) [AUR](https://aur.archlinux.org/packages/mpv-build-git)
-- GNU coreutils (usually preinstalled on every distibution)
-- either `wget`(preferred) or `curl` (both are usually preinstalled)
-- `zenity` (required for inputs)
+- GNU coreutils (usually preinstalled)
+- either `wget`(preferred) or `curl` (usually preinstalled)
+- `zenity` (optional; currently required for inputs like YouTube URLs; we might ditch this later for something nicer)
 
 ### Automatic
-(Not yet:) Download the latest version from [here](https://smto.pw/mpv/?#downloads).
+Unfinished. Use manual installation for now.
+  
+[//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)
 ### Manual
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
 Add `m script_binding easympv` to your input.conf. Launch mpv once to generate `easympv.conf`. Adjust to your liking.  
 If no `input.conf` is present, easympv will generate one with sane defaults and terminate.  
-Launch it again to see the setup.  
+Then launch it again.  
+In the future there will be some sort of setup on the first start, this is currently unfinished.  
 
 ## License
-All easympv code and assets (everything in `scripts/easympv.js/` and `images/`) is licensed under the MIT License.  
+All easympv code and assets (everything in `scripts/easympv/`) is licensed under the MIT License.  
 Third-Party assets in this repository use different licenses, such as fonts and shaders.  
-See `scripts/easympv.js/Credits.txt` for all attributions.  
-Special thanks to VideoPlayerCode for their awesome plugins, though none of their code has been used.  
+See `scripts/easympv/Credits.txt` for all attributions.  
+Special thanks to VideoPlayerCode for their awesome plugins, they have served as inspiration for this project, though none of their code has been used.  
