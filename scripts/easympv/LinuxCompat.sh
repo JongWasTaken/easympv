@@ -24,7 +24,7 @@ get-dependencies() {
     if [ -f "/usr/bin/wget" ]; then
         version=$(wget -q -O - https://smto.pw/mpv/hosted/dependencies.json)
     elif [ -f "/usr/bin/curl" ]; then
-        version=$(curl https://smto.pw/mpv/hosted/dependencies.json | grep '.\..\..')
+        version=$(curl https://smto.pw/mpv/hosted/dependencies.json)
     fi
 }
 
@@ -40,7 +40,7 @@ get-version-latest() {
     if [ -f "/usr/bin/wget" ]; then
         version=$(wget -q -O - https://smto.pw/mpv/hosted/latest.json)
     elif [ -f "/usr/bin/curl" ]; then
-        version=$(curl https://smto.pw/mpv/hosted/latest.json | grep '.\..\..')
+        version=$(curl https://smto.pw/mpv/hosted/latest.json)
     fi
 }
 

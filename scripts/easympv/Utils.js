@@ -24,15 +24,9 @@ var Settings = require("./Settings");
  */
 var Utils = {};
 
-/**
- * undefined by default. After calling Utils.determineOS, this variable will be one of these values:
- * win, unix, mac, unknown
- */
 Utils.OS = undefined;
 Utils.OSisWindows = false;
-
 Utils.commonFontName = "Overpass SemiBold";
-
 Utils.directorySeperator = "/";
 Utils.updateInProgress = false;
 Utils.isOnline = false;
@@ -133,7 +127,18 @@ Utils.getLatestUpdateData = function () {
 					Utils.downloadDependencies();
 				}
 			} catch (dummy) {
-				Utils.latestUpdateData = undefined;
+				if(Utils.latestUpdateData.version == undefined) {
+					Utils.latestUpdateData.version = "0.0.0";
+				}
+				if(Utils.latestUpdateData.changelog == undefined) {
+					Utils.latestUpdateData.changelog = "There was an issue while getting this data. Please restart mpv to retry!";
+				}
+				if(Utils.latestUpdateData.removeFiles == undefined) {
+					Utils.latestUpdateData.removeFiles = [];
+				}
+				if(Utils.latestUpdateData.enableSettings == undefined) {
+					Utils.latestUpdateData.enableSettings = [];
+				}
 			}
 		} else {
 			Utils.latestUpdateData = undefined;
@@ -831,10 +836,10 @@ Utils.downloadDependencies = function () {
 	if (Utils.OSisWindows) {
 		installList = dependencies.windows;
 	}
-	if (Utils.OS == "unix") {
+	if (Utils.OS == "linux") {
 		installList = dependencies.linux;
 	}
-	if (Utils.OS == "mac") {
+	if (Utils.OS == "macos") {
 		installList = dependencies.macos;
 	}
 

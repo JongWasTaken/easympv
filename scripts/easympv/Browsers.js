@@ -241,9 +241,21 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 		} else if (item == "device") {
 			Browsers.DeviceBrowser.open(Browsers.Selector.cachedParentMenu);
 		} else if (item == "url") {
+			function handleURL(success, result, error) {
+				if (result.status == "0") {
+					var input = result.stdout.trim();
+					if (input.includes("://")) {
+						if (input.includes("&list=")) {
+							mp.commandv("loadlist", input);
+						} else {
+							mp.commandv("loadfile", input);
+						}
+					}
+				}
+			}
 			WindowSystem.Alerts.show("info", "URL Input window has opened!");
 			if (Utils.OSisWindows) {
-				var r = mp.command_native({
+				var r = mp.command_native_async({
 					name: "subprocess",
 					playback_only: false,
 					capture_stdout: true,
@@ -258,9 +270,9 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 							.replaceAll("/", "\\"),
 						"show-url-box",
 					],
-				});
+				},handleURL);
 			} else {
-				var r = mp.command_native({
+				var r = mp.command_native_async({
 					name: "subprocess",
 					playback_only: false,
 					capture_stdout: true,
@@ -270,17 +282,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 						"--entry",
 						"--text=Paste URL",
 					],
-				});
-			}
-			if (r.status == "0") {
-				var input = r.stdout.trim();
-				if (input.includes("://")) {
-					if (input.includes("&list=")) {
-						mp.commandv("loadlist", input);
-					} else {
-						mp.commandv("loadfile", input);
-					}
-				}
+				},handleURL);
 			}
 		}
 	}

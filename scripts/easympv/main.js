@@ -735,7 +735,6 @@ SettingsMenu.eventHandler = function (event, action) {
 				[],
 				SettingsMenu
 			);
-
 			umenu.eventHandler = function (event, action) {
 				if (event == "hide") {
 					umenu = undefined;
@@ -798,13 +797,12 @@ SettingsMenu.eventHandler = function (event, action) {
 					mp.command(result.stdout.trim());
 				}
 			};
-
 			WindowSystem.Alerts.show(
 				"info",
 				"Command Input window has opened!"
 			);
 			if (Utils.OSisWindows) {
-				var r = mp.command_native_async(
+				mp.command_native_async(
 					{
 						name: "subprocess",
 						playback_only: false,
@@ -824,7 +822,7 @@ SettingsMenu.eventHandler = function (event, action) {
 					readCommand
 				);
 			} else {
-				var r = mp.command_native_async(
+				mp.command_native_async(
 					{
 						name: "subprocess",
 						playback_only: false,
@@ -976,7 +974,7 @@ mp.add_key_binding(null, "easympv", function () {
 	mp.msg.verbose("Menu key pressed!");
 	// If no menu is active, show main menum
 	if (
-		//!ColorsMenu.isMenuVisible &&
+		!ColorsMenu.isMenuVisible &&
 		!ShadersMenu.isMenuVisible &&
 		!ChaptersMenu.isMenuVisible &&
 		!SettingsMenu.isMenuVisible &&
@@ -989,7 +987,7 @@ mp.add_key_binding(null, "easympv", function () {
 		ShadersMenu.hideMenu();
 		ChaptersMenu.hideMenu();
 		SettingsMenu.hideMenu();
-		//ColorsMenu.hideMenu();
+		ColorsMenu.hideMenu();
 	}
 });
 
