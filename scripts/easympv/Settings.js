@@ -289,7 +289,7 @@ Settings.migrate = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" remove-file " +
 				file,
 		];
@@ -396,7 +396,7 @@ Settings.mpvConfig.reset = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" remove-file " +
 				file,
 		];
@@ -509,7 +509,7 @@ Settings.inputConfig.reset = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" remove-file " +
 				file,
 		];

@@ -241,7 +241,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 		} else if (item == "device") {
 			Browsers.DeviceBrowser.open(Browsers.Selector.cachedParentMenu);
 		} else if (item == "url") {
-			function handleURL(success, result, error) {
+			var handleURL = function (success, result, error) {
 				if (result.status == "0") {
 					var input = result.stdout.trim();
 					if (input.includes("://")) {

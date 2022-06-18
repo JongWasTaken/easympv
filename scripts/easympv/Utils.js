@@ -88,7 +88,7 @@ Utils.determineOS = function () {
 					"-c",
 					"chmod +x " +
 						mp.utils.get_user_path(
-							"~~/scripts/easympv/LinuxCompat.sh"
+							"~~/scripts/easympv/UnixCompat.sh"
 						),
 				],
 			});
@@ -159,7 +159,7 @@ Utils.getLatestUpdateData = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" get-version-latest",
 		];
 	}
@@ -272,7 +272,7 @@ Utils.executeCommand = function (line) {
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" alert \"" + text + "\""
 			];
 		}
@@ -342,7 +342,7 @@ Utils.checkInternetConnection = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" get-connection-status",
 		];
 	}
@@ -384,7 +384,7 @@ Utils.getLatestMpvVersion = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" get-version-latest-mpv",
 		];
 	}
@@ -478,7 +478,7 @@ Utils.doUpdateStage1 = function () // download
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" get-package " +
 				Utils.latestUpdateData.version,
 		];
@@ -519,7 +519,7 @@ Utils.doUpdateStage2 = function () // extract
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" extract-package",
 			];
 		}
@@ -574,7 +574,7 @@ Utils.doUpdateStage3 = function () // delete package
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" remove-package",
 			];
 		}
@@ -625,7 +625,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" apply-package " +
 					Utils.latestUpdateData.version,
 			];
@@ -687,7 +687,7 @@ Utils.doUpdateStage5 = function () {
 						"sh",
 						"-c",
 						mp.utils.get_user_path(
-							"~~/scripts/easympv/LinuxCompat.sh"
+							"~~/scripts/easympv/UnixCompat.sh"
 						) +
 							" remove-file " +
 							file,
@@ -814,7 +814,7 @@ Utils.downloadDependencies = function () {
 		var args = [
 			"sh",
 			"-c",
-			mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 				" get-dependencies",
 		];
 	}
@@ -836,7 +836,7 @@ Utils.downloadDependencies = function () {
 	if (Utils.OSisWindows) {
 		installList = dependencies.windows;
 	}
-	if (Utils.OS == "linux") {
+	if (Utils.OS == "linux" || Utils.OS == "unix") {
 		installList = dependencies.linux;
 	}
 	if (Utils.OS == "macos") {
@@ -871,7 +871,7 @@ Utils.downloadDependencies = function () {
 					"sh",
 					"-c",
 					mp.utils.get_user_path(
-						"~~/scripts/easympv/LinuxCompat.sh"
+						"~~/scripts/easympv/UnixCompat.sh"
 					) +
 						" remove-file " +
 						dependencies.linux[i].location,
@@ -903,7 +903,7 @@ Utils.downloadDependencies = function () {
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" remove-file " +
 					dependencies.linux[i].location,
 			];
@@ -934,7 +934,7 @@ Utils.downloadDependencies = function () {
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" remove-file " +
 					dependencies.macos[i].location,
 			];
@@ -969,7 +969,7 @@ Utils.downloadDependencies = function () {
 			var args = [
 				"sh",
 				"-c",
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh") +
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
 					" download-dependency " +
 					installList[i].url +
 					" " +
@@ -988,6 +988,24 @@ Utils.downloadDependencies = function () {
 
 	Settings.Data.downloadDependencies = false;
 	Settings.save();
+
+	// macOS requires discord game sdk to be in /usr/local/lib/
+	if (Utils.OS == "macos") 
+	{
+		var args = [
+			"sh",
+			"-c",
+			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+				" macos-install-dgsdk",
+		];
+		var r = mp.command_native({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: true,
+			capture_stderr: false,
+			args: args,
+		});
+	}
 };
 
 /**

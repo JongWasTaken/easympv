@@ -22,6 +22,10 @@ Most features should work though.
 - Windows 8 or higher (Windows 7 might work if you update Powershell and .NET Framework to v4.5+)
 - mpv, the newest version from [here](https://sourceforge.net/projects/mpv-player-windows/files/64bit/)
 
+#### macOS Dependencies
+- mpv, installed using brew: `brew install mpv`  
+**Other versions of mpv will not work!**
+
 #### Linux Dependencies
 Due to the modular nature of Linux, you will need to install a few dependencies:
 - mpv, preferably the newest possible version (0.34.1 at the time of writing) [AUR](https://aur.archlinux.org/packages/mpv-build-git)

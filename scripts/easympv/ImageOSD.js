@@ -52,7 +52,7 @@ __getImageInfo = function (file) {
 			playback_only: false,
 			capture_stdout: true,
 			args: [
-				mp.utils.get_user_path("~~/scripts/easympv/LinuxCompat.sh"),
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh"),
 				"get-image-info",
 				file,
 			],

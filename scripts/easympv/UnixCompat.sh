@@ -1,12 +1,15 @@
 #!/bin/bash
 
-# LINUXCOMPAT.SH
+# UNIXCOMPAT.SH
 #
 # Author:              Jong
 # URL:                 https://smto.pw/mpv
 # License:             MIT License
 #
 # This file does all the linux-specific things that are not possible using mpv.
+
+# TODO: add a bunch of backends for displaying messages
+# 
 
 command=$1
 
@@ -108,6 +111,22 @@ alert() {
     fi
 }
 
+macos-install-dgsdk() {
+    if [ "$(uname -a)" == *"Darwin"* ]; then
+        if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
+	        exit
+        fi
+        INPUT=$(osascript -e 'tell application "System Events" to display dialog "For Discord integration to work, GameSDK needs to be installed on your system. This requires your password. Press OK to continue."')
+        if [ "$INPUT" == *"OK"* ]; then 
+	        osascript -e "do shell script \"mkdir -p /usr/local/lib/ && mv ~/.config/mpv/scripts/mpvcord/discord_game_sdk.dylib /usr/local/lib/libdiscord_game_sdk.dylib\" with administrator privileges"
+	        if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
+		        osascript -e 'tell application "System Events" to display dialog "Installation finished. Discord integration will work after restarting mpv."'
+	        fi
+        fi
+        exit
+    fi
+}
+
 if [ "$command" == "get-version-latest" ]; then
     get-version-latest
     echo $version
@@ -163,6 +182,11 @@ fi
 
 if [ "$command" == "alert" ]; then
     alert "$@"
+    exit $?
+fi
+
+if [ "$command" == "macos-install-dgsdk" ]; then
+    macos-install-dgsdk
     exit $?
 fi
 
