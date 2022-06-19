@@ -255,35 +255,31 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 			}
 			WindowSystem.Alerts.show("info", "URL Input window has opened!");
 			if (Utils.OSisWindows) {
-				var r = mp.command_native_async({
-					name: "subprocess",
-					playback_only: false,
-					capture_stdout: true,
-					args: [
-						"powershell",
-						"-executionpolicy",
-						"bypass",
-						mp.utils
-							.get_user_path(
-								"~~/scripts/easympv/WindowsCompat.ps1"
-							)
-							.replaceAll("/", "\\"),
-						"show-url-box",
-					],
-				},handleURL);
+				var args = [
+					"powershell",
+					"-executionpolicy",
+					"bypass",
+					mp.utils
+						.get_user_path(
+							"~~/scripts/easympv/WindowsCompat.ps1"
+						)
+						.replaceAll("/", "\\"),
+					"show-url-box",
+				];
 			} else {
-				var r = mp.command_native_async({
-					name: "subprocess",
-					playback_only: false,
-					capture_stdout: true,
-					args: [
-						mp.utils.get_user_path("/usr/bin/zenity"),
-						"--title=mpv",
-						"--entry",
-						"--text=Paste URL",
-					],
-				},handleURL);
+				var args = [
+					"sh",
+					"-c",
+					mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+						" show-url-box",
+				];
 			}
+			mp.command_native_async({
+				name: "subprocess",
+				playback_only: false,
+				capture_stdout: true,
+				args: args
+			}, handleURL);
 		}
 	}
 };
@@ -312,22 +308,11 @@ Browsers.Selector.open = function (parentMenu) {
 		item: "device",
 		color: "ffffff",
 	});
-
-	if (Utils.OSisWindows) {
-		items.push({
-			title: SSA.insertSymbolFA(" ", 26, 30) + "URL",
-			item: "url",
-			color: "ffffff",
-		});
-	} else {
-		if (mp.utils.file_info("/usr/bin/zenity") != undefined) {
-			items.push({
-				title: SSA.insertSymbolFA(" ", 26, 30) + "URL",
-				item: "url",
-				color: "ffffff",
-			});
-		}
-	}
+	items.push({
+		title: SSA.insertSymbolFA(" ", 26, 30) + "URL",
+		item: "url",
+		color: "ffffff",
+	});
 
 	Browsers.Selector.menuSettings.title = "Select Content Type";
 	Browsers.Selector.menuSettings.description = "What do you want to open?";
@@ -569,11 +554,21 @@ Browsers.FileBrowser.open = function (parentMenu) {
 			}
 		}
 	} else {
-		var currentLocationFolders = mp.utils.readdir(
-			Browsers.FileBrowser.currentLocation,
-			"dirs"
-		);
-		currentLocationFolders.sort();
+		if (mp.utils.file_info(Browsers.FileBrowser.currentLocation) != undefined) {
+			var currentLocationFolders = mp.utils.readdir(
+				Browsers.FileBrowser.currentLocation,
+				"dirs"
+			);
+			currentLocationFolders.sort();
+		} else {
+			Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+			var currentLocationFolders = mp.utils.readdir(
+				Browsers.FileBrowser.currentLocation,
+				"dirs"
+			);
+			currentLocationFolders.sort();
+		}
+
 
 		if (Utils.OS != "win" && Browsers.FileBrowser.currentLocation == "/") {
 		} else {

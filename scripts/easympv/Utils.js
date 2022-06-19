@@ -61,21 +61,24 @@ Utils.determineOS = function () {
 		if (uname.status != "0") {
 			Utils.OS = "unknown";
 			mp.msg.warn("Detected operating system: unknown");
-			mp.msg.error("Your OS is not supported.");
+			mp.msg.error("There was an issue while identifying your operating system.");
 		} else {
 			var output = uname.stdout.trim();
 			if (output.includes("Darwin")) {
 				Utils.OS = "macos";
 				mp.msg.info("Detected operating system: macOS");
 				mp.msg.error(
-					"macOS is currently not supported. Expect issues."
+					"macOS support is experimental. Please report any issues."
 				);
 			} else if (output.includes("Linux")) {
 				Utils.OS = "linux";
 				mp.msg.info("Detected operating system: Linux");
 			} else {
 				Utils.OS = "unix";
-				mp.msg.info("Detected operating system: Unix-like");
+				mp.msg.info("Detected operating system: Unix-like?");
+				mp.msg.error(
+					"Your OS is untested, but if it is similar to Linux it will probably be fine."
+				);
 			}
 
 			mp.command_native({
@@ -92,15 +95,6 @@ Utils.determineOS = function () {
 						),
 				],
 			});
-			/*
-			mp.command_native({
-				name: "subprocess",
-				playback_only: false,
-				capture_stdout: true,
-				capture_stderr: false,
-				args: ["sh","-c","chmod +x " + mp.utils.get_user_path("~~/scripts/easympv/yad")]
-			})
-			*/
 		}
 	}
 };
@@ -1258,9 +1252,7 @@ Utils.WL.clear = function () {
 		Utils.executeCommand(["del", "/Q", "/S", folder]);
 		Utils.executeCommand(["mkdir", folder]);
 		Utils.WL.createDummy();
-	} else if (Utils.OS == "mac") {
-		mp.msg.info("macOS is not supported.");
-	} else if (Utils.OS == "unix") {
+	} else {
 		Utils.executeCommand(["rm", "-rf", folder]);
 		Utils.executeCommand(["mkdir", folder]);
 		Utils.WL.createDummy();

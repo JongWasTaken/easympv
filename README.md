@@ -5,8 +5,7 @@
 
 Extends base mpv with more features and makes it a bit more user-friendly.  
 Currently supports Windows and Linux.  
-macOS (and probably BSD) support is planned, but currently not fully tested.
-Most features should work though.
+macOS support is experimental and not fully tested.
 
 ## Features
 - Menus with custom Fonts
@@ -24,14 +23,14 @@ Most features should work though.
 
 #### macOS Dependencies
 - mpv, installed using brew: `brew install mpv`  
-**Other versions of mpv will not work!**
+**Other versions of mpv will not work, as they are not compiled with LuaJIT support!**
 
 #### Linux Dependencies
 Due to the modular nature of Linux, you will need to install a few dependencies:
-- mpv, preferably the newest possible version (0.34.1 at the time of writing) [AUR](https://aur.archlinux.org/packages/mpv-build-git)
+- mpv, compiled with LuaJIT support (Not all distributions do this!)
 - GNU coreutils (usually preinstalled)
-- either `wget`(preferred) or `curl` (usually preinstalled)
-- `zenity` (optional; currently required for inputs like YouTube URLs; we might ditch this later for something nicer)
+- either `wget` (preferred) or `curl` (usually preinstalled)
+- `zenity` OR `yad` OR `kdialog` OR `xmessage + dmenu`
 
 ### Automatic
 Unfinished. Use manual installation for now.

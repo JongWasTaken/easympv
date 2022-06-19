@@ -6,15 +6,15 @@
 # URL:                 https://smto.pw/mpv
 # License:             MIT License
 #
-# This file does all the linux-specific things that are not possible using mpv.
-
-# TODO: add a bunch of backends for displaying messages
-# 
+# This file does all the unix-specific things that are not possible using mpv.
 
 command=$1
 
-version=""
-changelog=""
+OS_IS_NOT_MACOS=1
+
+if [[ "$(uname -a)" == *"Darwin"* ]]; then
+    OS_IS_NOT_MACOS=""
+fi
 
 curl_or_wget=$(if hash curl 2>/dev/null; then echo "curl -s"; elif hash wget 2>/dev/null; then echo "wget -qO-"; fi)
 
@@ -23,12 +23,93 @@ if [ -z "$curl_or_wget" ]; then
     exit 1
 fi
 
+__show-message() {
+    TEXT=$(echo "$@")
+    if [ -z "$OS_IS_NOT_MACOS" ]; then
+        osascript -e 'tell application "System Events" to display dialog "$TEXT"'
+        return 0
+    else
+        if [ -f "/usr/bin/zenity" ]; then
+            /usr/bin/zenity --info --title="mpv" --text="$TEXT"
+            return 0
+        fi
+
+        if [ -f "/usr/bin/yad" ]; then
+            /usr/bin/yad --info --title="mpv" --text="$TEXT"
+            return 0
+        fi
+
+        if [ -f "/usr/bin/kdialog" ]; then
+            /usr/bin/kdialog --msgbox "$TEXT"
+            return 0
+        fi
+
+        if [ -f "/usr/bin/xmessage" ]; then
+            /usr/bin/xmessage "$TEXT"
+            return 0
+        fi
+
+        echo "No way to display graphical messages! Message text:"
+        echo "$TEXT"
+        return 0
+    fi
+}
+
+__show-input() {
+    TEXT=$(echo $@)
+    if [ -z "$OS_IS_NOT_MACOS" ]; then
+        DATA=$(osascript -e "display dialog \"$TEXT\" default answer \"\""  | cut -c35-)
+        echo $DATA
+        return 0
+    else
+        if [ -f "/usr/bin/zenity" ]; then
+            DATA=$(/usr/bin/zenity --entry --title="mpv" --text="$TEXT")
+            echo $DATA
+            return 0
+        fi
+
+        if [ -f "/usr/bin/yad" ]; then
+            DATA=$(/usr/bin/yad --entry --title="mpv" --text="$TEXT")
+            echo $DATA
+            return 0
+        fi
+
+        if [ -f "/usr/bin/kdialog" ]; then
+            DATA=$(/usr/bin/kdialog --inputbox "$TEXT")
+            echo $DATA
+            return 0
+        fi
+
+        if [ -f "/usr/bin/dmenu" ]; then
+            DATA=$(/usr/bin/dmenu -i -b -m 0 -p "$TEXT " <&-)
+            echo $DATA
+            return 0
+        fi
+
+        echo "No way to display graphical inputs! Input promt:"
+        echo "$TEXT"
+        read -p "type or paste:" DATA
+        echo $DATA
+        return 0
+    fi
+}
+
+get-connection-status() {
+    echo -e "GET http://smto.pw HTTP/1.0\n\n" | nc google.com 80 >/dev/null 2>&1
+    if [ $? -eq 0 ]; then
+        echo "True"
+    else
+        echo "False"
+    fi
+}
+
 get-dependencies() {
     if [ -f "/usr/bin/wget" ]; then
-        version=$(wget -q -O - https://smto.pw/mpv/hosted/dependencies.json)
+        output=$(wget -q -O - https://smto.pw/mpv/hosted/dependencies.json)
     elif [ -f "/usr/bin/curl" ]; then
-        version=$(curl https://smto.pw/mpv/hosted/dependencies.json)
+        output=$(curl https://smto.pw/mpv/hosted/dependencies.json)
     fi
+    echo $output
 }
 
 download-dependency() {
@@ -45,6 +126,7 @@ get-version-latest() {
     elif [ -f "/usr/bin/curl" ]; then
         version=$(curl https://smto.pw/mpv/hosted/latest.json)
     fi
+    echo $version
 }
 
 get-version-latest-mpv() {
@@ -53,6 +135,7 @@ get-version-latest-mpv() {
     elif [ -f "/usr/bin/curl" ]; then
         version=$(curl https://smto.pw/mpv/hosted/mpvLatestVersion | grep '.\...\..')
     fi
+    echo $version
 }
 
 get-package() {
@@ -101,18 +184,11 @@ get-image-info() {
 }
 
 alert() {
-    TEXT=$(echo $@ | cut -c7-)
-    if [ -f "/usr/bin/zenity" ]; then
-        #echo "$TEXT"
-        /usr/bin/zenity --info --text="$TEXT"
-    else
-        echo "zenity is not installed!"
-        echo $TEXT
-    fi
+    __show-message $@
 }
 
 macos-install-dgsdk() {
-    if [ "$(uname -a)" == *"Darwin"* ]; then
+    if [ -z "$OS_IS_NOT_MACOS" ]; then
         if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
 	        exit
         fi
@@ -124,93 +200,18 @@ macos-install-dgsdk() {
 	        fi
         fi
         exit
+    else
+        echo "Not on macOS!"
     fi
 }
 
-if [ "$command" == "get-version-latest" ]; then
-    get-version-latest
-    echo $version
-    exit 0
-fi
+show-url-box() {
+    __show-input "Paste URL:"
+}
 
-if [ "$command" == "get-dependencies" ]; then
-    get-dependencies
-    echo $version
-    exit 0
-fi
+show-command-box() {
+    __show-input "mpv command:"
+}
 
-if [ "$command" == "download-dependency" ]; then
-    download-dependency $2 $3
-    exit 0
-fi
-
-if [ "$command" == "get-version-latest-mpv" ]; then
-    get-version-latest-mpv
-    echo $version
-    exit 0
-fi
-
-if [ "$command" == "get-package" ]; then
-    get-package $2
-    exit $?
-fi
-
-if [ "$command" == "extract-package" ]; then
-    extract-package
-    exit $?
-fi
-
-if [ "$command" == "remove-package" ]; then
-    remove-package
-    exit $?
-fi
-
-if [ "$command" == "apply-package" ]; then
-    apply-package $2
-    exit $?
-fi
-
-if [ "$command" == "remove-file" ]; then
-    remove-file $2
-    exit $?
-fi
-
-if [ "$command" == "get-image-info" ]; then
-    get-image-info $2
-    exit $?
-fi
-
-if [ "$command" == "alert" ]; then
-    alert "$@"
-    exit $?
-fi
-
-if [ "$command" == "macos-install-dgsdk" ]; then
-    macos-install-dgsdk
-    exit $?
-fi
-
-if [ "$command" == "get-gpus" ]; then
-    gpu_count=$(lspci | grep ' VGA ' | wc -l)
-    gpus=""
-    for i in {1..99..1}; do
-        if (($i > $gpu_count)); then
-            break
-        else
-            gpus+=$(lspci | grep ' VGA ' | cut -c36- | sed -n "$i"p)
-            gpus+="|"
-        fi
-    done
-    echo $(echo "$gpus" | rev | cut -c 2- | rev)
-fi
-
-if [ "$command" == "get-connection-status" ]; then
-    echo -e "GET http://smto.pw HTTP/1.0\n\n" | nc google.com 80 >/dev/null 2>&1
-    if [ $? -eq 0 ]; then
-        echo "True"
-    else
-        echo "False"
-    fi
-fi
-
-exit 0
+$@
+exit $?

@@ -31,10 +31,12 @@ Current dependencies:
 	Windows only:
 		PowerShell
 		.NET Framework 4
+	macOS:
+		mpv must have been installed using brew
 	Linux only:
 		GNU coreutils
 		either wget or curl
-		zenity
+		zenity OR yad OR kdialog OR xmessage + dmenu
 
 TODO :
 	(DONE) Remake settings menu (with save/load)
@@ -207,14 +209,24 @@ var onFileLoad = function () {
 				.toString()
 				.replace(/\\/g, "/")
 				.substring(2);
-			mp.commandv(
-				"af",
-				"set",
-				"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
-			);
+			if (Utils.OSisWindows)
+			{
+				mp.commandv(
+					"af",
+					"set",
+					"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
+				);
+			}
+			else
+			{
+				mp.commandv(
+					"af",
+					"set",
+					"lavfi=[sofalizer=sofa=" + path + "/default.sofa]"
+				);
+			}
 			sofaEnabled = true;
 		}
-
 		isFirstFile = false;
 	}
 
@@ -802,42 +814,34 @@ SettingsMenu.eventHandler = function (event, action) {
 				"Command Input window has opened!"
 			);
 			if (Utils.OSisWindows) {
-				mp.command_native_async(
-					{
-						name: "subprocess",
-						playback_only: false,
-						capture_stdout: true,
-						args: [
-							"powershell",
-							"-executionpolicy",
-							"bypass",
-							mp.utils
-								.get_user_path(
-									"~~/scripts/easympv/WindowsCompat.ps1"
-								)
-								.replaceAll("/", "\\"),
-							"show-command-box",
-						],
-					},
-					readCommand
-				);
+				var args = [
+					"powershell",
+					"-executionpolicy",
+					"bypass",
+					mp.utils
+						.get_user_path(
+							"~~/scripts/easympv/WindowsCompat.ps1"
+						)
+						.replaceAll("/", "\\"),
+					"show-command-box",
+				];
 			} else {
-				mp.command_native_async(
-					{
-						name: "subprocess",
-						playback_only: false,
-						capture_stdout: true,
-						args: [
-							"zenity",
-							"--title=mpv",
-							"--forms",
-							"--text=Execute command",
-							"--add-entry=mpv command:",
-						],
-					},
-					readCommand
-				);
+				var args = [
+					"sh",
+					"-c",
+					mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+						" show-command-box",
+				];
 			}
+			mp.command_native_async(
+				{
+					name: "subprocess",
+					playback_only: false,
+					capture_stdout: true,
+					args: args
+				},
+				readCommand
+			);
 		} else if (action == "credits") {
 			var cmenu = new MenuSystem.Menu(
 				{
