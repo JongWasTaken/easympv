@@ -1,3 +1,13 @@
+/*
+ * FIRSTTIMEWIZARD.JS (MODULE),
+ *
+ * Author:         Jong
+ * URL:            https://smto.pw/mpv
+ * License:        MIT License
+ *
+ * This module is very WIP and basically the last puzzle piece before this project can go stable.
+ */
+
 var MenuSystem = require("./MenuSystem");
 
 var Wizard = {};
@@ -36,7 +46,7 @@ Wizard.Menus.Page1 = new MenuSystem.Menu(
 	{
 		title: "Welcome!",
 		description:
-			"Thank you for trying out easympv!@br@Since this is the first time easympv has been loaded, we will have to set a few settings.@br@You can navigate menus like this one using your mousewheel or arrow keys and enter.",
+			"Thank you for trying out easympv!@br@Since this is the first time easympv has been loaded, we will have to set a few settings.@br@You can navigate menus like this one using the mousewheel or arrow keys and enter.",
 		selectedItemColor: menuColor,
 		autoClose: 0,
 	},
@@ -90,7 +100,7 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
 			item: "continue",
 		},
 	],
-	undefined
+	Wizard.Menus.Page1
 );
 
 Wizard.Menus.Page2.eventHandler = function (event, action) {
@@ -149,6 +159,7 @@ Wizard.Menus.Page2.eventHandler = function (event, action) {
 			Wizard.Menus.Page2.redrawMenu();
 		} else if (action == "continue") {
 			Wizard.Menus.Page2.hideMenu();
+			//TODO: create Page3: a few words about usage, save settings on close, then unblock()
 			//Wizard.Menus.Page3.showMenu();
 			unblock();
 		}

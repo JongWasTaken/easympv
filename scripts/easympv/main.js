@@ -142,58 +142,55 @@ mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
 Utils.determineOS();
 Utils.checkInternetConnection();
 
+if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
+	mp.msg.verbose("[startup] startupTask: reset mpvConfig (file missing)");
+	Settings.inputConfig.reset();
+} 
+else
+{
+	if (Settings.Data.resetMpvConfig) {
+		mp.msg.verbose("[startup] startupTask: reset mpvConfig (user set)");
+		Settings.mpvConfig.reset();
+	}
+}
+
+if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
+	mp.msg.verbose("[startup] startupTask: reset inputConfig (file missing)");
+	Settings.inputConfig.reset();
+}
+else
+{
+	if (Settings.Data.resetInputConfig) {
+		mp.msg.verbose("[startup] startupTask: reset inputConfig (user set)");
+		Settings.inputConfig.reset();
+	}
+}
 
 if (Settings.Data.doMigration) {
 	mp.msg.verbose("[startup] startupTask: migration");
 	Settings.migrate();
 }
-if (Settings.Data.resetMpvConfig) {
-	mp.msg.verbose("[startup] startupTask: reset mpvConfig");
-	Settings.mpvConfig.reset();
-}
-if (Settings.Data.resetInputConfig) {
-	mp.msg.verbose("[startup] startupTask: reset inputConfig");
-	Settings.inputConfig.reset();
-}
-if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
-	mp.msg.verbose("[startup] startupTask: reset inputConfig");
-	Settings.inputConfig.reset();
-}
 
-var notifyAboutUpdates = new Boolean(
-	Settings.Data.notifyAboutUpdates.toString()
-);
+var notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
 Shaders.readFile();
 Colors.readFile();
 ImageOSD.readFile();
 
-/*
-mp.msg.verbose("[startup] indexImages");
-var imageArray = mp.utils.readdir(
-		mp.utils.get_user_path("~~/scripts/easympv/images/"),
-		"files"
-	),
-	i;
-for (i = 0; i < imageArray.length; i++) {
-	if (imageArray[i].includes(".bmp") && !imageArray[i].includes(".info")) {
-		ImageOSD.addImage(imageArray[i].replace(".bmp", ""), imageArray[i]);
-	}
-}
-*/
-
 Settings.Data.newestVersion = "0.0.0";
 Utils.WL.createCache();
-
-mp.msg.verbose("[startup] Settings.save");
-Settings.save();
-
-Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
 	mp.msg.verbose("[startup] startupTask: start Wizard");
 	Wizard.Start();
 }
+else
+{
+	mp.msg.verbose("[startup] Settings.save");
+	Settings.save();
+}
+
+Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
 var onFileLoad = function () {
 	var wld = Utils.WL.getData();
