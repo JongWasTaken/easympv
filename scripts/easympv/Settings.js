@@ -36,6 +36,7 @@ Settings.inputConfig = {};
  */
 Settings.Data = {
 	mpvLocation: "unknown",
+	forcedMenuKey: "m",
 	defaultShaderSet: "none",
 	defaultColorProfile: "none",
 	showHiddenFiles: false,
@@ -78,7 +79,7 @@ Settings.reload = function () {
 			if (lines[i].includes("=")) {
 				var temp = lines[i].split("=");
 				var option = temp[0].trim();
-				var value = temp[1].trim().split("#")[0];
+				var value = temp[1].trim().split("#")[0].replaceAll("\"","");
 
 				if (value == "true") {
 					value = true;
@@ -113,6 +114,13 @@ Settings.save = function () {
 		defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
 		defaultConfigString += "# Use a full path. Only required on Windows!\n";
 		defaultConfigString += "mpvLocation=unknown\n";
+		defaultConfigString += "\n";
+		defaultConfigString += "# The key that easympv will force its menu on.\n";
+		defaultConfigString += "# Default: m\n";
+		defaultConfigString += "# Set this to \"disable\" to revert to the old behavior.\n";
+		defaultConfigString += "# In that case, you will need to add your own keybinding to input.conf:\n";
+		defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
+		defaultConfigString += "forcedMenuKey=m\n";
 		defaultConfigString += "\n";
 		defaultConfigString += "# Default shader set to load at runtime.\n";
 		defaultConfigString += "# Default: none\n";

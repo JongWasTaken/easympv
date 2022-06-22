@@ -971,9 +971,10 @@ ColorsMenu.eventHandler = function (event, action) {
 ////////////////////////////////////////////////////////////////////////
 
 // Add menu key binding and its logic
-mp.add_key_binding(null, "easympv", function () {
+
+var handleMenuKeypress = function () {
 	mp.msg.verbose("Menu key pressed!");
-	// If no menu is active, show main menum
+	// if no menu is active, show main menu
 	if (
 		!ColorsMenu.isMenuVisible &&
 		!ShadersMenu.isMenuVisible &&
@@ -982,7 +983,7 @@ mp.add_key_binding(null, "easympv", function () {
 		!MainMenu.isMenuVisible
 	) {
 		MainMenu.showMenu();
-		// Else hide all menus (second keypress)
+		// else hide all menus (second keypress)
 	} else {
 		MainMenu.hideMenu();
 		ShadersMenu.hideMenu();
@@ -990,15 +991,13 @@ mp.add_key_binding(null, "easympv", function () {
 		SettingsMenu.hideMenu();
 		ColorsMenu.hideMenu();
 	}
-});
+};
 
-// below was used to test alerts
-/*
-mp.add_key_binding("k", "menu-test", function () {
-	mp.msg.verbose("Window key pressed!");
-	WindowSystem.Alerts.show("error","You pressed the window key!","XXXXXXXXXXXXXXX","Congratulations!");
-});
-*/
+mp.add_key_binding(null, "easympv", handleMenuKeypress);
+if (Settings.Data.forcedMenuKey != "disabled")
+{
+	mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
+}
 
 mp.add_key_binding("n", "toggle-sofa", function () {
 	if (

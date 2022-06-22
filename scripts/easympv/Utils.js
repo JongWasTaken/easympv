@@ -1166,7 +1166,7 @@ Utils.WL.createCache = function () {
 
 /**
  * Fetches data of current file from previously cached watch_later data.
- * @return {object} shader, color
+ * @return {object} {shader, color}
  */
 Utils.WL.getData = function () {
 	var cFile;
