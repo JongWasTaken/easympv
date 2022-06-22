@@ -144,7 +144,7 @@ Utils.checkInternetConnection();
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
 	mp.msg.verbose("[startup] startupTask: reset mpvConfig (file missing)");
-	Settings.inputConfig.reset();
+	Settings.mpvConfig.reset();
 } 
 else
 {
