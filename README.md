@@ -38,9 +38,8 @@ Unfinished. Use manual installation for now.
 [//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)
 ### Manual
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
-Add `m script_binding easympv` to your input.conf. Launch mpv once to generate `easympv.conf`. Adjust to your liking.  
-If no `input.conf` is present, easympv will generate one with sane defaults and terminate.  
-Then launch it again.  
+Launch mpv once to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`).  
+Adjust those to your liking, then launch it again.  
 In the future there will be some sort of setup on the first start, this is currently unfinished.  
 
 ## License
