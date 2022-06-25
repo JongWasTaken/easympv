@@ -193,7 +193,7 @@ macos-install-dgsdk() {
 	        exit
         fi
         INPUT=$(osascript -e 'tell application "System Events" to display dialog "For Discord integration to work, GameSDK needs to be installed on your system. This requires your password. Press OK to continue."')
-        if [ "$INPUT" == *"OK"* ]; then 
+        if [[ "$INPUT" == *"OK"* ]]; then 
 	        osascript -e "do shell script \"mkdir -p /usr/local/lib/ && mv ~/.config/mpv/scripts/mpvcord/discord_game_sdk.dylib /usr/local/lib/libdiscord_game_sdk.dylib\" with administrator privileges"
 	        if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
 		        osascript -e 'tell application "System Events" to display dialog "Installation finished. Discord integration will work after restarting mpv."'

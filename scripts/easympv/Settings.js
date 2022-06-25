@@ -584,8 +584,7 @@ Settings.inputConfig.reset = function () {
 	Settings.Data.resetInputConfig = false;
 	Settings.save();
 
-	Utils.showSystemAlert("Input file has been reset! mpv will now terminate.");
-	mp.commandv("quit-watch-later");
+	Utils.showSystemAlert("Input file has been reset!");
 };
 
 module.exports = Settings;

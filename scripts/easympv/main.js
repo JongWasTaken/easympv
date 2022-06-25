@@ -142,29 +142,37 @@ mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
 Utils.determineOS();
 Utils.checkInternetConnection();
 
+var resetOccured = false;
+
 if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
 	mp.msg.verbose("[startup] startupTask: reset mpvConfig (file missing)");
 	Settings.mpvConfig.reset();
+	resetOccured = true;
 } 
 else
 {
 	if (Settings.Data.resetMpvConfig) {
 		mp.msg.verbose("[startup] startupTask: reset mpvConfig (user set)");
 		Settings.mpvConfig.reset();
+		resetOccured = true;
 	}
 }
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
 	mp.msg.verbose("[startup] startupTask: reset inputConfig (file missing)");
 	Settings.inputConfig.reset();
+	resetOccured = true;
 }
 else
 {
 	if (Settings.Data.resetInputConfig) {
 		mp.msg.verbose("[startup] startupTask: reset inputConfig (user set)");
 		Settings.inputConfig.reset();
+		resetOccured = true;
 	}
 }
+
+if (resetOccured) { mp.msg.info("mpv will now terminate (file reset)"); mp.commandv("quit-watch-later"); };
 
 if (Settings.Data.doMigration) {
 	mp.msg.verbose("[startup] startupTask: migration");
