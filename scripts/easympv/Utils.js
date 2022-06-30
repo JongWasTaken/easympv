@@ -75,7 +75,8 @@ Utils.determineOS = function () {
 				Utils.OS = "linux";
 				mp.msg.info("Detected operating system: Linux");
 			} else {
-				Utils.OS = "unix";
+				//Utils.OS = "unix";
+				Utils.OS = "linux";
 				mp.msg.info("Detected operating system: Unix-like?");
 				mp.msg.error(
 					"Your OS is untested, but if it is similar to Linux it will probably be fine."
@@ -220,10 +221,10 @@ Utils.openFile = function (file) {
 	if (Utils.OSisWindows) {
 		file = file.replaceAll("/", "\\");
 		mp.commandv("run", "cmd", "/c", "start " + file);
-	} else if (Utils.OS == "unix") {
+	} else if (Utils.OS == "linux") {
 		mp.commandv("run", "sh", "-c", "xdg-open " + file);
-	} else if (Utils.OS == "mac") {
-		mp.commandv("run", "zsh", "-c", "open " + file);
+	} else if (Utils.OS == "macos") {
+		mp.commandv("run", "sh", "-c", "open " + file);
 	}
 	mp.msg.info("Opening file: " + file);
 };
