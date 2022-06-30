@@ -1054,13 +1054,13 @@ Utils.downloadDependencies = function () {
 	Settings.save();
 
 	// macOS requires discord game sdk to be in /usr/local/lib/
-	if (Utils.OS == "macos") 
+	if (!Utils.OSisWindows) 
 	{
 		var args = [
 			"sh",
 			"-c",
 			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-				" macos-install-dgsdk",
+				" dependency-postinstall",
 		];
 		var r = mp.command_native({
 			name: "subprocess",
