@@ -584,7 +584,7 @@ Settings.inputConfig.reset = function () {
 	Settings.Data.resetInputConfig = false;
 	Settings.save();
 
-	Utils.showSystemAlert("Input file has been reset!");
+	Utils.showSystemMessagebox("Input file has been reset!");
 };
 
 module.exports = Settings;

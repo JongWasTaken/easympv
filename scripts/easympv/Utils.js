@@ -18,6 +18,7 @@ and other "nice to have" things.
 "use strict";
 
 var Settings = require("./Settings");
+var Windows = require("./WindowSystem");
 
 /**
  * Collection of miscellaneous functions used throughout all of easympv.
@@ -253,7 +254,7 @@ Utils.executeCommand = function (line) {
 /**
  * X.
  */
- Utils.showSystemAlert = function (text, blockThread) {
+ Utils.showSystemMessagebox = function (text, blockThread) {
 
 	if(blockThread == undefined) { blockThread = true; }
 
@@ -267,7 +268,7 @@ Utils.executeCommand = function (line) {
 				"sh",
 				"-c",
 				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-					" alert \"" + text + "\""
+					" messagebox \"" + text + "\""
 			];
 		}
 	}
@@ -280,7 +281,7 @@ Utils.executeCommand = function (line) {
 			mp.utils
 				.get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
 				.replaceAll("/", "\\"),
-			"alert \"" + text + "\"",
+			"messagebox \"" + text + "\"",
 		];
 	}
 
@@ -304,6 +305,82 @@ Utils.executeCommand = function (line) {
 			args: args,
 		});
 	}
+};
+
+/**
+ * X.
+ */
+ Utils.showAlert = function (type,text) {
+
+	if(!Utils.OSisWindows)
+	{
+		//var isTerminal = (mp.utils.getenv("TERM") != undefined);
+		//if(isTerminal) {mp.msg.info(text); return;}
+		//else
+		//{ 
+			var args = [
+				"sh",
+				"-c",
+				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+					" alert \"" + text + "\""
+			];
+		//}
+	}
+	else
+	{ 
+		var args = [
+			"powershell",
+			"-executionpolicy",
+			"bypass",
+			mp.utils
+				.get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
+				.replaceAll("/", "\\"),
+			"alert \"" + text + "\"",
+		];
+	}
+
+	var callback = function (x, result, y)
+	{
+		if (result.status != 0)
+		{
+			var slices = text.split(" ");
+			var line1 = "";
+			var line2 = "";
+			var line3 = "";
+			var len = 0;
+
+			var limit = 24;
+
+			for (var i = 0; i < slices.length; i++) 
+			{
+				var s = slices[i];
+				
+				if (len < limit)
+				{
+					line1 += s + " ";
+				}
+				else if (len < (limit*2))
+				{
+					line2 += s + " ";
+				}
+				else if (len < (limit*3))
+				{
+					line3 += s + " ";
+				}
+				len = len + s.length;
+			}
+
+			Windows.Alerts.show(type,line1,line2,line3);
+		}
+	}
+
+	mp.command_native_async({
+		name: "subprocess",
+		playback_only: false,
+		capture_stdout: false,
+		capture_stderr: false,
+		args: args,
+	},callback);
 };
 
 /**
@@ -400,10 +477,9 @@ Utils.getLatestMpvVersion = function () {
  */
 Utils.exitMpv = function () {
 	if (Utils.updateInProgress) {
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"warning",
-			"An update is in progress.",
-			"",
+			"An update is in progress. " +
 			"You cannot close mpv now!"
 		);
 	} else {
@@ -530,10 +606,9 @@ Utils.doUpdateStage2 = function () // extract
 		);
 	} else {
 		Utils.unblockQuitButtons();
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"error",
-			"Update has failed.",
-			"",
+			"Update has failed. " +
 			"Download error!"
 		);
 		return;
@@ -585,10 +660,9 @@ Utils.doUpdateStage3 = function () // delete package
 		);
 	} else {
 		Utils.unblockQuitButtons();
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"error",
-			"Update has failed.",
-			"",
+			"Update has failed. " +
 			"Extraction error!"
 		);
 		return;
@@ -637,10 +711,9 @@ Utils.doUpdateStage4 = function () // apply extracted package
 		);
 	} else {
 		Utils.unblockQuitButtons();
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"error",
-			"Update has failed.",
-			"",
+			"Update has failed. " +
 			"Deletion error!"
 		);
 		return;
@@ -716,19 +789,17 @@ Utils.doUpdateStage5 = function () {
 
 		// done
 		Utils.unblockQuitButtons();
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"info",
-			"Finished updating!",
-			"",
+			"Finished updating! " +
 			"Restart mpv to see changes."
 		);
 		Utils.updateAvailable = false;
 	} else {
 		Utils.unblockQuitButtons();
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"error",
-			"Update has failed.",
-			"",
+			"Update has failed. " +
 			"Apply error!"
 		);
 		return;
@@ -774,18 +845,17 @@ Utils.updateMpv = function () {
 					args: args,
 				});
 			} else {
-				WindowSystem.Alerts.show("info", "mpv is up to date.", "", "");
+				Utils.showAlert("info", "mpv is up to date.");
 			}
 		} else {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"error",
-				"mpv location is unknown.",
-				"",
+				"mpv location is unknown. " +
 				"Please update easympv.conf!"
 			);
 		}
 	} else {
-		WindowSystem.Alerts.show("error", "Only supported on Windows.", "", "");
+		Utils.showAlert("error", "Only supported on Windows.");
 	}
 	return;
 };
@@ -984,13 +1054,13 @@ Utils.downloadDependencies = function () {
 	Settings.save();
 
 	// macOS requires discord game sdk to be in /usr/local/lib/
-	if (Utils.OS == "macos") 
+	if (!Utils.OSisWindows) 
 	{
 		var args = [
 			"sh",
 			"-c",
 			mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-				" macos-install-dgsdk",
+				" dependency-postinstall",
 		];
 		var r = mp.command_native({
 			name: "subprocess",
@@ -1007,10 +1077,10 @@ Utils.downloadDependencies = function () {
  */
 Utils.registerMpv = function () {
 	var onFinished = function () {
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"info",
-			"Successfully registered mpv!",
-			"Do not close any windows that have",
+			"Successfully registered mpv! " +
+			"Do not close any windows that have" +
 			" opened. They will close themselves."
 		);
 	};
@@ -1038,15 +1108,14 @@ Utils.registerMpv = function () {
 				onFinished
 			);
 		} else {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"error",
-				"mpv location is unknown.",
-				"",
+				"mpv location is unknown. " +
 				"Please update easympv.conf!"
 			);
 		}
 	} else {
-		WindowSystem.Alerts.show("error", "Only supported on Windows.", "", "");
+		Utils.showAlert("error", "Only supported on Windows.");
 	}
 	return;
 };
@@ -1056,10 +1125,10 @@ Utils.registerMpv = function () {
  */
 Utils.unregisterMpv = function () {
 	var onFinished = function () {
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"info",
-			"Successfully unregistered mpv!",
-			"Do not close any windows that have",
+			"Successfully unregistered mpv! " +
+			"Do not close any windows that have" +
 			" opened. They will close themselves."
 		);
 	};
@@ -1087,15 +1156,14 @@ Utils.unregisterMpv = function () {
 				onFinished
 			);
 		} else {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"error",
-				"mpv location is unknown.",
-				"",
+				"mpv location is unknown. " +
 				"Please update easympv.conf!"
 			);
 		}
 	} else {
-		WindowSystem.Alerts.show("error", "Only supported on Windows.", "", "");
+		Utils.showAlert("error", "Only supported on Windows.");
 	}
 	return;
 };

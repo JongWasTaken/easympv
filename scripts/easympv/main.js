@@ -463,11 +463,11 @@ MainMenu.eventHandler = function (event, action) {
 	} else if (event == "show") {
 		if (Utils.updateAvailable && notifyAboutUpdates) {
 			notifyAboutUpdates = false;
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
-				"An update is available.",
-				"Current Version: " + Settings.Data.currentVersion,
-				"New Version: " + Settings.Data.newestVersion
+				"An update is available. " +
+				"Current Version: " + Settings.Data.currentVersion +
+				", New Version: " + Settings.Data.newestVersion
 			);
 		}
 	}
@@ -532,14 +532,14 @@ ShadersMenu.eventHandler = function (event, action) {
 					)
 				);
 				if (action == "clear") {
-					WindowSystem.Alerts.show(
+					Utils.showAlert(
 						"info",
 						"Shaders have been disabled."
 					);
 				} else {
-					WindowSystem.Alerts.show(
+					Utils.showAlert(
 						"info",
-						"Shader has been enabled:",
+						"Shader has been enabled: " +
 						SSA.setColorYellow() + Shaders.name
 					);
 				}
@@ -561,10 +561,9 @@ ShadersMenu.eventHandler = function (event, action) {
 			if (action != "@back@") {
 				Settings.Data.defaultShaderSet = action;
 				Settings.save();
-				WindowSystem.Alerts.show(
+				Utils.showAlert(
 					"info",
-					"Default shader changed to:",
-					"",
+					"Default shader changed to: " +
 					Settings.Data.defaultShaderSet
 				);
 				ShadersMenu.setDescription(
@@ -814,7 +813,7 @@ SettingsMenu.eventHandler = function (event, action) {
 					mp.command(result.stdout.trim());
 				}
 			};
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
 				"Command Input window has opened!"
 			);
@@ -865,7 +864,7 @@ SettingsMenu.eventHandler = function (event, action) {
 			cmenu.showMenu();
 		} else if (action == "reload") {
 			Settings.reload();
-			WindowSystem.Alerts.show("info", "Configuration reloaded.");
+			Utils.showAlert("info", "Configuration reloaded.");
 		} else if (action == "remote") {
 			Settings.Data.useRandomPipeName = false;
 			Utils.setIPCServer(Settings.Data.useRandomPipeName);
@@ -930,14 +929,14 @@ ColorsMenu.eventHandler = function (event, action) {
 			ColorsMenu.hideMenu();
 			Colors.apply(action);
 			if (action == "none") {
-				WindowSystem.Alerts.show(
+				Utils.showAlert(
 					"info",
 					"Color profile has been disabled."
 				);
 			} else {
-				WindowSystem.Alerts.show(
+				Utils.showAlert(
 					"info",
-					"Color profile has been enabled:",
+					"Color profile has been enabled: " +
 					SSA.setColorYellow() + Colors.name
 				);
 			}
@@ -964,10 +963,9 @@ ColorsMenu.eventHandler = function (event, action) {
 						Settings.Data.defaultColorProfile
 					)
 				);
-				WindowSystem.Alerts.show(
+				Utils.showAlert(
 					"info",
-					"Default color profile changed to:",
-					"",
+					"Default color profile changed to: " +
 					Settings.Data.defaultColorProfile
 				);
 				Settings.save();
@@ -1024,22 +1022,22 @@ mp.add_key_binding("n", "toggle-sofa", function () {
 			"lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
 		);
 		if (sofaEnabled) {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
-				"Sofalizer:",
+				"Sofalizer: " +
 				SSA.setColorGreen() + "enabled"
 			);
 		} else {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
-				"Sofalizer:",
+				"Sofalizer: " +
 				SSA.setColorRed() + "disabled"
 			);
 		}
 	} else {
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"warning",
-			"File not found:",
+			"File not found: " +
 			SSA.setColorYellow() + "default.sofa"
 		);
 	}

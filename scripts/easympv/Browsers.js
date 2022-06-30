@@ -253,7 +253,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
 					}
 				}
 			}
-			WindowSystem.Alerts.show("info", "URL Input window has opened!");
+			Utils.showAlert("info", "URL Input window has opened!");
 			if (Utils.OSisWindows) {
 				var args = [
 					"powershell",
@@ -336,13 +336,11 @@ Browsers.FileBrowser.openFileSafe = function (filename) {
 				Browsers.FileBrowser.fileExtensionWhitelist[i].extension
 			)
 		) {
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
 				"Playing " +
 					Browsers.FileBrowser.fileExtensionWhitelist[i].name +
-					" file:",
-				"",
-				filename
+					" file: " + filename
 			);
 			mp.commandv(
 				"loadfile",
@@ -734,13 +732,11 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
 				"loadfile",
 				item + "://longest/" + Browsers.DriveBrowser.cachedDriveName
 			);
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
 				"Opening disc drive " +
 					Browsers.DriveBrowser.cachedDriveName +
-					"...",
-				"",
-				""
+					"..."
 			);
 		} else {
 			mp.commandv(
@@ -749,13 +745,11 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
 					"://longest//dev/" +
 					Browsers.DriveBrowser.cachedDriveName
 			);
-			WindowSystem.Alerts.show(
+			Utils.showAlert(
 				"info",
 				"Opening disc drive " +
 					Browsers.DriveBrowser.cachedDriveName +
-					"...",
-				"",
-				""
+					"..."
 			);
 		}
 		Browsers.DriveBrowser.cachedDriveName = "";
@@ -838,11 +832,9 @@ Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
 		} else {
 			mp.commandv("loadfile", "av://v4l2:/dev/" + item);
 		}
-		WindowSystem.Alerts.show(
+		Utils.showAlert(
 			"info",
-			"Opening device " + item,
-			"",
-			""
+			"Opening device " + item
 		);
 		Browsers.DeviceBrowser.menu.hideMenu();
 		Browsers.DeviceBrowser.menu = undefined;

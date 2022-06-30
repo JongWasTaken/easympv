@@ -4,8 +4,8 @@
 
 
 Extends base mpv with more features and makes it a bit more user-friendly.  
-Currently supports Windows and Linux.  
-macOS support is experimental and not fully tested.
+Currently supports Windows, macOS and Linux.  
+macOS support is experimental and not fully finished.
 
 ## Features
 - Menus with custom Fonts
