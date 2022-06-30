@@ -315,10 +315,10 @@ Utils.checkInternetConnection = function () {
 	var callback = function (success, result, error) {
 		if (result != undefined) {
 			Utils.isOnline = Boolean(result.stdout.trim());
-			if (!Settings.Data.manualInstallation) {
+			//if (!Settings.Data.manualInstallation) {
 				mp.msg.verbose("Checking for updates...");
 				Utils.getLatestUpdateData();
-			}
+			//}
 		}
 	};
 
