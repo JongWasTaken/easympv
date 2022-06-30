@@ -26,7 +26,7 @@ fi
 __show-message() {
     TEXT=$(echo "$@")
     if [ -z "$OS_IS_NOT_MACOS" ]; then
-        osascript -e 'tell application "System Events" to display dialog "$TEXT"'
+        osascript -e "tell application \"System Events\" to display dialog \"$TEXT\""
         return 0
     else
         if [ -f "/usr/bin/zenity" ]; then
@@ -91,6 +91,22 @@ __show-input() {
         read -p "type or paste:" DATA
         echo $DATA
         return 0
+    fi
+}
+
+__show-alert() {
+    TEXT=$(echo "$@")
+    if [ -z "$OS_IS_NOT_MACOS" ]; then
+        osascript -e "display notification \"$TEXT\" with title \"mpv\""
+        return 0
+    else
+        if [ -f "/usr/bin/notify-send" ]; then
+            /usr/bin/notify-send -i mpv -t 5000 "mpv" "$TEXT"
+            return 0
+        fi
+
+        echo "No way to display alerts! Falling back to buildin..."
+        return 1
     fi
 }
 
@@ -183,11 +199,15 @@ get-image-info() {
     fi
 }
 
-alert() {
+messagebox() {
     __show-message $@
 }
 
-macos-install-dgsdk() {
+alert() {
+    __show-alert $@
+}
+
+dependency-postinstall() {
     if [ -z "$OS_IS_NOT_MACOS" ]; then
         if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
 	        exit
@@ -201,7 +221,7 @@ macos-install-dgsdk() {
         fi
         exit
     else
-        echo "Not on macOS!"
+        echo "Currently only required on macOS!"
     fi
 }
 
