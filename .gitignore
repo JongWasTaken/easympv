@@ -3,6 +3,7 @@
 *.log
 *.code-workspace
 *.conf
+*.so
 updatenote.lua
 watch_later/
 watch_later/*

@@ -716,7 +716,7 @@ Menus.Menu.prototype._constructMenuCache = function () {
 		/*
 		 Known issues:
 
-		 	- Description Text Lines might overlap on low windows resolutions.
+		 	- Description Text Lines might overlap on low window resolutions.
 				-> Not really a concern
 		 */
 		var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage

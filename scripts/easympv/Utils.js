@@ -319,11 +319,12 @@ Utils.executeCommand = function (line) {
 		//if(isTerminal) {mp.msg.info(text); return;}
 		//else
 		//{ 
+			//mp.msg.warn(text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\n'));
 			var args = [
 				"sh",
 				"-c",
 				mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-					" alert \"" + text + "\""
+					" alert \"" + text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\\n') + "\""
 			];
 		//}
 	}
@@ -336,7 +337,7 @@ Utils.executeCommand = function (line) {
 			mp.utils
 				.get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
 				.replaceAll("/", "\\"),
-			"alert \"" + text + "\"",
+			"alert \"" + text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\\n') + "\"",
 		];
 	}
 
@@ -344,6 +345,7 @@ Utils.executeCommand = function (line) {
 	{
 		if (result.status != 0)
 		{
+			/*
 			var slices = text.split(" ");
 			var line1 = "";
 			var line2 = "";
@@ -371,17 +373,27 @@ Utils.executeCommand = function (line) {
 				len = len + s.length;
 			}
 
-			Windows.Alerts.show(type,line1,line2,line3);
+			var line = line1 + "@br@" + line2 + "@br@" + line3;
+			*/
+			Windows.Alerts.show(type,text);
 		}
 	}
 
-	mp.command_native_async({
-		name: "subprocess",
-		playback_only: false,
-		capture_stdout: false,
-		capture_stderr: false,
-		args: args,
-	},callback);
+	if (Settings.Data.useNativeNotifications)
+	{
+		mp.command_native_async({
+			name: "subprocess",
+			playback_only: false,
+			capture_stdout: false,
+			capture_stderr: false,
+			args: args,
+		},callback);
+	}
+	else
+	{
+		callback(null,{"status":1}, null);
+	}
+
 };
 
 /**

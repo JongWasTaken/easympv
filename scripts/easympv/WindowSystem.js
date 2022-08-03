@@ -614,7 +614,8 @@ Windows.TextWall.create = function (text)
 
 Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
-Windows.Alerts.show = function (type, line1, line2, line3) {
+Windows.Alerts.show = function (type, line) {
+	/*
 	var maxStringLength = 45;
 
 	if (type == undefined) {
@@ -639,6 +640,7 @@ Windows.Alerts.show = function (type, line1, line2, line3) {
 	if (line3.length >= maxStringLength) {
 		line3 = line3.substring(0, maxStringLength) + "...";
 	}
+	*/
 
 	var osdHeight = mp.get_property("osd-height");
 	var osdWidth = mp.get_property("osd-width");
@@ -655,13 +657,16 @@ Windows.Alerts.show = function (type, line1, line2, line3) {
 		10 * Windows.Alerts.onScreen.length;
 	var message = "";
 	var messageXPosition = osdWidth - (width + (xOffset + 100));
+	
+	var prefix = SSA.setPosition(messageXPosition + 250, yOffset + 40) +
+	SSA.setBorder(1) +
+	SSA.setSize("33") +
+	SSA.setFont(Utils.commonFontName);
 
-	message +=
-		SSA.setPosition(messageXPosition + 250, yOffset + 40) +
-		SSA.setBorder(1) +
-		SSA.setSize("33") +
-		SSA.setFont(Utils.commonFontName);
-	message += line1 + "@br@";
+	message += line.replaceAll("@br@",prefix+"@br@");
+
+	/*
+	message += prefix + line1 + "@br@";
 	message +=
 		SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
 		SSA.setBorder(1) +
@@ -674,6 +679,7 @@ Windows.Alerts.show = function (type, line1, line2, line3) {
 		SSA.setSize("33") +
 		SSA.setFont(Utils.commonFontName);
 	message += line3;
+	*/
 	var image = "";
 
 	if (type == "info") {

@@ -15,7 +15,7 @@ Chapters.cspeed = 1;
 Chapters.mode = "skip";
 Chapters.status = "disabled";
 
-Chapters.Handler = function () {
+Chapters.handler = function () {
 	// Called on every chapter change (in main.js)
 	mp.msg.verbose("Chapter change detected.");
 	Chapters.current = mp.get_property("chapter"); // Which chapter is currently playing

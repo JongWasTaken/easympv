@@ -56,6 +56,8 @@ TODO :
 	First time configuration wizard -> A bunch of menus basically, new module would be nice
 	Finish Settings.mpvSettings.*
 	Advanced settings menu
+	(DONE) Initial API for adding/removing menus
+	(DONE) Settings: Add useNativeNotifications: true; Implement in Utilities.js
 	(ALWAYS ONGOING) Update comments/documentation
 	(ALWAYS ONGOING) Move away from the util as much as possible
 
@@ -68,8 +70,6 @@ KNOWN ISSUES:
 	none?
 
 UNNAMED LIST OF "things to test on Windows specifically":
-	(WORKS) Utils.showSystemAlert -> Powershell implementation of 'alert'
-	(WORKS) ImageOSD -> get image dimensions using powershell
 	Browsers.DeviceBrowser.menuEventHandler -> low latency profile
 */
 "use strict";
@@ -131,12 +131,18 @@ var MenuSystem = require("./MenuSystem");
 var WindowSystem = require("./WindowSystem");
 var Browsers = require("./Browsers");
 var Wizard = require("./FirstTimeWizard");
+var API = require("./API");
 
 var isFirstFile = true;
 var sofaEnabled = false;
 
 // Setup
 Settings.load();
+ 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Settings.Data.currentVersion = "2.0.0";
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
 
 Utils.determineOS();
@@ -455,7 +461,7 @@ MainMenu.eventHandler = function (event, action) {
 				MainMenu.redrawMenu();
 			}
 		} else {
-			MainMenu.hideMenu();
+			API.openForeignMenu(action);
 		}
 	} else if (event == "hide") {
 		MainMenu.items[MainMenu.items.length - 1].title = quitTitle;
@@ -465,9 +471,9 @@ MainMenu.eventHandler = function (event, action) {
 			notifyAboutUpdates = false;
 			Utils.showAlert(
 				"info",
-				"An update is available. " +
+				"An update is available.@br@" +
 				"Current Version: " + Settings.Data.currentVersion +
-				", New Version: " + Settings.Data.newestVersion
+				"@br@New Version: " + Settings.Data.newestVersion
 			);
 		}
 	}
@@ -523,6 +529,7 @@ ShadersMenu.eventHandler = function (event, action) {
 			break;
 		case "enter":
 			ShadersMenu.hideMenu();
+			//mp.msg.warn(action);
 			if (action != "@back@") {
 				Shaders.apply(action);
 				ShadersMenu.setDescription(
@@ -531,7 +538,7 @@ ShadersMenu.eventHandler = function (event, action) {
 						Settings.Data.defaultShaderSet
 					)
 				);
-				if (action == "clear") {
+				if (action == "none") {
 					Utils.showAlert(
 						"info",
 						"Shaders have been disabled."
@@ -539,14 +546,14 @@ ShadersMenu.eventHandler = function (event, action) {
 				} else {
 					Utils.showAlert(
 						"info",
-						"Shader has been enabled: " +
+						"Shader has been enabled:@br@" +
 						SSA.setColorYellow() + Shaders.name
 					);
 				}
 			}
 			break;
 		case "right":
-			if (action != "@back@" && action != "clear") {
+			if (action != "@back@" && action != "none") {
 				Shaders.apply(action);
 				ShadersMenu.setDescription(
 					descriptionShaders(
@@ -563,7 +570,7 @@ ShadersMenu.eventHandler = function (event, action) {
 				Settings.save();
 				Utils.showAlert(
 					"info",
-					"Default shader changed to: " +
+					"Default shader changed to:@br@" +
 					Settings.Data.defaultShaderSet
 				);
 				ShadersMenu.setDescription(
@@ -936,7 +943,7 @@ ColorsMenu.eventHandler = function (event, action) {
 			} else {
 				Utils.showAlert(
 					"info",
-					"Color profile has been enabled: " +
+					"Color profile has been enabled:@br@" +
 					SSA.setColorYellow() + Colors.name
 				);
 			}
@@ -965,7 +972,7 @@ ColorsMenu.eventHandler = function (event, action) {
 				);
 				Utils.showAlert(
 					"info",
-					"Default color profile changed to: " +
+					"Default color profile changed to:@br@" +
 					Settings.Data.defaultColorProfile
 				);
 				Settings.save();
@@ -1003,8 +1010,49 @@ mp.add_key_binding(null, "easympv", handleMenuKeypress);
 if (Settings.Data.forcedMenuKey != "disabled")
 {
 	mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
-}
+	/*
+	mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", function() {
 
+		var x = {
+			"sender": "easympv",
+			"context": "deez",
+			"command": "createmenu",
+			"arguments": {
+				"menuName": "My Awesome Menu",
+				"menuSettings": {
+					"title": "My Awesome Title",
+					"description": "My Awesome Description",
+					"descriptionColor": "ff0000"
+				},
+				"menuItems": [
+					{
+						"title": "Option 1",
+						"item": "option1"
+					},
+					{
+						"title": "Option 2",
+						"item": "option2"
+					}
+				]
+			}
+		};
+
+		mp.commandv("script-message-to","easympv","json",JSON.stringify(x));
+	});
+	*/
+}
+/*
+mp.add_forced_key_binding(",", "test-rem", function () {
+	var x = {
+		"sender": "easympv",
+		"context": "deez",
+		"command": "removemenu",
+		"arguments": {}
+	};
+
+	mp.commandv("script-message-to","easympv","json",JSON.stringify(x));
+});
+*/
 mp.add_key_binding("n", "toggle-sofa", function () {
 	if (
 		mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=
@@ -1024,20 +1072,20 @@ mp.add_key_binding("n", "toggle-sofa", function () {
 		if (sofaEnabled) {
 			Utils.showAlert(
 				"info",
-				"Sofalizer: " +
+				"Sofalizer:@br@" +
 				SSA.setColorGreen() + "enabled"
 			);
 		} else {
 			Utils.showAlert(
 				"info",
-				"Sofalizer: " +
+				"Sofalizer:@br@" +
 				SSA.setColorRed() + "disabled"
 			);
 		}
 	} else {
 		Utils.showAlert(
 			"warning",
-			"File not found: " +
+			"File not found:@br@" +
 			SSA.setColorYellow() + "default.sofa"
 		);
 	}
@@ -1051,8 +1099,10 @@ mp.register_event("shutdown", onShutdown);
 mp.observe_property(
 	"chapter-metadata/by-key/title",
 	undefined,
-	Chapters.Handler
+	Chapters.handler
 );
+
+mp.register_script_message("json",API.handleIncomingJSON);
 
 // Registering an observer to fix Menus on window size change
 mp.observe_property("osd-height", undefined, function () {

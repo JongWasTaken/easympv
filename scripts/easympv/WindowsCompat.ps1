@@ -386,16 +386,28 @@ if($command -eq "messagebox")
 
 if($command -eq "alert")
 {
-    Add-Type -AssemblyName System.Windows.Forms 
-    $global:balloon = New-Object System.Windows.Forms.NotifyIcon
-    $path = (Get-Process "mpv").Path
-    $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) 
-    #$balloon.BalloonTipIcon = [System.Windows.Forms.ToolTipIcon]::Info 
-    $balloon.BalloonTipText = $arguments
-    $balloon.BalloonTipTitle = "mpv" 
-    $balloon.Visible = $true 
-    $balloon.ShowBalloonTip(5000)
-    exit 0
+    Add-Type -AssemblyName System.Windows.Forms
+    try {
+        $global:balloon = New-Object System.Windows.Forms.NotifyIcon
+        $path = (Get-Process "mpv").Path
+        $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path)
+        $balloon.BalloonTipText = $arguments
+        $balloon.BalloonTipTitle = "mpv" 
+        $balloon.Visible = $true 
+        $balloon.ShowBalloonTip(5000)
+    }
+    catch
+    {
+        $global:balloon = New-Object System.Windows.Forms.NotifyIcon
+        $path = (Get-Process "explorer").Path
+        $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path)
+        $balloon.BalloonTipText = $arguments
+        $balloon.BalloonTipTitle = "mpv" 
+        $balloon.Visible = $true 
+        $balloon.ShowBalloonTip(5000)
+    }
+
+    exit 1
 }
 
 exit 1

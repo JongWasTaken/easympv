@@ -41,7 +41,7 @@ Settings.Data = {
 	defaultColorProfile: "none",
 	showHiddenFiles: false,
 	startIPCServer: false,
-	//manualInstallation: false,
+	useNativeNotifications: true,
 	notifyAboutUpdates: true,
 	debugMode: false,
 	currentVersion: "0.0.0",
@@ -150,12 +150,14 @@ Settings.save = function () {
 			"# On Unix-likes a socket will be created: /tmp/mpv\n";
 		defaultConfigString += "startIPCServer=x\n";
 		defaultConfigString += "\n";
-		//defaultConfigString +=
-		//	"# Whether this installation is manual or automatic.\n";
-		//defaultConfigString +=
-		//	"# If you installed easympv via the executable, this will be false.\n";
-		//defaultConfigString += "manualInstallation=x\n";
-		//defaultConfigString += "\n";
+		defaultConfigString +=
+			"# Whether to use your operating system's native Notifications.\n";
+		defaultConfigString +=
+			"# If false, notifications will be shown inside the mpv window.\n";
+		defaultConfigString +=
+			"# Default: true.\n";
+		defaultConfigString += "useNativeNotifications=x\n";
+		defaultConfigString += "\n";
 		defaultConfigString += "# Whether to show alerts when out-of-date.\n";
 		defaultConfigString += "# Default: true\n";
 		defaultConfigString += "notifyAboutUpdates=x\n";
