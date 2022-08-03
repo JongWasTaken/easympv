@@ -1,9 +1,9 @@
 /*
  * API.JS (MODULE)
  *
- * Author:					Jong
- * URL:						https://smto.pw/mpv
- * License:					MIT License
+ * Author:                  Jong
+ * URL:                     https://smto.pw/mpv
+ * License:                 MIT License
  */
 
 "use strict";
@@ -30,11 +30,20 @@ var Impl_createmenu = function (json) {
                     break;
                 }
             }
+
+            if (json.arguments.menuDescription != undefined)
+            {
+                json.arguments.menuDescription = json.arguments.menuDescription + "@br@" + "Added by " + json.sender;
+            }
+            else
+            {
+                json.arguments.menuDescription = "Added by " + json.sender;
+            }
         
             root.items.splice(root.items.length-1, 0, {
                 "title": json.arguments.menuName,
                 "item": json.context,
-                "description": "Added by " + json.sender
+                "description": json.arguments.menuDescription
             });
         
             var menu = new Menus.Menu(json.arguments.menuSettings,json.arguments.menuItems,root);

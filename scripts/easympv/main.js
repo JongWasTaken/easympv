@@ -987,22 +987,15 @@ ColorsMenu.eventHandler = function (event, action) {
 
 var handleMenuKeypress = function () {
 	mp.msg.verbose("Menu key pressed!");
-	// if no menu is active, show main menu
-	if (
-		!ColorsMenu.isMenuVisible &&
-		!ShadersMenu.isMenuVisible &&
-		!ChaptersMenu.isMenuVisible &&
-		!SettingsMenu.isMenuVisible &&
-		!MainMenu.isMenuVisible
-	) {
+
+	var currentmenu = MenuSystem.getDisplayedMenu();
+	
+	if (currentmenu != undefined) {
+		currentmenu.hideMenu();
+	} 
+	else
+	{
 		MainMenu.showMenu();
-		// else hide all menus (second keypress)
-	} else {
-		MainMenu.hideMenu();
-		ShadersMenu.hideMenu();
-		ChaptersMenu.hideMenu();
-		SettingsMenu.hideMenu();
-		ColorsMenu.hideMenu();
 	}
 };
 
