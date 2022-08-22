@@ -17,7 +17,7 @@ Chapters.status = "disabled";
 
 Chapters.handler = function () {
     // Called on every chapter change (in main.js)
-    mp.msg.verbose("Chapter change detected.");
+    Utils.log("Chapter change detected.");
     Chapters.current = mp.get_property("chapter"); // Which chapter is currently playing
     Chapters.total = Number(mp.get_property("chapters")) - 1; // Total number of chapters in video file
 

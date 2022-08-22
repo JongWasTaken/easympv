@@ -20,7 +20,7 @@ Colors.set = function (name, data) {
 };
 
 Colors.readFile = function () {
-    mp.msg.verbose("[startup] Shaders.readFile");
+    Utils.log("[startup] Colors.readFile");
     Colors.sets = [];
     var file = JSON.parse(
         mp.utils.read_file(

@@ -410,6 +410,12 @@ if($command -eq "alert")
     exit 1
 }
 
+if($command -eq "get-clipboard")
+{
+    $clipboard = Get-Clipboard
+    Write-Output $clipboard
+}
+
 exit 1
 
 # Below is the source code for the included GetDevices.exe application:

@@ -1076,6 +1076,8 @@ Menus.Menu.prototype._initOSD = function () {
         if (this.OSD == undefined) {
             this.OSD = mp.create_osd_overlay("ass-events");
             // OSD is allowed entire window space
+            //this.OSD.res_y = mp.get_property("osd-height");
+            //this.OSD.res_x = mp.get_property("osd-width");
             this.OSD.res_y = mp.get_property("osd-height");
             this.OSD.res_x = mp.get_property("osd-width");
             this.OSD.z = this.settings.zIndex;

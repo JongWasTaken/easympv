@@ -30,7 +30,8 @@ Due to the modular nature of Linux, you will need to install a few dependencies:
 - mpv, compiled with LuaJIT support (Not all distributions do this!)
 - GNU coreutils (usually preinstalled)
 - either `wget` (preferred) or `curl` (usually preinstalled)
-- `zenity` OR `yad` OR `kdialog` OR `xmessage + dmenu`
+- `xclip` OR `wl-clipboard` (if you use Wayland)  
+    When in doubt, install both!
 
 ### Automatic
 Unfinished. Use manual installation for now.

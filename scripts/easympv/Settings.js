@@ -122,13 +122,13 @@ Settings.save = function () {
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
         defaultConfigString += "\n";
-        defaultConfigString += "# Default shader set to load at runtime.\n";
+        defaultConfigString += "# Default shader set to load at launch.\n";
         defaultConfigString += "# Default: none\n";
         defaultConfigString +=
             "# Use the full name of a shader as it appears in the shader menu!\n";
         defaultConfigString += "defaultShaderSet=x\n";
         defaultConfigString += "\n";
-        defaultConfigString += "# Default color profile to load at runtime.\n";
+        defaultConfigString += "# Default color profile to load at launch.\n";
         defaultConfigString += "# Default: none\n";
         defaultConfigString +=
             "# Use the full name of a profile as it appears in the colors menu!\n";
@@ -151,7 +151,7 @@ Settings.save = function () {
         defaultConfigString += "startIPCServer=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
-            "# Whether to use your operating system's native Notifications.\n";
+            "# Whether to use your operating system's native notifications.\n";
         defaultConfigString +=
             "# If false, notifications will be shown inside the mpv window.\n";
         defaultConfigString +=
@@ -163,7 +163,9 @@ Settings.save = function () {
         defaultConfigString += "notifyAboutUpdates=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
-            "# Will show more menu options. Useful for testing.\n";
+            "# This will make the log more detailed along with other changes.\n";
+        defaultConfigString +=
+            "You should not enable this unless you know what you are doing.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "debugMode=x\n";
         defaultConfigString += "\n";
@@ -231,6 +233,29 @@ Settings.save = function () {
             .read_file(mp.utils.get_user_path("~~/easympv.conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
+    }
+
+    if(Utils.OSisWindows && Settings.Data["mpvLocation"] == "unknown")
+    {
+        var searchPaths = [
+            "~~home\\AppData\\Local\\mpv\\",
+            "C:\\Program Files\\mpv\\",
+            "~~desktop\\mpv\\"
+        ];
+        var location = undefined;
+
+        for(var s = 0; s < searchPaths.length; s++)
+        {
+            if(mp.utils.file_info(mp.utils.get_user_path(searchPaths[s] + "mpv.exe")) != undefined){
+                location = searchPaths[s];
+                break;
+            }
+        }
+
+        if (location != undefined)
+        {
+            Settings.Data["mpvLocation"] = location;
+        }
     }
 
     for (var i = 0; i <= lines.length - 1; i++) {
@@ -314,7 +339,7 @@ Settings.migrate = function () {
 
     // set options to backup
     for (var element in Settings.Data) {
-        mp.msg.warn("1 | " + element);
+        //mp.msg.warn("1 | " + element);
         if (copy[element] != undefined) {
             mp.msg.warn("2 | " + copy[element]);
             mp.msg.warn("3 | " + Settings.Data[element]);
@@ -336,13 +361,40 @@ Settings.migrate = function () {
 Settings.mpvConfig.Data = {
     no_input_default_bindings: "@empty@",
     no_osd_bar: "@empty@",
+    keep_open: "@empty@",
+    autofit_larger:"75%x75%",
+    osd_font_size: "24",
+
+    sub_scale: "1",
+    vo: "gpu",
+    deband: "yes",
+    sigmoid_upscaling: "yes",
+    linear_downscaling: "yes",
+    correct_downscaling: "yes",
+    sub_ass_force_style: "Kerning", //TODO: change these to something more sane
+    demuxer_mkv_subtitle_preroll: "yes",
+    blend_subtitles: "yes",
+
     alang: "Japanese,ja,jap,jpn",
     slang: "Full,English,eng,en,Subtitles",
-    scale: "ewa_lanczossharp",
-    cscale: "ewa_lanczossoft",
-    dscale: "mitchell",
-    title: "${filename}",
+
+    scale: "ewa_lanczossharp", //
+    cscale: "ewa_lanczossoft", //
+    dscale: "mitchell", //
+    tscale: "oversample",
     video_sync: "audio",
+    temporal_dither: "yes",
+
+    title: "${filename}",
+    screenshot_directory:".",
+    screenshot_format: "png",
+    screenshot_png_compression: "8",
+    screenshot_template: "\"%F_%p\"",
+    speed: "1.0",
+    volume: "100",
+
+    ad_lavc_downmix: "no",
+    audio_channels: "stereo",
 };
 
 /**
@@ -570,8 +622,8 @@ Settings.inputConfig.reset = function () {
     defaultConfigString += 'x show-text "${playlist}"\n';
     defaultConfigString += "n seek 90\n";
     defaultConfigString += "\n";
-    defaultConfigString += "PGDWN add volume -5\n";
-    defaultConfigString += "PGUP add volume 5\n";
+    defaultConfigString += "PGDWN add volume -1\n";
+    defaultConfigString += "PGUP add volume 1\n";
     defaultConfigString +=
         'Shift+PGUP cycle-values sub-scale "0.8" "0.9" "1" "1.1" "1.2"\n';
     defaultConfigString +=

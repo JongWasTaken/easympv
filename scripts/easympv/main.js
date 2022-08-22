@@ -36,7 +36,7 @@ Current dependencies:
     Linux only:
         GNU coreutils
         either wget or curl
-        zenity OR yad OR kdialog OR xmessage + dmenu
+        xclip OR wl-clipboard (if you use Wayland; when in doubt, install both!)
 
 TODO :
     (DONE) Remake settings menu (with save/load)
@@ -53,11 +53,14 @@ TODO :
     (DONE) Dependency downloader
     (DONE) Replace placeholder titles
     (DONE) Fix input.conf if needed -> Settings.inputConfig.reset(), Settings.Data.resetInputConfig
-    First time configuration wizard -> A bunch of menus basically, new module would be nice
-    Finish Settings.mpvSettings.*
-    Advanced settings menu
+    (DONE) On-screen logs: make it toggleble using a key and put it in the bottom right corner
+    (DONE) Logging, like into an actual file. Make it disabled by default though.
     (DONE) Initial API for adding/removing menus
     (DONE) Settings: Add useNativeNotifications: true; Implement in Utilities.js
+    (DONE?) Finish Settings.mpvSettings.*
+    (DONE)  Replace zenity/PWSH input with in-window input
+    First time configuration wizard -> A bunch of menus basically, new module would be nice
+    Advanced settings menu
     (ALWAYS ONGOING) Update comments/documentation
     (ALWAYS ONGOING) Move away from the util as much as possible
 
@@ -65,11 +68,15 @@ IDEAS:
     Advanced settings, like the utility had before
         BONUS IDEA: use PWSH on windows/zenity on linux for this
     FFI.js -> easympv-ffi.lua
+    https://github.com/rossy/mpv-repl/blob/master/repl.lua
 
 KNOWN ISSUES:
-    none?
+    AUTOMATIC SHADERS DONT WORK???
+    INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
+        WORKAROUND: disable Chat message input & Chat message output in syncplay
 
 UNNAMED LIST OF "things to test on Windows specifically":
+    Settings.migrate -> find mpv path
     Browsers.DeviceBrowser.menuEventHandler -> low latency profile
 */
 "use strict";
@@ -119,7 +126,6 @@ Math.percentage = function (partialValue, totalValue) {
     return Math.round((100 * partialValue) / totalValue);
 };
 
-mp.msg.verbose("Starting!");
 var Settings = require("./Settings");
 var Utils = require("./Utils");
 var SSA = require("./SSAHelper");
@@ -138,7 +144,20 @@ var sofaEnabled = false;
 
 // Setup
 Settings.load();
- 
+
+if(Settings.Data.debugMode)
+{
+    mp.enable_messages("debug");
+}
+else
+{
+    mp.enable_messages("info");
+}
+
+mp.register_event("log-message", Utils.OSDLog.addToBuffer);
+
+Utils.log("Starting!");
+
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Settings.Data.currentVersion = "2.0.0";
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -150,38 +169,55 @@ Utils.checkInternetConnection();
 
 var resetOccured = false;
 
+if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
+    Utils.log("[startup] startupTask: reset easympv.conf (file missing)");
+    Settings.migrate();
+    resetOccured = true;
+}
+else
+{
+    if (Settings.Data.doMigration) {
+        Utils.log("[startup] startupTask: reset easympv.conf (user set)");
+        Settings.migrate();
+        resetOccured = true;
+    }
+}
+
 if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
-    mp.msg.verbose("[startup] startupTask: reset mpvConfig (file missing)");
+    Utils.log("[startup] startupTask: reset mpvConfig (file missing)");
     Settings.mpvConfig.reset();
     resetOccured = true;
 } 
 else
 {
     if (Settings.Data.resetMpvConfig) {
-        mp.msg.verbose("[startup] startupTask: reset mpvConfig (user set)");
+        Utils.log("[startup] startupTask: reset mpvConfig (user set)");
         Settings.mpvConfig.reset();
         resetOccured = true;
     }
 }
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
-    mp.msg.verbose("[startup] startupTask: reset inputConfig (file missing)");
+    Utils.log("[startup] startupTask: reset inputConfig (file missing)");
     Settings.inputConfig.reset();
     resetOccured = true;
 }
 else
 {
     if (Settings.Data.resetInputConfig) {
-        mp.msg.verbose("[startup] startupTask: reset inputConfig (user set)");
+        Utils.log("[startup] startupTask: reset inputConfig (user set)");
         Settings.inputConfig.reset();
         resetOccured = true;
     }
 }
 
-if (resetOccured) { mp.msg.info("mpv will now terminate (file reset)"); mp.commandv("quit-watch-later"); };
+if (resetOccured) {
+    mp.msg.info("mpv will now terminate (file reset)");
+    mp.commandv("quit-watch-later"); 
+};
 
 if (Settings.Data.doMigration) {
-    mp.msg.verbose("[startup] startupTask: migration");
+    Utils.log("[startup] startupTask: migration");
     Settings.migrate();
 }
 
@@ -195,16 +231,18 @@ Settings.Data.newestVersion = "0.0.0";
 Utils.WL.createCache();
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
-    mp.msg.verbose("[startup] startupTask: start Wizard");
+    Utils.log("[startup] startupTask: start Wizard");
     Wizard.Start();
 }
 else
 {
-    mp.msg.verbose("[startup] Settings.save");
+    Utils.log("[startup] Settings.save");
     Settings.save();
 }
 
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+
+//mp.msg.warn(mp.get_property("mpv-configuration"));
 
 var onFileLoad = function () {
     var wld = Utils.WL.getData();
@@ -214,7 +252,7 @@ var onFileLoad = function () {
                 mp.utils.get_user_path("~~/") + "/default.sofa"
             ) != undefined
         ) {
-            mp.msg.verbose("Sofa file found!");
+            Utils.log("Sofa file found!");
             var path = mp.utils
                 .get_user_path("~~/")
                 .toString()
@@ -238,6 +276,7 @@ var onFileLoad = function () {
             }
             sofaEnabled = true;
         }
+        Shaders.apply(Settings.Data.defaultShaderSet);
         isFirstFile = false;
     }
 
@@ -249,18 +288,22 @@ var onFileLoad = function () {
             Shaders.apply(wld.shader);
         }
         if (wld.color != undefined) {
-            // We dont Colors.apply this, because mpv already does that by itself.
+            // We don't Colors.apply this, because mpv already does that by itself.
             // Instead we just set Colors.name, achieving the same result.
             Colors.name = wld.color;
         }
     }
+
+    // mpv does not provide a good way to get the current filename, so we need to get creative
     var cFile;
     for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
         if (mp.get_property("playlist/" + i + "/current") == "yes") {
             cFile = mp.get_property("playlist/" + i + "/filename");
+            break;
         }
     }
 
+    // cFile could be a relative path, so we need to expand it
     if (cFile != undefined) {
         if (
             !Utils.OSisWindows &&
@@ -272,7 +315,7 @@ var onFileLoad = function () {
                 mp.get_property("working-directory") +
                 "/" +
                 cFile.replaceAll("./", "");
-            mp.msg.warn(cFile);
+            //mp.msg.warn(cFile);
         }
         Browsers.FileBrowser.currentLocation = cFile;
         Browsers.FileBrowser.currentLocation =
@@ -280,7 +323,6 @@ var onFileLoad = function () {
     }
 };
 
-// This will be executed on shutdown
 var onShutdown = function () {
     // This is not ideal, as data will only be saved when mpv is being closed.
     // Ideally, this would be in the on_startup block, before a file change.
@@ -675,16 +717,16 @@ var SettingsMenuSettings = {
 
 var SettingsMenuItems = [
     {
-        title: "Reload config",
-        item: "reload",
-    },
-    {
-        title: "Credits",
-        item: "credits",
-    },
-    {
         title: "Toggle Discord RPC@br@@us10@@br@",
         item: "discord",
+    },
+    {
+        title: "Check for updates",
+        item: "updater",
+    },
+    {
+        title: "Credits@br@@us10@@br@",
+        item: "credits",
     },
     {
         title: "Edit easympv.conf",
@@ -699,25 +741,37 @@ var SettingsMenuItems = [
         item: "inputconf",
     },
     {
-        title: "Input a command",
-        item: "command",
+        title: "Reload config",
+        item: "reload",
     },
     {
         title: "Open config folder@br@@us10@@br@",
         item: "config",
     },
     {
-        title: "Clear watchlater data",
-        item: "clearwld",
+        title: "Create Log File",
+        item: "log.export",
+    },
+    {
+        title: "Toggle On-Screen Log",
+        item: "log.osd",
+    },
+    {
+        title: "Toggle Debug Mode",
+        item: "debugmode",
+    },
+    {
+        title: "Input a command",
+        item: "command",
     },
 ];
 
-if (Utils.isOnline) {
-    SettingsMenuItems.splice(2, 0, {
-        title: "Check for updates",
-        item: "updater",
-    });
-}
+/*
+    {
+        title: "Clear watchlater data",
+        item: "clearwld",
+    },
+*/
 
 var SettingsMenu = new MenuSystem.Menu(
     SettingsMenuSettings,
@@ -730,15 +784,59 @@ SettingsMenu.eventHandler = function (event, action) {
         SettingsMenu.hideMenu();
         if (action == "ass") {
             toggle_assoverride();
-        } else if (action == "discord") {
+            return;
+        }
+        if (action == "debugmode") {
+            if (Settings.Data.debugMode)
+            {
+                Settings.Data.debugMode = false;
+                mp.enable_messages("info");
+                Utils.showAlert("info", "Debug mode has been disabled!");
+            }
+            else
+            {
+                Settings.Data.debugMode = true;
+                mp.enable_messages("debug");
+                Utils.showAlert("info", "Debug mode has been enabled!");
+            }
+            Settings.save();
+            return;
+        }
+        if (action == "log.osd") {
+            if (Utils.OSDLog.OSD == undefined) {
+                Utils.OSDLog.show();
+            }
+            else
+            { 
+                Utils.OSDLog.hide();
+            }
+            return;
+        }
+        if (action == "log.export") {
+            mp.utils.write_file(
+                "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+                Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'')
+            );
+            Utils.showAlert("info", "Log exported to Desktop!");
+            return;
+        }
+        if (action == "discord") {
             mp.commandv("script-binding", "drpc_toggle");
-        } else if (action == "easympvconf") {
+            return;
+        }
+        if (action == "easympvconf") {
             Utils.openFile("easympv.conf");
-        } else if (action == "mpvconf") {
+            return;
+        }
+        if (action == "mpvconf") {
             Utils.openFile("mpv.conf");
-        } else if (action == "inputconf") {
+            return;
+        }
+        if (action == "inputconf") {
             Utils.openFile("input.conf");
-        } else if (action == "updater") {
+            return;
+        }
+        if (action == "updater") {
             var updateConfirmation = false;
             var umenu = new MenuSystem.Menu(
                 {
@@ -810,50 +908,21 @@ SettingsMenu.eventHandler = function (event, action) {
                 }
             }
             umenu.showMenu();
-        } else if (action == "config") {
+            return;
+        }
+        if (action == "config") {
             Utils.openFile("");
-        } else if (action == "clearwld") {
+            return;
+        }
+        if (action == "clearwld") {
             Utils.WL.clear();
-        } else if (action == "command") {
-            var readCommand = function (success, result, error) {
-                if (result.status == "0") {
-                    mp.command(result.stdout.trim());
-                }
-            };
-            Utils.showAlert(
-                "info",
-                "Command Input window has opened!"
-            );
-            if (Utils.OSisWindows) {
-                var args = [
-                    "powershell",
-                    "-executionpolicy",
-                    "bypass",
-                    mp.utils
-                        .get_user_path(
-                            "~~/scripts/easympv/WindowsCompat.ps1"
-                        )
-                        .replaceAll("/", "\\"),
-                    "show-command-box",
-                ];
-            } else {
-                var args = [
-                    "sh",
-                    "-c",
-                    mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                        " show-command-box",
-                ];
-            }
-            mp.command_native_async(
-                {
-                    name: "subprocess",
-                    playback_only: false,
-                    capture_stdout: true,
-                    args: args
-                },
-                readCommand
-            );
-        } else if (action == "credits") {
+            return;
+        }
+        if (action == "command") {
+            Utils.showInteractiveCommandInput();
+            return;
+        }
+        if (action == "credits") {
             var cmenu = new MenuSystem.Menu(
                 {
                     title: "Credits",
@@ -869,21 +938,22 @@ SettingsMenu.eventHandler = function (event, action) {
                 }
             };
             cmenu.showMenu();
-        } else if (action == "reload") {
+            return;
+        }
+        if (action == "reload") {
             Settings.reload();
             Utils.showAlert("info", "Configuration reloaded.");
-        } else if (action == "remote") {
+            return;
+        }
+        if (action == "remote") {
             Settings.Data.useRandomPipeName = false;
             Utils.setIPCServer(Settings.Data.useRandomPipeName);
             Settings.save();
+            return;
         }
+        return;
     } else if (event == "show") {
-        if (Utils.isOnline && SettingsMenuItems[2].item != "updater") {
-            SettingsMenuItems.splice(2, 0, {
-                title: "Check for updates",
-                item: "updater",
-            });
-        }
+
         Utils.setDisplayVersion();
         SettingsMenu.setDescription(
             descriptionSettings(Utils.displayVersion, Utils.displayVersionMpv)
@@ -986,7 +1056,7 @@ ColorsMenu.eventHandler = function (event, action) {
 // Add menu key binding and its logic
 
 var handleMenuKeypress = function () {
-    mp.msg.verbose("Menu key pressed!");
+    Utils.log("Menu key pressed!");
 
     var currentmenu = MenuSystem.getDisplayedMenu();
     
@@ -1034,18 +1104,17 @@ if (Settings.Data.forcedMenuKey != "disabled")
     });
     */
 }
-/*
-mp.add_forced_key_binding(",", "test-rem", function () {
-    var x = {
-        "sender": "easympv",
-        "context": "deez",
-        "command": "removemenu",
-        "arguments": {}
-    };
 
-    mp.commandv("script-message-to","easympv","json",JSON.stringify(x));
+mp.add_forced_key_binding(",", "testkey", function () {
+
+    var callback = function(success, input)
+    {
+        mp.msg.warn("RECEIVED INPUT: " + input);
+    }
+
+    Utils.Input.show(callback);
 });
-*/
+
 mp.add_key_binding("n", "toggle-sofa", function () {
     if (
         mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=

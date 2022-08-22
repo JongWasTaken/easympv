@@ -19,6 +19,7 @@ and other "nice to have" things.
 
 var Settings = require("./Settings");
 var Windows = require("./WindowSystem");
+var SSA = require("./SSAHelper");
 
 /**
  * Collection of miscellaneous functions used throughout all of easympv.
@@ -27,13 +28,17 @@ var Utils = {};
 
 Utils.OS = undefined;
 Utils.OSisWindows = false;
+
 Utils.commonFontName = "Overpass SemiBold";
 Utils.directorySeperator = "/";
+
 Utils.updateInProgress = false;
 Utils.isOnline = false;
 Utils.latestUpdateData = undefined;
+
 Utils.updateAvailable = false;
 Utils.updateAvailableMpv = false;
+
 Utils.mpvLatestVersion = "0.0.0";
 Utils.displayVersion = "";
 Utils.displayVersionMpv = "";
@@ -43,7 +48,7 @@ Utils.displayVersionMpv = "";
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
  */
 Utils.determineOS = function () {
-    mp.msg.verbose("[startup] determineOS");
+    Utils.log("[startup] determineOS");
     if (mp.utils.getenv("OS") == "Windows_NT") {
         Utils.OS = "win";
         Utils.OSisWindows = true;
@@ -62,7 +67,7 @@ Utils.determineOS = function () {
         if (uname.status != "0") {
             Utils.OS = "unknown";
             mp.msg.warn("Detected operating system: unknown");
-            mp.msg.error("There was an issue while identifying your operating system.");
+            mp.msg.error("There was an issue while identifying your operating system: uname is not available!");
         } else {
             var output = uname.stdout.trim();
             if (output.includes("Darwin")) {
@@ -123,6 +128,9 @@ Utils.getLatestUpdateData = function () {
                     Utils.downloadDependencies();
                 }
             } catch (dummy) {
+                if(Utils.latestUpdateData == undefined) {
+                    Utils.latestUpdateData = {};
+                }
                 if(Utils.latestUpdateData.version == undefined) {
                     Utils.latestUpdateData.version = "0.0.0";
                 }
@@ -160,7 +168,7 @@ Utils.getLatestUpdateData = function () {
         ];
     }
 
-    var r = mp.command_native_async(
+    mp.command_native_async(
         {
             name: "subprocess",
             playback_only: false,
@@ -255,7 +263,19 @@ Utils.executeCommand = function (line) {
 /**
  * X.
  */
- Utils.showSystemMessagebox = function (text, blockThread) {
+Utils.log = function (text) {
+    //if(Settings.Data.debugMode) {
+    //    mp.msg.warn(text);
+    //    return;
+    //}
+    mp.msg.verbose(text);
+    return;
+};
+
+/**
+ * X.
+ */
+Utils.showSystemMessagebox = function (text, blockThread) {
 
     if(blockThread == undefined) { blockThread = true; }
 
@@ -401,12 +421,12 @@ Utils.executeCommand = function (line) {
  * @returns {boolean} True if the device can connect to the internet
  */
 Utils.checkInternetConnection = function () {
-    mp.msg.verbose("[startup] checkInternetConnection");
+    Utils.log("[startup] checkInternetConnection");
     var callback = function (success, result, error) {
         if (result != undefined) {
             Utils.isOnline = Boolean(result.stdout.trim());
             //if (!Settings.Data.manualInstallation) {
-                mp.msg.verbose("Checking for updates...");
+                Utils.log("Checking for updates...");
                 Utils.getLatestUpdateData();
             //}
         }
@@ -1207,6 +1227,370 @@ Utils.getCredits = function () {
     );
 };
 
+Utils.Input = {};
+Utils.Input.Callback = undefined;
+Utils.Input.isShown = false;
+Utils.Input.Buffer = "";
+Utils.Input.OSD = undefined;
+Utils.Input.TextSettings = SSA.setBorder(2) + SSA.setFont("Roboto");
+Utils.Input.InputPrefix = "";
+Utils.Input.Prefix = "";
+
+Utils.Input.keybindOverrides = [
+    { key: "ESC", id: "empv_input_esc" },
+    
+    { key: "ENTER", id: "empv_input_enter" },
+    { key: "SPACE", id: "empv_input_space" },
+
+    { key: "INS", id: "empv_input_insert" },
+    { key: "DEL", id: "empv_input_delete" },
+
+    { key: "~", id: "empv_input_tilde" },
+    { key: "`", id: "empv_input_backtick" },
+    { key: "1", id: "empv_input_one" },
+    { key: "!", id: "empv_input_exclamation" },
+    { key: "2", id: "empv_input_two" },
+    { key: "@", id: "empv_input_at" },
+    { key: "3", id: "empv_input_three" },
+    { key: "SHARP", id: "empv_input_hash" },
+    { key: "4", id: "empv_input_four" },
+    { key: "$", id: "empv_input_dollar" },
+    { key: "5", id: "empv_input_five" },
+    { key: "%", id: "empv_input_percent" },
+    { key: "6", id: "empv_input_six" },
+    { key: "^", id: "empv_input_caret" },
+    { key: "7", id: "empv_input_seven" },
+    { key: "&", id: "empv_input_ampersand" },
+    { key: "8", id: "empv_input_eight" },
+    { key: "*", id: "empv_input_star" },
+    { key: "9", id: "empv_input_nine" },
+    { key: "(", id: "empv_input_bracket_opened" },
+    { key: "0", id: "empv_input_zero" },
+    { key: ")", id: "empv_input_bracket_closed" },
+    { key: "-", id: "empv_input_minus" },
+    { key: "_", id: "empv_input_underscore" },
+    { key: "=", id: "empv_input_equals" },
+    { key: "+", id: "empv_input_plus" },
+    { key: "BS", id: "empv_input_bs" },
+
+    { key: "q", id: "empv_input_q" },
+    { key: "w", id: "empv_input_w" },
+    { key: "e", id: "empv_input_e" },
+    { key: "r", id: "empv_input_r" },
+    { key: "t", id: "empv_input_t" },
+    { key: "y", id: "empv_input_y" },
+    { key: "u", id: "empv_input_u" },
+    { key: "i", id: "empv_input_i" },
+    { key: "o", id: "empv_input_o" },
+    { key: "p", id: "empv_input_p" },
+    { key: "a", id: "empv_input_a" },
+    { key: "s", id: "empv_input_s" },
+    { key: "d", id: "empv_input_d" },
+    { key: "f", id: "empv_input_f" },
+    { key: "g", id: "empv_input_g" },
+    { key: "h", id: "empv_input_h" },
+    { key: "j", id: "empv_input_j" },
+    { key: "k", id: "empv_input_k" },
+    { key: "l", id: "empv_input_l" },
+    { key: "z", id: "empv_input_z" },
+    { key: "x", id: "empv_input_x" },
+    { key: "c", id: "empv_input_c" },
+    { key: "v", id: "empv_input_v" },
+    { key: "b", id: "empv_input_b" },
+    { key: "n", id: "empv_input_n" },
+    { key: "m", id: "empv_input_m" },
+
+    { key: "Q", id: "empv_input_q_uppercase" },
+    { key: "W", id: "empv_input_w_uppercase" },
+    { key: "E", id: "empv_input_e_uppercase" },
+    { key: "R", id: "empv_input_r_uppercase" },
+    { key: "T", id: "empv_input_t_uppercase" },
+    { key: "Y", id: "empv_input_y_uppercase" },
+    { key: "U", id: "empv_input_u_uppercase" },
+    { key: "I", id: "empv_input_i_uppercase" },
+    { key: "O", id: "empv_input_o_uppercase" },
+    { key: "P", id: "empv_input_p_uppercase" },
+    { key: "A", id: "empv_input_a_uppercase" },
+    { key: "S", id: "empv_input_s_uppercase" },
+    { key: "D", id: "empv_input_d_uppercase" },
+    { key: "F", id: "empv_input_f_uppercase" },
+    { key: "G", id: "empv_input_g_uppercase" },
+    { key: "H", id: "empv_input_h_uppercase" },
+    { key: "J", id: "empv_input_j_uppercase" },
+    { key: "K", id: "empv_input_k_uppercase" },
+    { key: "L", id: "empv_input_l_uppercase" },
+    { key: "Z", id: "empv_input_z_uppercase" },
+    { key: "X", id: "empv_input_x_uppercase" },
+    { key: "C", id: "empv_input_c_uppercase" },
+    { key: "V", id: "empv_input_v_uppercase" },
+    { key: "B", id: "empv_input_b_uppercase" },
+    { key: "N", id: "empv_input_n_uppercase" },
+    { key: "M", id: "empv_input_m_uppercase" },
+
+    { key: "{", id: "empv_input_curly_bracket_opened" },
+    { key: "}", id: "empv_input_curly_bracket_closed" },
+    { key: "[", id: "empv_input_square_bracket_opened" },
+    { key: "]", id: "empv_input_square_bracket_closed" },
+    { key: "\\", id: "empv_input_backslash" },
+    { key: "|", id: "empv_input_pipe" },
+    { key: ";", id: "empv_input_semicolon" },
+    { key: ":", id: "empv_input_colon" },
+    { key: "'", id: "empv_input_apostrophe" },
+    { key: "\"", id: "empv_input_quotation" },
+    { key: ",", id: "empv_input_comma" },
+    { key: "<", id: "empv_input_lessthan" },
+    { key: ".", id: "empv_input_dot" },
+    { key: ">", id: "empv_input_greaterthan" },
+    { key: "/", id: "empv_input_slash" },
+    { key: "?", id: "empv_input_question" },
+
+    { key: "UP", id: "empv_input_up" },
+    { key: "DOWN", id: "empv_input_down" },
+    { key: "LEFT", id: "empv_input_left" },
+    { key: "RIGHT", id: "empv_input_right" },
+
+    { key: "MBTN_MID", id: "empv_input_mbtn_mid" },
+    { key: "WHEEL_UP", id: "empv_input_mbtn_up" },
+    { key: "WHEEL_DOWN", id: "empv_input_mbtn_down" },
+
+    { key: "Ctrl+a", id: "empv_input_ctrl_a" },
+    { key: "Ctrl+v", id: "empv_input_ctrl_v" },
+];
+
+Utils.Input.handleKeyPress = function (key) {
+    if(key == "Ctrl+v" || key == "INS") {
+        if (Utils.OSisWindows) {
+            var args = [
+                "powershell",
+                "-executionpolicy",
+                "bypass",
+                mp.utils
+                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
+                    .replaceAll("/", "\\"),
+                "get-clipboard",
+            ];
+        } else {
+            var args = [
+                "sh",
+                "-c",
+                mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+                    " get-clipboard",
+            ];
+        }
+    
+        var result = mp.command_native(
+            {
+                name: "subprocess",
+                playback_only: false,
+                capture_stdout: true,
+                capture_stderr: false,
+                args: args,
+            });
+
+        Utils.Input.Buffer += result.stdout.trim();
+    }
+    else if (key == "Ctrl+a")
+    {
+        Utils.Input.Buffer = "";
+    }
+    else if (key == "BS" || key == "DEL" || key == "LEFT")
+    {
+        Utils.Input.Buffer = Utils.Input.Buffer.substring(0,Utils.Input.Buffer.length-1);
+    }
+    else if (key == "SPACE")
+    {
+        Utils.Input.Buffer += " ";
+    }
+    else if (key == "ESC")
+    {
+        Utils.Input.hide(false);
+        return;
+    }
+    else if (key == "ENTER")
+    {
+        Utils.Input.hide(true);
+        return;
+    }
+    else if (key == "SHARP")
+    {
+        Utils.Input.Buffer += "#";
+    }
+    else if (key == "UP" || key == "RIGHT" || key == "DOWN" || key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
+    {}
+    else
+    {
+        Utils.Input.Buffer += key;
+    }
+    Utils.Input.OSD.data = Utils.Input.Prefix + Utils.Input.Buffer + "_";
+    Utils.Input.OSD.update();
+}
+
+Utils.Input.show = function (callback, prefix) {
+
+    if(callback == undefined)
+    {
+        return;
+    }
+
+    mp.commandv("set","pause","yes");
+
+    if(prefix != undefined)
+    {
+        Utils.Input.InputPrefix = prefix;
+    }
+    else
+    {
+        Utils.Input.InputPrefix = "Input: ";
+    }
+
+    Utils.Input.Prefix = 
+        SSA.setSize("24") + Utils.Input.TextSettings +
+        "Press Enter to submit your Input. Press ESC to abort.\n" +
+        SSA.setSize("24") + Utils.Input.TextSettings +
+        "Press CTRL+V to paste.\n" +
+        SSA.setSize("32") + Utils.Input.TextSettings;
+
+    if(Utils.Input.isShown)
+    {
+        return;
+    }
+    Utils.Input.isShown = true;
+
+    Utils.Input.Buffer = "";
+
+    var tempFunction = function (x, key) {
+        return function () {
+            x.handleKeyPress(key);
+        };
+    };
+
+    for (var i = 0; i < Utils.Input.keybindOverrides.length; i++) {
+        var currentKey = Utils.Input.keybindOverrides[i];
+        mp.add_forced_key_binding(
+            currentKey.key,
+            currentKey.id,
+            tempFunction(this,currentKey.key),
+            { repeatable: true }
+        );
+    }
+
+    Utils.Input.OSD = mp.create_osd_overlay("ass-events");
+    Utils.Input.OSD.res_y = mp.get_property("osd-height");
+    Utils.Input.OSD.res_x = mp.get_property("osd-width");
+    Utils.Input.OSD.z = 1000;
+
+    Utils.Input.Prefix += Utils.Input.InputPrefix;
+    Utils.Input.OSD.data = Utils.Input.Prefix + "_";
+    Utils.Input.OSD.update();
+    Utils.Input.Callback = callback;
+}
+
+Utils.Input.hide = function (success) {
+
+    if(!Utils.Input.isShown)
+    {
+        return;
+    }
+    Utils.Input.isShown = false;
+
+    for (var i = 0; i < Utils.Input.keybindOverrides.length; i++) {
+        var currentKey = Utils.Input.keybindOverrides[i];
+        mp.remove_key_binding(currentKey.id);
+    }
+
+    mp.commandv(
+        "osd-overlay",
+        Utils.Input.OSD.id,
+        "none",
+        "",
+        0,
+        0,
+        0,
+        "no",
+        "no"
+    );
+    Utils.Input.OSD = undefined;
+    Utils.Input.Callback(success,Utils.Input.Buffer.slice());
+    Utils.Input.Buffer = "";
+}
+
+Utils.OSDLog = {};
+Utils.OSDLog.Buffer = "";
+Utils.OSDLog.BufferCounter = 0;
+Utils.OSDLog.show = function () {
+
+    Utils.OSDLog.OSD = mp.create_osd_overlay("ass-events");
+    Utils.OSDLog.OSD.res_y = mp.get_property("osd-height");
+    Utils.OSDLog.OSD.res_x = mp.get_property("osd-width");
+    Utils.OSDLog.OSD.z = 1;
+
+    Utils.OSDLog.Timer = setInterval(function () {
+        Utils.OSDLog.OSD.data = Utils.OSDLog.Buffer;
+        Utils.OSDLog.OSD.update();
+    }, 100);
+    
+}
+
+Utils.OSDLog.addToBuffer = function (msg) {
+    var color = "";
+    if (msg.level == "debug")
+    {
+        color = SSA.setColorGray();
+    }
+    if (msg.level == "info")
+    {
+        color = SSA.setColorWhite();
+    }
+    if (msg.level == "warn")
+    {
+        color = SSA.setColorYellow();
+    }
+    if (msg.level == "error")
+    {
+        color = SSA.setColorRed();
+    }
+    if (Utils.OSDLog.BufferCounter > 150)
+    {
+        Utils.OSDLog.Buffer = Utils.OSDLog.Buffer.substring(0,15000)
+        Utils.OSDLog.BufferCounter = 0;
+    }
+    if (msg.prefix != "osd/libass")
+    {
+        Utils.OSDLog.Buffer = SSA.setFont("Roboto") + SSA.setTransparency("4f") + color + SSA.setSize(16) + SSA.setBorder(0) +
+            "[" + msg.prefix + "] " + msg.text + "\n" + Utils.OSDLog.Buffer;
+    }
+    Utils.OSDLog.BufferCounter++;
+};
+
+Utils.OSDLog.hide = function () {
+    clearInterval(Utils.OSDLog.Timer);
+    mp.commandv(
+        "osd-overlay",
+        Utils.OSDLog.OSD.id,
+        "none",
+        "",
+        0,
+        0,
+        0,
+        "no",
+        "no"
+    );
+    Utils.OSDLog.OSD = undefined;
+}
+
+Utils.showInteractiveCommandInput = function () {
+    var readCommand = function (success, result) {
+        if (success) {
+            mp.command(result);
+            Utils.showAlert(
+                "info",
+                "Command executed!"
+            );
+        }
+    };
+    Utils.Input.show(readCommand,"Command: ");
+}
+
 /**
  * Reads, writes and modifies watch_later folder.
  */
@@ -1219,7 +1603,7 @@ Utils.WL.cache = [];
  * Access cache with Utils.wlCache
  */
 Utils.WL.createCache = function () {
-    mp.msg.verbose("[startup] Utils.WL.createCache");
+    Utils.log("[startup] Utils.WL.createCache");
     if (
         mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
         undefined

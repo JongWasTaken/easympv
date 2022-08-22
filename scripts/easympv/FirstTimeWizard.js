@@ -11,9 +11,7 @@
 var MenuSystem = require("./MenuSystem");
 
 var Wizard = {};
-
 Wizard.idsToUnblock = [];
-
 Wizard.Menus = {};
 
 /*
@@ -25,6 +23,7 @@ These depend on implementing a mpv.conf serializer/deserializer first
 - Subtitle Language: "English" or "none", maybe more?
 - Audio Language: "Japanese" or "English", maybe more?
 
+Check if input.conf exists, ask if the user prefers the mpv defaults or empv defaults, generate.
 
 */
 

@@ -241,18 +241,24 @@ Browsers.Selector.menuEventHandler = function (event, item) {
         } else if (item == "device") {
             Browsers.DeviceBrowser.open(Browsers.Selector.cachedParentMenu);
         } else if (item == "url") {
-            var handleURL = function (success, result, error) {
-                if (result.status == "0") {
-                    var input = result.stdout.trim();
+            var handleURL = function (success, input) {
+                if (success) {
                     if (input.includes("://")) {
                         if (input.includes("&list=")) {
                             mp.commandv("loadlist", input);
                         } else {
                             mp.commandv("loadfile", input);
                         }
+                        tils.showAlert("info", "URL is being loaded!");
+                    }
+                    else
+                    {
+                        Utils.showAlert("info", "Input is not a valid URL!");
                     }
                 }
             }
+            Utils.Input.show(handleURL,"URL: ");
+            /*
             Utils.showAlert("info", "URL Input window has opened!");
             if (Utils.OSisWindows) {
                 var args = [
@@ -280,6 +286,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                 capture_stdout: true,
                 args: args
             }, handleURL);
+            */
         }
     }
 };
@@ -584,7 +591,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 if (Settings.Data.showHiddenFiles) {
                     var title = currentLocationFolders[i];
                     if (title.length >= 32) {
-                        title = title.substring(0, 32) + "...";
+                        title = title.substring(0, 50) + "...";
                     }
 
                     items.push({
@@ -601,7 +608,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             } else {
                 var title = currentLocationFolders[i];
                 if (title.length >= 32) {
-                    title = title.substring(0, 32) + "...";
+                    title = title.substring(0, 50) + "...";
                 }
 
                 items.push({
@@ -642,7 +649,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                     var title = currentLocationFiles[i];
                     if (title.length >= 32) {
-                        title = title.substring(0, 32) + "...";
+                        title = title.substring(0, 50) + "...";
                     }
 
                     items.push({
@@ -672,7 +679,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 var title = currentLocationFiles[i];
                 if (title.length >= 32) {
-                    title = title.substring(0, 32) + "...";
+                    title = title.substring(0, 50) + "...";
                 }
 
                 items.push({

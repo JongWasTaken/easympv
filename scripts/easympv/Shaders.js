@@ -34,7 +34,7 @@ Shaders.set = function (name, files) {
 };
 
 Shaders.readFile = function () {
-    mp.msg.verbose("[startup] Shaders.readFile");
+    Utils.log("[startup] Shaders.readFile");
     Shaders.sets = [];
     // Parse Shaders.json and add all entries to Shaders.sets
     var file = JSON.parse(

@@ -23,6 +23,24 @@ if [ -z "$curl_or_wget" ]; then
     exit 1
 fi
 
+__get-clipboard() {
+    CLIPBOARD=""
+    if [ -z "$OS_IS_NOT_MACOS" ]; then
+        CLIPBOARD="$(pbpaste)"
+    else
+        CLIPBOARD="$(xclip -o)"
+        if [[ "$?" == "1" ]]; then
+            
+            CLIPBOARD="$(wl-paste)"
+        fi
+    fi
+    if [[ "$?" != "0" ]]; then
+        CLIPBOARD=""
+    fi
+
+    echo "$CLIPBOARD"
+}
+
 __show-message() {
     TEXT=$(echo "$@")
     if [ -z "$OS_IS_NOT_MACOS" ]; then
@@ -197,6 +215,10 @@ get-image-info() {
     if [ -f "$HOME/.config/mpv/scripts/easympv/images/$1" ]; then
         file -b "$HOME/.config/mpv/scripts/easympv/images/$1"
     fi
+}
+
+get-clipboard() {
+    __get-clipboard
 }
 
 messagebox() {

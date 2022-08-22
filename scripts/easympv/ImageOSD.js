@@ -183,7 +183,7 @@ ImageOSD.addImage = function (name, file) {
  * Reads Images.json and adds its contents to the Files array.
  */
 ImageOSD.readFile = function () {
-    mp.msg.verbose("[startup] ImageOSD.readFile");
+    Utils.log("[startup] ImageOSD.readFile");
     var file = JSON.parse(
         mp.utils.read_file(
             mp.utils.get_user_path("~~/scripts/easympv/Images.json")
