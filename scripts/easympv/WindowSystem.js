@@ -161,8 +161,8 @@ Windows.Window.prototype._keyPressHandler = function (action) {
         this.eventLocked = true;
         if (action == "click") {
             var mousePosition = JSON.parse(mp.get_property("mouse-pos"));
-            mp.msg.warn(
-                "Click event - X:" + mousePosition.x + " Y: " + mousePosition.y
+            Utils.log(
+                "Click event - X:" + mousePosition.x + " Y: " + mousePosition.y,"windowsystem","info"
             );
             this._constructWindowBaseCache();
             this._constructWindowContentCache();

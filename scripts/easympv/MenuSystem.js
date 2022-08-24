@@ -219,8 +219,8 @@ Menus.Menu = function (settings, items, parentMenu) {
         this.settings.displayMethod = settings.displayMethod;
     } else {
         if (Utils.mpvComparableVersion < 33) {
-            mp.msg.warn(
-                "Your mpv version is too old for overlays. Falling back to messages..."
+            Utils.log(
+                "Your mpv version is too old for overlays. Expect issues!","menusystem","error"
             );
             this.settings.displayMethod = "message";
         } else {
@@ -962,8 +962,6 @@ Menus.Menu.prototype._constructMenuCache = function () {
                 }
             }
         }
-        //this.cachedMenuText += SSA.drawRectangle(800,800,400,400);
-        //mp.msg.warn(this.cachedMenuText);
     }
 };
 
@@ -1195,7 +1193,7 @@ Menus.Menu.prototype.toggleMenu = function () {
 };
 
 Menus.Menu.prototype.eventHandler = function () {
-    mp.msg.warn('Menu "' + this.settings.title + '" has no event handler!');
+    Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
 };
 
 module.exports = Menus;

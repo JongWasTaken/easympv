@@ -30,6 +30,14 @@ SSAHelper.endSequence = function () {
     return mp.get_property_osd("osd-ass-cc/1");
 };
 
+SSAHelper.setBold = function (bold) {
+    if (bold)
+    {
+        return "{\\b1}";
+    }
+    return "{\\b0}";
+}
+
 SSAHelper.setSize = function (fontSize) {
     return "{\\fs" + fontSize + "}";
 };

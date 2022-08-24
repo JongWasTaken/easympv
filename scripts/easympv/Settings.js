@@ -50,7 +50,7 @@ Settings.Data = {
     downloadDependencies: false,
     resetMpvConfig: false,
     resetInputConfig: false,
-    firstTimeStartup: false,
+    isFirstLaunch: true,
 };
 
 /**
@@ -113,6 +113,7 @@ Settings.save = function () {
         defaultConfigString += "# Default: none\n";
         defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
         defaultConfigString += "# Use a full path. Only required on Windows!\n";
+        defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
         defaultConfigString += "mpvLocation=unknown\n";
         defaultConfigString += "\n";
         defaultConfigString += "# The key that easympv will force its menu on.\n";
@@ -165,7 +166,7 @@ Settings.save = function () {
         defaultConfigString +=
             "# This will make the log more detailed along with other changes.\n";
         defaultConfigString +=
-            "You should not enable this unless you know what you are doing.\n";
+            "# You should not enable this unless you know what you are doing, as this option WILL slow down mpv.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "debugMode=x\n";
         defaultConfigString += "\n";
@@ -225,7 +226,7 @@ Settings.save = function () {
         defaultConfigString += "# ! THIS WILL DISCARD YOUR CONFIGURATION !\n";
         defaultConfigString +=
             "# This is modified automatically and should not be changed!\n";
-        defaultConfigString += "firstTimeStartup=x\n";
+        defaultConfigString += "isFirstLaunch=x\n";
 
         lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
     } else {
@@ -261,10 +262,8 @@ Settings.save = function () {
     for (var i = 0; i <= lines.length - 1; i++) {
         if (lines[i].includes("=")) {
             try {
-                //mp.msg.warn(lines[i]);
                 var option = lines[i].split("=")[0].trim();
                 var value = Settings.Data[option];
-                //mp.msg.warn(option + "=" + value);
                 lines[i] = option + "=" + value;
             } catch (x) {}
         }
@@ -339,10 +338,7 @@ Settings.migrate = function () {
 
     // set options to backup
     for (var element in Settings.Data) {
-        //mp.msg.warn("1 | " + element);
         if (copy[element] != undefined) {
-            mp.msg.warn("2 | " + copy[element]);
-            mp.msg.warn("3 | " + Settings.Data[element]);
             Settings.Data[element] = copy[element];
         }
     }
@@ -359,9 +355,9 @@ Settings.migrate = function () {
  * Call Settings.mpvConfig.reload() to update it.
  */
 Settings.mpvConfig.Data = {
-    no_input_default_bindings: "@empty@",
-    no_osd_bar: "@empty@",
-    keep_open: "@empty@",
+    input_default_bindings: "no",
+    osd_bar: "no",
+    keep_open: "yes",
     autofit_larger:"75%x75%",
     osd_font_size: "24",
 
@@ -401,7 +397,7 @@ Settings.mpvConfig.Data = {
  * Same as Settings.mpvConfig.reload().
  */
 Settings.mpvConfig.load = function () {
-    Settings.reload();
+    Settings.mpvConfig.reload();
 };
 
 /**
@@ -439,6 +435,16 @@ Settings.mpvConfig.reload = function () {
                 Settings.mpvConfig.Data[option] = value;
             }
         }
+    }
+
+    for(var option in Settings.mpvConfig.Data)
+    {
+        var value = Settings.mpvConfig.Data[option];
+        if (value == "@empty@")
+        {
+            value = "yes";
+        }
+        mp.set_property(option.replaceAll("_", "-"),value);
     }
 };
 
@@ -494,6 +500,8 @@ Settings.mpvConfig.save = function () {
 
         defaultConfigString += "#!!v3\n";
         defaultConfigString += "### mpv.conf ###\n";
+        defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &\n"
+        defaultConfigString += "# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference\n"
 
         lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
     } else {
@@ -586,6 +594,7 @@ Settings.inputConfig.reset = function () {
 
     var defaultConfigString = "";
     defaultConfigString += "### input.conf ###\n";
+    defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst for reference\n";
     defaultConfigString += "MBTN_LEFT cycle pause\n";
     defaultConfigString += "MBTN_LEFT_DBL cycle fullscreen\n";
     defaultConfigString += "MBTN_RIGHT cycle pause\n";
@@ -638,7 +647,29 @@ Settings.inputConfig.reset = function () {
     Settings.Data.resetInputConfig = false;
     Settings.save();
 
-    Utils.showSystemMessagebox("Input file has been reset!");
+};
+
+Settings.inputConfig.reload = function () {
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) 
+    {
+        return;
+    };
+
+    var lines = mp.utils
+    .read_file(mp.utils.get_user_path("~~/input.conf"))
+    .replaceAll("\r\n", "\n")
+    .split("\n");
+
+    for (var i = 0; i <= lines.length - 1; i++) {
+        if (lines[i].trim().substring(0, 1) != "#") {
+            if (lines[i].trim() != "")
+            {
+                var command = lines[i].trim().split("#")[0];
+                mp.commandv("keybind",command.split(" ")[0],command.substring(command.indexOf(" ") + 1));
+            }
+        }
+    }
+
 };
 
 module.exports = Settings;

@@ -48,13 +48,12 @@ Utils.displayVersionMpv = "";
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
  */
 Utils.determineOS = function () {
-    Utils.log("[startup] determineOS");
     if (mp.utils.getenv("OS") == "Windows_NT") {
         Utils.OS = "win";
         Utils.OSisWindows = true;
         Utils.directorySeperator = "\\";
         Utils.commonFontName = "Overpass Light";
-        mp.msg.info("Detected operating system: Windows");
+        Utils.log("Detected operating system: Windows","startup","info");
     } else {
         var uname = mp.command_native({
             name: "subprocess",
@@ -66,25 +65,24 @@ Utils.determineOS = function () {
 
         if (uname.status != "0") {
             Utils.OS = "unknown";
-            mp.msg.warn("Detected operating system: unknown");
-            mp.msg.error("There was an issue while identifying your operating system: uname is not available!");
+            Utils.log("Detected operating system: unknown","startup","warn");
+            Utils.log("There was an issue while identifying your operating system: uname is not available!","startup","error");
         } else {
             var output = uname.stdout.trim();
             if (output.includes("Darwin")) {
                 Utils.OS = "macos";
-                mp.msg.info("Detected operating system: macOS");
-                mp.msg.error(
-                    "macOS support is experimental. Please report any issues."
+                Utils.log("Detected operating system: macOS","startup","info");
+                Utils.log(
+                    "macOS support is experimental. Please report any issues.","startup","error"
                 );
             } else if (output.includes("Linux")) {
                 Utils.OS = "linux";
-                mp.msg.info("Detected operating system: Linux");
+                Utils.log("Detected operating system: Linux","startup","info");
             } else {
-                //Utils.OS = "unix";
                 Utils.OS = "linux";
-                mp.msg.info("Detected operating system: Unix-like?");
-                mp.msg.error(
-                    "Your OS is untested, but if it is similar to Linux it will probably be fine."
+                Utils.log("Detected operating system: Unix-like?","startup","info");
+                Utils.log(
+                    "Your OS is untested, but if it is similar to Linux it will probably be fine.","startup","error"
                 );
             }
 
@@ -206,7 +204,7 @@ Utils.setDisplayVersion = function () {
  */
 Utils.setIPCServer = function () {
     Utils.pipeName = "mpv";
-    mp.msg.info("PipeName: mpv");
+    Utils.log("Started IPC Server: PipeName is \"mpv\"","main","info");
     if (Utils.OS != "win") {
         mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
     } else {
@@ -234,7 +232,7 @@ Utils.openFile = function (file) {
     } else if (Utils.OS == "macos") {
         mp.commandv("run", "sh", "-c", "open " + file);
     }
-    mp.msg.info("Opening file: " + file);
+    Utils.log("Opening file: " + file,"main","info");
 };
 
 /**
@@ -263,12 +261,20 @@ Utils.executeCommand = function (line) {
 /**
  * X.
  */
-Utils.log = function (text) {
-    //if(Settings.Data.debugMode) {
-    //    mp.msg.warn(text);
-    //    return;
-    //}
-    mp.msg.verbose(text);
+Utils.log = function (text, subject, level) {
+    var msg = "";
+    if (subject != undefined)
+    {
+        msg += "[" + subject + "] "
+    }
+
+    if (level == undefined)
+    {
+        level = "info";
+    }
+
+    msg += text;
+    mp.msg.log(level, msg)
     return;
 };
 
@@ -282,7 +288,7 @@ Utils.showSystemMessagebox = function (text, blockThread) {
     if(!Utils.OSisWindows)
     {
         var isTerminal = (mp.utils.getenv("TERM") != undefined);
-        if(isTerminal) {mp.msg.info(text); return;}
+        if(isTerminal) {Utils.log(text,"messagebox","info"); return;}
         else
         { 
             var args = [
@@ -335,18 +341,12 @@ Utils.showSystemMessagebox = function (text, blockThread) {
 
     if(!Utils.OSisWindows)
     {
-        //var isTerminal = (mp.utils.getenv("TERM") != undefined);
-        //if(isTerminal) {mp.msg.info(text); return;}
-        //else
-        //{ 
-            //mp.msg.warn(text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\n'));
             var args = [
                 "sh",
                 "-c",
                 mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
                     " alert \"" + text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\\n') + "\""
             ];
-        //}
     }
     else
     { 
@@ -397,6 +397,11 @@ Utils.showSystemMessagebox = function (text, blockThread) {
             */
             Windows.Alerts.show(type,text);
         }
+        if (type == "warning")
+        {
+            type = "warn";
+        }
+        Utils.log(text,"alert",type);
     }
 
     if (Settings.Data.useNativeNotifications)
@@ -421,12 +426,12 @@ Utils.showSystemMessagebox = function (text, blockThread) {
  * @returns {boolean} True if the device can connect to the internet
  */
 Utils.checkInternetConnection = function () {
-    Utils.log("[startup] checkInternetConnection");
+    Utils.log("checkInternetConnection","startup","info");
     var callback = function (success, result, error) {
         if (result != undefined) {
             Utils.isOnline = Boolean(result.stdout.trim());
             //if (!Settings.Data.manualInstallation) {
-                Utils.log("Checking for updates...");
+                Utils.log("Checking for updates...","startup","info");
                 Utils.getLatestUpdateData();
             //}
         }
@@ -1227,6 +1232,60 @@ Utils.getCredits = function () {
     );
 };
 
+Utils.restartMpv = function () {
+    // try to restart mpv in-place
+    var mpvLocation = "/usr/bin/mpv";
+
+    if (Settings.Data.mpvLocation != "unknown")
+    {
+        mpvLocation = Settings.Data.mpvLocation;
+    }
+
+    if (mp.utils.file_info(mpvLocation) == undefined)
+    {
+        Utils.log("mpv will now terminate (file reset)","startup","info");
+        mp.commandv("quit-watch-later"); 
+    }
+    
+    if (Utils.OSisWindows)
+    {
+        mpvLocation = mpvLocation.replaceAll("/", "\\");
+    }
+
+    var cFile = mp.get_property("playlist/0/filename");
+
+    for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+        if (mp.get_property("playlist/" + i + "/current") == "yes") {
+            cFile = mp.get_property("playlist/" + i + "/filename");
+            break;
+        }
+    }
+
+    // cFile could be a relative path, so we need to expand it
+    if (cFile != undefined) {
+        if (
+            !Utils.OSisWindows &&
+            mp.utils.file_info(
+                mp.get_property("working-directory") + "/" + cFile
+            ) != undefined
+        ) {
+            cFile =
+                mp.get_property("working-directory") +
+                "/" +
+                cFile.replaceAll("./", "");
+        }
+    }
+    else
+    {
+        cFile = "--player-operation-mode=pseudo-gui";
+    }
+
+    mp.commandv("run",mpvLocation,cFile)
+    Utils.log("!!! A file reset has occurred, mpv has been restarted !!!","restart","warn")
+    Utils.log("!!! Any custom options have not been passed to the new mpv instance, please restart manually if neccessary !!!","restart","warn")
+    mp.commandv("quit"); 
+}
+
 Utils.Input = {};
 Utils.Input.Callback = undefined;
 Utils.Input.isShown = false;
@@ -1239,6 +1298,7 @@ Utils.Input.Prefix = "";
 Utils.Input.keybindOverrides = [
     { key: "ESC", id: "empv_input_esc" },
     
+    { key: "KP_ENTER", id: "empv_input_kp_enter" },
     { key: "ENTER", id: "empv_input_enter" },
     { key: "SPACE", id: "empv_input_space" },
 
@@ -1387,7 +1447,7 @@ Utils.Input.handleKeyPress = function (key) {
                 args: args,
             });
 
-        Utils.Input.Buffer += result.stdout.trim();
+        Utils.Input.Buffer += result.stdout.trim().replace(/\{/g,'\{').replace(/\}/g,'\}');
     }
     else if (key == "Ctrl+a")
     {
@@ -1406,7 +1466,7 @@ Utils.Input.handleKeyPress = function (key) {
         Utils.Input.hide(false);
         return;
     }
-    else if (key == "ENTER")
+    else if (key == "ENTER" || key == "KP_ENTER")
     {
         Utils.Input.hide(true);
         return;
@@ -1414,6 +1474,14 @@ Utils.Input.handleKeyPress = function (key) {
     else if (key == "SHARP")
     {
         Utils.Input.Buffer += "#";
+    }
+    else if (key == "{")
+    {
+        Utils.Input.Buffer += "\\{";
+    }
+    else if (key == "}")
+    {
+        Utils.Input.Buffer += "\\}";
     }
     else if (key == "UP" || key == "RIGHT" || key == "DOWN" || key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
     {}
@@ -1442,6 +1510,8 @@ Utils.Input.show = function (callback, prefix) {
     {
         Utils.Input.InputPrefix = "Input: ";
     }
+
+    Utils.Input.InputPrefix = SSA.setBold(true) + Utils.Input.InputPrefix + Utils.Input.TextSettings + SSA.setBold(false);
 
     Utils.Input.Prefix = 
         SSA.setSize("24") + Utils.Input.TextSettings +
@@ -1510,8 +1580,11 @@ Utils.Input.hide = function (success) {
         "no"
     );
     Utils.Input.OSD = undefined;
-    Utils.Input.Callback(success,Utils.Input.Buffer.slice());
+    Utils.Input.Callback(success,Utils.Input.Buffer.slice().replace(/\\/g,''));
     Utils.Input.Buffer = "";
+
+    Utils.Input.InputPrefix = "";
+    Utils.Input.Prefix = "";
 }
 
 Utils.OSDLog = {};
@@ -1556,8 +1629,8 @@ Utils.OSDLog.addToBuffer = function (msg) {
     }
     if (msg.prefix != "osd/libass")
     {
-        Utils.OSDLog.Buffer = SSA.setFont("Roboto") + SSA.setTransparency("4f") + color + SSA.setSize(16) + SSA.setBorder(0) +
-            "[" + msg.prefix + "] " + msg.text + "\n" + Utils.OSDLog.Buffer;
+        Utils.OSDLog.Buffer = SSA.setFont("Roboto") + SSA.setTransparency("3f") + color + SSA.setSize(16) + SSA.setBorder(0) + SSA.setBold(true) +
+            "[" + msg.prefix + "] " + SSA.setBold(false) + msg.text + "\n" + Utils.OSDLog.Buffer;
     }
     Utils.OSDLog.BufferCounter++;
 };
@@ -1603,7 +1676,7 @@ Utils.WL.cache = [];
  * Access cache with Utils.wlCache
  */
 Utils.WL.createCache = function () {
-    Utils.log("[startup] Utils.WL.createCache");
+    Utils.log("Building watch_later cache","startup","info");
     if (
         mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
         undefined
@@ -1710,7 +1783,7 @@ Utils.WL.createDummy = function () {
  * Clears watch_later folder and creates a dummy file.
  */
 Utils.WL.clear = function () {
-    mp.msg.info("Clearing watchdata");
+    Utils.log("Clearing watch_later folder","main","info")
     var folder = mp.utils.get_user_path("~~/watch_later");
     if (Utils.OSisWindows) {
         folder = folder.replaceAll("/", "\\");

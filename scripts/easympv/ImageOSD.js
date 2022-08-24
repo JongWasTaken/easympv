@@ -175,7 +175,6 @@ ImageOSD.addImage = function (name, file) {
         ),
     };
     Files.push(image);
-    mp.msg.warn(JSON.stringify(image));
 };
  */
 

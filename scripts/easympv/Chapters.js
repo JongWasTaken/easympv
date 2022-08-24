@@ -17,7 +17,7 @@ Chapters.status = "disabled";
 
 Chapters.handler = function () {
     // Called on every chapter change (in main.js)
-    Utils.log("Chapter change detected.");
+    Utils.log("Chapter change detected", "chapters","info");
     Chapters.current = mp.get_property("chapter"); // Which chapter is currently playing
     Chapters.total = Number(mp.get_property("chapters")) - 1; // Total number of chapters in video file
 
@@ -32,9 +32,6 @@ Chapters.handler = function () {
     } else {
         Chapters.style = "unknown";
     }
-
-    // Left this line for debug purposes
-    //mp.msg.info("TOTAL CHAPTERS: " + Chapters.total + "\nCURRENT CHAPTER: " + Chapters.current + "\nCHAPTER STYLE: " + Chapters.style);
 
     // Do the actual operation
     if (Chapters.status == "enabled") {

@@ -28,10 +28,10 @@ __get-clipboard() {
     if [ -z "$OS_IS_NOT_MACOS" ]; then
         CLIPBOARD="$(pbpaste)"
     else
-        CLIPBOARD="$(xclip -o)"
+        CLIPBOARD="$(wl-paste)"
         if [[ "$?" == "1" ]]; then
             
-            CLIPBOARD="$(wl-paste)"
+            CLIPBOARD="$(xclip -o)"
         fi
     fi
     if [[ "$?" != "0" ]]; then

@@ -59,6 +59,10 @@ TODO :
     (DONE) Settings: Add useNativeNotifications: true; Implement in Utilities.js
     (DONE?) Finish Settings.mpvSettings.*
     (DONE)  Replace zenity/PWSH input with in-window input
+    (DONE) Find a way to restart mpv in-place
+    (DONE) Make Settings reload actually set properties
+    (DONE) Never actually restart mpv
+    Add more log points
     First time configuration wizard -> A bunch of menus basically, new module would be nice
     Advanced settings menu
     (ALWAYS ONGOING) Update comments/documentation
@@ -76,7 +80,9 @@ KNOWN ISSUES:
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 
 UNNAMED LIST OF "things to test on Windows specifically":
+    Utils.restartMpv
     Settings.migrate -> find mpv path
+    Utils.Input -> Paste
     Browsers.DeviceBrowser.menuEventHandler -> low latency profile
 */
 "use strict";
@@ -156,13 +162,11 @@ else
 
 mp.register_event("log-message", Utils.OSDLog.addToBuffer);
 
-Utils.log("Starting!");
-
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 Settings.Data.currentVersion = "2.0.0";
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-mp.msg.info("easympv " + Settings.Data.currentVersion + " starting...");
+Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
 
 Utils.determineOS();
 Utils.checkInternetConnection();
@@ -170,56 +174,60 @@ Utils.checkInternetConnection();
 var resetOccured = false;
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
-    Utils.log("[startup] startupTask: reset easympv.conf (file missing)");
+    Utils.log("Task: reset easympv.conf (file missing)","startup","info");
     Settings.migrate();
     resetOccured = true;
 }
 else
 {
     if (Settings.Data.doMigration) {
-        Utils.log("[startup] startupTask: reset easympv.conf (user set)");
+        Utils.log("Task: reset easympv.conf (user set)","startup","info");
         Settings.migrate();
         resetOccured = true;
     }
 }
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
-    Utils.log("[startup] startupTask: reset mpvConfig (file missing)");
+    Utils.log("Task: reset mpvConfig (file missing)","startup","info");
     Settings.mpvConfig.reset();
     resetOccured = true;
 } 
 else
 {
     if (Settings.Data.resetMpvConfig) {
-        Utils.log("[startup] startupTask: reset mpvConfig (user set)");
+        Utils.log("Task: reset mpvConfig (user set)","startup","info");
         Settings.mpvConfig.reset();
         resetOccured = true;
     }
 }
 
 if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
-    Utils.log("[startup] startupTask: reset inputConfig (file missing)");
+    Utils.log("Task: reset inputConfig (file missing)","startup","info");
     Settings.inputConfig.reset();
     resetOccured = true;
 }
 else
 {
     if (Settings.Data.resetInputConfig) {
-        Utils.log("[startup] startupTask: reset inputConfig (user set)");
+        Utils.log("Task: reset inputConfig (user set)","startup","info");
         Settings.inputConfig.reset();
         resetOccured = true;
     }
 }
 
-if (resetOccured) {
-    mp.msg.info("mpv will now terminate (file reset)");
-    mp.commandv("quit-watch-later"); 
-};
-
 if (Settings.Data.doMigration) {
-    Utils.log("[startup] startupTask: migration");
+    Utils.log("Migrating config","startup","info");
     Settings.migrate();
 }
+
+if (resetOccured) {
+
+    Settings.reload();
+    Settings.mpvConfig.reload();
+    Settings.inputConfig.reload();
+    //Utils.showSystemMessagebox("mpv has been restarted to reload its configuration.");
+    //Utils.restartMpv();
+};
 
 var notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
@@ -230,21 +238,20 @@ ImageOSD.readFile();
 Settings.Data.newestVersion = "0.0.0";
 Utils.WL.createCache();
 
-if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
-    Utils.log("[startup] startupTask: start Wizard");
-    Wizard.Start();
+if (Settings.Data.isFirstLaunch) {
+    Utils.log("startupTask: start Wizard","startup","info");
+    //Wizard.Start();
 }
 else
 {
-    Utils.log("[startup] Settings.save");
+    Utils.log("Settings.save","startup","info");
     Settings.save();
 }
 
 Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
 
-//mp.msg.warn(mp.get_property("mpv-configuration"));
-
 var onFileLoad = function () {
+
     var wld = Utils.WL.getData();
     if (isFirstFile) {
         if (
@@ -281,8 +288,8 @@ var onFileLoad = function () {
     }
 
     if (wld != undefined) {
-        mp.msg.warn(
-            'Please ignore "Error parsing option x (option not found)" errors. These are expected.'
+        Utils.log(
+            "Please ignore \"Error parsing option x (option not found)\" errors. These are expected.","startup","warn"
         );
         if (wld.shader != undefined && !Shaders.manualSelection) {
             Shaders.apply(wld.shader);
@@ -295,6 +302,7 @@ var onFileLoad = function () {
     }
 
     // mpv does not provide a good way to get the current filename, so we need to get creative
+    // (stream-open-filename does not work with relative paths and URLs!)
     var cFile;
     for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
         if (mp.get_property("playlist/" + i + "/current") == "yes") {
@@ -315,18 +323,19 @@ var onFileLoad = function () {
                 mp.get_property("working-directory") +
                 "/" +
                 cFile.replaceAll("./", "");
-            //mp.msg.warn(cFile);
         }
         Browsers.FileBrowser.currentLocation = cFile;
         Browsers.FileBrowser.currentLocation =
             Browsers.FileBrowser.getParentDirectory();
     }
+
+
 };
 
 var onShutdown = function () {
     // This is not ideal, as data will only be saved when mpv is being closed.
     // Ideally, this would be in the on_startup block, before a file change.
-    mp.msg.info("Writing data to watch_later...");
+    Utils.log("Writing data to watch_later...","shutdown","info");
     Utils.WL.writeData(Shaders.name, Colors.name);
 };
 
@@ -571,7 +580,6 @@ ShadersMenu.eventHandler = function (event, action) {
             break;
         case "enter":
             ShadersMenu.hideMenu();
-            //mp.msg.warn(action);
             if (action != "@back@") {
                 Shaders.apply(action);
                 ShadersMenu.setDescription(
@@ -942,6 +950,8 @@ SettingsMenu.eventHandler = function (event, action) {
         }
         if (action == "reload") {
             Settings.reload();
+            Settings.mpvConfig.reload();
+            Settings.inputConfig.reload();
             Utils.showAlert("info", "Configuration reloaded.");
             return;
         }
@@ -1105,17 +1115,32 @@ if (Settings.Data.forcedMenuKey != "disabled")
     */
 }
 
-mp.add_forced_key_binding(",", "testkey", function () {
+//mp.add_forced_key_binding(",", "testkey", function () {});
 
-    var callback = function(success, input)
-    {
-        mp.msg.warn("RECEIVED INPUT: " + input);
-    }
-
-    Utils.Input.show(callback);
+mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", Utils.showInteractiveCommandInput);
+mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+    var readCommand = function (success, result) {
+        if (success) {
+            try{
+                eval(result);
+                Utils.showAlert(
+                    "info",
+                    "Expression evaluated!"
+                );
+            }
+            catch(e)
+            {
+                Utils.showAlert(
+                    "error",
+                    "Invalid Expression! Error: " + e
+                );
+            }
+        }
+    };
+    Utils.Input.show(readCommand,"JavaScript expression: ");
 });
 
-mp.add_key_binding("n", "toggle-sofa", function () {
+mp.add_key_binding("n", "empv_toggle_sofa", function () {
     if (
         mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=
         undefined

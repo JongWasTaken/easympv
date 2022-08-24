@@ -20,7 +20,7 @@ Colors.set = function (name, data) {
 };
 
 Colors.readFile = function () {
-    Utils.log("[startup] Colors.readFile");
+    Utils.log("Reading colors file","startup","info");
     Colors.sets = [];
     var file = JSON.parse(
         mp.utils.read_file(

@@ -249,7 +249,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                         } else {
                             mp.commandv("loadfile", input);
                         }
-                        tils.showAlert("info", "URL is being loaded!");
+                        Utils.showAlert("info", "URL is being loaded!");
                     }
                     else
                     {

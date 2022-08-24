@@ -15,6 +15,7 @@
 var API = {};
 
 var Menus = require("./MenuSystem");
+var Utils = require("./Utils");
 
 API.foreignMenus = {};
 
@@ -70,7 +71,7 @@ var Impl_createmenu = function (json) {
         return "{\"result\":\"error\",\"id\":"+json.context+"}";
     }
     catch (x) {
-        mp.msg.warn(x);
+        Utils.log(x,"API","error");
         return "{\"result\":\"error\",\"id\":"+json.context+"}";
     }
 }
@@ -125,7 +126,7 @@ API.Commands = {
 }
 
 API.handleIncomingJSON = function(json) {
-    mp.msg.warn("Incoming JSON: " + json);
+    //mp.msg.warn("Incoming JSON: " + json);
     if(json == undefined) {
         return;
     }
