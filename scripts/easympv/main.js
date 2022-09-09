@@ -147,6 +147,9 @@ var Browsers = require("./Browsers");
 var Wizard = require("./FirstTimeWizard");
 var API = require("./API");
 
+/**
+ * The main function, called by executionWrapper().
+ */
 var startExecution = function () {
 
     var isFirstFile = true;
@@ -1229,6 +1232,10 @@ var startExecution = function () {
 
 var errorCounter = 0;
 
+
+/** Wraps startExecution() in a try/catch block. 
+ *  This way the entire plugin will not crash when something goes wrong.
+*/
 var executionWrapper = function () {
     try {
         startExecution();
@@ -1237,20 +1244,8 @@ var executionWrapper = function () {
         errorCounter++;
         mp.msg.error("Encountered "+errorCounter+" issue(s) during runtime!");
         mp.msg.error("Last issue description: " + e);
-        /*
-        if (errorCounter < 10)
-        {
-            mp.msg.error("easympv will try to restart...")
-            tryInit();
-        }
-        else
-        {
-            mp.msg.error("easympv crashed too many times! Restart mpv to try again!");
-            init = undefined;
-            tryInit = undefined;
-        }
-        */
     }
 };
 
+// Entry point
 executionWrapper();

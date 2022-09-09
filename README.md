@@ -26,17 +26,23 @@ macOS support is experimental and not fully finished.
 **Other versions of mpv will not work, as they are not compiled with LuaJIT support!**
 
 #### Linux Dependencies
-Due to the modular nature of Linux, you will need to install a few dependencies:
+The automatic installer script will take care of any dependencies.  
+If you wish to install easympv manually you will need the following dependencies:
 - mpv, compiled with LuaJIT support (Not all distributions do this!)
-- GNU coreutils (usually preinstalled)
 - either `wget` (preferred) or `curl` (usually preinstalled)
 - `xclip` OR `wl-clipboard` (if you use Wayland)  
     When in doubt, install both!
 
 ### Automatic
-Unfinished. Use manual installation for now.
-  
-[//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)
+#### Windows
+Unfinished. Use manual installation for now.  
+
+[//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)  
+#### Linux
+Paste this into a terminal:  
+`sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv/master/scripts/easympv/installer.sh)"`  
+This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
+Please report issues!  
 ### Manual
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
 Launch mpv once to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`).  
