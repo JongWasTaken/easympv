@@ -90,7 +90,13 @@ Shaders.readFile = function () {
  */
 Shaders.apply = function (shader) {
     Shaders.manualSelection = true;
-    if (shader == "Automatic Anime4K") {
+    if (shader.includes("Automatic Anime4K")) {
+
+	var suffix = " (Better, but Slower)";
+	if (shader.includes("Worse")) {
+	    suffix = " (Worse, but Faster)";
+	}
+
         var resolutions = [300, 480, 720, 1080, 1440, 2560, 3000],
             file_resolution = Number(mp.get_property("video-params/h"));
 
@@ -102,15 +108,15 @@ Shaders.apply = function (shader) {
         });
 
         if (closest == 480) {
-            Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+            Shaders.apply("Anime4K for HD and SD media" + suffix);
         } else if (closest == 720) {
-            Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
+            Shaders.apply("Anime4K for 720p media" + suffix);
         } else if (closest == 1080) {
-            Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+            Shaders.apply("Anime4K for HD and SD media" + suffix);
         } else if (closest == 1440) {
-            Shaders.apply("Anime4K for 720p media (Worse, but Faster)");
+            Shaders.apply("Anime4K for 720p media" + suffix);
         } else {
-            Shaders.apply("Anime4K for HD and SD media (Worse, but Faster)");
+            Shaders.apply("Anime4K for HD and SD media" + suffix);
         }
     } else if (shader == "Automatic All-Purpose") {
         Shaders.apply("NNEDI3 (128 Neurons)");

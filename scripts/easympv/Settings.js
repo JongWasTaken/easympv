@@ -105,8 +105,6 @@ Settings.save = function () {
         undefined
     ) {
         var defaultConfigString = "";
-
-        defaultConfigString += "#!!v3\n";
         defaultConfigString += "### easympv.conf ###\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
@@ -497,8 +495,6 @@ Settings.mpvConfig.save = function () {
         mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined
     ) {
         var defaultConfigString = "";
-
-        defaultConfigString += "#!!v3\n";
         defaultConfigString += "### mpv.conf ###\n";
         defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &\n"
         defaultConfigString += "# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference\n"

@@ -58,7 +58,7 @@ var Impl_createmenu = function (json) {
             menu.eventHandler = function (event, action) {
                 var res = {
                     "sender": "easympv",
-                    "id": json.context,
+                    "context": json.context,
                     "data": {
                         "event": event,
                         "action": action
@@ -66,13 +66,13 @@ var Impl_createmenu = function (json) {
                 };
                 API.sendJSON(json.sender,JSON.stringify(res));
             }
-            return "{\"result\":\"success\",\"id\":"+json.context+"}";
+            return "{\"result\":\"success\",\"context\":"+json.context+"}";
         }
-        return "{\"result\":\"error\",\"id\":"+json.context+"}";
+        return "{\"result\":\"error\",\"context\":"+json.context+"}";
     }
     catch (x) {
         Utils.log(x,"API","error");
-        return "{\"result\":\"error\",\"id\":"+json.context+"}";
+        return "{\"result\":\"error\",\"context\":"+json.context+"}";
     }
 }
 
@@ -113,10 +113,10 @@ var Impl_removemenu = function (json) {
             }
         }
     
-        return "{\"result\":\"success\",\"id\":"+json.context+"}";
+        return "{\"result\":\"success\",\"context\":"+json.context+"}";
     }
     catch(z) {
-        return "{\"result\":\"error\",\"id\":"+json.context+"}";
+        return "{\"result\":\"error\",\"context\":"+json.context+"}";
     }
 }
 
@@ -138,7 +138,7 @@ API.handleIncomingJSON = function(json) {
     }
 
     if(json.sender == undefined || json.context == undefined || json.command == undefined) {
-        API.sendJSON(json.sender,"{\"result\":\"error\",\"id\":"+json.context+"}");
+        API.sendJSON(json.sender,"{\"result\":\"error\",\"context\":"+json.context+"}");
         return;
     }
 

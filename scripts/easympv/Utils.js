@@ -43,6 +43,7 @@ Utils.mpvLatestVersion = "0.0.0";
 Utils.displayVersion = "";
 Utils.displayVersionMpv = "";
 
+
 /**
  * Determines OS by checking the output of uname.
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
@@ -220,10 +221,14 @@ Utils.libassVersion = mp.get_property("libass-version");
 /**
  * Open file relative to config root. Can also run applications.
  */
-Utils.openFile = function (file) {
-    file = mp.utils.get_user_path("~~/") + "/" + file;
-    file = file.replaceAll("//", "/");
-    file = file.replaceAll('"+"', "/");
+Utils.openFile = function (file,raw) {
+
+    if (raw == undefined) {
+        file = mp.utils.get_user_path("~~/") + "/" + file;
+        file = file.replaceAll("//", "/");
+        file = file.replaceAll('"+"', "/");
+    }
+
     if (Utils.OSisWindows) {
         file = file.replaceAll("/", "\\");
         mp.commandv("run", "cmd", "/c", "start " + file);
@@ -533,7 +538,7 @@ Utils.blockQuitButtons = function () {
     var bindings = JSON.parse(mp.get_property("input-bindings"));
     var keysToBlock = [];
     Utils.idsToUnblock = [];
-    for (i = 0; i < bindings.length; i++) {
+    for (var i = 0; i < bindings.length; i++) {
         if (
             bindings[i].cmd.includes("quit-watch-later") ||
             bindings[i].cmd.includes("quit")
@@ -541,7 +546,7 @@ Utils.blockQuitButtons = function () {
             keysToBlock.push(bindings[i]);
         }
     }
-    for (i = 0; i < keysToBlock.length; i++) {
+    for (var i = 0; i < keysToBlock.length; i++) {
         mp.add_forced_key_binding(
             keysToBlock[i].key,
             "prevent_close_" + i,
@@ -562,7 +567,7 @@ Utils.unblockQuitButtons = function () {
     }
 
     // Unblock quit keys
-    for (i = 0; i < Utils.idsToUnblock.length; i++) {
+    for (var i = 0; i < Utils.idsToUnblock.length; i++) {
         mp.remove_key_binding(Utils.idsToUnblock[i]);
     }
 };
@@ -1254,7 +1259,7 @@ Utils.restartMpv = function () {
 
     var cFile = mp.get_property("playlist/0/filename");
 
-    for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
         if (mp.get_property("playlist/" + i + "/current") == "yes") {
             cFile = mp.get_property("playlist/" + i + "/filename");
             break;
@@ -1685,7 +1690,7 @@ Utils.WL.createCache = function () {
             mp.utils.get_user_path("~~/watch_later/"),
             "files"
         );
-        for (i = 0; i < wlFilesCache.length; i++) {
+        for (var i = 0; i < wlFilesCache.length; i++) {
             if (i < 1000) {
                 var file = {
                     name: wlFilesCache[i],
@@ -1708,7 +1713,7 @@ Utils.WL.createCache = function () {
  */
 Utils.WL.getData = function () {
     var cFile;
-    for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
         if (mp.get_property("playlist/" + i + "/current") == "yes") {
             cFile = mp.get_property("playlist/" + i + "/filename");
         }
@@ -1716,7 +1721,7 @@ Utils.WL.getData = function () {
     cFile = Utils.md5(cFile).toUpperCase();
     var wlName;
     var wlContent;
-    for (i = 0; i < Utils.WL.cache.length; i++) {
+    for (var i = 0; i < Utils.WL.cache.length; i++) {
         if (Utils.WL.cache[i].name == cFile) {
             wlName = Utils.WL.cache[i].name;
             wlContent = Utils.WL.cache[i].content;
@@ -1726,7 +1731,7 @@ Utils.WL.getData = function () {
         var WLtmp = wlContent.split("\n");
         var cShader;
         var cColor;
-        for (i = 0; i < WLtmp.length; i++) {
+        for (var i = 0; i < WLtmp.length; i++) {
             var WLtmp2 = WLtmp[i].split("=");
             if (WLtmp2[0].includes("shader")) {
                 cShader = WLtmp2[1];
@@ -1745,7 +1750,7 @@ Utils.WL.getData = function () {
  */
 Utils.WL.writeData = function (shader, color) {
     var cFile;
-    for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
         if (mp.get_property("playlist/" + i + "/current") == "yes") {
             cFile = mp.get_property("playlist/" + i + "/filename");
         }
@@ -1912,17 +1917,17 @@ var md51 = function (s) {
     var n = s.length,
         state = [1732584193, -271733879, -1732584194, 271733878],
         i;
-    for (i = 64; i <= s.length; i += 64) {
+    for (var i = 64; i <= s.length; i += 64) {
         md5cycle(state, md5blk(s.substring(i - 64, i)));
     }
     s = s.substring(i - 64);
     var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for (i = 0; i < s.length; i++)
+    for (var i = 0; i < s.length; i++)
         tail[i >> 2] |= s.charCodeAt(i) << (i % 4 << 3);
     tail[i >> 2] |= 0x80 << (i % 4 << 3);
     if (i > 55) {
         md5cycle(state, tail);
-        for (i = 0; i < 16; i++) tail[i] = 0;
+        for (var i = 0; i < 16; i++) tail[i] = 0;
     }
     tail[14] = n * 8;
     md5cycle(state, tail);
@@ -1932,7 +1937,7 @@ var md51 = function (s) {
 var md5blk = function (s) {
     var md5blks = [],
         i;
-    for (i = 0; i < 64; i += 4) {
+    for (var i = 0; i < 64; i += 4) {
         md5blks[i >> 2] =
             s.charCodeAt(i) +
             (s.charCodeAt(i + 1) << 8) +
