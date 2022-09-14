@@ -160,11 +160,11 @@ var errorCounter = 0;
 */
 
 try {
-    //Core.startExecution();
+    Core.startExecution();
 }
 catch (e) {
     errorCounter++;
     mp.msg.error("Encountered "+errorCounter+" issue(s) during runtime!");
     mp.msg.error("Last issue description: " + e);
 }
-Core.startExecution();
+//Core.startExecution();
