@@ -43,7 +43,6 @@ Utils.mpvLatestVersion = "0.0.0";
 Utils.displayVersion = "";
 Utils.displayVersionMpv = "";
 
-
 /**
  * Determines OS by checking the output of uname.
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
@@ -205,11 +204,11 @@ Utils.setDisplayVersion = function () {
  */
 Utils.setIPCServer = function () {
     Utils.pipeName = "mpv";
-    Utils.log("Started IPC Server: PipeName is \"mpv\"","main","info");
-    if (Utils.OS != "win") {
-        mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
-    } else {
+    Utils.log("Started IPC Server: PipeName is \""+Utils.pipeName+"\"","startup","info");
+    if (Utils.OSisWindows) {
         mp.set_property("input-ipc-server", Utils.pipeName); // named pipes exist in the limbo
+    } else {
+        mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
     }
 };
 
@@ -281,6 +280,16 @@ Utils.log = function (text, subject, level) {
     msg += text;
     mp.msg.log(level, msg)
     return;
+};
+
+/**
+ * This is a hacky way to restart code execution.
+ * States WILL be wrong! 
+ * Utils.restartMpv() is probably a better solution.
+ */
+Utils.softRestart = function () {
+    Utils.log("!!! SOFT RESTART! LOG IS INVALID !!!","Utils","warn")
+    require("./Core").startExecution();
 };
 
 /**
@@ -858,8 +867,43 @@ Utils.doUpdate = function () {
     }
 
     Utils.blockQuitButtons();
-    Utils.doUpdateStage1();
 
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) == undefined)
+    { 
+        Utils.doUpdateStage1();
+    }
+    else
+    {
+        if (Utils.OSisWindows) {
+            var args = [
+                "powershell",
+                "-executionpolicy",
+                "bypass",
+                mp.utils
+                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
+                    .replaceAll("/", "\\"),
+                "git-update",
+            ];
+        } else {
+            var args = [
+                "sh",
+                "-c",
+                mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
+                    " git-update",
+            ];
+        }
+    
+        mp.command_native_async(
+            {
+                name: "subprocess",
+                playback_only: false,
+                capture_stdout: false,
+                capture_stderr: false,
+                args: args,
+            },
+            Utils.doUpdateStage5
+        );
+    }
     return "";
 };
 
@@ -1248,7 +1292,7 @@ Utils.restartMpv = function () {
 
     if (mp.utils.file_info(mpvLocation) == undefined)
     {
-        Utils.log("mpv will now terminate (file reset)","startup","info");
+        Utils.log("mpv location is unknown! mpv will now terminate!","restart","info");
         mp.commandv("quit-watch-later"); 
     }
     
@@ -1286,9 +1330,9 @@ Utils.restartMpv = function () {
     }
 
     mp.commandv("run",mpvLocation,cFile)
-    Utils.log("!!! A file reset has occurred, mpv has been restarted !!!","restart","warn")
+    Utils.log("!!! mpv will be restarted !!!","restart","warn")
     Utils.log("!!! Any custom options have not been passed to the new mpv instance, please restart manually if neccessary !!!","restart","warn")
-    mp.commandv("quit"); 
+    mp.commandv("quit-watch-later"); 
 }
 
 Utils.Input = {};

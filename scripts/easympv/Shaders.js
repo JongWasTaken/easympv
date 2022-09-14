@@ -15,74 +15,11 @@ keeping track of the current shaderset and applying a shaderset.
 
 /** This module handles all things shader.*/
 var Shaders = {};
-var seperator = "";
 Shaders.name = "none";
-Shaders.sets = [];
 Shaders.manualSelection = false;
 
 var Utils = require("./Utils");
-if (Utils.OSisWindows) {
-    seperator = ";";
-} else {
-    seperator = ":";
-}
-
-Shaders.set = function (name, files) {
-    this.name = name;
-    this.files = files;
-    return this;
-};
-
-Shaders.readFile = function () {
-    Utils.log("Reading shader file","startup","info");
-    Shaders.sets = [];
-    // Parse Shaders.json and add all entries to Shaders.sets
-    var file = JSON.parse(
-        mp.utils.read_file(
-            mp.utils.get_user_path("~~/scripts/easympv/Shaders.json")
-        )
-    );
-    for (var set in file) {
-        var filelist = "";
-        var i = 0;
-        for (i = 0; i < file[set].length; i++) {
-            filelist = filelist + "~~/shaders/" + file[set][i] + seperator;
-        }
-        filelist = filelist.slice(0, filelist.length - 1);
-        Shaders.sets.push(new Shaders.set(set, filelist));
-    }
-
-    // Sort the array
-    Shaders.sets.reverse();
-    var i;
-    var sorttemp_master = [];
-    var sorttemp_sd = [];
-    var sorttemp_hd = [];
-    var sorttemp2 = [];
-    for (i = 0; i < Shaders.sets.length; i++) {
-        if (Shaders.sets[i].name.includes("Worse, but Faster")) {
-            sorttemp_sd.push(Shaders.sets[i]);
-        } else if (Shaders.sets[i].name.includes("Better, but slower")) {
-            sorttemp_hd.push(Shaders.sets[i]);
-        } else {
-            sorttemp2.push(Shaders.sets[i]);
-        }
-    }
-    sorttemp_sd.reverse();
-    sorttemp_hd.reverse();
-
-    for (i = 0; i < sorttemp_sd.length; i++) {
-        sorttemp_master.push(sorttemp_sd[i]);
-    }
-    for (i = 0; i < sorttemp_hd.length; i++) {
-        sorttemp_master.push(sorttemp_hd[i]);
-    }
-    for (i = 0; i < sorttemp2.length; i++) {
-        sorttemp_master.push(sorttemp2[i]);
-    }
-
-    Shaders.sets = sorttemp_master;
-};
+var Settings = require("./Settings");
 
 /**
  * Applies shaderset.
@@ -92,9 +29,9 @@ Shaders.apply = function (shader) {
     Shaders.manualSelection = true;
     if (shader.includes("Automatic Anime4K")) {
 
-	var suffix = " (Better, but Slower)";
+	var suffix = " (Better, but more demanding)";
 	if (shader.includes("Worse")) {
-	    suffix = " (Worse, but Faster)";
+	    suffix = " (Worse, but less demanding)";
 	}
 
         var resolutions = [300, 480, 720, 1080, 1440, 2560, 3000],
@@ -137,15 +74,31 @@ Shaders.apply = function (shader) {
         }
 
         var i;
-        for (i = 0; i < Shaders.sets.length; i++) {
-            if (Shaders.sets[i].name == shader) {
+        var shaderFound = false;
+        for (i = 0; i < Settings.presets.shadersets.length; i++) {
+            if (Settings.presets.shadersets[i].name == shader) {
+                shaderFound = true;
                 mp.commandv(
                     "change-list",
                     "glsl-shaders",
                     "set",
-                    Shaders.sets[i].files
+                    Settings.presets.shadersets[i].files
                 );
                 break;
+            }
+        }
+        if (!shaderFound)
+        {
+            for (i = 0; i < Settings.presets.shadersetsUser.length; i++) {
+                if (Settings.presets.shadersetsUser[i].name == shader) {
+                    mp.commandv(
+                        "change-list",
+                        "glsl-shaders",
+                        "set",
+                        Settings.presets.shadersetsUser[i].files
+                    );
+                    break;
+                }
             }
         }
 

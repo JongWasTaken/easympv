@@ -421,11 +421,18 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             ) {
                 var isFolder = true;
             } else {
-                var isFolder = mp.utils.file_info(
+                // turns out mp.file_info can return undefined in rare edgecases
+                // this fixes a bug where opening a mount folder of an unmounted drive would crash everything
+                var temp = mp.utils.file_info(
                     Browsers.FileBrowser.currentLocation +
                         Utils.directorySeperator +
                         item
-                ).is_dir;
+                );
+                if (temp != undefined) {
+                    var isFolder = temp.is_dir;
+                } else {
+                    var isFolder = true;
+                }
             }
 
             if (isFolder) {

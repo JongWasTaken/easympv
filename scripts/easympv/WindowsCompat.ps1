@@ -83,6 +83,22 @@ if($command -eq "update-mpv")
     exit 0
 }
 
+if($command -eq "git-update")
+{
+    Set-Location $env:APPDATA\mpv\
+    $processOptions = @{
+        FilePath = "cmd.exe"
+        ArgumentList = "/k", "{cd $env:APPDATA\mpv\ && git pull"
+    }
+    try 
+    {
+        Start-Process @processOptions
+    }
+    Catch [system.exception]
+    {exit 1}
+    exit 0
+}
+
 if($command -eq "get-package")
 {
 
@@ -247,7 +263,7 @@ if($command -eq "get-image-info")
     $fstring = ""
     try 
     {
-        $bmp = New-Object System.Drawing.Bitmap "$env:APPDATA\mpv\scripts\easympv\images\" + $arguments
+        $bmp = New-Object System.Drawing.Bitmap "$arguments"
         $fstring += $bmp.Width + "|"
         $fstring += $bmp.Height
         $bmp.Dispose()

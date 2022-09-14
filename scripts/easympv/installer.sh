@@ -1,5 +1,5 @@
 #!/bin/sh
-EMPV_VERSION="2.0.0"
+
 mkdir -p "$HOME/.config/mpv"
 # Figure out distro
 # From https://ilhicas.com/2018/08/08/bash-script-to-install-packages-multiple-os.html
@@ -22,6 +22,7 @@ do
 done
 
 # Set Variables
+CURL_IS_INSTALLED=0
 WGET_IS_INSTALLED=0
 XCLIP_IS_INSTALLED=0
 WLC_IS_INSTALLED=0
@@ -29,12 +30,17 @@ UNZIP_IS_INSTALLED=0
 ZENITY_IS_INSTALLED=0
 NOTIFYSEND_IS_INSTALLED=0
 MPV_IS_INSTALLED=0
+GIT_IS_INSTALLED=0
 EMPV_IS_INSTALLED=0
 
 INSTALL_PACKAGES_LIST=()
 INSTALL_PACKAGES=0
 
 # Check if everything is already installed
+if [ $(type -P curl) != "" ]; then
+    CURL_IS_INSTALLED=1
+fi
+
 if [ $(type -P wget) != "" ]; then
     WGET_IS_INSTALLED=1
 fi
@@ -63,11 +69,20 @@ if [ $(type -P mpv) != "" ]; then
     MPV_IS_INSTALLED=1
 fi
 
+if [ $(type -P git) != "" ]; then
+    GIT_IS_INSTALLED=1
+fi
+
 if [ -f "$HOME/.config/mpv/scripts/easympv/main.js" ]; then
     EMPV_IS_INSTALLED=1
 fi
 
 # if not, add to install array
+
+if [ $CURL_IS_INSTALLED == 0 ]; then
+    INSTALL_PACKAGES_LIST+=("curl")
+    INSTALL_PACKAGES=1
+fi
 
 if [ $WGET_IS_INSTALLED == 0 ]; then
     INSTALL_PACKAGES_LIST+=("wget")
@@ -89,6 +104,11 @@ if [ $UNZIP_IS_INSTALLED == 0 ]; then
     INSTALL_PACKAGES=1
 fi
 
+if [ $ZENITY_IS_INSTALLED == 0 ]; then
+    INSTALL_PACKAGES_LIST+=("zenity")
+    INSTALL_PACKAGES=1
+fi
+
 if [ $NOTIFYSEND_IS_INSTALLED == 0 ]; then
     INSTALL_PACKAGES_LIST+=("libnotify")
     INSTALL_PACKAGES=1
@@ -96,6 +116,11 @@ fi
 
 if [ $MPV_IS_INSTALLED == 0 ]; then
     INSTALL_PACKAGES_LIST+=("mpv")
+    INSTALL_PACKAGES=1
+fi
+
+if [ $GIT_IS_INSTALLED == 0 ]; then
+    INSTALL_PACKAGES_LIST+=("git")
     INSTALL_PACKAGES=1
 fi
 
@@ -121,24 +146,45 @@ if [ $INSTALL_PACKAGES != 0 ]; then
     fi
 fi
 
+EMPV_VERSION=$(curl --silent "https://api.github.com/repos/JongWasTaken/easympv/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+function empv_ask_install_choice() {
+    if [ "$EMPV_VERSION" == "" ]; then
+        EMPV_INSTALL_CHOICE="Git Master"
+    else
+        EMPV_INSTALL_CHOICE=$(zenity --list --text "Select which easympv version to install:" --radiolist --column "" --column "" --hide-header 1 Latest\ Stable\ \(recommended\) 2 Git\ Master)
+        if [ "$EMPV_INSTALL_CHOICE" == "" ]; then
+            empv_ask_install_choice
+        fi
+    fi
+}
+
 if [ $EMPV_IS_INSTALLED == 0 ]; then
-    wget --content-disposition -q -O "$HOME/.config/mpv/package.zip" https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/$EMPV_VERSION
+    empv_ask_install_choice
+    if [ "$EMPV_INSTALL_CHOICE" == "Git Master" ]; then
+        mkdir -p $HOME/.cache/empvtemp/
+        git clone https://github.com/JongWasTaken/easympv $HOME/.cache/empvtemp/git
+        mv $HOME/.cache/empvtemp/git/* $HOME/.config/mpv
+        rm -rf $HOME/.cache/empvtemp/
+        zenity --info --text="easympv has been installed successfully!\nmpv will now start."
+    else
+        wget --content-disposition -q -O "$HOME/.config/mpv/package.zip" https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/$EMPV_VERSION
 
-    if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/"
-    fi
+        if [ -f "$HOME/.config/mpv/package.zip" ]; then
+            unzip "$HOME/.config/mpv/package.zip" -d "$HOME/.config/mpv/"
+        fi
 
-    if [ -f "$HOME/.config/mpv/package.zip" ]; then
-        rm -rf "$HOME/.config/mpv/package.zip"
-    fi
+        if [ -f "$HOME/.config/mpv/package.zip" ]; then
+            rm -rf "$HOME/.config/mpv/package.zip"
+        fi
 
-    if [ -d "$HOME/.config/mpv/easympv-$EMPV_VERSION" ]; then
-        cp -r "$HOME/.config/mpv/easympv-$EMPV_VERSION/"* "$HOME/.config/mpv/"
-        rm -rf "$HOME/.config/mpv/easympv-$EMPV_VERSION"
+        if [ -d "$HOME/.config/mpv/easympv-$EMPV_VERSION" ]; then
+            cp -r "$HOME/.config/mpv/easympv-$EMPV_VERSION/"* "$HOME/.config/mpv/"
+            rm -rf "$HOME/.config/mpv/easympv-$EMPV_VERSION"
+        fi
+        zenity --info --text="easympv has been installed successfully!\nmpv will now start."
     fi
 fi
-
-zenity --info --text="easympv has been installed successfully!\nmpv will now start."
 
 # launch mpv
 mpv --volume=30 --player-operation-mode=pseudo-gui "https://www.youtube.com/watch?v=dQw4w9WgXcQ"

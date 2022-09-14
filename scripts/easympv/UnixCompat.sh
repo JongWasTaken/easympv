@@ -172,6 +172,11 @@ get-version-latest-mpv() {
     echo $version
 }
 
+git-update() {
+    cd $HOME/.config/mpv/
+    git pull
+}
+
 get-package() {
     if [ -f "$HOME/.config/mpv/package.zip" ]; then
         rm -rf "$HOME/.config/mpv/package.zip"
@@ -212,8 +217,8 @@ remove-file() {
 }
 
 get-image-info() {
-    if [ -f "$HOME/.config/mpv/scripts/easympv/images/$1" ]; then
-        file -b "$HOME/.config/mpv/scripts/easympv/images/$1"
+    if [ -f "$1" ]; then
+        file -b "$1"
     fi
 }
 

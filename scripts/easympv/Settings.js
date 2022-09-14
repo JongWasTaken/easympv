@@ -28,6 +28,8 @@ var Settings = {};
 Settings.mpvConfig = {};
 Settings.inputConfig = {};
 
+Settings.presets = {};
+
 /////////////////////////////////////////// easympv.conf
 
 /**
@@ -667,5 +669,174 @@ Settings.inputConfig.reload = function () {
     }
 
 };
+
+Settings.presets.shadersets = [];
+
+Settings.presets.shaderset = function (name, files) {
+    this.name = name;
+    this.files = files;
+    return this;
+};
+
+Settings.presets.colorpresets = [];
+
+Settings.presets.colorpreset = function (name, data) {
+    this.name = name;
+    this.data = data;
+    return this;
+};
+
+Settings.presets.shadersetsUser =  [];
+Settings.presets.colorpresetsUser =  [];
+
+Settings.presets.images = [];
+
+Settings.presets.reload = function () {
+    var seperator = ":";
+    if (Utils.OSisWindows) {
+        seperator = ";";
+    };
+    
+    if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")) != undefined)
+    {
+        var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")));
+        if (json["shadersets"] != undefined) {
+            for (var set in json["shadersets"]) {
+                var filelist = "";
+                var i = 0;
+                for (i = 0; i < json["shadersets"][set].length; i++) {
+                    filelist = filelist + "~~/scripts/easympv/shaders/" + json["shadersets"][set][i] + seperator;
+                }
+                filelist = filelist.slice(0, filelist.length - 1);
+                Settings.presets.shadersets.push(new Settings.presets.shaderset(set, filelist));
+            }
+            
+            // Sort the array
+            Settings.presets.shadersets.reverse();
+            var i;
+            var sorttemp_master = [];
+            var sorttemp_sd = [];
+            var sorttemp_hd = [];
+            var sorttemp2 = [];
+            for (i = 0; i < Settings.presets.shadersets.length; i++) {
+                if (Settings.presets.shadersets[i].name.includes("Worse, but less demanding")) {
+                    sorttemp_sd.push(Settings.presets.shadersets[i]);
+                } else if (Settings.presets.shadersets[i].name.includes("Better, but more demanding")) {
+                    sorttemp_hd.push(Settings.presets.shadersets[i]);
+                } else {
+                    sorttemp2.push(Settings.presets.shadersets[i]);
+                }
+            }
+            sorttemp_sd.reverse();
+            sorttemp_hd.reverse();
+
+            for (i = 0; i < sorttemp_sd.length; i++) {
+                sorttemp_master.push(sorttemp_sd[i]);
+            }
+            for (i = 0; i < sorttemp_hd.length; i++) {
+                sorttemp_master.push(sorttemp_hd[i]);
+            }
+            for (i = 0; i < sorttemp2.length; i++) {
+                sorttemp_master.push(sorttemp2[i]);
+            }
+
+            Settings.presets.shadersets = sorttemp_master;
+        }
+        if (json["colorpresets"] != undefined) {
+            for (var set in json["colorpresets"]) {
+                Settings.presets.colorpresets.push(
+                    new Settings.presets.colorpreset(set, {
+                        contrast: json["colorpresets"][set].contrast,
+                        brightness: json["colorpresets"][set].brightness,
+                        gamma: json["colorpresets"][set].gamma,
+                        saturation: json["colorpresets"][set].saturation,
+                        hue: json["colorpresets"][set].hue,
+                        sharpen: parseFloat(json["colorpresets"][set].sharpen),
+                    })
+                );
+            }
+        }
+        if (json["images"] != undefined) {
+            for (var i = 0; i <= json["images"].length-1; i++) {
+                var file = json["images"][i].data.file;
+                json["images"][i].data.file = "~~/scripts/easympv/images/" + json["images"][i].data.file;
+                json["images"][i].name = file.substring(0,file.length-4);
+                json["images"][i].data.active = false;
+                json["images"][i].data.id = i;
+                if (json["images"][i].data.height == undefined || json["images"][i].data.width == undefined || json["images"][i].data.offset == undefined) {
+                    var x = ImageOSD.getImageInfo(json["images"][i].data.file);
+                    json["images"][i].data.height = x.h;
+                    json["images"][i].data.width = x.w;
+                    json["images"][i].data.offset = x.offset;
+                }
+            }
+            Settings.presets.images = json["images"];
+        }
+    }
+
+    if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.json")) != undefined)
+    {
+        var jsonUser = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv.json")));
+
+        if (jsonUser["shadersets"] != undefined) {
+            for (var set in jsonUser["shadersets"]) {
+                var filelist = "";
+                var i = 0;
+                for (i = 0; i < jsonUser["shadersets"][set].length; i++) {
+                    filelist = filelist + "~~/shaders/" + jsonUser["shadersets"][set][i] + seperator;
+                }
+                filelist = filelist.slice(0, filelist.length - 1);
+                Settings.presets.shadersetsUser.push(new Settings.presets.shaderset(set, filelist));
+            }
+        }
+
+        if (jsonUser["colorpresets"] != undefined) {
+            for (var set in jsonUser["colorpresets"]) {
+                Settings.presets.colorpresetsUser.push(
+                    new Settings.presets.colorpreset(set, {
+                        contrast: jsonUser["colorpresets"][set].contrast,
+                        brightness: jsonUser["colorpresets"][set].brightness,
+                        gamma: jsonUser["colorpresets"][set].gamma,
+                        saturation: jsonUser["colorpresets"][set].saturation,
+                        hue: jsonUser["colorpresets"][set].hue,
+                        sharpen: parseFloat(jsonUser["colorpresets"][set].sharpen),
+                    })
+                );
+            }
+        }
+
+        if (jsonUser["images"] != undefined) {
+            for (var i = 0; i <= jsonUser["images"].length-1; i++) {
+                var file = jsonUser["images"][i].data.file;
+                jsonUser["images"][i].data.file = "~~/images/" + jsonUser["images"][i].data.file;
+                jsonUser["images"][i].name = file.substring(0,file.length-4);
+                jsonUser["images"][i].data.active = false;
+                jsonUser["images"][i].data.id = i;
+                if (jsonUser["images"][i].data.height == undefined || jsonUser["images"][i].data.width == undefined || jsonUser["images"][i].data.offset == undefined) {
+                    var x = ImageOSD.getImageInfo(jsonUser["images"][i].data.file);
+                    jsonUser["images"][i].data.height = x.h;
+                    jsonUser["images"][i].data.width = x.w;
+                    jsonUser["images"][i].data.offset = x.offset;
+                }
+            }
+            Settings.presets.images = Settings.presets.images.concat(jsonUser["images"]);
+        }
+    }
+    else
+    {
+        var dummyFile = {
+            "_comment": "For more information please visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Presets",
+            "shadersets": {},
+            "colorpresets": {},
+            "images": []
+        };
+
+        mp.utils.write_file(
+            "file://" + mp.utils.get_user_path("~~/easympv.json"),
+            JSON.stringify(dummyFile,null,4)
+        );
+    }
+
+}
 
 module.exports = Settings;

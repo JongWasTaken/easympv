@@ -17,17 +17,15 @@ This file handles drawing images to the screen and manages them.
  */
 var ImageOSD = {};
 
-/**
- * This array contains all images added with OSD.addImage().
- */
-var Files = [];
+var Settings = require("./Settings");
 
 /**
  * Uses system provided tools to get image metadata.
  * Falls back to parsing .info files, otherwise assumes default values.
  * Defaults: H 60px x W 200px.
  */
-__getImageInfo = function (file) {
+ImageOSD.getImageInfo = function (file) {
+    file = mp.utils.get_user_path(file);
     var h, w, offset;
     // try using system tools to get image metadata
     if (Utils.OSisWindows) {
@@ -65,10 +63,7 @@ __getImageInfo = function (file) {
             w = data[0];
             h = data[1];
             offset =
-                mp.utils.file_info(
-                    mp.utils.get_user_path("~~/scripts/easympv/images/") + file
-                ).size -
-                4 * w * h;
+                mp.utils.file_info(file).size - 4 * w * h;
         } else {
             var data = input.split(",");
             var dataDimensions;
@@ -97,10 +92,7 @@ __getImageInfo = function (file) {
     }
     // otherwise try to use old way (parsing a .info file)
     else {
-        filex =
-            mp.utils.get_user_path("~~/scripts/easympv/images/") +
-            file +
-            ".info";
+        filex = file + ".info";
         if (mp.utils.file_info(filex) != undefined) {
             var data = mp.utils.read_file(filex).split(";");
             for (var i = 0; i < data.length; i++) {
@@ -117,19 +109,16 @@ __getImageInfo = function (file) {
             w = 200;
         }
         offset =
-            mp.utils.file_info(
-                mp.utils.get_user_path("~~/scripts/easympv/images/") + file
-            ).size -
-            4 * w * h;
+            mp.utils.file_info(file).size - 4 * w * h;
     }
 
     return (result = { h: h, w: w, offset: offset });
 };
 
 __getFilebyName = function (name) {
-    for (i = 0; i < Files.length; i++) {
-        if (Files[i].name == name) {
-            return Files[i];
+    for (i = 0; i < Settings.presets.images.length; i++) {
+        if (Settings.presets.images[i].name == name) {
+            return Settings.presets.images[i];
         }
     }
 };
@@ -177,20 +166,6 @@ ImageOSD.addImage = function (name, file) {
     Files.push(image);
 };
  */
-
-/**
- * Reads Images.json and adds its contents to the Files array.
- */
-ImageOSD.readFile = function () {
-    Utils.log("[startup] ImageOSD.readFile");
-    var file = JSON.parse(
-        mp.utils.read_file(
-            mp.utils.get_user_path("~~/scripts/easympv/Images.json")
-        )
-    );
-
-    Files = file.images;
-}
 
 /**
  * @param {string} name internal name of image
@@ -324,9 +299,9 @@ ImageOSD.hide = function (name) {
  * Removes all images from screen.
  */
 ImageOSD.hideAll = function () {
-    for (i = 0; i < Files.length; i++) {
-        if (Files[i].data.active == true) {
-            ImageOSD.hide(Files[i].name);
+    for (i = 0; i < Settings.presets.images.length; i++) {
+        if (Settings.presets.images[i].data.active == true) {
+            ImageOSD.hide(Settings.presets.images[i].name);
         }
     }
 };

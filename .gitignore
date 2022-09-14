@@ -4,6 +4,7 @@
 *.code-workspace
 *.conf
 *.so
+easympv.json
 updatenote.lua
 watch_later/
 watch_later/*

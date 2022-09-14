@@ -8,42 +8,15 @@
  * Inspired by (but not containing code from) COLORBOX.JS by VideoPlayerCode.
  */
 
+var Settings = require("./Settings");
+
 var Colors = {};
 Colors.name = "none";
-Colors.sets = [];
 Colors.manualSelection = false;
-
-Colors.set = function (name, data) {
-    this.name = name;
-    this.data = data;
-    return this;
-};
-
-Colors.readFile = function () {
-    Utils.log("Reading colors file","startup","info");
-    Colors.sets = [];
-    var file = JSON.parse(
-        mp.utils.read_file(
-            mp.utils.get_user_path("~~/scripts/easympv/Colors.json")
-        )
-    );
-
-    for (var set in file) {
-        Colors.sets.push(
-            new Colors.set(set, {
-                contrast: file[set].contrast,
-                brightness: file[set].brightness,
-                gamma: file[set].gamma,
-                saturation: file[set].saturation,
-                hue: file[set].hue,
-                sharpen: parseFloat(file[set].sharpen),
-            })
-        );
-    }
-};
 
 Colors.apply = function (name) {
     Colors.manualSelection = true;
+    var values = undefined;
     if (name == "none") {
         values = {
             contrast: 0,
@@ -55,10 +28,19 @@ Colors.apply = function (name) {
         };
     } else {
         var i;
-        for (i = 0; i < Colors.sets.length; i++) {
-            if (Colors.sets[i].name == name) {
-                values = Colors.sets[i].data;
+        for (i = 0; i < Settings.presets.colorpresets.length; i++) {
+            if (Settings.presets.colorpresets[i].name == name) {
+                values = Settings.presets.colorpresets[i].data;
                 break;
+            }
+        }
+
+        if (values == undefined) {
+            for (i = 0; i < Settings.presets.colorpresetsUser.length; i++) {
+                if (Settings.presets.colorpresetsUser[i].name == name) {
+                    values = Settings.presets.colorpresetsUser[i].data;
+                    break;
+                }
             }
         }
     }
