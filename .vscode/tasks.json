@@ -4,13 +4,34 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "mpv",
+            "label": "mpv (default)",
             "type": "shell",
-            "command": "/usr/bin/mpv /mnt/smb/Anime/Archive/Yu-Gi-Oh\\!\\ -\\ The\\ Dark\\ Side\\ of\\ Dimensions.mkv",
+            "command": "/usr/bin/mpv /mnt/smb/Anime/Incoming",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
                 "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "EASYMPV_DEBUG": "1",
+                    //"EASYMPV_BROWSER_WORKDIR": "/"
+                }
+            }
+        },
+        {
+            "label": "mpv (testing snapshot)",
+            "type": "shell",
+            "command": "/usr/bin/mpv --config-dir=\"snapshots/testing\" \"/mnt/smb/Anime/Incoming\"",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "options": {
+                "env": {
+                    "EASYMPV_DEBUG": "1"
+                }
             }
         }
     ]

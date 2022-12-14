@@ -5,6 +5,7 @@
 *.conf
 *.so
 easympv.json
+easympv-cache.json
 updatenote.lua
 watch_later/
 watch_later/*
@@ -17,3 +18,4 @@ shaders/testFile2.txt
 testFile1.txt
 extractedPackage/*
 package.zip
+snapshots/*

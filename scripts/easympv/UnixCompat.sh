@@ -30,7 +30,7 @@ __get-clipboard() {
     else
         CLIPBOARD="$(wl-paste)"
         if [[ "$?" == "1" ]]; then
-            
+
             CLIPBOARD="$(xclip -o)"
         fi
     fi
@@ -76,7 +76,7 @@ __show-message() {
 __show-input() {
     TEXT=$(echo $@)
     if [ -z "$OS_IS_NOT_MACOS" ]; then
-        DATA=$(osascript -e "display dialog \"$TEXT\" default answer \"\""  | cut -c35-)
+        DATA=$(osascript -e "display dialog \"$TEXT\" default answer \"\"" | cut -c35-)
         echo $DATA
         return 0
     else
@@ -237,14 +237,14 @@ alert() {
 dependency-postinstall() {
     if [ -z "$OS_IS_NOT_MACOS" ]; then
         if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
-	        exit
+            exit
         fi
         INPUT=$(osascript -e 'tell application "System Events" to display dialog "For Discord integration to work, GameSDK needs to be installed on your system. This requires your password. Press OK to continue."')
-        if [[ "$INPUT" == *"OK"* ]]; then 
-	        osascript -e "do shell script \"mkdir -p /usr/local/lib/ && mv ~/.config/mpv/scripts/mpvcord/discord_game_sdk.dylib /usr/local/lib/libdiscord_game_sdk.dylib\" with administrator privileges"
-	        if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
-		        osascript -e 'tell application "System Events" to display dialog "Installation finished. Discord integration will work after restarting mpv."'
-	        fi
+        if [[ "$INPUT" == *"OK"* ]]; then
+            osascript -e "do shell script \"mkdir -p /usr/local/lib/ && mv ~/.config/mpv/scripts/mpvcord/discord_game_sdk.dylib /usr/local/lib/libdiscord_game_sdk.dylib\" with administrator privileges"
+            if [ -f "/usr/local/lib/libdiscord_game_sdk.dylib" ]; then
+                osascript -e 'tell application "System Events" to display dialog "Installation finished. Discord integration will work after restarting mpv."'
+            fi
         fi
         exit
     else
