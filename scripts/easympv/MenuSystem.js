@@ -65,10 +65,16 @@ Settings can be an object with the following properties:
                             set to 0 to disable (default)
                             ! It is recommended to cut strings manually instead of using this,
                               as SSA tags could be cut as well, which will break the menu. !
-    "keybindOverrides"      Object Array, each object has 3 properties: 
+    "keybindOverrides"      Object Array, each object represents a key which gets force bound when the menu is on screen, has 3 properties:
                             "key"    - Name of the key, same as input.conf
                             "id"     - A unique identifier for this keybind
                             "action" - Which event to fire when it gets pressed
+    "customKeyEvents"       Object Array, similar to keybindOverrides, id gets derived from key/event, each object has 2 properties:
+                            "key"    - Name of the key, same as input.conf
+                            "event" - Custom event to fire when it gets pressed
+                            Use this to add custom hotkeys, like h for help
+    "itemHandlerScope"      Object, only required if you use <item>.eventHandler(...)
+                            Use this to pass any objects <item>.eventHandler could need
 All of these have default values.
 Alternatively leave Settings undefined to use all default values.
 
@@ -77,6 +83,12 @@ Items is an array of objects that can have the following properties:
     "item"                  String, internal name of item, gets passed to eventHandler
     ["description"]         String, optional description of the item
     ["color"]               Hex string, optionally override default item color for this item only
+    ["eventHandler"]        Function, gets called instead of <menu>.eventHandler if it exists
+                            3 arguments get passed to this function: 
+                            "event" - String, see below
+                            "menu" - Object, the menu calling this function
+                            "scope" - The object set as "itemHandlerScope" in the menu settings
+                                (This is required for stupid JS reasons)
 "title" and "item" are required.
 
 "title" and "description" can include these special substrings:
@@ -267,6 +279,12 @@ Menus.Menu = function (settings, items, parentMenu) {
         this.settings.maxTitleLength = 0;
     }
 
+    if (settings.itemHandlerScope != undefined) {
+        this.settings.itemHandlerScope = settings.itemHandlerScope;
+    } else {
+        this.settings.itemHandlerScope = undefined;
+    }
+
     if (settings.itemSuffix != undefined) {
         this.settings.itemSuffix = settings.itemSuffix;
     } else {
@@ -455,6 +473,23 @@ Menus.Menu = function (settings, items, parentMenu) {
                 action: "enter",
             },
         ];
+    }
+
+    if (settings.customKeyEvents != undefined) {
+        this.settings.customKeyEvents = settings.customKeyEvents;
+        for(var i = 0; i < this.settings.customKeyEvents.length; i++)
+        {
+            ckeItem = this.settings.customKeyEvents[i];
+            this.settings.keybindOverrides.push(
+                {
+                    key:ckeItem.key,
+                    id: "menu_key_customevent_" + ckeItem.key + "_" + ckeItem.event,
+                    action: ckeItem.event
+                }
+            );
+        }
+    } else {
+        this.settings.customKeyEvents = undefined;
     }
 
     if (parentMenu != undefined) {
@@ -1005,6 +1040,20 @@ Menus.getDisplayedMenu = function () {
     return cMenu;
 };
 
+Menus.switchCurrentMenu = function (newMenu, currentMenu) {
+    if (currentMenu == undefined)
+    {
+        currentMenu = Menus.getDisplayedMenu();
+    }
+
+    currentMenu.hideMenu();
+    if (!newMenu.isMenuVisible) {
+        newMenu.showMenu();
+    } else {
+        newMenu.hideMenu();
+    }
+};
+
 Menus.Menu.prototype._overrideKeybinds = function () {
     var tempFunction = function (x, action) {
         return function () {
@@ -1051,13 +1100,13 @@ Menus.Menu.prototype._keyPressHandler = function (action) {
             this._drawMenu();
             this.eventLocked = false;
         } else {
-            var item = this.items[this.selectedItemIndex].item;
-            if (item == "@back@") {
+            var item = this.items[this.selectedItemIndex];
+            if (item.item == "@back@") {
                 this.toggleMenu();
                 this.parentMenu.toggleMenu();
                 this.eventLocked = false;
             } else {
-                this.eventHandler(action, item);
+                this._dispatchEvent(action, item);
                 if (action != "enter") {
                     this._constructMenuCache();
                     this._drawMenu();
@@ -1128,7 +1177,7 @@ Menus.Menu.prototype._stopTimer = function () {
 
 Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
-        this.eventHandler("show", undefined);
+        this._dispatchEvent("show", { title: undefined, item: undefined, eventHandler: undefined });
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
@@ -1142,7 +1191,7 @@ Menus.Menu.prototype.showMenu = function () {
     }
 };
 Menus.Menu.prototype.hideMenu = function () {
-    this.eventHandler("hide", undefined);
+    this._dispatchEvent("hide", { title: undefined, item: undefined, eventHandler: undefined });
     if (this.settings.displayMethod == "message") {
         mp.osd_message("");
         if (this.isMenuVisible) {
@@ -1191,6 +1240,16 @@ Menus.Menu.prototype.toggleMenu = function () {
         this.hideMenu();
     }
 };
+
+Menus.Menu.prototype._dispatchEvent = function (event, item) {
+    if (item.eventHandler != undefined)
+    {
+        //item.eventHandler.call({event: event, menu: this });
+        item.eventHandler(event, this, this.settings.itemHandlerScope)
+        return;
+    }
+    this.eventHandler(event, item.item);
+}
 
 Menus.Menu.prototype.eventHandler = function () {
     Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");

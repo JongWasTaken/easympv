@@ -9,7 +9,7 @@
 /*----------------------------------------------------------------
 The Settings.js module
 
-This file handles serialization and deserialization of the 
+This file handles serialization and deserialization of the
 easympv.conf file located in the mpv config root directory.
 It also provides sane defaults in case configuration files
 are missing.
@@ -27,8 +27,8 @@ var Settings = {};
 
 Settings.mpvConfig = {};
 Settings.inputConfig = {};
-
 Settings.presets = {};
+Settings.cache = {};
 
 /////////////////////////////////////////// easympv.conf
 
@@ -41,11 +41,14 @@ Settings.Data = {
     forcedMenuKey: "m",
     defaultShaderSet: "none",
     defaultColorProfile: "none",
+    simpleVRR: false,
+    refreshRate: 144,
     showHiddenFiles: false,
     startIPCServer: false,
     useNativeNotifications: true,
     notifyAboutUpdates: true,
     debugMode: false,
+    saveFullLog: false,
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
@@ -135,6 +138,21 @@ Settings.save = function () {
             "# Use the full name of a profile as it appears in the colors menu!\n";
         defaultConfigString += "defaultColorProfile=x\n";
         defaultConfigString += "\n";
+        defaultConfigString += "# Enables use of G-Sync/FreeSync in mpv.\n";
+        defaultConfigString += "# If enabled, mpv will first check your video files FPS. If this value is below half of your refresh rate,\n";
+        defaultConfigString += "# VRR will be enabled by doubling every frame and setting the display-fps to double the video FPS.\n";
+        defaultConfigString += "#\n";
+        defaultConfigString += "# Example: Video file has 23.976 FPS, Display has 144Hz refresh rate and can go as low as 40Hz.\n";
+        defaultConfigString += "# If enabled, mpv will output every frame twice, resulting in 47.952Hz, which is more than 40Hz.\n";
+        defaultConfigString += "#\n";
+        defaultConfigString += "# You must also set your refresh rate below and have mpv fullscreen'd for this to work!\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "simpleVRR=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# The current refresh rate of your monitor. This is only required for simpleVRR!\n";
+        defaultConfigString += "# Default: 144\n";
+        defaultConfigString += "refreshRate=x\n";
+        defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to show hidden files and folders in the file browser.\n";
         defaultConfigString += "# Default: false\n";
@@ -169,6 +187,13 @@ Settings.save = function () {
             "# You should not enable this unless you know what you are doing, as this option WILL slow down mpv.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "debugMode=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString +=
+            "# This will disable log trimming, which can be useful for debugging and testing.\n";
+        defaultConfigString +=
+            "# You should not enable this unless you know what you are doing, as this option WILL slow down mpv and INCREASE memory usage by A LOT.\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "saveFullLog=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# ! Settings below are set automatically, though some might be of interest !\n";
@@ -307,6 +332,13 @@ Settings.migrate = function () {
         }
     }
 
+    // set options to backup
+    for (var element in Settings.Data) {
+        if (copy[element] != undefined) {
+            Settings.Data[element] = copy[element];
+        }
+    }
+
     // delete easympv.conf
     var file = "easympv.conf";
     if (Utils.OSisWindows) {
@@ -335,13 +367,6 @@ Settings.migrate = function () {
         capture_stderr: false,
         args: args,
     });
-
-    // set options to backup
-    for (var element in Settings.Data) {
-        if (copy[element] != undefined) {
-            Settings.Data[element] = copy[element];
-        }
-    }
 
     Settings.Data.doMigration = false;
 
@@ -374,10 +399,10 @@ Settings.mpvConfig.Data = {
     alang: "Japanese,ja,jap,jpn",
     slang: "Full,English,eng,en,Subtitles",
 
-    scale: "ewa_lanczossharp", //
-    cscale: "ewa_lanczossoft", //
-    dscale: "mitchell", //
-    tscale: "oversample",
+    scale: "spline36",
+    cscale: "spline36",
+    dscale: "mitchell",
+    tscale: "mitchell",
     video_sync: "audio",
     temporal_dither: "yes",
 
@@ -498,9 +523,10 @@ Settings.mpvConfig.save = function () {
     ) {
         var defaultConfigString = "";
         defaultConfigString += "### mpv.conf ###\n";
-        defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &\n"
-        defaultConfigString += "# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference\n"
-
+        defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &\n";
+        defaultConfigString += "# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference\n\n";
+        defaultConfigString += "# Check https://github.com/JongWasTaken/easympv/wiki/Setup#default-settings\n";
+        defaultConfigString += "# for more information about the default settings.\n";
         lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
     } else {
         lines = mp.utils
@@ -561,35 +587,6 @@ Settings.mpvConfig.save = function () {
  * Resets input.conf to default values.
  */
 Settings.inputConfig.reset = function () {
-    // delete input.conf
-    var file = "input.conf";
-    if (Utils.OSisWindows) {
-        var args = [
-            "powershell",
-            "-executionpolicy",
-            "bypass",
-            mp.utils
-                .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                .replaceAll("/", "\\"),
-            "remove-file " + file,
-        ];
-    } else {
-        var args = [
-            "sh",
-            "-c",
-            mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                " remove-file " +
-                file,
-        ];
-    }
-    mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: false,
-        capture_stderr: false,
-        args: args,
-    });
-
     var defaultConfigString = "";
     defaultConfigString += "### input.conf ###\n";
     defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst for reference\n";
@@ -628,6 +625,7 @@ Settings.inputConfig.reset = function () {
     defaultConfigString += "d script-binding drpc_toggle\n";
     defaultConfigString += 'x show-text "${playlist}"\n';
     defaultConfigString += "n seek 90\n";
+    defaultConfigString += "Shift+n seek -90\n";
     defaultConfigString += "\n";
     defaultConfigString += "PGDWN add volume -1\n";
     defaultConfigString += "PGUP add volume 1\n";
@@ -648,7 +646,7 @@ Settings.inputConfig.reset = function () {
 };
 
 Settings.inputConfig.reload = function () {
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) 
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined)
     {
         return;
     };
@@ -691,12 +689,12 @@ Settings.presets.colorpresetsUser =  [];
 
 Settings.presets.images = [];
 
-Settings.presets.reload = function () {
+Settings.presets.load = function () {
     var seperator = ":";
     if (Utils.OSisWindows) {
         seperator = ";";
     };
-    
+
     if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")) != undefined)
     {
         var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")));
@@ -710,7 +708,7 @@ Settings.presets.reload = function () {
                 filelist = filelist.slice(0, filelist.length - 1);
                 Settings.presets.shadersets.push(new Settings.presets.shaderset(set, filelist));
             }
-            
+
             // Sort the array
             Settings.presets.shadersets.reverse();
             var i;
@@ -836,7 +834,40 @@ Settings.presets.reload = function () {
             JSON.stringify(dummyFile,null,4)
         );
     }
+}
 
+Settings.presets.reload = function () {
+    Settings.presets.load();
+}
+
+Settings.cache.perFileSaves = [];
+
+Settings.cache.load = function() {
+    if(
+        mp.utils.file_info(mp.utils.get_user_path("~~/easympv-cache.json")) !=
+        undefined
+    ) {
+        var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv-cache.json")));
+        Settings.cache.perFileSaves = json["perFileSaves"];
+    }
+    else {
+        Settings.cache.save();
+    }
+}
+
+Settings.cache.reload = function() {
+    Settings.cache.load();
+}
+
+Settings.cache.save = function() {
+    var temp = {
+        perFileSaves: Settings.cache.perFileSaves,
+    };
+
+    mp.utils.write_file(
+        "file://" + mp.utils.get_user_path("~~/easympv-cache.json"),
+        JSON.stringify(temp,null,4)
+    );
 }
 
 module.exports = Settings;

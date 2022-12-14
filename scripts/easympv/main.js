@@ -1,5 +1,5 @@
 /*
- * EASYMPV.JS (main.js)
+ * EASYMPV (main.js)
  *
  * Author:              Jong
  * URL:                 https://smto.pw/mpv
@@ -41,7 +41,7 @@ Current dependencies:
 TODO :
     (DONE) Remake settings menu (with save/load)
     (DONE) Folder navigation from current directory
-    (DONE) Utility: DirectShow readout to stdout 
+    (DONE) Utility: DirectShow readout to stdout
     (DONE) Utility: return version in stdout on check
     (DONE) UpdateMenu: display changelog
     (DONE) MenuSystem: scrolling
@@ -70,7 +70,7 @@ TODO :
     (ALWAYS ONGOING) Move away from the util as much as possible
 
     Add h for help in menus
-    
+    Load subtitles via File Browser
 
     Test everything again because of the try/catch wrapper!
 
@@ -137,34 +137,46 @@ Math.percentage = function (partialValue, totalValue) {
     return Math.round((100 * partialValue) / totalValue);
 };
 
-
-var Core = require("./Core");
-var Settings = require("./Settings");
-var Utils = require("./Utils");
-var SSA = require("./SSAHelper");
-var ImageOSD = require("./ImageOSD");
-var Shaders = require("./Shaders");
-var Colors = require("./Colors");
-var Chapters = require("./Chapters");
-var MenuSystem = require("./MenuSystem");
-var WindowSystem = require("./WindowSystem");
-var Browsers = require("./Browsers");
-var Wizard = require("./FirstTimeWizard");
 var API = require("./API");
+var Browsers = require("./Browsers");
+var Chapters = require("./Chapters");
+var Colors = require("./Colors");
+var Core = require("./Core");
+var Wizard = require("./FirstTimeWizard");
+var ImageOSD = require("./ImageOSD");
+var MenuSystem = require("./MenuSystem");
+var OS = require("./OS");
+var Settings = require("./Settings");
+var Shaders = require("./Shaders");
+var SSA = require("./SSAHelper");
+var Utils = require("./Utils");
+var WindowSystem = require("./WindowSystem");
+
+var Environment = {};
+Environment.isDebug = mp.utils.getenv("EASYMPV_DEBUG") == undefined ? false : true;
+Environment.BrowserWorkDir = mp.utils.getenv("EASYMPV_BROWSER_WORKDIR");
 
 var errorCounter = 0;
 
-/* 
-    We wrap Core.startExecution() in a try/catch block. 
-    This way the entire plugin will not crash when something goes wrong.
-*/
+mp.register_script_message("__internal",function(msg) {
+    if(msg == "restart")
+    {
+        Core.doUnregistrations();
+        Core.startExecution();
+    }
+});
 
-try {
+if (Environment.isDebug) {
     Core.startExecution();
 }
-catch (e) {
-    errorCounter++;
-    mp.msg.error("Encountered "+errorCounter+" issue(s) during runtime!");
-    mp.msg.error("Last issue description: " + e);
+else
+{
+    try {
+        Core.startExecution();
+    }
+    catch (e) {
+        errorCounter++;
+        mp.msg.error("Encountered "+errorCounter+" issue(s) during runtime!");
+        mp.msg.error("Last issue description: " + e);
+    }
 }
-//Core.startExecution();

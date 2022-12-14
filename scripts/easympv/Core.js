@@ -14,210 +14,212 @@ things like soft-restarts possible.
 ----------------------------------------------------------------*/
 
 var Core = {};
+
+
+var isFirstFile = true;
+var sofaEnabled = false;
+var resetOccured = false;
+var notifyAboutUpdates = false;
+
+var cFile;
+
 //TODO: clean up
-/**
- * The main function, called by main.js.
- */
-Core.startExecution = function () {
 
-    var isFirstFile = true;
-    var sofaEnabled = false;
+Core.Menus = {};
 
-    // Setup
-    Settings.load();
+Core.onFileLoad = function () {
 
-    if(Settings.Data.debugMode)
+    if(Settings.Data.simpleVRR)
     {
-        mp.enable_messages("debug");
-    }
-    else
-    {
-        mp.enable_messages("info");
-    }
-
-    mp.register_event("log-message", Utils.OSDLog.addToBuffer);
-
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    Settings.Data.currentVersion = "2.0.0";
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-    Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
-
-    Utils.determineOS();
-    Utils.checkInternetConnection();
-
-    var resetOccured = false;
-
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
-        Utils.log("Task: reset easympv.conf (file missing)","startup","info");
-        Settings.migrate();
-        resetOccured = true;
-    }
-    else
-    {
-        if (Settings.Data.doMigration) {
-            Utils.log("Task: reset easympv.conf (user set)","startup","info");
-            Settings.migrate();
-            resetOccured = true;
-        }
-    }
-
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
-        Utils.log("Task: reset mpvConfig (file missing)","startup","info");
-        Settings.mpvConfig.reset();
-        resetOccured = true;
-    } 
-    else
-    {
-        if (Settings.Data.resetMpvConfig) {
-            Utils.log("Task: reset mpvConfig (user set)","startup","info");
-            Settings.mpvConfig.reset();
-            resetOccured = true;
-        }
-    }
-
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
-        Utils.log("Task: reset inputConfig (file missing)","startup","info");
-        Settings.inputConfig.reset();
-        resetOccured = true;
-    }
-    else
-    {
-        if (Settings.Data.resetInputConfig) {
-            Utils.log("Task: reset inputConfig (user set)","startup","info");
-            Settings.inputConfig.reset();
-            resetOccured = true;
-        }
-    }
-
-    if (Settings.Data.doMigration) {
-        Utils.log("Migrating config","startup","info");
-        Settings.migrate();
-    }
-
-    if (resetOccured) {
-
-        Settings.reload();
-        Settings.mpvConfig.reload();
-        Settings.inputConfig.reload();
-        //Utils.showSystemMessagebox("mpv has been restarted to reload its configuration.");
-        //Utils.restartMpv();
-    };
-
-    if(Settings.Data.startIPCServer)
-    { 
-        Utils.setIPCServer();
-    }
-
-    var notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
-
-    Utils.log("Reading presets","startup","info");
-    Settings.presets.reload();
-
-    Settings.Data.newestVersion = "0.0.0";
-    Utils.WL.createCache();
-
-    if (Settings.Data.isFirstLaunch) {
-        Utils.log("startupTask: start Wizard","startup","info");
-        Wizard.Start();
-    }
-    else
-    {
-        Utils.log("Settings.save","startup","info");
-        Settings.save();
-    }
-
-    Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
-
-    var onFileLoad = function () {
-
-        var wld = Utils.WL.getData();
-        if (isFirstFile) {
-            if (
-                mp.utils.file_info(
-                    mp.utils.get_user_path("~~/") + "/default.sofa"
-                ) != undefined
-            ) {
-                Utils.log("Sofa file found!");
-                var path = mp.utils
-                    .get_user_path("~~/")
-                    .toString()
-                    .replace(/\\/g, "/")
-                    .substring(2);
-                if (Utils.OSisWindows)
-                {
-                    mp.commandv(
-                        "af",
-                        "set",
-                        "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
-                    );
-                }
-                else
-                {
-                    mp.commandv(
-                        "af",
-                        "set",
-                        "lavfi=[sofalizer=sofa=" + path + "/default.sofa]"
-                    );
-                }
-                sofaEnabled = true;
-            }
-            Shaders.apply(Settings.Data.defaultShaderSet);
-            isFirstFile = false;
-        }
-
-        if (wld != undefined) {
-            Utils.log(
-                "Please ignore \"Error parsing option x (option not found)\" errors. These are expected.","startup","warn"
+        var double = "";
+        if (Number(mp.get_property("container-fps")) < (Settings.Data.refreshRate / 2)) {
+            double = String(Number(mp.get_property("container-fps")) * 2);
+            mp.set_property("override-display-fps",double)
+            mp.commandv(
+                "vf",
+                "set",
+                "fps=fps=" + double
             );
-            if (wld.shader != undefined && !Shaders.manualSelection) {
-                Shaders.apply(wld.shader);
-            }
-            if (wld.color != undefined) {
-                // We don't Colors.apply this, because mpv already does that by itself.
-                // Instead we just set Colors.name, achieving the same result.
-                Colors.name = wld.color;
-            }
+        } else {
+            mp.set_property("override-display-fps",Settings.Data.refreshRate);
+            mp.commandv(
+                "vf",
+                "set",
+                "fps=fps=" + String(mp.get_property("container-fps"))
+            );
         }
+    }
 
-        // mpv does not provide a good way to get the current filename, so we need to get creative
-        // (stream-open-filename does not work with relative paths and URLs!)
-        var cFile;
-        for (i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-            if (mp.get_property("playlist/" + i + "/current") == "yes") {
-                cFile = mp.get_property("playlist/" + i + "/filename");
-                break;
+
+    if (isFirstFile) {
+        if (
+            mp.utils.file_info(
+                mp.utils.get_user_path("~~/") + "/default.sofa"
+            ) != undefined
+        ) {
+            Utils.log("Sofa file found!");
+            var path = mp.utils
+                .get_user_path("~~/")
+                .toString()
+                .replace(/\\/g, "/")
+                .substring(2);
+            if (Utils.OSisWindows)
+            {
+                mp.commandv(
+                    "af",
+                    "set",
+                    "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
+                );
             }
-        }
-
-        // cFile could be a relative path, so we need to expand it
-        if (cFile != undefined) {
-            if (
-                !Utils.OSisWindows &&
-                mp.utils.file_info(
-                    mp.get_property("working-directory") + "/" + cFile
-                ) != undefined
-            ) {
-                cFile =
-                    mp.get_property("working-directory") +
-                    "/" +
-                    cFile.replaceAll("./", "");
+            else
+            {
+                mp.commandv(
+                    "af",
+                    "set",
+                    "lavfi=[sofalizer=sofa=" + path + "/default.sofa]"
+                );
             }
-            Browsers.FileBrowser.currentLocation = cFile;
-            Browsers.FileBrowser.currentLocation =
-                Browsers.FileBrowser.getParentDirectory();
+            sofaEnabled = true;
         }
+        Shaders.apply(Settings.Data.defaultShaderSet);
+        isFirstFile = false;
+    }
 
+    // mpv does not provide a reliable way to get the current filename, so we (ab)use playlists
+    // (stream-open-filename does not work with relative paths and URLs!)
+    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+        if (mp.get_property("playlist/" + i + "/current") == "yes") {
+            cFile = mp.get_property("playlist/" + i + "/filename");
+            break;
+        }
+    }
 
+    // cFile could be a relative path, so we need to expand it
+    if (cFile != undefined) {
+        if (
+            !Utils.OSisWindows &&
+            mp.utils.file_info(
+                mp.get_property("working-directory") + "/" + cFile
+            ) != undefined
+        ) {
+            cFile =
+                mp.get_property("working-directory") +
+                "/" +
+                cFile.replaceAll("./", "");
+        }
+    }
+
+    Browsers.FileBrowser.currentLocation = cFile;
+    Browsers.FileBrowser.gotoParentDirectory();
+
+    for (var i = 0; i < Settings.cache.perFileSaves.length; i++) {
+        if (Settings.cache.perFileSaves[i].file == cFile){
+            Shaders.apply(Settings.cache.perFileSaves[i].shaderset)
+            Colors.apply(Settings.cache.perFileSaves[i].colorpreset);
+            Settings.cache.perFileSaves.splice(i, 1);
+            break;
+        }
+    }
+};
+
+Core.onShutdown = function () {
+    if (cFile != undefined && cFile != "")
+    {
+        Utils.log("Saving per-file settings...","shutdown","info");
+        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name});
+        Settings.cache.save();
+    }
+};
+
+var redrawMenus = function () {
+    var currentmenu = MenuSystem.getDisplayedMenu();
+    if (currentmenu != undefined) {
+        currentmenu.hideMenu();
+        currentmenu.showMenu();
+    }
+};
+
+Core.doRegistrations = function () {
+    var handleMenuKeypress = function () {
+        Utils.log("Menu key pressed!");
+        var currentmenu = MenuSystem.getDisplayedMenu();
+        if (currentmenu != undefined) {
+            currentmenu.hideMenu();
+            return;
+        }
+        Core.Menus.MainMenu.showMenu();
     };
 
-    var onShutdown = function () {
-        // This is not ideal, as data will only be saved when mpv is being closed.
-        // Ideally, this would be in the on_startup block, before a file change.
-        Utils.log("Writing data to watch_later...","shutdown","info");
-        Utils.WL.writeData(Shaders.name, Colors.name);
-    };
+    mp.add_key_binding(null, "easympv", handleMenuKeypress);
+    if (Settings.Data.forcedMenuKey != "disabled")
+    {
+        mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
+    }
 
+    mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", Utils.showInteractiveCommandInput);
+    mp.add_forced_key_binding("Ctrl+Alt+`", "empv_log_hotkey", function () {
+        if (Utils.OSDLog.OSD == undefined)
+        {
+            Utils.OSDLog.show();
+        return;
+        }
+        Utils.OSDLog.hide();
+    });
+    mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+        var readCommand = function (success, result) {
+            if (success) {
+                try{
+                    eval(result);
+                    Utils.showAlert(
+                        "info",
+                        "Expression evaluated!"
+                    );
+                }
+                catch(e)
+                {
+                    Utils.showAlert(
+                        "error",
+                        "Invalid Expression! Error: " + e
+                    );
+                }
+            }
+        };
+        Utils.Input.show(readCommand,"JavaScript expression: ");
+    });
+
+    // Registering functions to events
+    mp.register_event("file-loaded", Core.onFileLoad);
+    mp.register_event("shutdown", Core.onShutdown);
+    mp.register_script_message("json",API.handleIncomingJSON);
+
+    // Registering an observer to check for chapter changes (Chapters.js)
+    mp.observe_property(
+        "chapter-metadata/by-key/title",
+        undefined,
+        Chapters.handler
+    );
+
+    // Registering an observer to redraw Menus on window size change
+    mp.observe_property("osd-height", undefined, redrawMenus);
+}
+
+Core.doUnregistrations = function () {
+    mp.remove_key_binding("easympv");
+    mp.remove_key_binding("easympv-forced-menu");
+    mp.remove_key_binding("empv_command_hotkey");
+    mp.remove_key_binding("empv_log_hotkey");
+    mp.remove_key_binding("empv_eval_hotkey");
+
+    mp.unregister_event(Utils.OSDLog.addToBuffer);
+    mp.unregister_event(Core.onFileLoad);
+    mp.unregister_event(Core.onShutdown);
+    mp.unregister_event(API.handleIncomingJSON);
+
+    mp.unobserve_property(Chapters.handler);
+    mp.unobserve_property(redrawMenus);
+}
+
+Core.defineMenus = function () {
     var descriptionShaders = function (a, b) {
         return (
             "Shaders post-process video to improve image quality.@br@" +
@@ -283,82 +285,92 @@ Core.startExecution = function () {
         description: "",
         descriptionColor: "ff0000",
         image: "logo",
+        customKeyEvents: [{key: "h", event: "help"}],
+        itemHandlerScope: Core
     };
 
     var MainMenuItems = [
         {
             title: "Close@br@@br@",
             item: "close",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+            }
         },
         {
             title: "Open...",
             item: "open",
             description: "Files, Discs, Devices & URLs",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Browsers.Selector.open(menu);
+            }
         },
         {
             title: "Shaders",
             item: "shaders",
+            eventHandler: function(event, menu, scope) {
+                MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+            }
         },
         {
             title: "Colors",
             item: "colors",
+            eventHandler: function(event, menu, scope) {
+                MenuSystem.switchCurrentMenu(scope.Menus.ColorsMenu,menu);
+            }
         },
         {
             title: "Chapters@br@",
             item: "chapters",
+            eventHandler: function(event, menu, scope) {
+                MenuSystem.switchCurrentMenu(scope.Menus.ChaptersMenu,menu);
+            }
         },
         {
             title: "Preferences@br@@us10@@br@",
             item: "options",
+            eventHandler: function(event, menu, scope) {
+                MenuSystem.switchCurrentMenu(scope.Menus.SettingsMenu,menu);
+            }
         },
         {
             title: "Quit mpv",
             item: "quit",
+            eventHandler: function(event, menu, scope) {
+                quitCounter++;
+                if (!quitCounter.isOdd()) {
+                    Utils.exitMpv();
+                    menu.hideMenu();
+                } else {
+                    quitTitle = this.title;
+                    this.title =
+                        SSA.setColorRed() + "Are you sure?";
+                    menu.redrawMenu();
+                }
+            }
         },
     ];
 
+    // TODO: this needs to be moved to onFileLoad
     if (Number(mp.get_property("playlist-count")) > 1) {
         MainMenuItems.splice(2, 0, {
             title: "[Shuffle playlist]@br@",
             item: "shuffle",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                mp.commandv("playlist-shuffle");
+            }
         });
     }
 
-    var MainMenu = new MenuSystem.Menu(MainMenuSettings, MainMenuItems, undefined);
+    Core.Menus.MainMenu = new MenuSystem.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
-    var quitTitle = MainMenu.items[MainMenu.items.length - 1].title;
-    MainMenu.eventHandler = function (event, action) {
-        if (event == "enter") {
-            if (action == "colors") {
-                MainMenu.hideMenu();
-                if (!ColorsMenu.isMenuVisible) {
-                    ColorsMenu.showMenu();
-                } else {
-                    ColorsMenu.hideMenu();
-                }
-            } else if (action == "shaders") {
-                MainMenu.hideMenu();
-                if (!ShadersMenu.isMenuVisible) {
-                    ShadersMenu.showMenu();
-                } else {
-                    ShadersMenu.hideMenu();
-                }
-            } else if (action == "chapters") {
-                MainMenu.hideMenu();
-                if (!ChaptersMenu.isMenuVisible) {
-                    ChaptersMenu.showMenu();
-                } else {
-                    ChaptersMenu.hideMenu();
-                }
-            } else if (action == "options") {
-                MainMenu.hideMenu();
-                if (!SettingsMenu.isMenuVisible) {
-                    SettingsMenu.showMenu();
-                } else {
-                    SettingsMenu.hideMenu();
-                }
-            } else if (action == "show") {
-                MainMenu.hideMenu();
+    var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;
+    Core.Menus.MainMenu.eventHandler = function (event, action) {
+/*
+            if (action == "show-playlist") {
+                Core.Menus.MainMenu.hideMenu();
                 var playlist = "   ";
                 var i;
                 for (i = 0; i < mp.get_property("playlist/count"); i++) {
@@ -373,30 +385,18 @@ Core.startExecution = function () {
                         "@br@";
                 }
                 mp.osd_message(SSA.startSequence() + SSA.setSize(8) + playlist, 3);
-            } else if (action == "shuffle") {
-                MainMenu.hideMenu();
-                mp.commandv("playlist-shuffle");
-            } else if (action == "open") {
-                MainMenu.hideMenu();
-                Browsers.Selector.open(MainMenu);
-            } else if (action == "quit") {
-                quitCounter++;
-                if (!quitCounter.isOdd()) {
-                    Utils.exitMpv();
-                    MainMenu.hideMenu();
-                } else {
-                    quitTitle = MainMenu.getSelectedItem().title;
-                    MainMenu.getSelectedItem().title =
-                        SSA.setColorRed() + "Are you sure?";
-                    MainMenu.redrawMenu();
-                }
-            } else {
-                API.openForeignMenu(action);
             }
-        } else if (event == "hide") {
-            MainMenu.items[MainMenu.items.length - 1].title = quitTitle;
+*/
+        if (event == "enter") {
+            API.openForeignMenu(action);
+            return;
+        }
+        if (event == "hide") {
+            Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title = quitTitle;
             quitCounter = 0;
-        } else if (event == "show") {
+            return;
+        }
+        if (event == "show") {
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
                 Utils.showAlert(
@@ -406,12 +406,16 @@ Core.startExecution = function () {
                     "@br@New Version: " + Settings.Data.newestVersion
                 );
             }
-
             if (errorCounter != 0)
-            { 
-                MainMenu.setDescription(SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
-                MainMenu.redrawMenu();
+            {
+                Core.Menus.MainMenu.setDescription(SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
+                Core.Menus.MainMenu.redrawMenu();
             }
+            return;
+        }
+        if (event == "help") {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
+            return;
         }
     };
 
@@ -426,7 +430,8 @@ Core.startExecution = function () {
             Settings.Data.defaultShaderSet
         ),
         image: "shaders",
-        scrollingEnabled: true
+        scrollingEnabled: true,
+        customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var ShadersMenuItems = [
@@ -438,7 +443,7 @@ Core.startExecution = function () {
             title: "Recommended All-Purpose Settings",
             item: "Automatic All-Purpose",
         },
-        { 
+        {
             title: "Recommended Anime4K Settings (Worse, but less demanding)",
             item: "Automatic Anime4K (Worse, but less demanding)",
         },
@@ -462,24 +467,25 @@ Core.startExecution = function () {
         });
     }
 
-    var ShadersMenu = new MenuSystem.Menu(
+    Core.Menus.ShadersMenu = new MenuSystem.Menu(
         ShadersMenuSettings,
         ShadersMenuItems,
-        MainMenu
+        Core.Menus.MainMenu
     );
 
-    ShadersMenu.eventHandler = function (event, action) {
+    Core.Menus.ShadersMenu.eventHandler = function (event, action) {
+
         switch (event) {
             case "show":
-                ShadersMenu.setDescription(
+                Core.Menus.ShadersMenu.setDescription(
                     descriptionShaders(Shaders.name, Settings.Data.defaultShaderSet)
                 );
                 break;
             case "enter":
-                ShadersMenu.hideMenu();
+                Core.Menus.ShadersMenu.hideMenu();
                 if (action != "@back@") {
                     Shaders.apply(action);
-                    ShadersMenu.setDescription(
+                    Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
                             Shaders.name,
                             Settings.Data.defaultShaderSet
@@ -502,13 +508,13 @@ Core.startExecution = function () {
             case "right":
                 if (action != "@back@" && action != "none") {
                     Shaders.apply(action);
-                    ShadersMenu.setDescription(
+                    Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
                             Shaders.name,
                             Settings.Data.defaultShaderSet
                         )
                     );
-                    ShadersMenu.appendSuffixToCurrentItem();
+                    Core.Menus.ShadersMenu.appendSuffixToCurrentItem();
                 }
                 break;
             case "left":
@@ -520,13 +526,18 @@ Core.startExecution = function () {
                         "Default shader changed to:@br@" +
                         Settings.Data.defaultShaderSet
                     );
-                    ShadersMenu.setDescription(
+                    Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
                             Shaders.name,
                             Settings.Data.defaultShaderSet
                         )
                     );
                 }
+                break;
+            case "help":
+                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#shaders-menu", true);
+                break;
+            default:
                 break;
         }
     };
@@ -539,6 +550,7 @@ Core.startExecution = function () {
             SSA.setColorWhite() +
             "Chapters",
         description: descriptionChapters(Chapters.mode, Chapters.status),
+        customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var ChaptersMenuItems = [
@@ -556,29 +568,29 @@ Core.startExecution = function () {
         },
     ];
 
-    var ChaptersMenu = new MenuSystem.Menu(
+    Core.Menus.ChaptersMenu = new MenuSystem.Menu(
         ChaptersMenuSettings,
         ChaptersMenuItems,
-        MainMenu
+        Core.Menus.MainMenu
     );
 
-    ChaptersMenu.eventHandler = function (event, action) {
+    Core.Menus.ChaptersMenu.eventHandler = function (event, action) {
         switch (event) {
             case "show":
-                ChaptersMenu.setDescription(
+                Core.Menus.ChaptersMenu.setDescription(
                     descriptionChapters(Chapters.mode, Chapters.status)
                 );
                 break;
             case "enter":
                 if (action == "back") {
-                    ChaptersMenu.hideMenu();
-                    if (!MainMenu.isMenuActive()) {
-                        MainMenu.renderMenu();
+                    Core.Menus.ChaptersMenu.hideMenu();
+                    if (!Core.Menus.MainMenu.isMenuActive()) {
+                        Core.Menus.MainMenu.renderMenu();
                     } else {
-                        MainMenu.hideMenu();
+                        Core.Menus.MainMenu.hideMenu();
                     }
                 } else if (action == "confirm") {
-                    ChaptersMenu.hideMenu();
+                    Core.Menus.ChaptersMenu.hideMenu();
                 }
                 break;
             case "right":
@@ -588,23 +600,28 @@ Core.startExecution = function () {
                     } else {
                         Chapters.mode = "skip";
                     }
-                    ChaptersMenu.setDescription(
+                    Core.Menus.ChaptersMenu.setDescription(
                         descriptionChapters(Chapters.mode, Chapters.status)
                     );
-                    ChaptersMenu.appendSuffixToCurrentItem();
+                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
                 } else if (action == "tstatus") {
                     if (Chapters.status == "disabled") {
                         Chapters.status = "enabled";
                     } else {
                         Chapters.status = "disabled";
                     }
-                    ChaptersMenu.setDescription(
+                    Core.Menus.ChaptersMenu.setDescription(
                         descriptionChapters(Chapters.mode, Chapters.status)
                     );
-                    ChaptersMenu.appendSuffixToCurrentItem();
+                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
                 }
                 break;
-        }
+            case "help":
+                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
+                break;
+            default:
+                break;
+            }
     };
 
     var SettingsMenuSettings = {
@@ -618,130 +635,25 @@ Core.startExecution = function () {
             Utils.displayVersion,
             Utils.displayVersionMpv
         ),
+        customKeyEvents: [{key: "h", event: "help"}],
+        itemHandlerScope: Core
     };
 
     var SettingsMenuItems = [
         {
             title: "Toggle Discord RPC@br@@us10@@br@",
             item: "discord",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                mp.commandv("script-binding", "drpc_toggle");
+            }
         },
         {
             title: "Check for updates",
             item: "updater",
-        },
-        {
-            title: "Credits@br@@us10@@br@",
-            item: "credits",
-        },
-        {
-            title: "Edit easympv.conf",
-            item: "easympvconf",
-        },
-        {
-            title: "Edit mpv.conf",
-            item: "mpvconf",
-        },
-        {
-            title: "Edit input.conf",
-            item: "inputconf",
-        },
-        {
-            title: "Reload config",
-            item: "reload",
-        },
-        {
-            title: "Open config folder@br@@us10@@br@",
-            item: "config",
-        },
-        {
-            title: "Create Log File",
-            item: "log.export",
-        },
-        {
-            title: "Toggle On-Screen Log",
-            item: "log.osd",
-        },
-        {
-            title: "Toggle Debug Mode",
-            item: "debugmode",
-        },
-        {
-            title: "Input a command",
-            item: "command",
-        },
-    ];
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
 
-    /*
-        {
-            title: "Clear watchlater data",
-            item: "clearwld",
-        },
-    */
-
-    var SettingsMenu = new MenuSystem.Menu(
-        SettingsMenuSettings,
-        SettingsMenuItems,
-        MainMenu
-    );
-
-    SettingsMenu.eventHandler = function (event, action) {
-        if (event == "enter") {
-            SettingsMenu.hideMenu();
-            if (action == "ass") {
-                toggle_assoverride();
-                return;
-            }
-            if (action == "debugmode") {
-                if (Settings.Data.debugMode)
-                {
-                    Settings.Data.debugMode = false;
-                    mp.enable_messages("info");
-                    Utils.showAlert("info", "Debug mode has been disabled!");
-                }
-                else
-                {
-                    Settings.Data.debugMode = true;
-                    mp.enable_messages("debug");
-                    Utils.showAlert("info", "Debug mode has been enabled!");
-                }
-                Settings.save();
-                return;
-            }
-            if (action == "log.osd") {
-                if (Utils.OSDLog.OSD == undefined) {
-                    Utils.OSDLog.show();
-                }
-                else
-                { 
-                    Utils.OSDLog.hide();
-                }
-                return;
-            }
-            if (action == "log.export") {
-                mp.utils.write_file(
-                    "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
-                    Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'')
-                );
-                Utils.showAlert("info", "Log exported to Desktop!");
-                return;
-            }
-            if (action == "discord") {
-                mp.commandv("script-binding", "drpc_toggle");
-                return;
-            }
-            if (action == "easympvconf") {
-                Utils.openFile("easympv.conf");
-                return;
-            }
-            if (action == "mpvconf") {
-                Utils.openFile("mpv.conf");
-                return;
-            }
-            if (action == "inputconf") {
-                Utils.openFile("input.conf");
-                return;
-            }
-            if (action == "updater") {
                 var updateConfirmation = false;
                 var umenu = new MenuSystem.Menu(
                     {
@@ -759,7 +671,7 @@ Core.startExecution = function () {
                             Utils.latestUpdateData.changelog,
                     },
                     [],
-                    SettingsMenu
+                    scope.Menus.SettingsMenu
                 );
                 umenu.eventHandler = function (event, action) {
                     if (event == "hide") {
@@ -813,21 +725,14 @@ Core.startExecution = function () {
                     }
                 }
                 umenu.showMenu();
-                return;
+
             }
-            if (action == "config") {
-                Utils.openFile("");
-                return;
-            }
-            if (action == "clearwld") {
-                Utils.WL.clear();
-                return;
-            }
-            if (action == "command") {
-                Utils.showInteractiveCommandInput();
-                return;
-            }
-            if (action == "credits") {
+        },
+        {
+            title: "Credits@br@@us10@@br@",
+            item: "credits",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
                 var cmenu = new MenuSystem.Menu(
                     {
                         title: "Credits",
@@ -835,7 +740,7 @@ Core.startExecution = function () {
                         description: Utils.getCredits().replaceAll("\n", "@br@"),
                     },
                     [],
-                    SettingsMenu
+                    scope.Menus.SettingsMenu
                 );
                 cmenu.eventHandler = function (event, action) {
                     if (event == "hide") {
@@ -843,14 +748,172 @@ Core.startExecution = function () {
                     }
                 };
                 cmenu.showMenu();
-                return;
             }
-            if (action == "reload") {
+        },
+        {
+            title: "Edit easympv.conf",
+            item: "easympvconf",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Utils.openFile("easympv.conf");
+            }
+        },
+        {
+            title: "Edit mpv.conf",
+            item: "mpvconf",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Utils.openFile("mpv.conf");
+            }
+        },
+        {
+            title: "Edit input.conf",
+            item: "inputconf",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Utils.openFile("input.conf");
+            }
+        },
+        {
+            title: "Reload config",
+            item: "reload",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
                 Settings.reload();
                 Settings.mpvConfig.reload();
                 Settings.inputConfig.reload();
                 Settings.presets.reload();
                 Utils.showAlert("info", "Configuration reloaded.");
+            }
+        },
+        {
+            title: "Restart plugin",
+            item: "restart",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                mp.commandv("script-message-to", "easympv", "__internal", "restart");
+            }
+        },
+        {
+            title: "Open config folder@br@@us10@@br@",
+            item: "config",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Utils.openFile();
+            }
+        },
+        {
+            title: "Create Log File",
+            item: "log.export",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                var buffer = Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
+                buffer.reverse();
+                mp.utils.write_file(
+                    "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+                    buffer.join("\n")
+                );
+                Utils.showAlert("info", "Log exported to Desktop!");
+
+            }
+        },
+        {
+            title: "Toggle On-Screen Log",
+            item: "log.osd",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                if (Utils.OSDLog.OSD == undefined) {
+                    Utils.OSDLog.show();
+                    return;
+                }
+                Utils.OSDLog.hide();
+            }
+        },
+        {
+            title: "Toggle Debug Mode",
+            item: "debugmode",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                if (Settings.Data.debugMode)
+                {
+                    Settings.Data.debugMode = false;
+                    mp.enable_messages("info");
+                    Utils.showAlert("info", "Debug mode has been disabled!");
+                }
+                else
+                {
+                    Settings.Data.debugMode = true;
+                    mp.enable_messages("debug");
+                    Utils.showAlert("info", "Debug mode has been enabled!");
+                }
+                Settings.save();
+            }
+        },
+        {
+            title: "Input a command",
+            item: "command",
+            eventHandler: function(event, menu, scope) {
+                menu.hideMenu();
+                Utils.showInteractiveCommandInput();
+            }
+        },
+    ];
+
+    /*
+        {
+            title: "Clear watchlater data",
+            item: "clearwld",
+        },
+    */
+
+    Core.Menus.SettingsMenu = new MenuSystem.Menu(
+        SettingsMenuSettings,
+        SettingsMenuItems,
+        Core.Menus.MainMenu
+    );
+
+    Core.Menus.SettingsMenu.eventHandler = function (event, action) {
+            /*
+            Core.Menus.SettingsMenu.hideMenu();
+            if (action == "togglesofa") {
+                if (
+                    mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=
+                    undefined
+                ) {
+                    sofaEnabled = !sofaEnabled;
+                    var path = mp.utils
+                        .get_user_path("~~/")
+                        .toString()
+                        .replace(/\\/g, "/")
+                        .substring(2);
+                    mp.commandv(
+                        "af",
+                        "toggle",
+                        "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
+                    );
+                    if (sofaEnabled) {
+                        Utils.showAlert(
+                            "info",
+                            "Sofalizer:@br@" +
+                            SSA.setColorGreen() + "enabled"
+                        );
+                    } else {
+                        Utils.showAlert(
+                            "info",
+                            "Sofalizer:@br@" +
+                            SSA.setColorRed() + "disabled"
+                        );
+                    }
+                } else {
+                    Utils.showAlert(
+                        "warning",
+                        "File not found:@br@" +
+                        SSA.setColorYellow() + "default.sofa"
+                    );
+                }
+            }
+            if (action == "clearwld") {
+                Utils.clearWL();
                 return;
             }
             if (action == "remote") {
@@ -860,12 +923,17 @@ Core.startExecution = function () {
                 return;
             }
             return;
-        } else if (event == "show") {
-
+            */
+        if (event == "show") {
             Utils.setDisplayVersion();
-            SettingsMenu.setDescription(
+            Core.Menus.SettingsMenu.setDescription(
                 descriptionSettings(Utils.displayVersion, Utils.displayVersionMpv)
             );
+            return;
+        }
+        if (event == "help") {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#settings-menu", true);
+            return;
         }
     };
 
@@ -878,7 +946,8 @@ Core.startExecution = function () {
             Colors.name,
             Settings.Data.defaultColorProfile
         ),
-        scrollingEnabled: true
+        scrollingEnabled: true,
+        customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var ColorsMenuItems = [
@@ -902,16 +971,16 @@ Core.startExecution = function () {
         });
     }
 
-    var ColorsMenu = new MenuSystem.Menu(
+    Core.Menus.ColorsMenu = new MenuSystem.Menu(
         ColorsMenuSettings,
         ColorsMenuItems,
-        MainMenu
+        Core.Menus.MainMenu
     );
 
-    ColorsMenu.eventHandler = function (event, action) {
+    Core.Menus.ColorsMenu.eventHandler = function (event, action) {
         switch (event) {
             case "show":
-                ColorsMenu.setDescription(
+                Core.Menus.ColorsMenu.setDescription(
                     descriptionColors(
                         Colors.name,
                         Settings.Data.defaultColorProfile
@@ -919,7 +988,7 @@ Core.startExecution = function () {
                 );
                 break;
             case "enter":
-                ColorsMenu.hideMenu();
+                Core.Menus.ColorsMenu.hideMenu();
                 Colors.apply(action);
                 if (action == "none") {
                     Utils.showAlert(
@@ -938,19 +1007,19 @@ Core.startExecution = function () {
             case "right":
                 if (action != "@back@") {
                     Colors.apply(action);
-                    ColorsMenu.setDescription(
+                    Core.Menus.ColorsMenu.setDescription(
                         descriptionColors(
                             Colors.name,
                             Settings.Data.defaultColorProfile
                         )
                     );
-                    ColorsMenu.appendSuffixToCurrentItem();
+                    Core.Menus.ColorsMenu.appendSuffixToCurrentItem();
                 }
                 break;
             case "left":
                 if (action != "@back@") {
                     Settings.Data.defaultColorProfile = action;
-                    ColorsMenu.setDescription(
+                    Core.Menus.ColorsMenu.setDescription(
                         descriptionColors(
                             Colors.name,
                             Settings.Data.defaultColorProfile
@@ -964,155 +1033,123 @@ Core.startExecution = function () {
                     Settings.save();
                 }
                 break;
+            case "help":
+                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#colors-menu", true);
+                break;
+            default:
+                break;
         }
     };
+}
 
-    ////////////////////////////////////////////////////////////////////////
-
-    // Add menu key binding and its logic
-
-    var handleMenuKeypress = function () {
-        Utils.log("Menu key pressed!");
-
-        var currentmenu = MenuSystem.getDisplayedMenu();
-        
-        if (currentmenu != undefined) {
-            currentmenu.hideMenu();
-        } 
-        else
-        {
-            MainMenu.showMenu();
-        }
-    };
-
-    mp.add_key_binding(null, "easympv", handleMenuKeypress);
-    if (Settings.Data.forcedMenuKey != "disabled")
+Core.doFileChecks = function () {
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
+        Utils.log("Task: reset easympv.conf (file missing)","startup","info");
+        Settings.migrate();
+        resetOccured = true;
+    }
+    else
     {
-        mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
-        /*
-        mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", function() {
-
-            var x = {
-                "sender": "easympv",
-                "context": "deez",
-                "command": "createmenu",
-                "arguments": {
-                    "menuName": "My Awesome Menu",
-                    "menuSettings": {
-                        "title": "My Awesome Title",
-                        "description": "My Awesome Description",
-                        "descriptionColor": "ff0000"
-                    },
-                    "menuItems": [
-                        {
-                            "title": "Option 1",
-                            "item": "option1"
-                        },
-                        {
-                            "title": "Option 2",
-                            "item": "option2"
-                        }
-                    ]
-                }
-            };
-
-            mp.commandv("script-message-to","easympv","json",JSON.stringify(x));
-        });
-        */
+        if (Settings.Data.doMigration) {
+            Utils.log("Task: reset easympv.conf (user set)","startup","info");
+            Settings.migrate();
+            resetOccured = true;
+        }
     }
 
-    //mp.add_forced_key_binding(",", "testkey", function () {});
-
-    mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", Utils.showInteractiveCommandInput);
-    mp.add_forced_key_binding("Ctrl+Alt+`", "empv_log_hotkey", function () {
-        if (Utils.OSDLog.OSD == undefined)
-        {
-            Utils.OSDLog.show();
-        return;
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
+        Utils.log("Task: reset mpvConfig (file missing)","startup","info");
+        Settings.mpvConfig.reset();
+        resetOccured = true;
+    }
+    else
+    {
+        if (Settings.Data.resetMpvConfig) {
+            Utils.log("Task: reset mpvConfig (user set)","startup","info");
+            Settings.mpvConfig.reset();
+            resetOccured = true;
         }
-        Utils.OSDLog.hide();
-    });
-    mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
-        var readCommand = function (success, result) {
-            if (success) {
-                try{
-                    eval(result);
-                    Utils.showAlert(
-                        "info",
-                        "Expression evaluated!"
-                    );
-                }
-                catch(e)
-                {
-                    Utils.showAlert(
-                        "error",
-                        "Invalid Expression! Error: " + e
-                    );
-                }
-            }
-        };
-        Utils.Input.show(readCommand,"JavaScript expression: ");
-    });
+    }
 
-    mp.add_key_binding("n", "empv_toggle_sofa", function () {
-        if (
-            mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=
-            undefined
-        ) {
-            sofaEnabled = !sofaEnabled;
-            var path = mp.utils
-                .get_user_path("~~/")
-                .toString()
-                .replace(/\\/g, "/")
-                .substring(2);
-            mp.commandv(
-                "af",
-                "toggle",
-                "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
-            );
-            if (sofaEnabled) {
-                Utils.showAlert(
-                    "info",
-                    "Sofalizer:@br@" +
-                    SSA.setColorGreen() + "enabled"
-                );
-            } else {
-                Utils.showAlert(
-                    "info",
-                    "Sofalizer:@br@" +
-                    SSA.setColorRed() + "disabled"
-                );
-            }
-        } else {
-            Utils.showAlert(
-                "warning",
-                "File not found:@br@" +
-                SSA.setColorYellow() + "default.sofa"
-            );
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
+        Utils.log("Task: reset inputConfig (file missing)","startup","info");
+        Settings.inputConfig.reset();
+        resetOccured = true;
+    }
+    else
+    {
+        if (Settings.Data.resetInputConfig) {
+            Utils.log("Task: reset inputConfig (user set)","startup","info");
+            Settings.inputConfig.reset();
+            resetOccured = true;
         }
-    });
+    }
 
-    // Registering functions to events
-    mp.register_event("file-loaded", onFileLoad);
-    mp.register_event("shutdown", onShutdown);
+    if (Settings.Data.doMigration) {
+        Utils.log("Migrating config","startup","info");
+        Settings.migrate();
+    }
 
-    // Registering an observer to check for chapter changes (Chapters.js)
-    mp.observe_property(
-        "chapter-metadata/by-key/title",
-        undefined,
-        Chapters.handler
-    );
+    if (resetOccured) {
+        Settings.reload();
+        Settings.mpvConfig.reload();
+        Settings.inputConfig.reload();
+    };
+}
 
-    mp.register_script_message("json",API.handleIncomingJSON);
+/**
+ * The main function, called by main.js.
+ */
+Core.startExecution = function () {
+    Settings.load();
+    notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
-    // Registering an observer to fix Menus on window size change
-    mp.observe_property("osd-height", undefined, function () {
-        var currentmenu = MenuSystem.getDisplayedMenu();
-        if (currentmenu != undefined) {
-            currentmenu.hideMenu();
-            currentmenu.showMenu();
-        }
-    });
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    Settings.Data.currentVersion = "2.0.0";
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    if(Settings.Data.debugMode)
+    {
+        mp.enable_messages("debug");
+    }
+    else
+    {
+        mp.enable_messages("info");
+    }
+    mp.register_event("log-message", Utils.OSDLog.addToBuffer);
+
+    Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
+
+    Utils.determineOS();
+    Utils.checkInternetConnection();
+
+    Core.doFileChecks();
+
+    if(Settings.Data.startIPCServer)
+    {
+        Utils.setIPCServer();
+    }
+
+    Utils.log("Reading files","startup","info");
+    Settings.presets.reload();
+    Settings.cache.reload();
+
+    if (Settings.Data.isFirstLaunch) {
+        Utils.log("startupTask: start Wizard","startup","info");
+        Wizard.Start();
+    }
+
+    if (Environment.BrowserWorkDir != undefined) {
+	    mp.msg.warn("Browser override: " + Environment.BrowserWorkDir);
+        Browsers.FileBrowser.currentLocation = Environment.BrowserWorkDir;
+    }
+    else
+    {
+        Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+    }
+
+    Core.defineMenus();
+    Core.doRegistrations();
 
     Colors.name = Settings.Data.defaultColorProfile;
     Colors.apply(Settings.Data.defaultColorProfile);

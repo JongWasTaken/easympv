@@ -389,6 +389,10 @@ Browsers.FileBrowser.getParentDirectory = function () {
     return newDir;
 };
 
+Browsers.FileBrowser.gotoParentDirectory = function () {
+    Browsers.FileBrowser.currentLocation = Browsers.FileBrowser.getParentDirectory();
+}
+
 Browsers.FileBrowser.changeDirectory = function (directory) {
     Browsers.FileBrowser.currentLocation = directory.replaceAll(
         Utils.directorySeperator + Utils.directorySeperator,

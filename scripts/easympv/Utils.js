@@ -9,7 +9,7 @@
 /*----------------------------------------------------------------
 The Utils.js module
 
-This file contains all the miscellaneous functions that 
+This file contains all the miscellaneous functions that
 don't really fit anywhere else, such as opening/executing files,
 hashing strings to MD5, operations on the watch_later folder,
 and other "nice to have" things.
@@ -1336,9 +1336,12 @@ Utils.restartMpv = function () {
 }
 
 Utils.Input = {};
+Utils.Input.Memory = [];
+Utils.Input.MemoryPosition = 0;
 Utils.Input.Callback = undefined;
 Utils.Input.isShown = false;
 Utils.Input.Buffer = "";
+Utils.Input.Position = 0;
 Utils.Input.OSD = undefined;
 Utils.Input.TextSettings = SSA.setBorder(2) + SSA.setFont("Roboto");
 Utils.Input.InputPrefix = "";
@@ -1346,7 +1349,7 @@ Utils.Input.Prefix = "";
 
 Utils.Input.keybindOverrides = [
     { key: "ESC", id: "empv_input_esc" },
-    
+
     { key: "KP_ENTER", id: "empv_input_kp_enter" },
     { key: "ENTER", id: "empv_input_enter" },
     { key: "SPACE", id: "empv_input_space" },
@@ -1466,8 +1469,15 @@ Utils.Input.keybindOverrides = [
     { key: "Ctrl+v", id: "empv_input_ctrl_v" },
 ];
 
+Utils.Input.returnBufferInserted = function(insert)
+{
+    return Utils.Input.Buffer.slice(0,Utils.Input.Buffer.length-Utils.Input.Position) + insert + Utils.Input.Buffer.slice(Utils.Input.Buffer.length-Utils.Input.Position);
+}
+
 Utils.Input.handleKeyPress = function (key) {
+
     if(key == "Ctrl+v" || key == "INS") {
+        /*
         if (Utils.OSisWindows) {
             var args = [
                 "powershell",
@@ -1486,7 +1496,7 @@ Utils.Input.handleKeyPress = function (key) {
                     " get-clipboard",
             ];
         }
-    
+
         var result = mp.command_native(
             {
                 name: "subprocess",
@@ -1495,20 +1505,23 @@ Utils.Input.handleKeyPress = function (key) {
                 capture_stderr: false,
                 args: args,
             });
-
-        Utils.Input.Buffer += result.stdout.trim().replace(/\{/g,'\{').replace(/\}/g,'\}');
+    */
+        Utils.Input.Buffer = Utils.Input.returnBufferInserted(OS.getClipboard().replace(/\{/g,'\{').replace(/\}/g,'\}'));
     }
     else if (key == "Ctrl+a")
     {
         Utils.Input.Buffer = "";
+        Utils.Input.Position = 0;
     }
-    else if (key == "BS" || key == "DEL" || key == "LEFT")
+    else if (key == "BS" || key == "DEL")
     {
-        Utils.Input.Buffer = Utils.Input.Buffer.substring(0,Utils.Input.Buffer.length-1);
+        var partA = Utils.Input.Buffer.slice(0,Utils.Input.Buffer.length-Utils.Input.Position);
+        Utils.Input.Buffer = partA.substring(0,partA.length-1) + Utils.Input.Buffer.slice(Utils.Input.Buffer.length-Utils.Input.Position);
+
     }
     else if (key == "SPACE")
     {
-        Utils.Input.Buffer += " ";
+        Utils.Input.Buffer = Utils.Input.returnBufferInserted(" ");
     }
     else if (key == "ESC")
     {
@@ -1522,23 +1535,47 @@ Utils.Input.handleKeyPress = function (key) {
     }
     else if (key == "SHARP")
     {
-        Utils.Input.Buffer += "#";
+        Utils.Input.Buffer = Utils.Input.returnBufferInserted("#");
     }
-    else if (key == "{")
+    else if (key == "UP")
     {
-        Utils.Input.Buffer += "\\{";
+        if(Utils.Input.Memory[Utils.Input.MemoryPosition] != undefined)
+        {
+            Utils.Input.Position = 0;
+            Utils.Input.Buffer = Utils.Input.Memory[Utils.Input.MemoryPosition];
+            Utils.Input.MemoryPosition = Utils.Input.MemoryPosition + 1;
+        }
     }
-    else if (key == "}")
+    else if (key == "DOWN")
     {
-        Utils.Input.Buffer += "\\}";
+        if(Utils.Input.Memory[Utils.Input.MemoryPosition-1] != undefined)
+        {
+            Utils.Input.Position = 0;
+            Utils.Input.Buffer = Utils.Input.Memory[Utils.Input.MemoryPosition-1];
+            Utils.Input.MemoryPosition = Utils.Input.MemoryPosition - 1;
+        }
     }
-    else if (key == "UP" || key == "RIGHT" || key == "DOWN" || key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
+    else if (key == "LEFT")
+    {
+        if (Utils.Input.Position < Utils.Input.Buffer.length)
+        {
+            Utils.Input.Position = Utils.Input.Position + 1;
+        }
+    }
+    else if (key == "RIGHT")
+    {
+        if (Utils.Input.Position > 0)
+        {
+            Utils.Input.Position = Utils.Input.Position - 1;
+        }
+    }
+    else if (key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
     {}
     else
     {
-        Utils.Input.Buffer += key;
+        Utils.Input.Buffer = Utils.Input.returnBufferInserted(key);
     }
-    Utils.Input.OSD.data = Utils.Input.Prefix + Utils.Input.Buffer + "_";
+    Utils.Input.OSD.data = Utils.Input.Prefix + Utils.Input.returnBufferInserted("_");
     Utils.Input.OSD.update();
 }
 
@@ -1576,6 +1613,8 @@ Utils.Input.show = function (callback, prefix) {
     Utils.Input.isShown = true;
 
     Utils.Input.Buffer = "";
+    Utils.Input.Position = 0;
+    Utils.Input.MemoryPosition = 0;
 
     var tempFunction = function (x, key) {
         return function () {
@@ -1629,8 +1668,14 @@ Utils.Input.hide = function (success) {
         "no"
     );
     Utils.Input.OSD = undefined;
+    if(success)
+    {
+        Utils.Input.Memory.push(Utils.Input.Buffer);
+    }
     Utils.Input.Callback(success,Utils.Input.Buffer.slice().replace(/\\/g,''));
     Utils.Input.Buffer = "";
+    Utils.Input.Position = 0;
+    Utils.Input.MemoryPosition = 0;
 
     Utils.Input.InputPrefix = "";
     Utils.Input.Prefix = "";
@@ -1650,7 +1695,6 @@ Utils.OSDLog.show = function () {
         Utils.OSDLog.OSD.data = Utils.OSDLog.Buffer;
         Utils.OSDLog.OSD.update();
     }, 100);
-    
 }
 
 Utils.OSDLog.addToBuffer = function (msg) {
@@ -1671,15 +1715,18 @@ Utils.OSDLog.addToBuffer = function (msg) {
     {
         color = SSA.setColorRed();
     }
-    if (Utils.OSDLog.BufferCounter > 150)
+    if (Utils.OSDLog.BufferCounter > 150 && !Settings.Data.saveFullLog)
     {
         Utils.OSDLog.Buffer = Utils.OSDLog.Buffer.substring(0,15000)
         Utils.OSDLog.BufferCounter = 0;
     }
     if (msg.prefix != "osd/libass")
     {
+        var time = mp.get_property("time-pos");
+        if (time == undefined) { time = "0.000000"; }
+
         Utils.OSDLog.Buffer = SSA.setFont("Roboto") + SSA.setTransparency("3f") + color + SSA.setSize(16) + SSA.setBorder(0) + SSA.setBold(true) +
-            "[" + msg.prefix + "] " + SSA.setBold(false) + msg.text + "\n" + Utils.OSDLog.Buffer;
+            "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + SSA.setBold(false) + msg.text + "\n" + Utils.OSDLog.Buffer;
     }
     Utils.OSDLog.BufferCounter++;
 };
@@ -1714,124 +1761,9 @@ Utils.showInteractiveCommandInput = function () {
 }
 
 /**
- * Reads, writes and modifies watch_later folder.
- */
-Utils.WL = {};
-
-Utils.WL.cache = [];
-
-/**
- * Caches watch_later folder to memory. Limited to 999 entries.
- * Access cache with Utils.wlCache
- */
-Utils.WL.createCache = function () {
-    Utils.log("Building watch_later cache","startup","info");
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/watch_later/")) !=
-        undefined
-    ) {
-        var wlFilesCache = mp.utils.readdir(
-            mp.utils.get_user_path("~~/watch_later/"),
-            "files"
-        );
-        for (var i = 0; i < wlFilesCache.length; i++) {
-            if (i < 1000) {
-                var file = {
-                    name: wlFilesCache[i],
-                    content: mp.utils.read_file(
-                        mp.utils.get_user_path("~~/watch_later/") +
-                            wlFilesCache[i]
-                    ),
-                };
-                Utils.WL.cache.push(file);
-            } else {
-                break;
-            }
-        }
-    }
-};
-
-/**
- * Fetches data of current file from previously cached watch_later data.
- * @return {object} {shader, color}
- */
-Utils.WL.getData = function () {
-    var cFile;
-    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-        if (mp.get_property("playlist/" + i + "/current") == "yes") {
-            cFile = mp.get_property("playlist/" + i + "/filename");
-        }
-    }
-    cFile = Utils.md5(cFile).toUpperCase();
-    var wlName;
-    var wlContent;
-    for (var i = 0; i < Utils.WL.cache.length; i++) {
-        if (Utils.WL.cache[i].name == cFile) {
-            wlName = Utils.WL.cache[i].name;
-            wlContent = Utils.WL.cache[i].content;
-        }
-    }
-    if (wlContent != undefined) {
-        var WLtmp = wlContent.split("\n");
-        var cShader;
-        var cColor;
-        for (var i = 0; i < WLtmp.length; i++) {
-            var WLtmp2 = WLtmp[i].split("=");
-            if (WLtmp2[0].includes("shader")) {
-                cShader = WLtmp2[1];
-            }
-            if (WLtmp2[0].includes("color")) {
-                cColor = WLtmp2[1];
-            }
-        }
-        var results = { shader: cShader, color: cColor };
-        return results;
-    }
-};
-
-/**
- * This function finds the current videos wlFile and writes a shaderset and colorset to it.
- */
-Utils.WL.writeData = function (shader, color) {
-    var cFile;
-    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-        if (mp.get_property("playlist/" + i + "/current") == "yes") {
-            cFile = mp.get_property("playlist/" + i + "/filename");
-        }
-    }
-    if (cFile != undefined) {
-        var WLfile =
-            mp.utils.get_user_path("~~/") +
-            "/watch_later/" +
-            Utils.md5(cFile).toUpperCase();
-
-        if (mp.utils.file_info(WLfile) != undefined) {
-            var WLtmp = mp.utils.read_file(WLfile);
-            var WLtmp =
-                WLtmp + "shader=" + shader + "\n" + "color=" + color + "\n";
-            mp.utils.write_file("file://" + WLfile, WLtmp);
-        }
-    }
-};
-
-/**
- * Creates a dummy file in watch_later folder.
- */
-Utils.WL.createDummy = function () {
-    var folder = mp.utils.get_user_path("~~/watch_later");
-    var name = "00000000000000000000000000000000";
-    if (Utils.OSisWindows) {
-        folder = folder.replaceAll("/", "\\");
-        Utils.executeCommand(["copy", "nul", folder + "\\" + name, ">", "nul"]);
-    } else {
-        Utils.executeCommand(["touch", folder + "/" + name]);
-    }
-};
-
-/**
  * Clears watch_later folder and creates a dummy file.
  */
-Utils.WL.clear = function () {
+Utils.clearWL = function () {
     Utils.log("Clearing watch_later folder","main","info")
     var folder = mp.utils.get_user_path("~~/watch_later");
     if (Utils.OSisWindows) {
@@ -1844,176 +1776,6 @@ Utils.WL.clear = function () {
         Utils.executeCommand(["mkdir", folder]);
         Utils.WL.createDummy();
     }
-};
-
-// The entire section below is dedicated to implementing a fast MD5 hashing algorithm in native JS.
-// It is copy-pasted from here: https://gist.github.com/jhoff/7680711 / http://www.myersdaily.org/joseph/javascript/md5-text.html
-// There is no license for this, but the source site is ancient and has no mention of one, so i think this is fine.
-
-// MD5 block starts //
-var md5cycle = function (x, k) {
-    var a = x[0],
-        b = x[1],
-        c = x[2],
-        d = x[3];
-
-    a = ff(a, b, c, d, k[0], 7, -680876936);
-    d = ff(d, a, b, c, k[1], 12, -389564586);
-    c = ff(c, d, a, b, k[2], 17, 606105819);
-    b = ff(b, c, d, a, k[3], 22, -1044525330);
-    a = ff(a, b, c, d, k[4], 7, -176418897);
-    d = ff(d, a, b, c, k[5], 12, 1200080426);
-    c = ff(c, d, a, b, k[6], 17, -1473231341);
-    b = ff(b, c, d, a, k[7], 22, -45705983);
-    a = ff(a, b, c, d, k[8], 7, 1770035416);
-    d = ff(d, a, b, c, k[9], 12, -1958414417);
-    c = ff(c, d, a, b, k[10], 17, -42063);
-    b = ff(b, c, d, a, k[11], 22, -1990404162);
-    a = ff(a, b, c, d, k[12], 7, 1804603682);
-    d = ff(d, a, b, c, k[13], 12, -40341101);
-    c = ff(c, d, a, b, k[14], 17, -1502002290);
-    b = ff(b, c, d, a, k[15], 22, 1236535329);
-
-    a = gg(a, b, c, d, k[1], 5, -165796510);
-    d = gg(d, a, b, c, k[6], 9, -1069501632);
-    c = gg(c, d, a, b, k[11], 14, 643717713);
-    b = gg(b, c, d, a, k[0], 20, -373897302);
-    a = gg(a, b, c, d, k[5], 5, -701558691);
-    d = gg(d, a, b, c, k[10], 9, 38016083);
-    c = gg(c, d, a, b, k[15], 14, -660478335);
-    b = gg(b, c, d, a, k[4], 20, -405537848);
-    a = gg(a, b, c, d, k[9], 5, 568446438);
-    d = gg(d, a, b, c, k[14], 9, -1019803690);
-    c = gg(c, d, a, b, k[3], 14, -187363961);
-    b = gg(b, c, d, a, k[8], 20, 1163531501);
-    a = gg(a, b, c, d, k[13], 5, -1444681467);
-    d = gg(d, a, b, c, k[2], 9, -51403784);
-    c = gg(c, d, a, b, k[7], 14, 1735328473);
-    b = gg(b, c, d, a, k[12], 20, -1926607734);
-
-    a = hh(a, b, c, d, k[5], 4, -378558);
-    d = hh(d, a, b, c, k[8], 11, -2022574463);
-    c = hh(c, d, a, b, k[11], 16, 1839030562);
-    b = hh(b, c, d, a, k[14], 23, -35309556);
-    a = hh(a, b, c, d, k[1], 4, -1530992060);
-    d = hh(d, a, b, c, k[4], 11, 1272893353);
-    c = hh(c, d, a, b, k[7], 16, -155497632);
-    b = hh(b, c, d, a, k[10], 23, -1094730640);
-    a = hh(a, b, c, d, k[13], 4, 681279174);
-    d = hh(d, a, b, c, k[0], 11, -358537222);
-    c = hh(c, d, a, b, k[3], 16, -722521979);
-    b = hh(b, c, d, a, k[6], 23, 76029189);
-    a = hh(a, b, c, d, k[9], 4, -640364487);
-    d = hh(d, a, b, c, k[12], 11, -421815835);
-    c = hh(c, d, a, b, k[15], 16, 530742520);
-    b = hh(b, c, d, a, k[2], 23, -995338651);
-
-    a = ii(a, b, c, d, k[0], 6, -198630844);
-    d = ii(d, a, b, c, k[7], 10, 1126891415);
-    c = ii(c, d, a, b, k[14], 15, -1416354905);
-    b = ii(b, c, d, a, k[5], 21, -57434055);
-    a = ii(a, b, c, d, k[12], 6, 1700485571);
-    d = ii(d, a, b, c, k[3], 10, -1894986606);
-    c = ii(c, d, a, b, k[10], 15, -1051523);
-    b = ii(b, c, d, a, k[1], 21, -2054922799);
-    a = ii(a, b, c, d, k[8], 6, 1873313359);
-    d = ii(d, a, b, c, k[15], 10, -30611744);
-    c = ii(c, d, a, b, k[6], 15, -1560198380);
-    b = ii(b, c, d, a, k[13], 21, 1309151649);
-    a = ii(a, b, c, d, k[4], 6, -145523070);
-    d = ii(d, a, b, c, k[11], 10, -1120210379);
-    c = ii(c, d, a, b, k[2], 15, 718787259);
-    b = ii(b, c, d, a, k[9], 21, -343485551);
-
-    x[0] = add32(a, x[0]);
-    x[1] = add32(b, x[1]);
-    x[2] = add32(c, x[2]);
-    x[3] = add32(d, x[3]);
-};
-
-var cmn = function (q, a, b, x, s, t) {
-    a = add32(add32(a, q), add32(x, t));
-    return add32((a << s) | (a >>> (32 - s)), b);
-};
-
-var ff = function (a, b, c, d, x, s, t) {
-    return cmn((b & c) | (~b & d), a, b, x, s, t);
-};
-
-var gg = function (a, b, c, d, x, s, t) {
-    return cmn((b & d) | (c & ~d), a, b, x, s, t);
-};
-
-var hh = function (a, b, c, d, x, s, t) {
-    return cmn(b ^ c ^ d, a, b, x, s, t);
-};
-
-var ii = function (a, b, c, d, x, s, t) {
-    return cmn(c ^ (b | ~d), a, b, x, s, t);
-};
-
-var add32 = function (a, b) {
-    return (a + b) & 0xffffffff;
-};
-
-var md51 = function (s) {
-    var txt = "";
-    var n = s.length,
-        state = [1732584193, -271733879, -1732584194, 271733878],
-        i;
-    for (var i = 64; i <= s.length; i += 64) {
-        md5cycle(state, md5blk(s.substring(i - 64, i)));
-    }
-    s = s.substring(i - 64);
-    var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for (var i = 0; i < s.length; i++)
-        tail[i >> 2] |= s.charCodeAt(i) << (i % 4 << 3);
-    tail[i >> 2] |= 0x80 << (i % 4 << 3);
-    if (i > 55) {
-        md5cycle(state, tail);
-        for (var i = 0; i < 16; i++) tail[i] = 0;
-    }
-    tail[14] = n * 8;
-    md5cycle(state, tail);
-    return state;
-};
-
-var md5blk = function (s) {
-    var md5blks = [],
-        i;
-    for (var i = 0; i < 64; i += 4) {
-        md5blks[i >> 2] =
-            s.charCodeAt(i) +
-            (s.charCodeAt(i + 1) << 8) +
-            (s.charCodeAt(i + 2) << 16) +
-            (s.charCodeAt(i + 3) << 24);
-    }
-    return md5blks;
-};
-
-var hex_chr = "0123456789abcdef".split("");
-
-var rhex = function (n) {
-    var s = "",
-        j = 0;
-    for (; j < 4; j++)
-        s +=
-            hex_chr[(n >> (j * 8 + 4)) & 0x0f] + hex_chr[(n >> (j * 8)) & 0x0f];
-    return s;
-};
-
-var hex = function (x) {
-    for (var i = 0; i < x.length; i++) x[i] = rhex(x[i]);
-    return x.join("");
-};
-// MD5 block ends //
-
-/**
- * Calculates MD5 hash of given string.
- * @return {string} Hash
- */
-Utils.md5 = function (s) {
-    return hex(md51(s));
 };
 
 module.exports = Utils;
