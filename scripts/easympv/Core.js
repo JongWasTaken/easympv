@@ -29,28 +29,6 @@ Core.Menus = {};
 
 Core.onFileLoad = function () {
 
-    if(Settings.Data.simpleVRR)
-    {
-        var double = "";
-        if (Number(mp.get_property("container-fps")) < (Settings.Data.refreshRate / 2)) {
-            double = String(Number(mp.get_property("container-fps")) * 2);
-            mp.set_property("override-display-fps",double)
-            mp.commandv(
-                "vf",
-                "set",
-                "fps=fps=" + double
-            );
-        } else {
-            mp.set_property("override-display-fps",Settings.Data.refreshRate);
-            mp.commandv(
-                "vf",
-                "set",
-                "fps=fps=" + String(mp.get_property("container-fps"))
-            );
-        }
-    }
-
-
     if (isFirstFile) {
         if (
             mp.utils.file_info(
@@ -150,6 +128,27 @@ Core.doRegistrations = function () {
         Core.Menus.MainMenu.showMenu();
     };
 
+    var checkVRR = function (){
+        var double = "";
+        if (Number(mp.get_property("container-fps")) < (Settings.Data.refreshRate / 2) && mp.get_property("speed") == 1) {
+            double = String(Number(mp.get_property("container-fps")) * 2);
+            if (double < 48) { double = double * 2};
+            mp.set_property("override-display-fps",double)
+            mp.commandv(
+                "vf",
+                "set",
+                "fps=fps=" + double
+            );
+        } else {
+            mp.set_property("override-display-fps",Settings.Data.refreshRate);
+            mp.commandv(
+                "vf",
+                "set",
+                "fps=fps=" + String(mp.get_property("container-fps"))
+            );
+        }
+    }
+
     mp.add_key_binding(null, "easympv", handleMenuKeypress);
     if (Settings.Data.forcedMenuKey != "disabled")
     {
@@ -198,6 +197,11 @@ Core.doRegistrations = function () {
         undefined,
         Chapters.handler
     );
+
+    if(Settings.Data.simpleVRR)
+    {
+        mp.observe_property("speed",undefined,checkVRR);
+    }
 
     // Registering an observer to redraw Menus on window size change
     mp.observe_property("osd-height", undefined, redrawMenus);
@@ -285,15 +289,14 @@ Core.defineMenus = function () {
         description: "",
         descriptionColor: "ff0000",
         image: "logo",
-        customKeyEvents: [{key: "h", event: "help"}],
-        itemHandlerScope: Core
+        customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var MainMenuItems = [
         {
             title: "Close@br@@br@",
             item: "close",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
             }
         },
@@ -301,7 +304,7 @@ Core.defineMenus = function () {
             title: "Open...",
             item: "open",
             description: "Files, Discs, Devices & URLs",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Browsers.Selector.open(menu);
             }
@@ -309,35 +312,36 @@ Core.defineMenus = function () {
         {
             title: "Shaders",
             item: "shaders",
-            eventHandler: function(event, menu, scope) {
-                MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+            eventHandler: function(event, menu) {
+                //MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+                MenuSystem.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
             }
         },
         {
             title: "Colors",
             item: "colors",
-            eventHandler: function(event, menu, scope) {
-                MenuSystem.switchCurrentMenu(scope.Menus.ColorsMenu,menu);
+            eventHandler: function(event, menu) {
+                MenuSystem.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
             }
         },
         {
             title: "Chapters@br@",
             item: "chapters",
-            eventHandler: function(event, menu, scope) {
-                MenuSystem.switchCurrentMenu(scope.Menus.ChaptersMenu,menu);
+            eventHandler: function(event, menu) {
+                MenuSystem.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
             }
         },
         {
             title: "Preferences@br@@us10@@br@",
             item: "options",
-            eventHandler: function(event, menu, scope) {
-                MenuSystem.switchCurrentMenu(scope.Menus.SettingsMenu,menu);
+            eventHandler: function(event, menu) {
+                MenuSystem.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
             }
         },
         {
             title: "Quit mpv",
             item: "quit",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 quitCounter++;
                 if (!quitCounter.isOdd()) {
                     Utils.exitMpv();
@@ -357,7 +361,7 @@ Core.defineMenus = function () {
         MainMenuItems.splice(2, 0, {
             title: "[Shuffle playlist]@br@",
             item: "shuffle",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 mp.commandv("playlist-shuffle");
             }
@@ -635,15 +639,14 @@ Core.defineMenus = function () {
             Utils.displayVersion,
             Utils.displayVersionMpv
         ),
-        customKeyEvents: [{key: "h", event: "help"}],
-        itemHandlerScope: Core
+        customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var SettingsMenuItems = [
         {
             title: "Toggle Discord RPC@br@@us10@@br@",
             item: "discord",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 mp.commandv("script-binding", "drpc_toggle");
             }
@@ -651,7 +654,7 @@ Core.defineMenus = function () {
         {
             title: "Check for updates",
             item: "updater",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
 
                 var updateConfirmation = false;
@@ -671,7 +674,7 @@ Core.defineMenus = function () {
                             Utils.latestUpdateData.changelog,
                     },
                     [],
-                    scope.Menus.SettingsMenu
+                    Core.Menus.SettingsMenu
                 );
                 umenu.eventHandler = function (event, action) {
                     if (event == "hide") {
@@ -731,7 +734,7 @@ Core.defineMenus = function () {
         {
             title: "Credits@br@@us10@@br@",
             item: "credits",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 var cmenu = new MenuSystem.Menu(
                     {
@@ -740,7 +743,7 @@ Core.defineMenus = function () {
                         description: Utils.getCredits().replaceAll("\n", "@br@"),
                     },
                     [],
-                    scope.Menus.SettingsMenu
+                    Core.Menus.SettingsMenu
                 );
                 cmenu.eventHandler = function (event, action) {
                     if (event == "hide") {
@@ -753,7 +756,7 @@ Core.defineMenus = function () {
         {
             title: "Edit easympv.conf",
             item: "easympvconf",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Utils.openFile("easympv.conf");
             }
@@ -761,7 +764,7 @@ Core.defineMenus = function () {
         {
             title: "Edit mpv.conf",
             item: "mpvconf",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Utils.openFile("mpv.conf");
             }
@@ -769,7 +772,7 @@ Core.defineMenus = function () {
         {
             title: "Edit input.conf",
             item: "inputconf",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Utils.openFile("input.conf");
             }
@@ -777,7 +780,7 @@ Core.defineMenus = function () {
         {
             title: "Reload config",
             item: "reload",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Settings.reload();
                 Settings.mpvConfig.reload();
@@ -789,7 +792,7 @@ Core.defineMenus = function () {
         {
             title: "Restart plugin",
             item: "restart",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 mp.commandv("script-message-to", "easympv", "__internal", "restart");
             }
@@ -797,7 +800,7 @@ Core.defineMenus = function () {
         {
             title: "Open config folder@br@@us10@@br@",
             item: "config",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Utils.openFile();
             }
@@ -805,7 +808,7 @@ Core.defineMenus = function () {
         {
             title: "Create Log File",
             item: "log.export",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 var buffer = Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
                 buffer.reverse();
@@ -820,7 +823,7 @@ Core.defineMenus = function () {
         {
             title: "Toggle On-Screen Log",
             item: "log.osd",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 if (Utils.OSDLog.OSD == undefined) {
                     Utils.OSDLog.show();
@@ -832,7 +835,7 @@ Core.defineMenus = function () {
         {
             title: "Toggle Debug Mode",
             item: "debugmode",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 if (Settings.Data.debugMode)
                 {
@@ -852,7 +855,7 @@ Core.defineMenus = function () {
         {
             title: "Input a command",
             item: "command",
-            eventHandler: function(event, menu, scope) {
+            eventHandler: function(event, menu) {
                 menu.hideMenu();
                 Utils.showInteractiveCommandInput();
             }

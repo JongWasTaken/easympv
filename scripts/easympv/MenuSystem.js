@@ -73,8 +73,6 @@ Settings can be an object with the following properties:
                             "key"    - Name of the key, same as input.conf
                             "event" - Custom event to fire when it gets pressed
                             Use this to add custom hotkeys, like h for help
-    "itemHandlerScope"      Object, only required if you use <item>.eventHandler(...)
-                            Use this to pass any objects <item>.eventHandler could need
 All of these have default values.
 Alternatively leave Settings undefined to use all default values.
 
@@ -87,8 +85,6 @@ Items is an array of objects that can have the following properties:
                             3 arguments get passed to this function: 
                             "event" - String, see below
                             "menu" - Object, the menu calling this function
-                            "scope" - The object set as "itemHandlerScope" in the menu settings
-                                (This is required for stupid JS reasons)
 "title" and "item" are required.
 
 "title" and "description" can include these special substrings:
@@ -277,12 +273,6 @@ Menus.Menu = function (settings, items, parentMenu) {
         this.settings.maxTitleLength = settings.maxTitleLength;
     } else {
         this.settings.maxTitleLength = 0;
-    }
-
-    if (settings.itemHandlerScope != undefined) {
-        this.settings.itemHandlerScope = settings.itemHandlerScope;
-    } else {
-        this.settings.itemHandlerScope = undefined;
     }
 
     if (settings.itemSuffix != undefined) {
@@ -1244,8 +1234,7 @@ Menus.Menu.prototype.toggleMenu = function () {
 Menus.Menu.prototype._dispatchEvent = function (event, item) {
     if (item.eventHandler != undefined)
     {
-        //item.eventHandler.call({event: event, menu: this });
-        item.eventHandler(event, this, this.settings.itemHandlerScope)
+        item.eventHandler(event, this)
         return;
     }
     this.eventHandler(event, item.item);
