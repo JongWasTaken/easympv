@@ -49,6 +49,7 @@ Settings.Data = {
     notifyAboutUpdates: true,
     debugMode: false,
     saveFullLog: false,
+    FileBrowserFavorites: { locations: [] },
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
@@ -84,14 +85,31 @@ Settings.reload = function () {
             if (lines[i].includes("=")) {
                 var temp = lines[i].split("=");
                 var option = temp[0].trim();
-                var value = temp[1].trim().split("#")[0].replaceAll("\"","");
+                var value = temp[1].trim().split("#")[0];
 
-                if (value == "true") {
-                    value = true;
+                if (value.charAt(0) == "{")
+                {
+                    try
+                    {
+                        value = JSON.parse(value);
+                    }
+                    catch (e)
+                    {
+                        mp.msg.warn("Could not parse JSON in easympv.conf: " + e);
+                        value = { locations: [] };
+                    }
                 }
-                if (value == "false") {
-                    value = false;
+                else
+                {
+                    value = value.replaceAll("\"","");
+                    if (value == "true") {
+                        value = true;
+                    }
+                    if (value == "false") {
+                        value = false;
+                    }
                 }
+
                 Settings.Data[option] = value;
             }
         }
@@ -196,7 +214,13 @@ Settings.save = function () {
         defaultConfigString += "saveFullLog=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
-            "# ! Settings below are set automatically, though some might be of interest !\n";
+        "# ! Settings below are set automatically, though some might be of interest !\n";
+        defaultConfigString += "\n";
+        defaultConfigString +=
+            "# List of favorite'd folders in the File Browser.\n";
+        defaultConfigString +=
+            "# This should be a valid JSON array. Default: {\"locations\":[]}\n";
+        defaultConfigString += "FileBrowserFavorites=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# The currently installed version of easympv.\n";
@@ -289,6 +313,12 @@ Settings.save = function () {
             try {
                 var option = lines[i].split("=")[0].trim();
                 var value = Settings.Data[option];
+
+                if (typeof value === "object")
+                {
+                    value = JSON.stringify(value,undefined,0);
+                }
+
                 lines[i] = option + "=" + value;
             } catch (x) {}
         }
@@ -320,12 +350,25 @@ Settings.migrate = function () {
                     var option = temp[0].trim();
                     var value = temp[1].trim().split("#")[0];
 
+                    if (value.charAt(0) == "{")
+                    {
+                        try
+                        {
+                            value = JSON.parse(value);
+                        }
+                        catch (e)
+                        {
+                            value = { locations: [] };
+                        }
+                    }
+
                     if (value == "true") {
                         value = true;
                     }
                     if (value == "false") {
                         value = false;
                     }
+
                     copy[option] = value;
                 }
             }

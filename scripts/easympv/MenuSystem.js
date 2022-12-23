@@ -58,6 +58,8 @@ Settings can be an object with the following properties:
                             0 -> 10 are allowed, lower number is higher on screen
     "borderSize"            Number, thickness of border
     "borderColor"           Hex string, color of border
+    "backButtonTitle"       String, name of the back button entry if parentMenu is set
+    "backButtonColor"       Hex string, color of the back button entry if parentMenu is set
     "displayMethod"         String, either "overlay" or "message", check below for explanation
                             "message" displayMethod is intended as a fallback only, it is not really maintained
     "zIndex"                Number, on which zIndex to show this menu on, default is 999
@@ -82,7 +84,7 @@ Items is an array of objects that can have the following properties:
     ["description"]         String, optional description of the item
     ["color"]               Hex string, optionally override default item color for this item only
     ["eventHandler"]        Function, gets called instead of <menu>.eventHandler if it exists
-                            3 arguments get passed to this function: 
+                            3 arguments get passed to this function:
                             "event" - String, see below
                             "menu" - Object, the menu calling this function
 "title" and "item" are required.
@@ -221,6 +223,24 @@ Menus.Menu = function (settings, items, parentMenu) {
         this.settings.borderColor = settings.borderColor;
     } else {
         this.settings.borderColor = "2F2C28";
+    }
+
+    if (settings.backButtonTitle != undefined) {
+        this.settings.backButtonTitle = settings.backButtonTitle;
+    } else {
+        this.settings.backButtonTitle = SSA.insertSymbolFA(
+            "",
+            this.settings.fontSize - 3,
+            this.settings.fontSize
+        ) +
+        SSA.setFont(this.settings.fontName) +
+        " Back@br@@br@";
+    }
+
+    if (settings.backButtonColor != undefined) {
+        this.settings.backButtonColor = settings.backButtonColor;
+    } else {
+        this.settings.backButtonColor = "999999";
     }
 
     if (settings.displayMethod != undefined) {
@@ -486,16 +506,9 @@ Menus.Menu = function (settings, items, parentMenu) {
         this.hasBackButton = true;
         this.parentMenu = parentMenu;
         this.items.unshift({
-            title:
-                SSA.insertSymbolFA(
-                    "",
-                    this.settings.fontSize - 3,
-                    this.settings.fontSize
-                ) +
-                SSA.setFont(this.settings.fontName) +
-                " Back@br@@br@", // ↑
+            title: this.settings.backButtonTitle, // ↑
             item: "@back@",
-            color: "999999",
+            color: this.settings.backButtonColor,
         });
     } else {
         this.hasBackButton = false;

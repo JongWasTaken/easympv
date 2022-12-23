@@ -20,6 +20,7 @@ var MenuSystem = require("./MenuSystem");
 var Utils = require("./Utils");
 var WindowSystem = require("./WindowSystem");
 var SSA = require("./SSAHelper");
+var Settings = require("./Settings");
 
 /**
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
@@ -37,7 +38,10 @@ Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
 Browsers.FileBrowser.menu = undefined;
-Browsers.FileBrowser.menuSettings = { autoClose: 0, scrollingEnabled: true };
+Browsers.FileBrowser.menuSettings = {
+    autoClose: 0,
+    scrollingEnabled: true,
+};
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
 Browsers.DriveBrowser.menu = undefined;
@@ -456,6 +460,38 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                 Browsers.FileBrowser.openFileSafe(item);
             }
         }
+        return;
+    } else if (event == "right") {
+        if (
+            Utils.OSisWindows &&
+            Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
+        ) {
+            var isFolder = true;
+        } else {
+            var temp = mp.utils.file_info(
+                Browsers.FileBrowser.currentLocation +
+                    Utils.directorySeperator +
+                    item
+            );
+            if (temp != undefined) {
+                var isFolder = temp.is_dir;
+            } else {
+                var isFolder = true;
+            }
+        }
+
+        if (isFolder) {
+            if (Settings.Data["FileBrowserFavorites"].locations.indexOf(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item) == -1)
+            {
+                Settings.Data["FileBrowserFavorites"].locations.push(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item);
+                Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
+                Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
+                Settings.save();
+                return;
+            }
+            Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
+            return;
+        }
     }
 };
 Browsers.FileBrowser.open = function (parentMenu) {
@@ -659,7 +695,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     }
 
                     var title = currentLocationFiles[i];
-                    if (title.length >= 32) {
+                    if (title.length >= 36) {
                         title = title.substring(0, 50) + "...";
                     }
 
@@ -689,7 +725,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 }
 
                 var title = currentLocationFiles[i];
-                if (title.length >= 32) {
+                if (title.length >= 36) {
                     title = title.substring(0, 50) + "...";
                 }
 
@@ -709,6 +745,80 @@ Browsers.FileBrowser.open = function (parentMenu) {
             "@DRIVESELECTOR@",
             "Drive Selection"
         );
+    Browsers.FileBrowser.menuSettings.backButtonTitle =
+        SSA.insertSymbolFA(
+            "",
+            32,
+            35
+        ) + SSA.setFont(Utils.commonFontName) + " Back@br@";
+
+    if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
+    {
+        items.unshift({
+            title: "[Open in File Explorer]@br@",
+            color: "999999",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Utils.openFile(Browsers.FileBrowser.currentLocation,true);
+                }
+            }
+        });
+    }
+
+    items.unshift({
+        title: "[Favorites]",
+        color: "999999",
+        eventHandler: function(event, menu)
+        {
+            if (event == "enter")
+            {
+                var favItems = [];
+                for (var i = 0; i < Settings.Data["FileBrowserFavorites"].locations.length; i++)
+                {
+                    favItems.push({
+                        title: SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["FileBrowserFavorites"].locations[i],
+                        item: Settings.Data["FileBrowserFavorites"].locations[i],
+                        color: "FFFF90"
+                    });
+                }
+
+                var favMenu = new MenuSystem.Menu({
+                    title: "File Browser",
+                    description: "Use the \"right\" action to remove an entry."
+                },favItems,Browsers.FileBrowser.menu);
+
+                favMenu.eventHandler = function(event,item) {
+                    if(event == "enter")
+                    {
+                        Browsers.FileBrowser.currentLocation = item;
+                        favMenu.hideMenu();
+                        Browsers.FileBrowser.open();
+                        return;
+                    }
+                    if(event == "right")
+                    {
+                        var pos = Settings.Data["FileBrowserFavorites"].locations.indexOf(item);
+                        if (pos != -1)
+                        {
+                            Settings.Data["FileBrowserFavorites"].locations.splice(pos,1);
+                            favMenu.items.splice(pos+1,1);
+                            favMenu.selectedItemIndex = 0;
+                            Settings.save();
+                            favMenu.redrawMenu();
+                            Utils.showAlert("info","Favorite \""+item+"\" has been removed.")
+                        }
+                        return;
+                    }
+                };
+
+                Browsers.FileBrowser.menu.hideMenu();
+                favMenu.showMenu();
+            }
+        }
+    });
+
     Browsers.FileBrowser.menu = new MenuSystem.Menu(
         Browsers.FileBrowser.menuSettings,
         items,
