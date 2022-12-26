@@ -297,7 +297,9 @@ Core.defineMenus = function () {
             title: "Close@br@@br@",
             item: "close",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
+                if (event == "enter") {
+                    menu.hideMenu();
+                }
             }
         },
         {
@@ -305,52 +307,64 @@ Core.defineMenus = function () {
             item: "open",
             description: "Files, Discs, Devices & URLs",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Browsers.Selector.open(menu);
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Browsers.Selector.open(menu);
+                }
             }
         },
         {
             title: "Shaders",
             item: "shaders",
             eventHandler: function(event, menu) {
-                //MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                MenuSystem.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                if (event == "enter") {
+                    //MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+                    MenuSystem.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                }
             }
         },
         {
             title: "Colors",
             item: "colors",
             eventHandler: function(event, menu) {
-                MenuSystem.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
+                if (event == "enter") {
+                    MenuSystem.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
+                }
             }
         },
         {
             title: "Chapters@br@",
             item: "chapters",
             eventHandler: function(event, menu) {
-                MenuSystem.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
+                if (event == "enter") {
+                    MenuSystem.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
+                }
             }
         },
         {
             title: "Preferences@br@@us10@@br@",
             item: "options",
             eventHandler: function(event, menu) {
-                MenuSystem.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
+                if (event == "enter") {
+                    MenuSystem.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
+                }
             }
         },
         {
             title: "Quit mpv",
             item: "quit",
             eventHandler: function(event, menu) {
-                quitCounter++;
-                if (!quitCounter.isOdd()) {
-                    Utils.exitMpv();
-                    menu.hideMenu();
-                } else {
-                    quitTitle = this.title;
-                    this.title =
-                        SSA.setColorRed() + "Are you sure?";
-                    menu.redrawMenu();
+                if (event == "enter") {
+                    quitCounter++;
+                    if (!quitCounter.isOdd()) {
+                        Utils.exitMpv();
+                        menu.hideMenu();
+                    } else {
+                        quitTitle = this.title;
+                        this.title =
+                            SSA.setColorRed() + "Are you sure?";
+                        menu.redrawMenu();
+                    }
                 }
             }
         },
@@ -647,217 +661,241 @@ Core.defineMenus = function () {
             title: "Toggle Discord RPC@br@@us10@@br@",
             item: "discord",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                mp.commandv("script-binding", "drpc_toggle");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    mp.commandv("script-binding", "drpc_toggle");
+                }
             }
         },
         {
             title: "Check for updates",
             item: "updater",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
+                if (event == "enter") {
+                    menu.hideMenu();
 
-                var updateConfirmation = false;
-                var umenu = new MenuSystem.Menu(
-                    {
-                        title: "Update",
-                        autoClose: "0",
-                        description:
-                            "You are on version " +
-                            SSA.setColorYellow() +
-                            Settings.Data.currentVersion +
-                            "@br@" +
-                            "The latest available version is " +
-                            SSA.setColorYellow() +
-                            Settings.Data.newestVersion +
-                            "@br@@br@" +
-                            Utils.latestUpdateData.changelog,
-                    },
-                    [],
-                    Core.Menus.SettingsMenu
-                );
-                umenu.eventHandler = function (event, action) {
-                    if (event == "hide") {
-                        umenu = undefined;
-                        updateConfirmation = false;
-                    } else if (event == "enter" && action != "@back@") {
-                        if (updateConfirmation) {
-                            umenu.hideMenu();
-                            Utils.doUpdate();
-                        } else {
-                            umenu.items[1].title =
-                                SSA.setColorRed() + "Are you sure?";
-                            umenu.redrawMenu();
-                            updateConfirmation = true;
+                    var updateConfirmation = false;
+                    var umenu = new MenuSystem.Menu(
+                        {
+                            title: "Update",
+                            autoClose: "0",
+                            description:
+                                "You are on version " +
+                                SSA.setColorYellow() +
+                                Settings.Data.currentVersion +
+                                "@br@" +
+                                "The latest available version is " +
+                                SSA.setColorYellow() +
+                                Settings.Data.newestVersion +
+                                "@br@@br@" +
+                                Utils.latestUpdateData.changelog,
+                        },
+                        [],
+                        Core.Menus.SettingsMenu
+                    );
+                    umenu.eventHandler = function (event, action) {
+                        if (event == "hide") {
+                            umenu = undefined;
+                            updateConfirmation = false;
+                        } else if (event == "enter" && action != "@back@") {
+                            if (updateConfirmation) {
+                                umenu.hideMenu();
+                                Utils.doUpdate();
+                            } else {
+                                umenu.items[1].title =
+                                    SSA.setColorRed() + "Are you sure?";
+                                umenu.redrawMenu();
+                                updateConfirmation = true;
+                            }
+                        } else if (event == "show" && Utils.updateAvailable) {
+                            if (umenu.items.length == 1) {
+                                umenu.items.push({
+                                    title:
+                                        "Update to version " +
+                                        SSA.setColorYellow() +
+                                        Settings.Data.newestVersion,
+                                    item: "update",
+                                });
+                            }
                         }
-                    } else if (event == "show" && Utils.updateAvailable) {
-                        if (umenu.items.length == 1) {
-                            umenu.items.push({
-                                title:
-                                    "Update to version " +
-                                    SSA.setColorYellow() +
-                                    Settings.Data.newestVersion,
-                                item: "update",
-                            });
-                        }
-                    }
-                };
-                if (Settings.Data.debugMode) {
-                    umenu.settings.description +=
-                        "@br@@br@[Debug Mode Information]@br@These files will be removed:@br@";
+                    };
+                    if (Settings.Data.debugMode) {
+                        umenu.settings.description +=
+                            "@br@@br@[Debug Mode Information]@br@These files will be removed:@br@";
 
-                    for (
-                        var i = 0;
-                        i < Utils.latestUpdateData.removeFiles.length;
-                        i++
-                    ) {
+                        for (
+                            var i = 0;
+                            i < Utils.latestUpdateData.removeFiles.length;
+                            i++
+                        ) {
+                            umenu.settings.description +=
+                                " - " + Utils.latestUpdateData.removeFiles[i] + "@br@";
+                        }
                         umenu.settings.description +=
-                            " - " + Utils.latestUpdateData.removeFiles[i] + "@br@";
+                            "@br@These settings will be enabled:@br@";
+                        for (
+                            var i = 0;
+                            i < Utils.latestUpdateData.enableSettings.length;
+                            i++
+                        ) {
+                            umenu.settings.description +=
+                                " - " +
+                                Utils.latestUpdateData.enableSettings[i] +
+                                "@br@";
+                        }
                     }
-                    umenu.settings.description +=
-                        "@br@These settings will be enabled:@br@";
-                    for (
-                        var i = 0;
-                        i < Utils.latestUpdateData.enableSettings.length;
-                        i++
-                    ) {
-                        umenu.settings.description +=
-                            " - " +
-                            Utils.latestUpdateData.enableSettings[i] +
-                            "@br@";
-                    }
+                    umenu.showMenu();
                 }
-                umenu.showMenu();
-
             }
         },
         {
             title: "Credits@br@@us10@@br@",
             item: "credits",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                var cmenu = new MenuSystem.Menu(
-                    {
-                        title: "Credits",
-                        autoClose: "0",
-                        description: Utils.getCredits().replaceAll("\n", "@br@"),
-                    },
-                    [],
-                    Core.Menus.SettingsMenu
-                );
-                cmenu.eventHandler = function (event, action) {
-                    if (event == "hide") {
-                        cmenu = undefined;
-                    }
-                };
-                cmenu.showMenu();
+                if (event == "enter") {
+                    menu.hideMenu();
+                    var cmenu = new MenuSystem.Menu(
+                        {
+                            title: "Credits",
+                            autoClose: "0",
+                            description: Utils.getCredits().replaceAll("\n", "@br@"),
+                        },
+                        [],
+                        Core.Menus.SettingsMenu
+                    );
+                    cmenu.eventHandler = function (event, action) {
+                        if (event == "hide") {
+                            cmenu = undefined;
+                        }
+                    };
+                    cmenu.showMenu();
+                }
             }
         },
         {
             title: "Edit easympv.conf",
             item: "easympvconf",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Utils.openFile("easympv.conf");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile("easympv.conf");
+                }
             }
         },
         {
             title: "Edit mpv.conf",
             item: "mpvconf",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Utils.openFile("mpv.conf");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile("mpv.conf");
+                }
             }
         },
         {
             title: "Edit input.conf",
             item: "inputconf",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Utils.openFile("input.conf");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile("input.conf");
+                }
             }
         },
         {
             title: "Reload config",
             item: "reload",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Settings.reload();
-                Settings.mpvConfig.reload();
-                Settings.inputConfig.reload();
-                Settings.presets.reload();
-                Utils.showAlert("info", "Configuration reloaded.");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Settings.reload();
+                    Settings.mpvConfig.reload();
+                    Settings.inputConfig.reload();
+                    Settings.presets.reload();
+                    Utils.showAlert("info", "Configuration reloaded.");
+                }
             }
         },
         {
             title: "Restart plugin",
             item: "restart",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                }
             }
         },
         {
             title: "Open config folder@br@@us10@@br@",
             item: "config",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Utils.openFile();
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile();
+                }
             }
         },
         {
             title: "Create Log File",
             item: "log.export",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                var buffer = Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
-                buffer.reverse();
-                mp.utils.write_file(
-                    "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
-                    buffer.join("\n")
-                );
-                Utils.showAlert("info", "Log exported to Desktop!");
-
+                if (event == "enter") {
+                    menu.hideMenu();
+                    var buffer = Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
+                    buffer.reverse();
+                    mp.utils.write_file(
+                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+                        buffer.join("\n")
+                    );
+                    Utils.showAlert("info", "Log exported to Desktop!");
+                }
             }
         },
         {
             title: "Toggle On-Screen Log",
             item: "log.osd",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                if (Utils.OSDLog.OSD == undefined) {
-                    Utils.OSDLog.show();
-                    return;
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (Utils.OSDLog.OSD == undefined) {
+                        Utils.OSDLog.show();
+                        return;
+                    }
+                    Utils.OSDLog.hide();
                 }
-                Utils.OSDLog.hide();
             }
         },
         {
             title: "Toggle Debug Mode",
             item: "debugmode",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                if (Settings.Data.debugMode)
-                {
-                    Settings.Data.debugMode = false;
-                    mp.enable_messages("info");
-                    Utils.showAlert("info", "Debug mode has been disabled!");
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (Settings.Data.debugMode)
+                    {
+                        Settings.Data.debugMode = false;
+                        mp.enable_messages("info");
+                        Utils.showAlert("info", "Debug mode has been disabled!");
+                    }
+                    else
+                    {
+                        Settings.Data.debugMode = true;
+                        mp.enable_messages("debug");
+                        Utils.showAlert("info", "Debug mode has been enabled!");
+                    }
+                    Settings.save();
                 }
-                else
-                {
-                    Settings.Data.debugMode = true;
-                    mp.enable_messages("debug");
-                    Utils.showAlert("info", "Debug mode has been enabled!");
-                }
-                Settings.save();
             }
         },
         {
             title: "Input a command",
             item: "command",
             eventHandler: function(event, menu) {
-                menu.hideMenu();
-                Utils.showInteractiveCommandInput();
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.showInteractiveCommandInput();
+                }
             }
         },
     ];

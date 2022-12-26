@@ -1104,7 +1104,7 @@ Menus.Menu.prototype._keyPressHandler = function (action) {
             this.eventLocked = false;
         } else {
             var item = this.items[this.selectedItemIndex];
-            if (item.item == "@back@") {
+            if (item.item == "@back@" && action == "enter") {
                 this.toggleMenu();
                 this.parentMenu.toggleMenu();
                 this.eventLocked = false;
