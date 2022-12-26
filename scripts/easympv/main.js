@@ -39,49 +39,20 @@ Current dependencies:
         xclip OR wl-clipboard (if you use Wayland; when in doubt, install both!)
 
 TODO :
-    (DONE) Remake settings menu (with save/load)
-    (DONE) Folder navigation from current directory
-    (DONE) Utility: DirectShow readout to stdout
-    (DONE) Utility: return version in stdout on check
-    (DONE) UpdateMenu: display changelog
-    (DONE) MenuSystem: scrolling
-    (DONE) Implement Updater
-    (DONE) Windows (un)registration
-    (DONE) Change command_native -> command_native_async to speed up launch times
-    (DONE) Migrate Config on update
-    (DONE) Implement version comparison for base mpv
-    (DONE) Dependency downloader
-    (DONE) Replace placeholder titles
-    (DONE) Fix input.conf if needed -> Settings.inputConfig.reset(), Settings.Data.resetInputConfig
-    (DONE) On-screen logs: make it toggleble using a key and put it in the bottom right corner
-    (DONE) Logging, like into an actual file. Make it disabled by default though.
-    (DONE) Initial API for adding/removing menus
-    (DONE) Settings: Add useNativeNotifications: true; Implement in Utils.js
-    (DONE?) Finish Settings.mpvSettings.*
-    (DONE) Replace zenity/PWSH input with in-window input
-    (DONE) Find a way to restart mpv in-place
-    (DONE) Make Settings reload actually set properties
-    (DONE) Never actually restart mpv
-    (DONE) Add more log points
-    (DONE) Replace Shaders.json/Colors.json with Presets.json (Settings module)
     First time configuration wizard -> A bunch of menus basically, new module would be nice
     Advanced settings menu
-    (ALWAYS ONGOING) Update comments/documentation
-    (ALWAYS ONGOING) Move away from the util as much as possible
-
     Add h for help in menus
     Load subtitles via File Browser
-
-    Test everything again because of the try/catch wrapper!
+    Combine all UI-related code into one file (UI.js)
 
 IDEAS:
     Advanced settings, like the utility had before
-        BONUS IDEA: use PWSH on windows/zenity on linux for this
     FFI.js -> easympv-ffi.lua
+    On-screen-controls -> would ensure android compatibility and tablets in general
     https://github.com/rossy/mpv-repl/blob/master/repl.lua
 
 KNOWN ISSUES:
-    AUTOMATIC SHADERS DONT WORK???
+    AUTOMATIC SHADERS DONT WORK SOMETIMES
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 
