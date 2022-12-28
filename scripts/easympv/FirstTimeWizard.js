@@ -61,31 +61,51 @@ Wizard.Menus.Page1 = new MenuSystem.Menu(
         {
             title: "Open Wiki",
             item: "wiki",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup", true)
+                    Wizard.Menus.Page1.items.splice(0,1);
+                    Wizard.Menus.Page1.redrawMenu();
+                }
+            }
         },
         {
             title: "Continue",
             item: "continue",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Wizard.Menus.Page1.hideMenu();
+                    Wizard.Menus.Page2.showMenu();
+                }
+            }
         },
     ],
     undefined
 );
 
-Wizard.Menus.Page1.eventHandler = function (event, action) {
-    if (action == "wiki") {
-        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup", true)
-        Wizard.Menus.Page1.items.splice(0,1);
-        Wizard.Menus.Page1.redrawMenu()
-    }
-    if (action == "continue") {
-        Wizard.Menus.Page1.hideMenu();
-        Wizard.Menus.Page2.showMenu();
-    }
+Wizard.Menus.Page1.eventHandler = function (event, action) {};
+
+Wizard.Menus.Page2Options = {
+    PerformanceName: [
+        "Lowest / \"Potato\"",
+        "Laptop / integrated GPU",
+        "Desktop / good dedicated GPU"
+    ],
+    PerformanceDescription: [
+        "@br@0 placeholder@br@",
+        "@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@",
+        "@br@2 placeholder@br@"
+    ]
 };
 
 Wizard.Menus.Page2 = new MenuSystem.Menu(
     {
         title: "",
-        description: "X",
+        description: "Use the left/right arrow key to change an option.",
         selectedItemColor: menuColor,
         autoClose: 0,
     },
@@ -93,9 +113,23 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
         {
             title: "Performance Preset@us10@@br@",
             item: "toggle-performance",
-            description:
-                "Laptop / integrated GPU@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@",
+            description: Wizard.Menus.Page2Options.PerformanceName[1] + Wizard.Menus.Page2Options.PerformanceDescription[1],
             data: 1,
+            eventHandler: function(event,menu)
+            {
+                if (event == "enter") return;
+                if (event == "left" && this.data != 0)
+                {
+                    this.data = this.data - 1;
+                }
+                if (event == "right" && this.data != Wizard.Menus.Page2Options.PerformanceName.length-1)
+                {
+                    this.data = this.data + 1;
+                }
+                this.description = Wizard.Menus.Page2Options.PerformanceName[this.data];
+                this.description += Wizard.Menus.Page2Options.PerformanceDescription[this.data];
+                Wizard.Menus.Page2.redrawMenu();
+            }
         },
         {
             title: "Default Audio Language",
@@ -114,6 +148,16 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
         {
             title: "Continue",
             item: "continue",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Wizard.Menus.Page2.hideMenu();
+                    //TODO: create Page3: a few words about usage, set firsttime, save settings on close, then unblock()
+                    //Wizard.Menus.Page3.showMenu();
+                    unblock();
+                }
+            }
         },
     ],
     Wizard.Menus.Page1
@@ -127,23 +171,7 @@ Wizard.Menus.Page2.eventHandler = function (event, action) {
             if (Wizard.Menus.Page2.items[i].item == action)
             {item = Wizard.Menus.Page2.items[i]; break;}
         };
-        if (action == "toggle-performance") {
-            if (item.data == 0) {
-                item.description =
-                    "Laptop / integrated GPU";
-                item.data = 1;
-            } else if (item.data == 1) {
-                item.description =
-                    "Desktop / good dedicated GPU";
-                item.data = 2;
-            } else if (item.data == 2) {
-                item.description =
-                    'Lowest / "Potato"';
-                item.data = 0;
-            }
-            item.description += "@br@Choose this if your PC is old.@br@At this point you should probably use your phone instead.@br@"
-            Wizard.Menus.Page2.redrawMenu();
-        } else if (action == "toggle-audio-language") {
+        if (action == "toggle-audio-language") {
             if (item.data == 0) {
                 item.description =
                     'none';
@@ -180,10 +208,6 @@ Wizard.Menus.Page2.eventHandler = function (event, action) {
             item.description += "@br@Set to \"none\" to not display subtitles by default.@br@"
             Wizard.Menus.Page2.redrawMenu();
         } else if (action == "continue") {
-            Wizard.Menus.Page2.hideMenu();
-            //TODO: create Page3: a few words about usage, set firsttime, save settings on close, then unblock()
-            //Wizard.Menus.Page3.showMenu();
-            unblock();
         }
     }
 };
