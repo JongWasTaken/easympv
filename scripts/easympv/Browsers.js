@@ -16,9 +16,8 @@ There is a lot of spaghetti here, read at your own risk.
 Comments are also missing.
 ----------------------------------------------------------------*/
 
-var MenuSystem = require("./MenuSystem");
+var UI = require("./UI");
 var Utils = require("./Utils");
-var WindowSystem = require("./WindowSystem");
 var SSA = require("./SSAHelper");
 var Settings = require("./Settings");
 
@@ -327,7 +326,7 @@ Browsers.Selector.open = function (parentMenu) {
 
     Browsers.Selector.menuSettings.title = "Select Content Type";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
-    Browsers.Selector.menu = new MenuSystem.Menu(
+    Browsers.Selector.menu = new UI.Menu(
         Browsers.Selector.menuSettings,
         items,
         parentMenu
@@ -481,9 +480,9 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
         }
 
         if (isFolder) {
-            if (Settings.Data["FileBrowserFavorites"].locations.indexOf(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item) == -1)
+            if (Settings.Data["fileBrowserFavorites"].locations.indexOf(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item) == -1)
             {
-                Settings.Data["FileBrowserFavorites"].locations.push(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item);
+                Settings.Data["fileBrowserFavorites"].locations.push(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item);
                 Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
                 Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
                 Settings.save();
@@ -775,16 +774,16 @@ Browsers.FileBrowser.open = function (parentMenu) {
             if (event == "enter")
             {
                 var favItems = [];
-                for (var i = 0; i < Settings.Data["FileBrowserFavorites"].locations.length; i++)
+                for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++)
                 {
                     favItems.push({
-                        title: SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["FileBrowserFavorites"].locations[i],
-                        item: Settings.Data["FileBrowserFavorites"].locations[i],
+                        title: SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["fileBrowserFavorites"].locations[i],
+                        item: Settings.Data["fileBrowserFavorites"].locations[i],
                         color: "FFFF90"
                     });
                 }
 
-                var favMenu = new MenuSystem.Menu({
+                var favMenu = new UI.Menu({
                     title: "File Browser",
                     description: "Use the \"right\" action to remove an entry."
                 },favItems,Browsers.FileBrowser.menu);
@@ -799,10 +798,10 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     }
                     if(event == "right")
                     {
-                        var pos = Settings.Data["FileBrowserFavorites"].locations.indexOf(item);
+                        var pos = Settings.Data["fileBrowserFavorites"].locations.indexOf(item);
                         if (pos != -1)
                         {
-                            Settings.Data["FileBrowserFavorites"].locations.splice(pos,1);
+                            Settings.Data["fileBrowserFavorites"].locations.splice(pos,1);
                             favMenu.items.splice(pos+1,1);
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
@@ -819,7 +818,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     });
 
-    Browsers.FileBrowser.menu = new MenuSystem.Menu(
+    Browsers.FileBrowser.menu = new UI.Menu(
         Browsers.FileBrowser.menuSettings,
         items,
         parentMenu
@@ -940,7 +939,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
     Browsers.DriveBrowser.menuMode = "list";
     Browsers.DriveBrowser.menuSettings.title = "Drive Browser";
     Browsers.DriveBrowser.menuSettings.description = "Select a drive to open.";
-    Browsers.DriveBrowser.menu = new MenuSystem.Menu(
+    Browsers.DriveBrowser.menu = new UI.Menu(
         Browsers.DriveBrowser.menuSettings,
         items,
         parentMenu
@@ -1021,7 +1020,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
     Browsers.DeviceBrowser.menuSettings.title = "Device Browser";
     Browsers.DeviceBrowser.menuSettings.description =
         "Select a device to open.@br@Important: If you play a file after playing a device, there might be issues.@br@ It is recommended to restart mpv first!";
-    Browsers.DeviceBrowser.menu = new MenuSystem.Menu(
+    Browsers.DeviceBrowser.menu = new UI.Menu(
         Browsers.DeviceBrowser.menuSettings,
         items,
         parentMenu

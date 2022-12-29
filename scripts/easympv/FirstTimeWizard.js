@@ -8,7 +8,8 @@
  * This module is very WIP and basically the last puzzle piece before this project can go stable.
  */
 
-var MenuSystem = require("./MenuSystem");
+var Settings = require("./Settings");
+var UI = require("./UI");
 var Utils = require("./Utils");
 
 var Wizard = {};
@@ -46,12 +47,12 @@ var title = function (n1,n2) {
     return "easympv Initial Setup - Page " + n1 + "/" + n2;
 }
 
-Wizard.Menus.Page1 = new MenuSystem.Menu(
+Wizard.Menus.Page1 = new UI.Menu(
     {
         title: "",
         description:
             "Thank you for trying out easympv!@br@" +
-            "Since this is the first time easympv has been loaded, we will have to set a few settings.@br@" + 
+            "Since this is the first time easympv has been loaded, we will have to set a few settings.@br@" +
             "You can navigate menus like this one using the mousewheel or arrow keys and enter.@br@" +
             "For more information visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Setup",
         selectedItemColor: menuColor,
@@ -96,16 +97,20 @@ Wizard.Menus.Page2Options = {
         "Desktop / good dedicated GPU"
     ],
     PerformanceDescription: [
-        "@br@0 placeholder@br@",
-        "@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@",
-        "@br@2 placeholder@br@"
-    ]
+        "@br@Choose this if your PC is old.@br@At this point you should probably use your phone instead.@br@",
+        "@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@@br@",
+        "@br@Choose this preset if your PC can play videogames well.@br@@br@"
+    ],
+    AudioLanguageNames: [ "none", "Japanese", "English", "German" ],
+    AudioLanguageDescription: "@br@Set to \"none\" to use the default language specified by a video file.@br@",
+    SubLanguageNames: [ "none", "English", "German" ],
+    SubLanguageDescription: "@br@Set to \"none\" to not display subtitles by default.@br@"
 };
 
-Wizard.Menus.Page2 = new MenuSystem.Menu(
+Wizard.Menus.Page2 = new UI.Menu(
     {
         title: "",
-        description: "Use the left/right arrow key to change an option.",
+        description: "(IMPORTANT: These options do not actually work yet. Please edit config files manually for now!)@br@Use the left/right arrow key to change an option.",
         selectedItemColor: menuColor,
         autoClose: 0,
     },
@@ -134,16 +139,44 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
         {
             title: "Default Audio Language",
             item: "toggle-audio-language",
-            description:
-                'none@br@Set to "none" to use the default language specified by a video file.@br@',
+            description: Wizard.Menus.Page2Options.AudioLanguageNames[1] + Wizard.Menus.Page2Options.AudioLanguageDescription,
             data: 1,
+            eventHandler: function(event,menu)
+            {
+                if (event == "enter") return;
+                if (event == "left" && this.data != 0)
+                {
+                    this.data = this.data - 1;
+                }
+                if (event == "right" && this.data != Wizard.Menus.Page2Options.AudioLanguageNames.length-1)
+                {
+                    this.data = this.data + 1;
+                }
+                this.description = Wizard.Menus.Page2Options.AudioLanguageNames[this.data];
+                this.description += Wizard.Menus.Page2Options.AudioLanguageDescription;
+                Wizard.Menus.Page2.redrawMenu();
+            }
         },
         {
             title: "Default Subtitle Language@us10@@br@",
             item: "toggle-sub-language",
-            description:
-                'none@br@Set to "none" to not display subtitles by default.@br@',
+            description: Wizard.Menus.Page2Options.SubLanguageNames[1] + Wizard.Menus.Page2Options.SubLanguageDescription,
             data: 1,
+            eventHandler: function(event,menu)
+            {
+                if (event == "enter") return;
+                if (event == "left" && this.data != 0)
+                {
+                    this.data = this.data - 1;
+                }
+                if (event == "right" && this.data != Wizard.Menus.Page2Options.SubLanguageNames.length-1)
+                {
+                    this.data = this.data + 1;
+                }
+                this.description = Wizard.Menus.Page2Options.SubLanguageNames[this.data];
+                this.description += Wizard.Menus.Page2Options.SubLanguageDescription;
+                Wizard.Menus.Page2.redrawMenu();
+            }
         },
         {
             title: "Continue",
@@ -153,9 +186,7 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
                 if (event == "enter")
                 {
                     Wizard.Menus.Page2.hideMenu();
-                    //TODO: create Page3: a few words about usage, set firsttime, save settings on close, then unblock()
-                    //Wizard.Menus.Page3.showMenu();
-                    unblock();
+                    Wizard.Menus.Page3.showMenu();
                 }
             }
         },
@@ -163,59 +194,49 @@ Wizard.Menus.Page2 = new MenuSystem.Menu(
     Wizard.Menus.Page1
 );
 
-Wizard.Menus.Page2.eventHandler = function (event, action) {
-    if (event == "enter") {
-        var item;
-        for (var i = 0; i < Wizard.Menus.Page2.items.length;i++)
+Wizard.Menus.Page2.eventHandler = function (event, action) {};
+
+Wizard.Menus.Page3 = new UI.Menu(
+    {
+        title: "",
+        description: "Placeholder: Closing this menu will set \"isFirstLaunch\" to \"false\".",
+        selectedItemColor: menuColor,
+        autoClose: 0,
+    },
+    [
         {
-            if (Wizard.Menus.Page2.items[i].item == action)
-            {item = Wizard.Menus.Page2.items[i]; break;}
-        };
-        if (action == "toggle-audio-language") {
-            if (item.data == 0) {
-                item.description =
-                    'none';
-                item.data = 1;
-            } else if (item.data == 1) {
-                item.description =
-                    'Japanese';
-                item.data = 2;
-            } else if (item.data == 2) {
-                item.description =
-                    'English';
-                item.data = 3;
-            } else if (item.data == 3) {
-                item.description =
-                    'German';
-                item.data = 0;
+            title: "Finish",
+            item: "finish",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Wizard.Menus.Page3.hideMenu();
+                    //TODO: save settings
+
+                    Settings.Data["isFirstLaunch"] = false;
+
+                    //Wizard.Menus.Page2.items[1].data; // performance preset
+                    //Wizard.Menus.Page2.items[2].data; // audio language
+                    //Wizard.Menus.Page2.items[3].data; // sub language
+
+                    Settings.save();
+                    unblock();
+                }
             }
-            item.description += "@br@Set to \"none\" to use the default language specified by a video file.@br@";
-            Wizard.Menus.Page2.redrawMenu();
-        } else if (action == "toggle-sub-language") {
-            if (item.data == 0) {
-                item.description =
-                    'none';
-                item.data = 1;
-            } else if (item.data == 1) {
-                item.description =
-                    'English';
-                item.data = 2;
-            } else if (item.data == 2) {
-                item.description =
-                    'German';
-                item.data = 0;
-            }
-            item.description += "@br@Set to \"none\" to not display subtitles by default.@br@"
-            Wizard.Menus.Page2.redrawMenu();
-        } else if (action == "continue") {
-        }
-    }
-};
+        },
+    ],
+    Wizard.Menus.Page2
+);
+
+Wizard.Menus.Page3.eventHandler = function (event, action) {};
 
 Wizard.Start = function () {
-    var pageTotal = Object.keys(Wizard.Menus).length;
+    Settings.load();
+    var pageTotal = Object.keys(Wizard.Menus).length-1;
     Wizard.Menus.Page1.settings.title = title(1,pageTotal);
     Wizard.Menus.Page2.settings.title = title(2,pageTotal);
+    Wizard.Menus.Page3.settings.title = title(3,pageTotal);
     // disable all menus keys
     var bindings = JSON.parse(mp.get_property("input-bindings"));
     var keysToBlock = [];

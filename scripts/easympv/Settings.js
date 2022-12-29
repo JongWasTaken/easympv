@@ -49,7 +49,7 @@ Settings.Data = {
     notifyAboutUpdates: true,
     debugMode: false,
     saveFullLog: false,
-    FileBrowserFavorites: { locations: [] },
+    fileBrowserFavorites: { locations: [] },
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
@@ -220,7 +220,7 @@ Settings.save = function () {
             "# List of favorite'd folders in the File Browser.\n";
         defaultConfigString +=
             "# This should be a valid JSON array. Default: {\"locations\":[]}\n";
-        defaultConfigString += "FileBrowserFavorites=x\n";
+        defaultConfigString += "fileBrowserFavorites=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# The currently installed version of easympv.\n";

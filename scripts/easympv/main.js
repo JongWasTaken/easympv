@@ -114,8 +114,8 @@ var Chapters = require("./Chapters");
 var Colors = require("./Colors");
 var Core = require("./Core");
 var Wizard = require("./FirstTimeWizard");
-var ImageOSD = require("./ImageOSD");
-var MenuSystem = require("./MenuSystem");
+//var ImageOSD = require("./ImageOSD");
+var UI = require("./UI");
 var OS = require("./OS");
 var Settings = require("./Settings");
 var Shaders = require("./Shaders");
@@ -126,6 +126,7 @@ var WindowSystem = require("./WindowSystem");
 var Environment = {};
 Environment.isDebug = mp.utils.getenv("EASYMPV_DEBUG") == undefined ? false : true;
 Environment.BrowserWorkDir = mp.utils.getenv("EASYMPV_BROWSER_WORKDIR");
+Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");
 
 var errorCounter = 0;
 

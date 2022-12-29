@@ -110,7 +110,7 @@ Core.onShutdown = function () {
 };
 
 var redrawMenus = function () {
-    var currentmenu = MenuSystem.getDisplayedMenu();
+    var currentmenu = UI.getDisplayedMenu();
     if (currentmenu != undefined) {
         currentmenu.hideMenu();
         currentmenu.showMenu();
@@ -120,7 +120,7 @@ var redrawMenus = function () {
 Core.doRegistrations = function () {
     var handleMenuKeypress = function () {
         Utils.log("Menu key pressed!");
-        var currentmenu = MenuSystem.getDisplayedMenu();
+        var currentmenu = UI.getDisplayedMenu();
         if (currentmenu != undefined) {
             currentmenu.hideMenu();
             return;
@@ -155,14 +155,14 @@ Core.doRegistrations = function () {
         mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
     }
 
-    mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", Utils.showInteractiveCommandInput);
+    mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", UI.Input.showInteractiveCommandInput);
     mp.add_forced_key_binding("Ctrl+Alt+`", "empv_log_hotkey", function () {
-        if (Utils.OSDLog.OSD == undefined)
+        if (UI.Input.OSDLog.OSD == undefined)
         {
-            Utils.OSDLog.show();
+            UI.Input.OSDLog.show();
         return;
         }
-        Utils.OSDLog.hide();
+        UI.Input.OSDLog.hide();
     });
     mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
         var readCommand = function (success, result) {
@@ -183,7 +183,7 @@ Core.doRegistrations = function () {
                 }
             }
         };
-        Utils.Input.show(readCommand,"JavaScript expression: ");
+        UI.Input.show(readCommand,"JavaScript expression: ");
     });
 
     // Registering functions to events
@@ -214,7 +214,7 @@ Core.doUnregistrations = function () {
     mp.remove_key_binding("empv_log_hotkey");
     mp.remove_key_binding("empv_eval_hotkey");
 
-    mp.unregister_event(Utils.OSDLog.addToBuffer);
+    mp.unregister_event(UI.Input.OSDLog.addToBuffer);
     mp.unregister_event(Core.onFileLoad);
     mp.unregister_event(Core.onShutdown);
     mp.unregister_event(API.handleIncomingJSON);
@@ -318,8 +318,8 @@ Core.defineMenus = function () {
             item: "shaders",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    //MenuSystem.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                    MenuSystem.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                    //UI.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+                    UI.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
                 }
             }
         },
@@ -328,7 +328,7 @@ Core.defineMenus = function () {
             item: "colors",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    MenuSystem.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
+                    UI.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
                 }
             }
         },
@@ -337,7 +337,7 @@ Core.defineMenus = function () {
             item: "chapters",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    MenuSystem.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
+                    UI.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
                 }
             }
         },
@@ -346,7 +346,7 @@ Core.defineMenus = function () {
             item: "options",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    MenuSystem.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
+                    UI.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
                 }
             }
         },
@@ -382,7 +382,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.MainMenu = new MenuSystem.Menu(MainMenuSettings, MainMenuItems, undefined);
+    Core.Menus.MainMenu = new UI.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
@@ -485,7 +485,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ShadersMenu = new MenuSystem.Menu(
+    Core.Menus.ShadersMenu = new UI.Menu(
         ShadersMenuSettings,
         ShadersMenuItems,
         Core.Menus.MainMenu
@@ -586,7 +586,7 @@ Core.defineMenus = function () {
         },
     ];
 
-    Core.Menus.ChaptersMenu = new MenuSystem.Menu(
+    Core.Menus.ChaptersMenu = new UI.Menu(
         ChaptersMenuSettings,
         ChaptersMenuItems,
         Core.Menus.MainMenu
@@ -675,7 +675,7 @@ Core.defineMenus = function () {
                     menu.hideMenu();
 
                     var updateConfirmation = false;
-                    var umenu = new MenuSystem.Menu(
+                    var umenu = new UI.Menu(
                         {
                             title: "Update",
                             autoClose: "0",
@@ -754,7 +754,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var cmenu = new MenuSystem.Menu(
+                    var cmenu = new UI.Menu(
                         {
                             title: "Credits",
                             autoClose: "0",
@@ -842,7 +842,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var buffer = Utils.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
+                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
                     buffer.reverse();
                     mp.utils.write_file(
                         "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
@@ -858,11 +858,11 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    if (Utils.OSDLog.OSD == undefined) {
-                        Utils.OSDLog.show();
+                    if (UI.Input.OSDLog.OSD == undefined) {
+                        UI.Input.OSDLog.show();
                         return;
                     }
-                    Utils.OSDLog.hide();
+                    UI.Input.OSDLog.hide();
                 }
             }
         },
@@ -907,7 +907,7 @@ Core.defineMenus = function () {
         },
     */
 
-    Core.Menus.SettingsMenu = new MenuSystem.Menu(
+    Core.Menus.SettingsMenu = new UI.Menu(
         SettingsMenuSettings,
         SettingsMenuItems,
         Core.Menus.MainMenu
@@ -1012,7 +1012,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ColorsMenu = new MenuSystem.Menu(
+    Core.Menus.ColorsMenu = new UI.Menu(
         ColorsMenuSettings,
         ColorsMenuItems,
         Core.Menus.MainMenu
@@ -1157,7 +1157,7 @@ Core.startExecution = function () {
     {
         mp.enable_messages("info");
     }
-    mp.register_event("log-message", Utils.OSDLog.addToBuffer);
+    mp.register_event("log-message", UI.Input.OSDLog.addToBuffer);
 
     Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
 
