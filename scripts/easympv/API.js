@@ -14,7 +14,7 @@
  */
 var API = {};
 
-var Menus = require("./MenuSystem");
+var UI = require("./UI");
 var Utils = require("./Utils");
 
 API.foreignMenus = {};
@@ -23,11 +23,11 @@ var Impl_createmenu = function (json) {
     try {
         if (API.foreignMenus[json.context] == undefined) {
             var root = {};
-            for (var i = 0; i < Menus.registeredMenus.length; i++)
+            for (var i = 0; i < UI.registeredMenus.length; i++)
             {
-                if (Menus.registeredMenus[i].settings.image == "logo")
+                if (UI.registeredMenus[i].settings.image == "logo")
                 {
-                    root = Menus.registeredMenus[i];
+                    root = UI.registeredMenus[i];
                     break;
                 }
             }
@@ -40,21 +40,21 @@ var Impl_createmenu = function (json) {
             {
                 json.arguments.menuDescription = "Added by " + json.sender;
             }
-        
+
             root.items.splice(root.items.length-1, 0, {
                 "title": json.arguments.menuName,
                 "item": json.context,
                 "description": json.arguments.menuDescription
             });
-        
-            var menu = new Menus.Menu(json.arguments.menuSettings,json.arguments.menuItems,root);
-    
+
+            var menu = new UI.Menu(json.arguments.menuSettings,json.arguments.menuItems,root);
+
             menu.foreign = {};
             menu.foreign.owner = json.sender;
             menu.foreign.context = json.context;
-    
+
             API.foreignMenus[json.context] = menu;
-    
+
             menu.eventHandler = function (event, action) {
                 var res = {
                     "sender": "easympv",
@@ -77,25 +77,25 @@ var Impl_createmenu = function (json) {
 }
 
 API.openForeignMenu = function(action) {
-    var current = Menus.getDisplayedMenu();
+    var current = UI.getDisplayedMenu();
     if (current != undefined) { current.hideMenu(); }
     if(API.foreignMenus[action] != undefined) {
         API.foreignMenus[action].showMenu();
     }
 }
 
-var Impl_removemenu = function (json) { 
+var Impl_removemenu = function (json) {
     try {
         var root = {};
-        for (var i = 0; i < Menus.registeredMenus.length; i++)
+        for (var i = 0; i < UI.registeredMenus.length; i++)
         {
-            if (Menus.registeredMenus[i].settings.image == "logo")
+            if (UI.registeredMenus[i].settings.image == "logo")
             {
-                root = Menus.registeredMenus[i];
+                root = UI.registeredMenus[i];
                 break;
             }
         }
-    
+
         var menu = API.foreignMenus[json.context];
         if (menu !== undefined)
         {
@@ -112,7 +112,7 @@ var Impl_removemenu = function (json) {
                 }
             }
         }
-    
+
         return "{\"result\":\"success\",\"context\":"+json.context+"}";
     }
     catch(z) {

@@ -11,15 +11,13 @@ The Utils.js module
 
 This file contains all the miscellaneous functions that
 don't really fit anywhere else, such as opening/executing files,
-hashing strings to MD5, operations on the watch_later folder,
-and other "nice to have" things.
+operations on the watch_later folder, and other "nice to have" things.
 ----------------------------------------------------------------*/
 
 "use strict";
 
 var Settings = require("./Settings");
 var Windows = require("./WindowSystem");
-var SSA = require("./SSAHelper");
 
 /**
  * Collection of miscellaneous functions used throughout all of easympv.
@@ -179,11 +177,11 @@ Utils.getLatestUpdateData = function () {
 };
 
 Utils.setDisplayVersion = function () {
-    Utils.displayVersion = SSA.setColorGreen() + Settings.Data.currentVersion;
-    Utils.displayVersionMpv = SSA.setColorGreen() + Utils.mpvVersion;
+    Utils.displayVersion = UI.SSA.setColorGreen() + Settings.Data.currentVersion;
+    Utils.displayVersionMpv = UI.SSA.setColorGreen() + Utils.mpvVersion;
     if (Utils.updateAvailable) {
         Utils.displayVersion =
-            SSA.setColorRed() +
+            UI.SSA.setColorRed() +
             Settings.Data.currentVersion +
             " (" +
             Settings.Data.newestVersion +
@@ -191,7 +189,7 @@ Utils.setDisplayVersion = function () {
     }
     if (Utils.updateAvailableMpv) {
         Utils.displayVersionMpv =
-            SSA.setColorRed() +
+            UI.SSA.setColorRed() +
             Utils.mpvVersion +
             " (" +
             Utils.mpvLatestVersion +

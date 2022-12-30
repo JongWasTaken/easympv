@@ -6,11 +6,254 @@
  * License:                 MIT License
  */
 
-var SSA = require("./SSAHelper");
 var Utils = require("./Utils");
 var Settings = require("./Settings");
 
 var UI = {};
+
+/*----------------------------------------------------------------
+CLASS: UI.SSA
+DESCRIPTION:
+    This static class provides helpers for SubStationAlpha tags.
+USAGE:
+    (TODO)
+----------------------------------------------------------------*/
+
+UI.SSA = {};
+
+UI.SSA.startSequence = function () {
+    return mp.get_property_osd("osd-ass-cc/0");
+};
+
+UI.SSA.endSequence = function () {
+    return mp.get_property_osd("osd-ass-cc/1");
+};
+
+UI.SSA.setBold = function (bold) {
+    if (bold)
+    {
+        return "{\\b1}";
+    }
+    return "{\\b0}";
+}
+
+UI.SSA.setSize = function (fontSize) {
+    return "{\\fs" + fontSize + "}";
+};
+
+UI.SSA.setScale = function (scalePercent) {
+    return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
+};
+
+UI.SSA.setTransparency = function (transparencyHex) {
+    return "{\\alpha&H" + transparencyHex + "&}";
+};
+
+UI.SSA.setTransparencyPercentage = function (transparencyPercentage) {
+    var transparencyHex = Math.floor(
+        (transparencyPercentage / 100) * 255
+    ).toString(16);
+    return "{\\alpha&H" + transparencyHex + "&}";
+};
+
+UI.SSA.drawRaw = function (commands) {
+    return "{\\p1}" + commands + "{\\p0}";
+};
+
+UI.SSA.setPosition = function (x, y) {
+    var s = "{\\pos(" + x + "," + y + ")}";
+    return s;
+};
+
+UI.SSA.move = function (x, y) {
+    var s = "{\\p1} ";
+    s += "m " + x + " " + y + "{\\p0}";
+    return s;
+};
+
+UI.SSA.drawRectangle = function (x1, y1, x2, y2) {
+    var s = "{\\p1} ";
+    s += "m " + x1 + " " + y1 + " ";
+    s += "l " + x2 + " " + y1 + " ";
+    s += "l " + x2 + " " + y2 + " ";
+    s += "l " + x1 + " " + y2 + "{\\p0}";
+    return s;
+};
+
+UI.SSA.drawLine = function (x1, y1, x2, y2) {
+    var s = "{\\p1} ";
+    s += "m " + x1 + " " + y1 + " ";
+    s += "l " + x2 + " " + y2 + "{\\p0}";
+    return s;
+};
+
+UI.SSA.setFont = function (font) {
+    return "{\\fn" + font + "}";
+};
+
+UI.SSA.setBorder = function (border) {
+    return "{\\bord" + border + "}";
+};
+
+UI.SSA.setShadow = function (depth) {
+    return "{\\shad" + depth + "}";
+};
+
+/** Inserts given Font Awesome symbol with given size, then sets font back to Roboto.
+ * @returns {string} SSA string
+ * */
+UI.SSA.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
+    var font = "Font Awesome 6 Free Solid";
+
+    if (fontNameAfter == undefined) {
+        fontNameAfter = "Roboto";
+    }
+
+    if (size != undefined && defaultSize != undefined) {
+        return (
+            UI.SSA.setSize(size) +
+            UI.SSA.setFont(font) +
+            symbol +
+            UI.SSA.setFont(fontNameAfter) +
+            UI.SSA.setSize(defaultSize)
+        );
+    } else {
+        return (
+            UI.SSA.setFont(font) + symbol + UI.SSA.setFont(fontNameAfter)
+        );
+    }
+};
+
+UI.SSA.setColor = function (hex) {
+    return (
+        "{\\1c&H" +
+        hex.substring(4, 6) +
+        hex.substring(2, 4) +
+        hex.substring(0, 2) +
+        "&}"
+    );
+};
+
+UI.SSA.setSecondaryColor = function (hex) {
+    return (
+        "{\\2c&H" +
+        hex.substring(4, 6) +
+        hex.substring(2, 4) +
+        hex.substring(0, 2) +
+        "&}"
+    );
+};
+
+UI.SSA.setBorderColor = function (hex) {
+    return (
+        "{\\3c&H" +
+        hex.substring(4, 6) +
+        hex.substring(2, 4) +
+        hex.substring(0, 2) +
+        "&}"
+    );
+};
+
+UI.SSA.setShadowColor = function (hex) {
+    return (
+        "{\\4c&H" +
+        hex.substring(4, 6) +
+        hex.substring(2, 4) +
+        hex.substring(0, 2) +
+        "&}"
+    );
+};
+
+UI.SSA.reset = function () {
+    return "{\\r}";
+};
+
+UI.SSA.setColorWhite = function () {
+    return UI.SSA.setColor("FFFFFF");
+};
+
+UI.SSA.setColorGray = function () {
+    return UI.SSA.setColor("909090");
+};
+
+UI.SSA.setColorYellow = function () {
+    return UI.SSA.setColor("FFFF90");
+};
+
+UI.SSA.setColorGreen = function () {
+    return UI.SSA.setColor("33ff33");
+};
+
+UI.SSA.setColorDarkRed = function () {
+    return UI.SSA.setColor("EB4034");
+};
+
+UI.SSA.setColorRed = function () {
+    return UI.SSA.setColor("FF3300");
+};
+
+UI.SSA.setColorBlack = function () {
+    return UI.SSA.setColor("000000");
+};
+
+/**
+ * Using https://qgustavor.github.io/svg2ass-gui/ , any svg file can
+ * be displayed. However mpv has a quirk with this, files that consist
+ * of multiple shapes will be missaligned. Those same lines will look
+ * perfect in AegiSub.
+ * This is why all images here are a single shape/SSA draw command.
+ */
+UI.SSA.Images = {};
+
+/** Blue round info symbol. */
+UI.SSA.Images.info = function () {
+    var symbol = "";
+    symbol +=
+        "{\\an7\\1c&HF39621&\\bord2\\shad0\\p1}m 24 4 b 13 4 4 13 4 24 b 4 35 13 44 24 44 b 35 44 44 35 44 24 b 44 13 35 4 24 4 ";
+    symbol +=
+        "m 24 14 b 25.4 14 26.5 15.1 26.5 16.5 b 26.5 17.9 25.4 19 24 19 b 22.6 19 21.5 17.9 21.5 16.5 b 21.5 15.1 22.6 14 24 14 ";
+    symbol += "m 22 22 l 26 22 l 26 33 l 22 33 l 22 22 {\\p0}";
+    return symbol + UI.SSA.reset();
+};
+
+/** Yellow triangular warning symbol. */
+UI.SSA.Images.warning = function () {
+    var symbol = "";
+    symbol +=
+        "{\\an7\\1c&H1CEEFD&\\bord2\\shad0\\p1}m 58.1 0.3 b 56.2 0.6 54.6 1.7 53.6 3.3 l 1 94.5 b -0.1 96.4 -0.1 98.8 1 100.8 ";
+    symbol +=
+        "b 2.1 102.7 4.2 103.9 6.5 103.9 l 111.7 103.9 b 114 103.9 116.1 102.7 117.2 100.8 b 118.3 98.8 118.3 96.4 117.2 94.5 ";
+    symbol += "l 64.5 3.3 b 63.2 1.1 60.7 -0.1 58.1 0.3 ";
+    symbol +=
+        "m 58.6 2.9 b 57.6 3 56.7 3.6 56.2 4.5 l 3.2 96.3 b 2.7 97.3 2.7 98.6 3.2 99.6 b 3.8 100.6 4.9 101.3 6.1 101.3 l 112.1 101.3 b ";
+    symbol +=
+        "113.3 101.3 114.4 100.6 115 99.6 b 115.6 98.6 115.6 97.3 115 96.3 l 62 4.5 b 61.3 3.3 60 2.7 58.6 2.9 m 59.1 13.4 l 104.1 92.7 l 14 92.7 l 59.1 13.4 ";
+    symbol +=
+        "m 62.6 83 b 62.6 85.6 60.5 87.7 57.9 87.7 b 55.3 87.7 53.2 85.6 53.2 83 b 53.2 80.4 55.3 78.3 57.9 78.3 b 60.5 78.3 62.6 80.4 62.6 83 ";
+    symbol +=
+        "m 56.1 39.1 l 59.8 39.1 b 61.7 39.1 63.2 41.4 63.2 44.3 l 61.6 67.9 b 61.6 70.8 60.1 73.1 58.2 73.1 l 57.7 73.1 ";
+    symbol +=
+        "b 55.8 73.1 54.3 70.8 54.3 67.9 l 52.7 44.3 b 52.7 41.4 54.2 39.1 56.1 39.1 {\\p0}";
+    return symbol + UI.SSA.reset();
+};
+
+/** Red round error symbol. */
+UI.SSA.Images.error = function () {
+    var symbol = "";
+    symbol +=
+        "{\\an7\\1c&H0000EC&\\bord2.8\\shad0\\p1}m 128 2 b 58.5 2 2 58.5 2 128 b 2 197.5 58.5 254 128 254 b 197.5 254 254 197.5 254 128 ";
+    symbol +=
+        "b 254 58.5 197.5 2 128 2 m 82.9 68.9 b 86.5 68.9 90.1 70.3 92.8 73 l 128 108.2 l 163.2 73 b 165.9 70.3 169.5 68.9 173.1 68.9 b 176.7 68.9 180.3 70.3 183 73 ";
+    symbol +=
+        "b 188.5 78.5 188.5 87.3 183 92.8 l 147.8 128 l 183 163.2 b 188.5 168.7 188.5 177.5 183 183 ";
+    symbol +=
+        "b 180.3 185.7 176.7 187.1 173.1 187.1 b 169.5 187.1 165.9 185.7 163.2 183 l 128 147.8 l 92.8 183 ";
+    symbol +=
+        "b 90.1 185.7 86.5 187.1 82.9 187.1 b 79.3 187.1 75.7 185.7 73 183 b 67.5 177.5 67.5 168.7 73 163.2 ";
+    symbol +=
+        "l 108.2 128 l 73 92.8 b 67.5 87.3 67.5 78.5 73 73 b 75.7 70.3 79.3 68.9 82.9 68.9 {\\p0}";
+    return symbol + UI.SSA.reset();
+};
 
 /*----------------------------------------------------------------
 CLASS: UI.Image
@@ -511,12 +754,12 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = SSA.insertSymbolFA(
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(
             "",
             this.settings.fontSize - 3,
             this.settings.fontSize
         ) +
-        SSA.setFont(this.settings.fontName) +
+        UI.SSA.setFont(this.settings.fontName) +
         " Back@br@@br@";
     }
 
@@ -558,7 +801,7 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.itemPrefix != undefined) {
         this.settings.itemPrefix = settings.itemPrefix + " ";
     } else {
-        this.settings.itemPrefix = SSA.insertSymbolFA(
+        this.settings.itemPrefix = UI.SSA.insertSymbolFA(
             " ",
             this.settings.fontSize - 2,
             this.settings.fontSize,
@@ -581,7 +824,7 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.itemSuffix != undefined) {
         this.settings.itemSuffix = settings.itemSuffix;
     } else {
-        this.settings.itemSuffix = SSA.insertSymbolFA(
+        this.settings.itemSuffix = UI.SSA.insertSymbolFA(
             " ",
             this.settings.fontSize - 2,
             this.settings.fontSize
@@ -868,15 +1111,15 @@ UI.Menu.prototype._constructMenuCache = function () {
     this.cachedMenuText = "";
     if (this.settings.displayMethod == "message") {
         var border =
-            SSA.setBorderColor(this.settings.borderColor) +
-            SSA.setBorder(this.settings.borderSize - 2);
+            UI.SSA.setBorderColor(this.settings.borderColor) +
+            UI.SSA.setBorder(this.settings.borderSize - 2);
 
         this.cachedMenuText +=
-            SSA.startSequence() +
-            SSA.setTransparencyPercentage(this.settings.transparency) +
+            UI.SSA.startSequence() +
+            UI.SSA.setTransparencyPercentage(this.settings.transparency) +
             border;
-        this.cachedMenuText += SSA.setFont(this.settings.fontName);
-        this.cachedMenuText += SSA.setSize(this.settings.fontSize);
+        this.cachedMenuText += UI.SSA.setFont(this.settings.fontName);
+        this.cachedMenuText += UI.SSA.setSize(this.settings.fontSize);
 
         // Title
         var title = this.settings.title;
@@ -894,20 +1137,20 @@ UI.Menu.prototype._constructMenuCache = function () {
             }
         }
         this.cachedMenuText +=
-            SSA.setSize(this.settings.fontSize + 2) +
-            SSA.setColor(this.settings.titleColor) +
-            SSA.setFont(this.settings.titleFont) +
+            UI.SSA.setSize(this.settings.fontSize + 2) +
+            UI.SSA.setColor(this.settings.titleColor) +
+            UI.SSA.setFont(this.settings.titleFont) +
             title +
-            SSA.setSize(this.settings.fontSize) +
+            UI.SSA.setSize(this.settings.fontSize) +
             "\n \n";
 
         // Description
         if (this.settings.description != undefined) {
             this.cachedMenuText +=
-                SSA.setSize(this.settings.fontSize - 3) +
-                SSA.setColor(this.settings.descriptionColor) +
+                UI.SSA.setSize(this.settings.fontSize - 3) +
+                UI.SSA.setColor(this.settings.descriptionColor) +
                 this.settings.description.replaceAll("@br@", "\n") +
-                SSA.setSize(this.settings.fontSize) +
+                UI.SSA.setSize(this.settings.fontSize) +
                 "\n \n";
         }
 
@@ -959,26 +1202,26 @@ UI.Menu.prototype._constructMenuCache = function () {
             var description = "";
 
             if (currentItem.color != undefined) {
-                color = SSA.setColor(currentItem.color);
+                color = UI.SSA.setColor(currentItem.color);
             } else {
-                color = SSA.setColor(this.settings.itemColor);
+                color = UI.SSA.setColor(this.settings.itemColor);
             }
 
             if (currentItem.description != undefined) {
                 description =
-                    SSA.setSize(this.settings.fontSize - 5) +
+                    UI.SSA.setSize(this.settings.fontSize - 5) +
                     color +
                     " " +
                     currentItem.description
                         .replaceAll("@br@", "\n")
                         .replaceAll("\n", "\n ") +
-                    SSA.setColorWhite() +
-                    SSA.setSize(this.settings.fontSize) +
+                    UI.SSA.setColorWhite() +
+                    UI.SSA.setSize(this.settings.fontSize) +
                     "\n";
             }
 
             if (this.selectedItemIndex - startItem == i) {
-                color = SSA.setColor(this.settings.selectedItemColor);
+                color = UI.SSA.setColor(this.settings.selectedItemColor);
                 title = this.settings.itemPrefix + title;
             }
 
@@ -999,8 +1242,8 @@ UI.Menu.prototype._constructMenuCache = function () {
             this.cachedMenuText +=
                 color +
                 title +
-                SSA.setSize(this.settings.fontSize) +
-                SSA.setColorWhite() +
+                UI.SSA.setSize(this.settings.fontSize) +
+                UI.SSA.setColorWhite() +
                 "\n" +
                 description;
             for (var q = 0; q != postItemActions.length; q++) {
@@ -1030,7 +1273,7 @@ UI.Menu.prototype._constructMenuCache = function () {
         }
 
         // End
-        this.cachedMenuText += SSA.endSequence();
+        this.cachedMenuText += UI.SSA.endSequence();
     }
 
     if (this.settings.displayMethod == "overlay") {
@@ -1042,11 +1285,11 @@ UI.Menu.prototype._constructMenuCache = function () {
          */
         var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage
         var transparency = this.settings.transparency;
-        var scale = SSA.setScale(scaleFactor);
+        var scale = UI.SSA.setScale(scaleFactor);
         var border =
-            SSA.setBorderColor(this.settings.borderColor) +
-            SSA.setBorder(this.settings.borderSize);
-        var font = SSA.setFont(this.settings.fontName);
+            UI.SSA.setBorderColor(this.settings.borderColor) +
+            UI.SSA.setBorder(this.settings.borderSize);
+        var font = UI.SSA.setFont(this.settings.fontName);
         var fontSize = this.settings.fontSize;
         var descriptionSizeModifier = -10;
         var currentLinePosition = 0;
@@ -1112,8 +1355,8 @@ UI.Menu.prototype._constructMenuCache = function () {
                 findLinePosition(positionType, customPositionModifier) +
                 border +
                 font +
-                SSA.setTransparencyPercentage(transparency) +
-                SSA.setSize(fontSize + fontSizeModifier);
+                UI.SSA.setTransparencyPercentage(transparency) +
+                UI.SSA.setSize(fontSize + fontSizeModifier);
             return s;
         };
 
@@ -1146,8 +1389,8 @@ UI.Menu.prototype._constructMenuCache = function () {
 
         this.cachedMenuText +=
             lineStart(0, 2) +
-            SSA.setColor(this.settings.titleColor) +
-            SSA.setFont(this.settings.titleFont) +
+            UI.SSA.setColor(this.settings.titleColor) +
+            UI.SSA.setFont(this.settings.titleFont) +
             title +
             lineEnd();
 
@@ -1157,13 +1400,13 @@ UI.Menu.prototype._constructMenuCache = function () {
             var mdLines = this.settings.description.split("@br@");
             mainDescription =
                 lineStart(2, descriptionSizeModifier) +
-                SSA.setColor(this.settings.descriptionColor) +
+                UI.SSA.setColor(this.settings.descriptionColor) +
                 mdLines[0] +
                 lineEnd();
             for (var i = 1; i < mdLines.length; i++) {
                 mainDescription +=
                     lineStart(0, descriptionSizeModifier) +
-                    SSA.setColor(this.settings.descriptionColor) +
+                    UI.SSA.setColor(this.settings.descriptionColor) +
                     mdLines[i] +
                     lineEnd();
             }
@@ -1217,13 +1460,13 @@ UI.Menu.prototype._constructMenuCache = function () {
             var description = "";
 
             if (currentItem.color != undefined) {
-                color = SSA.setColor(currentItem.color);
+                color = UI.SSA.setColor(currentItem.color);
             } else {
-                color = SSA.setColor(this.settings.itemColor);
+                color = UI.SSA.setColor(this.settings.itemColor);
             }
 
             if (this.selectedItemIndex - startItem == i) {
-                color = SSA.setColor(this.settings.selectedItemColor);
+                color = UI.SSA.setColor(this.settings.selectedItemColor);
                 title = this.settings.itemPrefix + title;
             }
 
@@ -1275,7 +1518,7 @@ UI.Menu.prototype._constructMenuCache = function () {
                 if (postItemActions[q].includes("@t")) {
                     this.cachedMenuText += lineStart(4, 0, 0.0005);
                     this.cachedMenuText +=
-                        SSA.setSize(this.settings.fontSize - 9) +
+                        UI.SSA.setSize(this.settings.fontSize - 9) +
                         postItemActions[q]
                             .replaceAll("@t", "")
                             .replaceAll("@", "");
@@ -1567,7 +1810,7 @@ UI.Input.isShown = false;
 UI.Input.Buffer = "";
 UI.Input.Position = 0;
 UI.Input.OSD = undefined;
-UI.Input.TextSettings = SSA.setBorder(2) + SSA.setFont("Roboto");
+UI.Input.TextSettings = UI.SSA.setBorder(2) + UI.SSA.setFont("Roboto");
 UI.Input.InputPrefix = "";
 UI.Input.Prefix = "";
 
@@ -1791,14 +2034,14 @@ UI.Input.show = function (callback, prefix) {
         UI.Input.InputPrefix = "Input: ";
     }
 
-    UI.Input.InputPrefix = SSA.setBold(true) + UI.Input.InputPrefix + UI.Input.TextSettings + SSA.setBold(false);
+    UI.Input.InputPrefix = UI.SSA.setBold(true) + UI.Input.InputPrefix + UI.Input.TextSettings + UI.SSA.setBold(false);
 
     UI.Input.Prefix =
-        SSA.setSize("24") + UI.Input.TextSettings +
+        UI.SSA.setSize("24") + UI.Input.TextSettings +
         "Press Enter to submit your Input. Press ESC to abort.\n" +
-        SSA.setSize("24") + UI.Input.TextSettings +
+        UI.SSA.setSize("24") + UI.Input.TextSettings +
         "Press CTRL+V to paste.\n" +
-        SSA.setSize("32") + UI.Input.TextSettings;
+        UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)
     {
@@ -1894,19 +2137,19 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
     var color = "";
     if (msg.level == "debug")
     {
-        color = SSA.setColorGray();
+        color = UI.SSA.setColorGray();
     }
     if (msg.level == "info")
     {
-        color = SSA.setColorWhite();
+        color = UI.SSA.setColorWhite();
     }
     if (msg.level == "warn")
     {
-        color = SSA.setColorYellow();
+        color = UI.SSA.setColorYellow();
     }
     if (msg.level == "error")
     {
-        color = SSA.setColorRed();
+        color = UI.SSA.setColorRed();
     }
     if (UI.Input.OSDLog.BufferCounter > 150 && !Settings.Data.saveFullLog)
     {
@@ -1918,8 +2161,8 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
         var time = mp.get_property("time-pos");
         if (time == undefined) { time = "0.000000"; }
 
-        UI.Input.OSDLog.Buffer = SSA.setFont("Roboto") + SSA.setTransparency("3f") + color + SSA.setSize(16) + SSA.setBorder(0) + SSA.setBold(true) +
-            "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + SSA.setBold(false) + msg.text + "\n" + UI.Input.OSDLog.Buffer;
+        UI.Input.OSDLog.Buffer = UI.SSA.setFont("Roboto") + UI.SSA.setTransparency("3f") + color + UI.SSA.setSize(16) + UI.SSA.setBorder(0) + UI.SSA.setBold(true) +
+            "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + UI.SSA.setBold(false) + msg.text + "\n" + UI.Input.OSDLog.Buffer;
     }
     UI.Input.OSDLog.BufferCounter++;
 };

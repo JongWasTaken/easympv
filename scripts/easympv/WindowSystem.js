@@ -11,12 +11,11 @@
 The WindowSystem.js module
 
 This file was an attempt at creating full-fledged windows within
-mpv, but it is now on hold because of issues. 
+mpv, but it is now on hold because of issues.
 Currently it is only used to show alerts.
 ----------------------------------------------------------------*/
 
-var SSA = require("./SSAHelper");
-var OSD = require("./ImageOSD");
+var UI = require("./UI");
 var Utils = require("./Utils");
 
 var Windows = {};
@@ -177,21 +176,21 @@ Windows.Window.prototype._constructCaches = function () {
     this.cachedWindowContentText = "";
     this.cachedWindowEffectText = "";
 
-    this.cachedWindowBaseText += SSA.setTransparencyPercentage(
+    this.cachedWindowBaseText += UI.SSA.setTransparencyPercentage(
         this.settings.transparency
     );
-    this.cachedWindowContentText += SSA.setTransparencyPercentage(
+    this.cachedWindowContentText += UI.SSA.setTransparencyPercentage(
         this.settings.transparency
     );
-    this.cachedWindowEffectText += SSA.setTransparencyPercentage(
+    this.cachedWindowEffectText += UI.SSA.setTransparencyPercentage(
         this.settings.transparency
     );
 
-    this.cachedWindowBaseText += SSA.setBorder(0);
-    this.cachedWindowBaseText += SSA.setShadow(2);
-    this.cachedWindowBaseText += SSA.setBorderColor("ffffff");
-    this.cachedWindowBaseText += SSA.setShadowColor("000000");
-    this.cachedWindowBaseText += SSA.setSecondaryColor("000000");
+    this.cachedWindowBaseText += UI.SSA.setBorder(0);
+    this.cachedWindowBaseText += UI.SSA.setShadow(2);
+    this.cachedWindowBaseText += UI.SSA.setBorderColor("ffffff");
+    this.cachedWindowBaseText += UI.SSA.setShadowColor("000000");
+    this.cachedWindowBaseText += UI.SSA.setSecondaryColor("000000");
 
     // start draw mode
     this.cachedWindowBaseText += "{\\p1}";
@@ -225,9 +224,9 @@ Windows.Window.prototype._constructCaches = function () {
             (this.y1 + this.titleOffset - 5) +
             ")}";
         this.cachedWindowContentText +=
-            SSA.setBorder(0) +
-            SSA.setShadow(0) +
-            SSA.setColorBlack() +
+            UI.SSA.setBorder(0) +
+            UI.SSA.setShadow(0) +
+            UI.SSA.setColorBlack() +
             this.settings.title;
     }
     if (this.settings.item != undefined) {
@@ -235,11 +234,11 @@ Windows.Window.prototype._constructCaches = function () {
             this.cachedWindowContentText += this.settings.item.data;
         } else if (this.settings.item.type == "text") {
             var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8);
-            var scale = SSA.setScale(scaleFactor);
+            var scale = UI.SSA.setScale(scaleFactor);
             var border =
-                SSA.setBorderColor(this.settings.item.borderColor) +
-                SSA.setBorder(this.settings.item.borderSize);
-            var font = SSA.setFont(this.settings.item.fontName);
+                UI.SSA.setBorderColor(this.settings.item.borderColor) +
+                UI.SSA.setBorder(this.settings.item.borderSize);
+            var font = UI.SSA.setFont(this.settings.item.fontName);
             var fontSize = this.settings.item.fontSize;
             var currentLinePosition = 0;
             var descriptionSizeModifier = -10;
@@ -313,7 +312,7 @@ Windows.Window.prototype._constructCaches = function () {
                     findLinePosition(positionType, customPositionModifier) +
                     border +
                     font +
-                    SSA.setSize(fontSize + fontSizeModifier);
+                    UI.SSA.setSize(fontSize + fontSizeModifier);
                 return s;
             };
 
@@ -333,13 +332,13 @@ Windows.Window.prototype._constructCaches = function () {
             var mdLines = this.settings.item.text.split("@br@");
             text =
                 lineStart(2, descriptionSizeModifier) +
-                SSA.setColor(this.settings.item.color) +
+                UI.SSA.setColor(this.settings.item.color) +
                 mdLines[0] +
                 lineEnd();
             for (var i = 1; i < mdLines.length; i++) {
                 text +=
                     lineStart(0, descriptionSizeModifier) +
-                    SSA.setColor(this.settings.item.color) +
+                    UI.SSA.setColor(this.settings.item.color) +
                     mdLines[i] +
                     lineEnd();
             }
@@ -349,16 +348,16 @@ Windows.Window.prototype._constructCaches = function () {
             this.cachedWindowEffectText += this.settings.item.image;
             this.cachedWindowContentText += this.settings.item.text.replaceAll(
                 "@br@",
-                "\n" + SSA.setTransparencyPercentage(this.settings.transparency)
+                "\n" + UI.SSA.setTransparencyPercentage(this.settings.transparency)
             );
         }
     }
 
     if (this.settings.title != undefined) {
         this.cachedWindowEffectText +=
-            SSA.setBorder(1) +
-            SSA.setColorGreen() +
-            SSA.drawLine(
+            UI.SSA.setBorder(1) +
+            UI.SSA.setColorGreen() +
+            UI.SSA.drawLine(
                 this.x1,
                 this.y1 + this.titleOffset,
                 this.x2,
@@ -658,45 +657,45 @@ Windows.Alerts.show = function (type, line) {
     var message = "";
     var messageXPosition = osdWidth - (width + (xOffset + 100));
     
-    var prefix = SSA.setPosition(messageXPosition + 250, yOffset + 40) +
-    SSA.setBorder(1) +
-    SSA.setSize("33") +
-    SSA.setFont(Utils.commonFontName);
+    var prefix = UI.SSA.setPosition(messageXPosition + 250, yOffset + 40) +
+    UI.SSA.setBorder(1) +
+    UI.SSA.setSize("33") +
+    UI.SSA.setFont(Utils.commonFontName);
 
     message += line.replaceAll("@br@",prefix+"@br@");
 
     /*
     message += prefix + line1 + "@br@";
     message +=
-        SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
-        SSA.setBorder(1) +
-        SSA.setSize("33") +
-        SSA.setFont(Utils.commonFontName);
+        UI.SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
+        UI.SSA.setBorder(1) +
+        UI.SSA.setSize("33") +
+        UI.SSA.setFont(Utils.commonFontName);
     message += line2 + "@br@";
     message +=
-        SSA.setPosition(messageXPosition + 250, yOffset + 95) +
-        SSA.setBorder(1) +
-        SSA.setSize("33") +
-        SSA.setFont(Utils.commonFontName);
+        UI.SSA.setPosition(messageXPosition + 250, yOffset + 95) +
+        UI.SSA.setBorder(1) +
+        UI.SSA.setSize("33") +
+        UI.SSA.setFont(Utils.commonFontName);
     message += line3;
     */
     var image = "";
 
     if (type == "info") {
         image =
-            SSA.setPosition(messageXPosition + 145, yOffset + 35) +
-            SSA.setScale("200") +
-            SSA.Images.info();
+            UI.SSA.setPosition(messageXPosition + 145, yOffset + 35) +
+            UI.SSA.setScale("200") +
+            UI.SSA.Images.info();
     } else if (type == "warning") {
         image =
-            SSA.setPosition(messageXPosition + 150, yOffset + 45) +
-            SSA.setScale("75") +
-            SSA.Images.warning();
+            UI.SSA.setPosition(messageXPosition + 150, yOffset + 45) +
+            UI.SSA.setScale("75") +
+            UI.SSA.Images.warning();
     } else if (type == "error") {
         image =
-            SSA.setPosition(messageXPosition + 150, yOffset + 40) +
-            SSA.setScale("33") +
-            SSA.Images.error();
+            UI.SSA.setPosition(messageXPosition + 150, yOffset + 40) +
+            UI.SSA.setScale("33") +
+            UI.SSA.Images.error();
     }
 
     var window = new Windows.Window({

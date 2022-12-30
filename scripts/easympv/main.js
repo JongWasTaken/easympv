@@ -114,12 +114,10 @@ var Chapters = require("./Chapters");
 var Colors = require("./Colors");
 var Core = require("./Core");
 var Wizard = require("./FirstTimeWizard");
-//var ImageOSD = require("./ImageOSD");
 var UI = require("./UI");
 var OS = require("./OS");
 var Settings = require("./Settings");
 var Shaders = require("./Shaders");
-var SSA = require("./SSAHelper");
 var Utils = require("./Utils");
 var WindowSystem = require("./WindowSystem");
 

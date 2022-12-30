@@ -229,28 +229,28 @@ Core.defineMenus = function () {
             "Shaders post-process video to improve image quality.@br@" +
             "Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@" +
             "Current default Shaders: " +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             b +
             "@br@" +
             "Currently enabled Shaders: " +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             a
         );
     };
     var descriptionChapters = function (a, b) {
         var b1;
-        b1 = SSA.setColorRed();
+        b1 = UI.SSA.setColorRed();
         if (b == "enabled") {
-            b1 = SSA.setColorGreen();
+            b1 = UI.SSA.setColorGreen();
         }
         return (
             "(Use the Right Arrow Key to change settings.)@br@" +
             '@br@This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.@br@' +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             "Current Mode: " +
             a +
             "@br@" +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             "Currently " +
             b1 +
             b
@@ -260,11 +260,11 @@ Core.defineMenus = function () {
         return (
             "Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@" +
             "Current default Profile: " +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             b +
             "@br@" +
             "Current Profile: " +
-            SSA.setColorYellow() +
+            UI.SSA.setColorYellow() +
             a
         );
     };
@@ -285,7 +285,7 @@ Core.defineMenus = function () {
     };
 
     var MainMenuSettings = {
-        title: SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
+        title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
         description: "",
         descriptionColor: "ff0000",
         image: "logo",
@@ -362,7 +362,7 @@ Core.defineMenus = function () {
                     } else {
                         quitTitle = this.title;
                         this.title =
-                            SSA.setColorRed() + "Are you sure?";
+                            UI.SSA.setColorRed() + "Are you sure?";
                         menu.redrawMenu();
                     }
                 }
@@ -402,7 +402,7 @@ Core.defineMenus = function () {
                         mp.get_property("playlist/" + i + "/filename") +
                         "@br@";
                 }
-                mp.osd_message(SSA.startSequence() + SSA.setSize(8) + playlist, 3);
+                mp.osd_message(UI.SSA.startSequence() + UI.SSA.setSize(8) + playlist, 3);
             }
 */
         if (event == "enter") {
@@ -426,7 +426,7 @@ Core.defineMenus = function () {
             }
             if (errorCounter != 0)
             {
-                Core.Menus.MainMenu.setDescription(SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
+                Core.Menus.MainMenu.setDescription(UI.SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
                 Core.Menus.MainMenu.redrawMenu();
             }
             return;
@@ -440,8 +440,8 @@ Core.defineMenus = function () {
     var ShadersMenuSettings = {
         title:
             "{\\1c&H782B78&}" +
-            SSA.insertSymbolFA("") +
-            SSA.setColorWhite() +
+            UI.SSA.insertSymbolFA("") +
+            UI.SSA.setColorWhite() +
             "Shaders",
         description: descriptionShaders(
             Shaders.name,
@@ -518,7 +518,7 @@ Core.defineMenus = function () {
                         Utils.showAlert(
                             "info",
                             "Shader has been enabled:@br@" +
-                            SSA.setColorYellow() + Shaders.name
+                            UI.SSA.setColorYellow() + Shaders.name
                         );
                     }
                 }
@@ -564,8 +564,8 @@ Core.defineMenus = function () {
         image: "chapters",
         title:
             "{\\1c&H782B78&}" +
-            SSA.insertSymbolFA("") +
-            SSA.setColorWhite() +
+            UI.SSA.insertSymbolFA("") +
+            UI.SSA.setColorWhite() +
             "Chapters",
         description: descriptionChapters(Chapters.mode, Chapters.status),
         customKeyEvents: [{key: "h", event: "help"}]
@@ -646,8 +646,8 @@ Core.defineMenus = function () {
         image: "settings",
         title:
             "{\\1c&H782B78&}" +
-            SSA.insertSymbolFA("") +
-            SSA.setColorWhite() +
+            UI.SSA.insertSymbolFA("") +
+            UI.SSA.setColorWhite() +
             "Settings",
         description: descriptionSettings(
             Utils.displayVersion,
@@ -681,11 +681,11 @@ Core.defineMenus = function () {
                             autoClose: "0",
                             description:
                                 "You are on version " +
-                                SSA.setColorYellow() +
+                                UI.SSA.setColorYellow() +
                                 Settings.Data.currentVersion +
                                 "@br@" +
                                 "The latest available version is " +
-                                SSA.setColorYellow() +
+                                UI.SSA.setColorYellow() +
                                 Settings.Data.newestVersion +
                                 "@br@@br@" +
                                 Utils.latestUpdateData.changelog,
@@ -703,7 +703,7 @@ Core.defineMenus = function () {
                                 Utils.doUpdate();
                             } else {
                                 umenu.items[1].title =
-                                    SSA.setColorRed() + "Are you sure?";
+                                    UI.SSA.setColorRed() + "Are you sure?";
                                 umenu.redrawMenu();
                                 updateConfirmation = true;
                             }
@@ -712,7 +712,7 @@ Core.defineMenus = function () {
                                 umenu.items.push({
                                     title:
                                         "Update to version " +
-                                        SSA.setColorYellow() +
+                                        UI.SSA.setColorYellow() +
                                         Settings.Data.newestVersion,
                                     item: "update",
                                 });
@@ -936,20 +936,20 @@ Core.defineMenus = function () {
                         Utils.showAlert(
                             "info",
                             "Sofalizer:@br@" +
-                            SSA.setColorGreen() + "enabled"
+                            UI.SSA.setColorGreen() + "enabled"
                         );
                     } else {
                         Utils.showAlert(
                             "info",
                             "Sofalizer:@br@" +
-                            SSA.setColorRed() + "disabled"
+                            UI.SSA.setColorRed() + "disabled"
                         );
                     }
                 } else {
                     Utils.showAlert(
                         "warning",
                         "File not found:@br@" +
-                        SSA.setColorYellow() + "default.sofa"
+                        UI.SSA.setColorYellow() + "default.sofa"
                     );
                 }
             }
@@ -981,7 +981,7 @@ Core.defineMenus = function () {
     var ColorsMenuSettings = {
         image: "colors",
         title:
-            SSA.insertSymbolFA("") +
+            UI.SSA.insertSymbolFA("") +
             "{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
         description: descriptionColors(
             Colors.name,
@@ -1040,7 +1040,7 @@ Core.defineMenus = function () {
                     Utils.showAlert(
                         "info",
                         "Color profile has been enabled:@br@" +
-                        SSA.setColorYellow() + Colors.name
+                        UI.SSA.setColorYellow() + Colors.name
                     );
                 }
 

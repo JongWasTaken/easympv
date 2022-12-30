@@ -18,7 +18,6 @@ Comments are also missing.
 
 var UI = require("./UI");
 var Utils = require("./Utils");
-var SSA = require("./SSAHelper");
 var Settings = require("./Settings");
 
 /**
@@ -304,22 +303,22 @@ Browsers.Selector.open = function (parentMenu) {
     var items = [];
 
     items.push({
-        title: SSA.insertSymbolFA(" ", 26, 30) + "File",
+        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "File",
         item: "file",
         color: "ffffff",
     });
     items.push({
-        title: SSA.insertSymbolFA(" ", 26, 30) + "Disc",
+        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Disc",
         item: "disc",
         color: "ffffff",
     });
     items.push({
-        title: SSA.insertSymbolFA(" ", 26, 30) + "Device",
+        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Device",
         item: "device",
         color: "ffffff",
     });
     items.push({
-        title: SSA.insertSymbolFA(" ", 26, 30) + "URL",
+        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "URL",
         item: "url",
         color: "ffffff",
     });
@@ -529,7 +528,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 30) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -562,7 +561,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 30) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -595,7 +594,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 30) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -625,7 +624,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         } else {
             items.push({
                 title:
-                    SSA.insertSymbolFA(" ", 30, 30) +
+                    UI.SSA.insertSymbolFA(" ", 30, 30) +
                     ".." +
                     Utils.directorySeperator,
                 item: ".." + Utils.directorySeperator,
@@ -642,7 +641,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                     items.push({
                         title:
-                            SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 30) +
                             title +
                             Utils.directorySeperator,
                         item:
@@ -659,7 +658,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 items.push({
                     title:
-                        SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 30) +
                         title +
                         Utils.directorySeperator,
                     item: currentLocationFolders[i] + Utils.directorySeperator,
@@ -699,7 +698,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     }
 
                     items.push({
-                        title: SSA.insertSymbolFA(" ", 26, 30) + title,
+                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
                         item: currentLocationFiles[i],
                         color: color,
                     });
@@ -729,7 +728,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 }
 
                 items.push({
-                    title: SSA.insertSymbolFA(" ", 26, 30) + title,
+                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
                     item: currentLocationFiles[i],
                     color: color,
                 });
@@ -745,11 +744,11 @@ Browsers.FileBrowser.open = function (parentMenu) {
             "Drive Selection"
         );
     Browsers.FileBrowser.menuSettings.backButtonTitle =
-        SSA.insertSymbolFA(
+        UI.SSA.insertSymbolFA(
             "",
             32,
             35
-        ) + SSA.setFont(Utils.commonFontName) + " Back@br@";
+        ) + UI.SSA.setFont(Utils.commonFontName) + " Back@br@";
 
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
@@ -777,7 +776,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++)
                 {
                     favItems.push({
-                        title: SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["fileBrowserFavorites"].locations[i],
+                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["fileBrowserFavorites"].locations[i],
                         item: Settings.Data["fileBrowserFavorites"].locations[i],
                         color: "FFFF90"
                     });
@@ -838,17 +837,17 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
         Browsers.DriveBrowser.menu.items = [];
         Browsers.DriveBrowser.menu.items.push(temp);
         Browsers.DriveBrowser.menu.items.push({
-            title: SSA.insertSymbolFA(" ", 26, 30) + "CD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "CD",
             item: "ccda",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: SSA.insertSymbolFA(" ", 26, 30) + "DVD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "DVD",
             item: "dvd",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: SSA.insertSymbolFA(" ", 26, 30) + "BluRay",
+            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "BluRay",
             item: "bd",
             color: "ffffff",
         });
@@ -915,7 +914,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
             for (var i = 0; i < drives.length; i++) {
                 items.push({
                     title:
-                        SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 30) +
                         drives[i].trim() +
                         "\\",
                     item: drives[i].trim() + "\\",
@@ -929,7 +928,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("sr")) {
                 items.push({
-                    title: SSA.insertSymbolFA(" ", 26, 30) + deviceList[i],
+                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i],
                     item: deviceList[i],
                     color: "ffffff",
                 });
@@ -991,7 +990,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             devices = r.stdout.split("|");
             for (var i = 0; i < devices.length - 1; i++) {
                 items.push({
-                    title: SSA.insertSymbolFA(" ", 26, 30) + devices[i].trim(),
+                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + devices[i].trim(),
                     item: devices[i].trim(),
                     color: "ffffff",
                 });
@@ -1002,7 +1001,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
         deviceList.sort();
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("video")) {
-                var title = SSA.insertSymbolFA(" ", 26, 30) + deviceList[i];
+                var title = UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i];
                 title +=
                     " - " +
                     Utils.executeCommand([
