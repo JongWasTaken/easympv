@@ -1,5 +1,7 @@
 # easympv (mpv plugin)
-## (WORK IN PROGRESS: DO NOT USE YET)  
+
+> :warning: **Work in progress**: Master branch can be unstable or non-working!
+
 ![](https://smto.pw/mpv/images/preview.png)
 
 
@@ -17,15 +19,16 @@ macOS support is experimental and not fully finished.
 - Automatic Updates
 #### and more!
 ## Installation
-#### Windows Dependencies
+### Prerequisites
+#### Windows
 - Windows 8 or higher (Windows 7 might work if you update Powershell and .NET Framework to v4.5+)
 - mpv, the newest version from [here](https://sourceforge.net/projects/mpv-player-windows/files/64bit/)
 
-#### macOS Dependencies
+#### macOS
 - mpv, installed using brew: `brew install mpv`  
 **Other versions of mpv will not work, as they are not compiled with LuaJIT support!**
 
-#### Linux Dependencies
+#### Linux
 The automatic installer script will take care of any dependencies.  
 If you wish to install easympv manually you will need the following dependencies:
 - mpv, compiled with LuaJIT support (Not all distributions do this!)
@@ -33,17 +36,17 @@ If you wish to install easympv manually you will need the following dependencies
 - `xclip` OR `wl-clipboard` (if you use Wayland)  
     When in doubt, install both!
 
-### Automatic
-#### Windows
+### Install
+#### Windows Installer
 Unfinished. Use manual installation for now.  
 
 [//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)  
-#### Linux
+#### Linux Installer
 Paste this into a terminal:  
 `sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv/master/scripts/easympv/installer.sh)"`  
 This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
 Please report issues!  
-### Manual
+#### Manual (All platforms)
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
 Launch mpv once to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`).  
 Adjust those to your liking, then launch it again.  
