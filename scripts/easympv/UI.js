@@ -16,7 +16,7 @@ CLASS: UI.SSA
 DESCRIPTION:
     This static class provides helpers for SubStationAlpha tags.
 USAGE:
-    (TODO)
+    N/A
 ----------------------------------------------------------------*/
 
 UI.SSA = {};
@@ -1792,7 +1792,15 @@ USAGE:
 ----------------------------------------------------------------*/
 
 UI.Alerts = {};
-//TODO: rewrite alerts
+//TODO: rewrite alerts:
+// - less bloated
+// - make it work on more resolutions
+
+UI.Alerts.onScreen = [];
+
+UI.Alerts.Alert = function () {};
+
+UI.Alerts.show = function (type, line) {};
 
 /*----------------------------------------------------------------
 CLASS: UI.Input

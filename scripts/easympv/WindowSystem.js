@@ -547,100 +547,26 @@ Windows.Window.prototype._stopTimer = function () {
     }
 };
 
-/* // Does not work
-Windows.TextWall = {};
-Windows.TextWall.create = function (text)
-{
-    var osdHeight = mp.get_property("osd-height");
-    var osdWidth = mp.get_property("osd-width");
-
-    text = text.replaceAll("\n","@br@");
-
-    var window = new Windows.Window({
-        xPosition: 0,
-        yPosition: 0,
-        width: 0,
-        height: 0,
-        keybindOverrides: [],
-        autoClose: 0,
-        fadeOut: false,
-        fadeOutTime: 35,
-        transparency: "0",
-        item: {
-            xPositionOverride: (osdWidth / 2),
-            yPositionOverride: 0,
-            type: "text",
-            color: "ffffff",
-            fontName: Utils.commonFontName,
-            fontSize: "33",
-            borderColor: "000000",
-            borderSize: "1",
-            text: text
-        }
-    });
-
-    window.settings.drawBaseOSD = false;
-    window.settings.drawEffectOSD = false;
-
-    mp.observe_property("osd-height", undefined, function () {
-        if(
-            mp.get_property("osd-height") != osdHeight
-            ||
-            mp.get_property("osd-width") != osdWidth
-            )
-        {
-            window.hide();
-            window.show();
-        }
-    });
-
-    mp.observe_property("osd-width", undefined, function () {
-        if(
-            mp.get_property("osd-height") != osdHeight
-            ||
-            mp.get_property("osd-width") != osdWidth
-            )
-        {
-            window.hide();
-            window.show();
-        }
-    });
 
 
-    return window;
-}
-*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Windows.Alerts = {};
 Windows.Alerts.onScreen = [];
 Windows.Alerts.show = function (type, line) {
-    /*
-    var maxStringLength = 45;
-
-    if (type == undefined) {
-        type = "info";
-    }
-    if (line1 == undefined) {
-        line1 = "";
-    }
-    if (line2 == undefined) {
-        line2 = "";
-    }
-    if (line3 == undefined) {
-        line3 = "";
-    }
-
-    if (line1.length >= maxStringLength) {
-        line1 = line1.substring(0, maxStringLength) + "...";
-    }
-    if (line2.length >= maxStringLength) {
-        line2 = line2.substring(0, maxStringLength) + "...";
-    }
-    if (line3.length >= maxStringLength) {
-        line3 = line3.substring(0, maxStringLength) + "...";
-    }
-    */
-
     var osdHeight = mp.get_property("osd-height");
     var osdWidth = mp.get_property("osd-width");
     //var xScale = 1 - Math.floor(osdWidth / 1920);
@@ -656,7 +582,7 @@ Windows.Alerts.show = function (type, line) {
         10 * Windows.Alerts.onScreen.length;
     var message = "";
     var messageXPosition = osdWidth - (width + (xOffset + 100));
-    
+
     var prefix = UI.SSA.setPosition(messageXPosition + 250, yOffset + 40) +
     UI.SSA.setBorder(1) +
     UI.SSA.setSize("33") +
@@ -664,21 +590,6 @@ Windows.Alerts.show = function (type, line) {
 
     message += line.replaceAll("@br@",prefix+"@br@");
 
-    /*
-    message += prefix + line1 + "@br@";
-    message +=
-        UI.SSA.setPosition(messageXPosition + 250, yOffset + 67.5) +
-        UI.SSA.setBorder(1) +
-        UI.SSA.setSize("33") +
-        UI.SSA.setFont(Utils.commonFontName);
-    message += line2 + "@br@";
-    message +=
-        UI.SSA.setPosition(messageXPosition + 250, yOffset + 95) +
-        UI.SSA.setBorder(1) +
-        UI.SSA.setSize("33") +
-        UI.SSA.setFont(Utils.commonFontName);
-    message += line3;
-    */
     var image = "";
 
     if (type == "info") {

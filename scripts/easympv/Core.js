@@ -894,7 +894,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Utils.showInteractiveCommandInput();
+                    UI.Input.showInteractiveCommandInput();
                 }
             }
         },
