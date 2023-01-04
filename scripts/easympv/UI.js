@@ -275,34 +275,7 @@ UI.Image.getImageInfo = function (file) {
     file = mp.utils.get_user_path(file);
     var h, w, offset;
     // try using system tools to get image metadata
-    if (Utils.OSisWindows) {
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-image-info",
-                file,
-            ],
-        });
-    } else {
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh"),
-                "get-image-info",
-                file,
-            ],
-        });
-    }
+    var r = OS.getImageInfo(file);
     if (r.status == "0") {
         var input = r.stdout.trim();
         if (Utils.OSisWindows) {

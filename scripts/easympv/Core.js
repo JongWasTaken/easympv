@@ -15,7 +15,6 @@ things like soft-restarts possible.
 
 var Core = {};
 
-
 var isFirstFile = true;
 var sofaEnabled = false;
 var resetOccured = false;
@@ -672,23 +671,31 @@ Core.defineMenus = function () {
             item: "updater",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
+                    var isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
                     menu.hideMenu();
-
                     var updateConfirmation = false;
+
+                    var setDescription = function()
+                    {
+                        var d = "You are on version " +
+                        UI.SSA.setColorYellow() +
+                        Settings.Data.currentVersion;
+                        if(isGit) { d += "-git"; }
+                        if(!isGit)
+                        {
+                            d += "@br@The latest available version is " +
+                            UI.SSA.setColorYellow() +
+                            Settings.Data.newestVersion;
+                        }
+                        d += "@br@@br@" + Utils.latestUpdateData.changelog;
+                        return d;
+                    }
+
                     var umenu = new UI.Menu(
                         {
                             title: "Update",
                             autoClose: "0",
-                            description:
-                                "You are on version " +
-                                UI.SSA.setColorYellow() +
-                                Settings.Data.currentVersion +
-                                "@br@" +
-                                "The latest available version is " +
-                                UI.SSA.setColorYellow() +
-                                Settings.Data.newestVersion +
-                                "@br@@br@" +
-                                Utils.latestUpdateData.changelog,
+                            description: setDescription(),
                         },
                         [],
                         Core.Menus.SettingsMenu
@@ -707,15 +714,30 @@ Core.defineMenus = function () {
                                 umenu.redrawMenu();
                                 updateConfirmation = true;
                             }
-                        } else if (event == "show" && Utils.updateAvailable) {
-                            if (umenu.items.length == 1) {
-                                umenu.items.push({
-                                    title:
-                                        "Update to version " +
-                                        UI.SSA.setColorYellow() +
-                                        Settings.Data.newestVersion,
-                                    item: "update",
-                                });
+                        } else if (event == "show") {
+
+                            if(isGit)
+                            {
+                                if (umenu.items.length == 1) {
+                                    umenu.items.push({
+                                        title:
+                                            "Pull latest changes",
+                                        item: "update",
+                                    });
+                                }
+                            }
+
+                            if (Utils.updateAvailable && !isGit)
+                            {
+                                if (umenu.items.length == 1) {
+                                    umenu.items.push({
+                                        title:
+                                            "Update to version " +
+                                            UI.SSA.setColorYellow() +
+                                            Settings.Data.newestVersion,
+                                        item: "update",
+                                    });
+                                }
                             }
                         }
                     };
@@ -899,13 +921,6 @@ Core.defineMenus = function () {
             }
         },
     ];
-
-    /*
-        {
-            title: "Clear watchlater data",
-            item: "clearwld",
-        },
-    */
 
     Core.Menus.SettingsMenu = new UI.Menu(
         SettingsMenuSettings,
@@ -1161,8 +1176,11 @@ Core.startExecution = function () {
 
     Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
 
-    Utils.determineOS();
-    Utils.checkInternetConnection();
+    OS.init();
+    Utils.log("Checking for updates...","startup","info");
+    setTimeout(function() {
+        Utils.getLatestUpdateData();
+    },1000)
 
     Core.doFileChecks();
 
