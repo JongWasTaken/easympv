@@ -16,7 +16,7 @@ things like soft-restarts possible.
 var Core = {};
 
 var isFirstFile = true;
-var sofaEnabled = false;
+//var sofaEnabled = false;
 var resetOccured = false;
 var notifyAboutUpdates = false;
 
@@ -27,7 +27,6 @@ var cFile;
 Core.Menus = {};
 
 Core.onFileLoad = function () {
-
     if (isFirstFile) {
         if (
             mp.utils.file_info(
@@ -236,25 +235,6 @@ Core.defineMenus = function () {
             a
         );
     };
-    var descriptionChapters = function (a, b) {
-        var b1;
-        b1 = UI.SSA.setColorRed();
-        if (b == "enabled") {
-            b1 = UI.SSA.setColorGreen();
-        }
-        return (
-            "(Use the Right Arrow Key to change settings.)@br@" +
-            '@br@This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.@br@' +
-            UI.SSA.setColorYellow() +
-            "Current Mode: " +
-            a +
-            "@br@" +
-            UI.SSA.setColorYellow() +
-            "Currently " +
-            b1 +
-            b
-        );
-    };
     var descriptionColors = function (a, b) {
         return (
             "Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@" +
@@ -286,7 +266,6 @@ Core.defineMenus = function () {
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
         description: "",
-        descriptionColor: "ff0000",
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
     };
@@ -414,6 +393,12 @@ Core.defineMenus = function () {
             return;
         }
         if (event == "show") {
+            Core.Menus.MainMenu.settings.description =
+                UI.SSA.setColorYellow() +
+                UI.SSA.insertSymbolFA(" ",21,21) +
+                "Press \"I\" during playback to display various statistics.@br@" + UI.SSA.setColorYellow() +
+                "While shown, press the number keys to switch through different pages."
+
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
                 Utils.showAlert(
@@ -566,22 +551,40 @@ Core.defineMenus = function () {
             UI.SSA.insertSymbolFA("") +
             UI.SSA.setColorWhite() +
             "Chapters",
-        description: descriptionChapters(Chapters.mode, Chapters.status),
-        customKeyEvents: [{key: "h", event: "help"}]
+        description: "This will autodetect Openings, Endings and Previews and then either \"skip\" or \"slowdown\" them.@br@",
+        customKeyEvents: [{key: "h", event: "help"}],
     };
 
     var ChaptersMenuItems = [
         {
-            title: "[Change Mode]",
+            title: "Change Mode",
             item: "tmode",
+            description: UI.SSA.setColorYellow() + "Current mode: " + Chapters.mode,
+            eventHandler: function(event, menu)
+            {
+                if (Chapters.mode == "skip") {
+                    Chapters.mode = "slowdown";
+                } else {
+                    Chapters.mode = "skip";
+                }
+                this.description = UI.SSA.setColorYellow() + "Current mode: " + Chapters.mode;
+                menu.redrawMenu();
+            }
         },
         {
-            title: "[Toggle]@br@@us10@@br@",
+            title: "Toggle",
             item: "tstatus",
-        },
-        {
-            title: "Confirm",
-            item: "confirm",
+            description: UI.SSA.setColorYellow() + "Currently " + Chapters.status,
+            eventHandler: function(event, menu)
+            {
+                if (Chapters.status == "disabled") {
+                    Chapters.status = "enabled";
+                } else {
+                    Chapters.status = "disabled";
+                }
+                this.description = UI.SSA.setColorYellow() + "Currently " + Chapters.status;
+                menu.redrawMenu();
+            }
         },
     ];
 
@@ -592,53 +595,10 @@ Core.defineMenus = function () {
     );
 
     Core.Menus.ChaptersMenu.eventHandler = function (event, action) {
-        switch (event) {
-            case "show":
-                Core.Menus.ChaptersMenu.setDescription(
-                    descriptionChapters(Chapters.mode, Chapters.status)
-                );
-                break;
-            case "enter":
-                if (action == "back") {
-                    Core.Menus.ChaptersMenu.hideMenu();
-                    if (!Core.Menus.MainMenu.isMenuActive()) {
-                        Core.Menus.MainMenu.renderMenu();
-                    } else {
-                        Core.Menus.MainMenu.hideMenu();
-                    }
-                } else if (action == "confirm") {
-                    Core.Menus.ChaptersMenu.hideMenu();
-                }
-                break;
-            case "right":
-                if (action == "tmode") {
-                    if (Chapters.mode == "skip") {
-                        Chapters.mode = "slowdown";
-                    } else {
-                        Chapters.mode = "skip";
-                    }
-                    Core.Menus.ChaptersMenu.setDescription(
-                        descriptionChapters(Chapters.mode, Chapters.status)
-                    );
-                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
-                } else if (action == "tstatus") {
-                    if (Chapters.status == "disabled") {
-                        Chapters.status = "enabled";
-                    } else {
-                        Chapters.status = "disabled";
-                    }
-                    Core.Menus.ChaptersMenu.setDescription(
-                        descriptionChapters(Chapters.mode, Chapters.status)
-                    );
-                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
-                }
-                break;
-            case "help":
-                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
-                break;
-            default:
-                break;
-            }
+        if (event == "help")
+        {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
+        }
     };
 
     var SettingsMenuSettings = {
@@ -1008,7 +968,7 @@ Core.defineMenus = function () {
 
     var ColorsMenuItems = [
         {
-            title: "[Disable All Presets]@br@@us10@@br@",
+            title: "None@br@@us10@@br@",
             item: "none",
         },
     ];
@@ -1180,7 +1140,7 @@ Core.startExecution = function () {
     Utils.log("Checking for updates...","startup","info");
     setTimeout(function() {
         Utils.getLatestUpdateData();
-    },1000)
+    },1000);
 
     Core.doFileChecks();
 
