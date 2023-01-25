@@ -28,7 +28,7 @@ var Utils = {};
 Utils.OS = OS.name;
 Utils.OSisWindows = OS.isWindows;
 
-Utils.commonFontName = "Overpass SemiBold";
+Utils.commonFontName = "Overpass"; //"Overpass SemiBold";
 Utils.directorySeperator = OS.directorySeperator;
 
 Utils.updateInProgress = false;

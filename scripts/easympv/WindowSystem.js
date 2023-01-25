@@ -15,7 +15,7 @@ mpv, but it is now on hold because of issues.
 Currently it is only used to show alerts.
 ----------------------------------------------------------------*/
 
-var UI = require("./UI");
+//var UI = require("./UI");
 var Utils = require("./Utils");
 
 var Windows = {};

@@ -8,9 +8,6 @@
 
 // Most functions here are not in use yet!
 
-//var Utils = require("./Utils");
-//var Settings = require("./Settings");
-
 var OS = {};
 
 OS.checksCompleted = false;
@@ -66,7 +63,7 @@ OS.init = function () {
     }
 };
 
-OS.performChecks = function () {
+OS._performChecks = function () {
     // Git
     if (OS.isWindows) {
         var args = [
@@ -106,7 +103,7 @@ OS._call = function (cmd,async,callback) {
     }
 
     if(!OS.checksCompleted) {
-        OS.performChecks();
+        OS._performChecks();
     }
 
     if (OS.isWindows) {
@@ -167,7 +164,7 @@ OS.getClipboard = function () {
     }
 
     var r = OS._call("wl-paste");
-    mp.msg.warn(r.status)
+
     if (r.status != 0) {
         clipboard = OS._call("xclip -o").stdout.trim();
     }
