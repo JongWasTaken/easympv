@@ -44,6 +44,7 @@ TODO :
     Add h for help in menus
     Load subtitles via File Browser
     Combine all UI-related code into one file (UI.js)
+    Port compatscripts to OS.js
 
 IDEAS:
     Advanced settings, like the utility had before
@@ -122,9 +123,55 @@ var Utils = require("./Utils");
 var WindowSystem = require("./WindowSystem");
 
 var Environment = {};
-Environment.isDebug = mp.utils.getenv("EASYMPV_DEBUG") == undefined ? false : true;
-Environment.BrowserWorkDir = mp.utils.getenv("EASYMPV_BROWSER_WORKDIR");
 Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");
+// example: EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming"
+if(Environment.Arguments != undefined)
+{
+    Environment.Arguments = Environment.Arguments.split(";");
+
+    Environment.isDebug = false;
+    Environment.BrowserWorkDir = undefined;
+    Environment.SettingsOverrides = undefined;
+
+    for (var i = 0; i < Environment.Arguments.length; i++)
+    {
+        try {
+            if(Environment.Arguments[i].includes("="))
+            {
+                var temp = Environment.Arguments[i].split("=");
+                var key = temp[0];
+                var value =  temp[1];
+                if (key == "debug")
+                {
+                    Environment.isDebug = Boolean(value);
+                }
+                else if (key == "workdir")
+                {
+                    Environment.BrowserWorkDir = value;
+                }
+                else if (key == "options")
+                {
+                    value = value.split(",");
+                    Environment.SettingsOverrides = {};
+                    mp.msg.warn("Settings Override:");
+                    for (var j = 0; j < value.length; j++)
+                    {
+                        var temp2 = value[j].split(":");
+                        if (temp2.length == 2)
+                        {
+                            Environment.SettingsOverrides[temp2[0]] = temp2[1];
+                            mp.msg.warn(temp2[0] + " = " + temp2[1]);
+                        }
+                    }
+                }
+            }
+        }
+        catch (e) {
+            mp.msg.warn("[easympv] Invalid EASYMPV_ARGS environment variable!");
+            mp.msg.warn("Error description: " + e);
+        }
+    }
+}
 
 var errorCounter = 0;
 
@@ -146,7 +193,7 @@ else
     }
     catch (e) {
         errorCounter++;
-        mp.msg.error("Encountered "+errorCounter+" issue(s) during runtime!");
+        mp.msg.error("Encountered "+errorCounter+" issue(s) during startup!");
         mp.msg.error("Last issue description: " + e);
     }
 }

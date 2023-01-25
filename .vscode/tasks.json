@@ -14,8 +14,22 @@
             },
             "options": {
                 "env": {
-                    "EASYMPV_DEBUG": "1",
-                    //"EASYMPV_BROWSER_WORKDIR": "/"
+                    "EASYMPV_ARGS": "options=showHiddenFiles:true;debug=true",
+                }
+            }
+        },
+        {
+            "label": "mpv (no file/ no log)",
+            "type": "shell",
+            "command": "/usr/bin/mpv --player-operation-mode=pseudo-gui --",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "env": {
+                    "EASYMPV_ARGS": "options=showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming",
                 }
             }
         },
@@ -30,7 +44,7 @@
             },
             "options": {
                 "env": {
-                    "EASYMPV_DEBUG": "1"
+                    "EASYMPV_ARGS": "debug=true"
                 }
             }
         }

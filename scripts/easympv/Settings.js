@@ -114,6 +114,14 @@ Settings.reload = function () {
             }
         }
     }
+
+    if(Environment.SettingsOverrides != undefined)
+    {
+        for(var key in Environment.SettingsOverrides)
+        {
+            Settings.Data[key] = Environment.SettingsOverrides[key];
+        }
+    }
 };
 
 /**
