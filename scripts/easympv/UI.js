@@ -590,7 +590,7 @@ USAGE:
         ["description"]         String, optional description of the item
         ["color"]               Hex string, optionally override default item color for this item only
         ["eventHandler"]        Function, gets called instead of <menu>.eventHandler if it exists
-                                3 arguments get passed to this function:
+                                Two arguments get passed to this function:
                                 "event" - String, see below
                                 "menu" - Object, the menu calling this function
     "title" and "item" are required.
@@ -609,6 +609,8 @@ USAGE:
         "show"      Executed before drawing the menu to the screen
                     "action" is undefined
         "hide"      Executed before removing the menu from the screen
+                    "action" is undefined
+        "draw"      Executed while the menu gets (re)drawn.
                     "action" is undefined
         "enter"     User pressed enter(or equivalent) on an item
                     "action" will be the selected items "item" property
@@ -745,7 +747,7 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.displayMethod != undefined) {
         this.settings.displayMethod = settings.displayMethod;
     } else {
-        if (Utils.mpvComparableVersion < 33) {
+        if (Utils.mpvComparableVersion <= 32) {
             Utils.log(
                 "Your mpv version is too old for overlays. Expect issues!","menusystem","error"
             );
@@ -1057,7 +1059,7 @@ UI.Menu.prototype._constructMenuCache = function () {
         +- Line spacing works by default, but cannot be changed
         -  Automatic scaling is busted
             (there might be some universal offset to fix it)
-        -  Sizes do not translate 1:1 
+        -  Sizes do not translate 1:1
             (default font size has to be 35 intead of 11 to look similar to "overlay" displayMethod)
         -  Will fight over display space (basically like Z-fighting)
         -  Deprecated, not maintained
@@ -1093,6 +1095,9 @@ UI.Menu.prototype._constructMenuCache = function () {
             border;
         this.cachedMenuText += UI.SSA.setFont(this.settings.fontName);
         this.cachedMenuText += UI.SSA.setSize(this.settings.fontSize);
+
+        // draw event
+        this._dispatchEvent("draw");
 
         // Title
         var title = this.settings.title;
@@ -1343,6 +1348,9 @@ UI.Menu.prototype._constructMenuCache = function () {
             s = lineStart(4, 0, 0.0005) + lineEnd();
             return s;
         };
+
+        // draw event
+        this._dispatchEvent("draw");
 
         // Title
         var title = this.settings.title;
@@ -1679,11 +1687,12 @@ UI.Menu.prototype._stopTimer = function () {
 
 UI.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
-        this._dispatchEvent("show", { title: undefined, item: undefined, eventHandler: undefined });
+        //this._dispatchEvent("preshow");
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
         this.isMenuVisible = true;
+        this._dispatchEvent("show");
         this._constructMenuCache();
         this._drawMenu();
         this._startTimer();
@@ -1693,7 +1702,7 @@ UI.Menu.prototype.showMenu = function () {
     }
 };
 UI.Menu.prototype.hideMenu = function () {
-    this._dispatchEvent("hide", { title: undefined, item: undefined, eventHandler: undefined });
+    this._dispatchEvent("hide");
     if (this.settings.displayMethod == "message") {
         mp.osd_message("");
         if (this.isMenuVisible) {
@@ -1744,11 +1753,17 @@ UI.Menu.prototype.toggleMenu = function () {
 };
 
 UI.Menu.prototype._dispatchEvent = function (event, item) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
     if (item.eventHandler != undefined)
     {
         item.eventHandler(event, this)
         return;
     }
+
     this.eventHandler(event, item.item);
 }
 
@@ -2105,7 +2120,7 @@ UI.Input.OSDLog.show = function () {
 
     UI.Input.OSDLog.OSD = mp.create_osd_overlay("ass-events");
     UI.Input.OSDLog.OSD.res_y = mp.get_property("osd-height");
-    UI.Input.OSDLog.OSD.res_x = mp.get_property("osd-width");
+    UI.Input.OSDLog.OSD.res_x = mp.get_property("osd-width"); // TODO: 101?
     UI.Input.OSDLog.OSD.z = 1;
 
     UI.Input.OSDLog.Timer = setInterval(function () {
