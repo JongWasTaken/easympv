@@ -159,7 +159,14 @@ if(Environment.Arguments != undefined)
                         var temp2 = value[j].split(":");
                         if (temp2.length == 2)
                         {
-                            Environment.SettingsOverrides[temp2[0]] = temp2[1];
+
+                            var val = temp2[1];
+                            if (val == "true" || val == "false")
+                            {
+                                val = Boolean(val);
+                            }
+
+                            Environment.SettingsOverrides[temp2[0]] = val;
                             mp.msg.warn(temp2[0] + " = " + temp2[1]);
                         }
                     }
