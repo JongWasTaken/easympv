@@ -269,7 +269,7 @@ OS._checkConnectionAsync = function (callback) {
         return OS._call("Test-Connection smto.pw -Quiet -Count 1",true,callback);
     }
 
-    return OS._call("echo -e \"GET http://smto.pw HTTP/1.0\n\n\" | nc google.com 80 >/dev/null 2>&1",true,callback);
+    return OS._call("curl --head https://smto.pw >/dev/null 2>&1",true,callback);
 }
 
 OS.getConnectionStatus = function () {
@@ -288,8 +288,8 @@ OS.getConnectionStatus = function () {
     var call = OS._checkConnectionAsync(callback);
 
     setTimeout(function() {
-        try { mp.abort_async(call); }
-        catch(e) {}
+        try { mp.abort_async_command(call); }
+        catch(e) { }
     },1000)
 
     OS._connectionChecked = true;

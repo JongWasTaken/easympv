@@ -510,7 +510,7 @@ Utils.doUpdate = function () {
     Utils.blockQuitButtons();
 
     if (mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) == undefined)
-    { 
+    {
         Utils.doUpdateStage1();
     }
     else
