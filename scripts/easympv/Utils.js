@@ -290,7 +290,8 @@ Utils.showSystemMessagebox = function (text, async) {
     }
     else
     {
-        Windows.Alerts.show(type,text);
+        //Windows.Alerts.show(type,text);
+        UI.Alerts.show(type,text);
     }
 
     if (type == "warning")

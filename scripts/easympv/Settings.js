@@ -115,6 +115,10 @@ Settings.reload = function () {
         }
     }
 
+    for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++) {
+        Settings.Data["fileBrowserFavorites"].locations[i] = Settings.Data["fileBrowserFavorites"].locations[i].replaceAll("\/\/","\/");
+    }
+
     if(Environment.SettingsOverrides != undefined)
     {
         for(var key in Environment.SettingsOverrides)
@@ -735,12 +739,22 @@ Settings.presets.colorpreset = function (name, data) {
     return this;
 };
 
+Settings.presets.hints = [];
+
 Settings.presets.shadersetsUser =  [];
 Settings.presets.colorpresetsUser =  [];
 
 Settings.presets.images = [];
 
 Settings.presets.load = function () {
+
+    Settings.presets.shadersets = [];
+    Settings.presets.colorpresets = [];
+    Settings.presets.hints = [];
+    Settings.presets.shadersetsUser =  [];
+    Settings.presets.colorpresetsUser =  [];
+    Settings.presets.images = [];
+
     var seperator = ":";
     if (Utils.OSisWindows) {
         seperator = ";";
@@ -805,6 +819,11 @@ Settings.presets.load = function () {
                 );
             }
         }
+        if (json["hints"] != undefined) {
+            for (var i = 0; i <= json["hints"].length-1; i++) {
+                Settings.presets.hints.push(json["hints"][i]);
+            }
+        }
         if (json["images"] != undefined) {
             for (var i = 0; i <= json["images"].length-1; i++) {
                 var file = json["images"][i].data.file;
@@ -854,6 +873,12 @@ Settings.presets.load = function () {
             }
         }
 
+        if (jsonUser["hints"] != undefined) {
+            for (var i = 0; i <= jsonUser["hints"].length-1; i++) {
+                Settings.presets.hints.push(jsonUser["hints"][i]);
+            }
+        }
+
         if (jsonUser["images"] != undefined) {
             for (var i = 0; i <= jsonUser["images"].length-1; i++) {
                 var file = jsonUser["images"][i].data.file;
@@ -877,6 +902,7 @@ Settings.presets.load = function () {
             "_comment": "For more information please visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Presets",
             "shadersets": {},
             "colorpresets": {},
+            "tips": [],
             "images": []
         };
 
@@ -894,12 +920,33 @@ Settings.presets.reload = function () {
 Settings.cache.perFileSaves = [];
 
 Settings.cache.load = function() {
+
+    var currentTime = Date.now();
+    var period = 2592000; // 30 * 24 * 60 * 60
+
+    Settings.cache.perFileSaves = [];
+
     if(
         mp.utils.file_info(mp.utils.get_user_path("~~/easympv-cache.json")) !=
         undefined
     ) {
         var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv-cache.json")));
-        Settings.cache.perFileSaves = json["perFileSaves"];
+        for(var i = 0; i < json["perFileSaves"].length; i++)
+        {
+            var key = json["perFileSaves"][i];
+            //mp.msg.warn(key.timestamp)
+            if (key.timestamp != undefined)
+            {
+                //mp.msg.warn(Number(currentTime - key.timestamp));
+                //mp.msg.warn(Number(currentTime - key.timestamp) < period);
+                if (Number(currentTime - key.timestamp) < period)
+                {
+                    Settings.cache.perFileSaves.push(key);
+                }
+            }
+
+        }
+        //Settings.cache.perFileSaves = json["perFileSaves"];
     }
     else {
         Settings.cache.save();

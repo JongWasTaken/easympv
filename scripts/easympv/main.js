@@ -161,13 +161,16 @@ if(Environment.Arguments != undefined)
                         {
 
                             var val = temp2[1];
-                            if (val == "true" || val == "false")
+                            if (val == "true")
                             {
-                                val = Boolean(val);
+                                val = true;
+                            }
+                            else if (val == "false") {
+                                val = false;
                             }
 
                             Environment.SettingsOverrides[temp2[0]] = val;
-                            mp.msg.warn(temp2[0] + " = " + temp2[1]);
+                            mp.msg.warn(temp2[0] + " = " + val);
                         }
                     }
                 }

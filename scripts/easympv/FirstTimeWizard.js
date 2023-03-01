@@ -47,7 +47,7 @@ var title = function (n1,n2) {
     return "easympv Initial Setup - Page " + n1 + "/" + n2;
 }
 
-Wizard.Menus.Page1 = new UI.Menu(
+Wizard.Menus.Page1 = new UI.Menus.Menu(
     {
         title: "",
         description:
@@ -107,7 +107,7 @@ Wizard.Menus.Page2Options = {
     SubLanguageDescription: "@br@Set to \"none\" to not display subtitles by default.@br@"
 };
 
-Wizard.Menus.Page2 = new UI.Menu(
+Wizard.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
         description: "(IMPORTANT: These options do not actually work yet. Please edit config files manually for now!)@br@Use the left/right arrow key to change an option.",
@@ -196,7 +196,7 @@ Wizard.Menus.Page2 = new UI.Menu(
 
 Wizard.Menus.Page2.eventHandler = function (event, action) {};
 
-Wizard.Menus.Page3 = new UI.Menu(
+Wizard.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
         description: "Placeholder: Closing this menu will set \"isFirstLaunch\" to \"false\".",

@@ -102,13 +102,13 @@ Core.onShutdown = function () {
     if (cFile != undefined && cFile != "")
     {
         Utils.log("Saving per-file settings...","shutdown","info");
-        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name});
+        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name, timestamp: Date.now()});
         Settings.cache.save();
     }
 };
 
 var redrawMenus = function () {
-    var currentmenu = UI.getDisplayedMenu();
+    var currentmenu = UI.Menus.getDisplayedMenu();
     if (currentmenu != undefined) {
         currentmenu.hideMenu();
         currentmenu.showMenu();
@@ -118,7 +118,7 @@ var redrawMenus = function () {
 Core.doRegistrations = function () {
     var handleMenuKeypress = function () {
         Utils.log("Menu key pressed!");
-        var currentmenu = UI.getDisplayedMenu();
+        var currentmenu = UI.Menus.getDisplayedMenu();
         if (currentmenu != undefined) {
             currentmenu.hideMenu();
             return;
@@ -166,10 +166,56 @@ Core.doRegistrations = function () {
         var readCommand = function (success, result) {
             if (success) {
                 try{
+                    var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
+                    var clearOSD = function(id) {
+                        mp.osd_message("");
+                        if (id == undefined){
+                            mp.msg.warn("Force-removing all overlays: you might see error messages!");
+                            for (var i = 0; i < 1000; i++)
+                            {
+                                mp.commandv(
+                                    "osd-overlay",
+                                    i,
+                                    "none",
+                                    "",
+                                    0,
+                                    0,
+                                    0,
+                                    "no",
+                                    "no"
+                                );
+                            }
+                        }
+                        else
+                        {
+                            mp.commandv(
+                                "osd-overlay",
+                                id,
+                                "none",
+                                "",
+                                0,
+                                0,
+                                0,
+                                "no",
+                                "no"
+                            );
+                        }
+                    }
+                    var help = function () {
+                        if (UI.Input.OSDLog.OSD == undefined) {
+                            UI.Input.OSDLog.show();
+                        }
+                        //UI.Input.OSDLog.hide();
+                        mp.msg.warn("help() output:\nList of helper functions:\n"+
+                        "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                        "clearOSD() -> force-removes ALL OSDs and messages on screen"
+                        );
+                    };
+
                     eval(result);
                     Utils.showAlert(
                         "info",
-                        "Expression evaluated!"
+                        "Expression evaluated! Check log for more info."
                     );
                 }
                 catch(e)
@@ -181,7 +227,7 @@ Core.doRegistrations = function () {
                 }
             }
         };
-        UI.Input.show(readCommand,"JavaScript expression: ");
+        UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
     });
 
     // Registering functions to events
@@ -296,8 +342,8 @@ Core.defineMenus = function () {
             item: "shaders",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    //UI.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                    UI.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                    //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
                 }
             }
         },
@@ -306,7 +352,7 @@ Core.defineMenus = function () {
             item: "colors",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
                 }
             }
         },
@@ -315,7 +361,7 @@ Core.defineMenus = function () {
             item: "chapters",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
                 }
             }
         },
@@ -324,7 +370,7 @@ Core.defineMenus = function () {
             item: "options",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
                 }
             }
         },
@@ -360,7 +406,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.MainMenu = new UI.Menu(MainMenuSettings, MainMenuItems, undefined);
+    Core.Menus.MainMenu = new UI.Menus.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
@@ -393,11 +439,10 @@ Core.defineMenus = function () {
             return;
         }
         if (event == "show") {
+            hint = Settings.presets.hints[Math.floor(Math.random() * Settings.presets.hints.length)].replaceAll("@br@", "@br@" + UI.SSA.setColorYellow());
             Core.Menus.MainMenu.settings.description =
                 UI.SSA.setColorYellow() +
-                UI.SSA.insertSymbolFA(" ",21,21) +
-                "Press \"I\" during playback to display various statistics.@br@" + UI.SSA.setColorYellow() +
-                "While shown, press the number keys to switch through different pages."
+                UI.SSA.insertSymbolFA(" ",21,21) + hint;
 
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
@@ -469,7 +514,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ShadersMenu = new UI.Menu(
+    Core.Menus.ShadersMenu = new UI.Menus.Menu(
         ShadersMenuSettings,
         ShadersMenuItems,
         Core.Menus.MainMenu
@@ -588,7 +633,7 @@ Core.defineMenus = function () {
         },
     ];
 
-    Core.Menus.ChaptersMenu = new UI.Menu(
+    Core.Menus.ChaptersMenu = new UI.Menus.Menu(
         ChaptersMenuSettings,
         ChaptersMenuItems,
         Core.Menus.MainMenu
@@ -651,7 +696,7 @@ Core.defineMenus = function () {
                         return d;
                     }
 
-                    var umenu = new UI.Menu(
+                    var umenu = new UI.Menus.Menu(
                         {
                             title: "Update",
                             autoClose: "0",
@@ -736,7 +781,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var cmenu = new UI.Menu(
+                    var cmenu = new UI.Menus.Menu(
                         {
                             title: "Credits",
                             autoClose: "0",
@@ -882,7 +927,7 @@ Core.defineMenus = function () {
         },
     ];
 
-    Core.Menus.SettingsMenu = new UI.Menu(
+    Core.Menus.SettingsMenu = new UI.Menus.Menu(
         SettingsMenuSettings,
         SettingsMenuItems,
         Core.Menus.MainMenu
@@ -987,7 +1032,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ColorsMenu = new UI.Menu(
+    Core.Menus.ColorsMenu = new UI.Menus.Menu(
         ColorsMenuSettings,
         ColorsMenuItems,
         Core.Menus.MainMenu

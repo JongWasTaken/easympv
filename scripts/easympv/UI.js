@@ -535,7 +535,7 @@ DESCRIPTION:
     customization options.
     This implementation puts customization first and should be easy to modifiy to suit your needs.
 USAGE:
-    Create a new instance of UI.Menu(Settings,Items[,ParentMenuInstance])
+    Create a new instance of UI.Menus.Menu(Settings,Items[,ParentMenuInstance])
     Settings can be an object with the following properties:
         "autoClose"             Number, how many to wait after the last input before closing the menu
                                 Set to 0 to disable
@@ -599,7 +599,7 @@ USAGE:
         @br@ - Insert blank line after item
         (title only) @us1@ - Insert line after item , replace 1 with amount of line characters
 
-    Parent is another instance of MenuSystem.Menu, if provided, a Back button
+    Parent is another instance of UI.Menus.Menu, if provided, a Back button
     will appear as the first item of the Menu.
 
     Then just assign a function to the instances eventHandler:
@@ -625,11 +625,13 @@ USAGE:
     making it "unbreakable". It will also scale with the window size (1080p is 100%).
     Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
 
-    The definition of UI.Menu.prototype._constructMenuCache has even more information.
+    The definition of UI.Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
-UI.registeredMenus = [];
+UI.Menus = {};
 
-UI.Menu = function (settings, items, parentMenu) {
+UI.Menus.registeredMenus = [];
+
+UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings == undefined) {
         settings = {};
     }
@@ -1034,23 +1036,23 @@ UI.Menu = function (settings, items, parentMenu) {
     this.autoCloseStart = -1;
     this.eventLocked = false;
 
-    UI.registeredMenus.push(this);
+    UI.Menus.registeredMenus.push(this);
 };
 
-UI.Menu.prototype.setImage = function (name) {
+UI.Menus.Menu.prototype.setImage = function (name) {
     this.settings.image = name;
 };
 
-UI.Menu.prototype.setDescription = function (text) {
+UI.Menus.Menu.prototype.setDescription = function (text) {
     this.settings.description = text;
 };
 
-UI.Menu.prototype.redrawMenu = function () {
+UI.Menus.Menu.prototype.redrawMenu = function () {
     this._constructMenuCache();
     this._drawMenu();
 };
 
-UI.Menu.prototype._constructMenuCache = function () {
+UI.Menus.Menu.prototype._constructMenuCache = function () {
     /*
         Differences between displayMethods
 
@@ -1448,6 +1450,7 @@ UI.Menu.prototype._constructMenuCache = function () {
 
             if (this.selectedItemIndex - startItem == i) {
                 color = UI.SSA.setColor(this.settings.selectedItemColor);
+                // + UI.SSA.setShadowColor("ffffff") + UI.SSA.setShadow(0.25);
                 title = this.settings.itemPrefix + title;
             }
 
@@ -1510,7 +1513,7 @@ UI.Menu.prototype._constructMenuCache = function () {
     }
 };
 
-UI.Menu.prototype._handleAutoClose = function () {
+UI.Menus.Menu.prototype._handleAutoClose = function () {
     if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1) {
         return;
     }
@@ -1519,52 +1522,27 @@ UI.Menu.prototype._handleAutoClose = function () {
     }
 };
 
-UI.Menu.prototype.fireEvent = function (name) {
+UI.Menus.Menu.prototype.fireEvent = function (name) {
     this._keyPressHandler(name);
 };
 
-UI.Menu.prototype.appendSuffixToCurrentItem = function () {
+UI.Menus.Menu.prototype.appendSuffixToCurrentItem = function () {
     this.suffixCacheIndex = this.selectedItemIndex;
     this._constructMenuCache();
     this._drawMenu();
 };
 
-UI.Menu.prototype.removeSuffix = function () {
+UI.Menus.Menu.prototype.removeSuffix = function () {
     this.suffixCacheIndex = -1;
     //this._constructMenuCache();
     //this._drawMenu();
 };
 
-UI.Menu.prototype.getSelectedItem = function () {
+UI.Menus.Menu.prototype.getSelectedItem = function () {
     return this.items[this.selectedItemIndex];
 };
 
-UI.getDisplayedMenu = function () {
-    var cMenu = undefined;
-    for (var i = 0; i < UI.registeredMenus.length; i++) {
-        if (UI.registeredMenus[i].isMenuVisible) {
-            cMenu = UI.registeredMenus[i];
-            break;
-        }
-    }
-    return cMenu;
-};
-
-UI.switchCurrentMenu = function (newMenu, currentMenu) {
-    if (currentMenu == undefined)
-    {
-        currentMenu = UI.getDisplayedMenu();
-    }
-
-    currentMenu.hideMenu();
-    if (!newMenu.isMenuVisible) {
-        newMenu.showMenu();
-    } else {
-        newMenu.hideMenu();
-    }
-};
-
-UI.Menu.prototype._overrideKeybinds = function () {
+UI.Menus.Menu.prototype._overrideKeybinds = function () {
     var tempFunction = function (x, action) {
         return function () {
             x._keyPressHandler(action);
@@ -1583,7 +1561,7 @@ UI.Menu.prototype._overrideKeybinds = function () {
     }
 };
 
-UI.Menu.prototype._revertKeybinds = function () {
+UI.Menus.Menu.prototype._revertKeybinds = function () {
     for (var i = 0; i < this.settings.keybindOverrides.length; i++) {
         var currentKey = this.settings.keybindOverrides[i];
 
@@ -1591,7 +1569,7 @@ UI.Menu.prototype._revertKeybinds = function () {
     }
 };
 
-UI.Menu.prototype._keyPressHandler = function (action) {
+UI.Menus.Menu.prototype._keyPressHandler = function (action) {
     this.autoCloseStart = mp.get_time();
     if (!this.eventLocked) {
         this.eventLocked = true;
@@ -1628,7 +1606,7 @@ UI.Menu.prototype._keyPressHandler = function (action) {
     }
 };
 
-UI.Menu.prototype._initOSD = function () {
+UI.Menus.Menu.prototype._initOSD = function () {
     if (this.settings.displayMethod == "overlay") {
         if (this.OSD == undefined) {
             this.OSD = mp.create_osd_overlay("ass-events");
@@ -1642,7 +1620,7 @@ UI.Menu.prototype._initOSD = function () {
     }
 };
 
-UI.Menu.prototype._drawMenu = function () {
+UI.Menus.Menu.prototype._drawMenu = function () {
     if (this.settings.displayMethod == "message") {
         mp.osd_message(this.cachedMenuText, 1000);
         // seem to be the same
@@ -1656,7 +1634,7 @@ UI.Menu.prototype._drawMenu = function () {
     }
 };
 
-UI.Menu.prototype._startTimer = function () {
+UI.Menus.Menu.prototype._startTimer = function () {
     if (this.settings.displayMethod == "message") {
         var x = this;
         if (this.menuInterval != undefined) {
@@ -1678,14 +1656,14 @@ UI.Menu.prototype._startTimer = function () {
     }
 };
 
-UI.Menu.prototype._stopTimer = function () {
+UI.Menus.Menu.prototype._stopTimer = function () {
     if (this.menuInterval != undefined) {
         clearInterval(this.menuInterval);
         this.menuInterval = undefined;
     }
 };
 
-UI.Menu.prototype.showMenu = function () {
+UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
         //this._dispatchEvent("preshow");
         this.autoCloseStart = mp.get_time();
@@ -1701,7 +1679,7 @@ UI.Menu.prototype.showMenu = function () {
         }
     }
 };
-UI.Menu.prototype.hideMenu = function () {
+UI.Menus.Menu.prototype.hideMenu = function () {
     this._dispatchEvent("hide");
     if (this.settings.displayMethod == "message") {
         mp.osd_message("");
@@ -1716,7 +1694,6 @@ UI.Menu.prototype.hideMenu = function () {
         }
         mp.osd_message("");
     }
-
     if (this.settings.displayMethod == "overlay") {
         if (this.isMenuVisible) {
             this._stopTimer();
@@ -1744,7 +1721,7 @@ UI.Menu.prototype.hideMenu = function () {
     //OSD.hideAll();
 };
 
-UI.Menu.prototype.toggleMenu = function () {
+UI.Menus.Menu.prototype.toggleMenu = function () {
     if (!this.isMenuVisible) {
         this.showMenu();
     } else {
@@ -1752,7 +1729,7 @@ UI.Menu.prototype.toggleMenu = function () {
     }
 };
 
-UI.Menu.prototype._dispatchEvent = function (event, item) {
+UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
     if (item == undefined)
     {
        item = { title: undefined, item: undefined, eventHandler: undefined };
@@ -1767,8 +1744,33 @@ UI.Menu.prototype._dispatchEvent = function (event, item) {
     this.eventHandler(event, item.item);
 }
 
-UI.Menu.prototype.eventHandler = function () {
+UI.Menus.Menu.prototype.eventHandler = function () {
     Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
+};
+
+UI.Menus.getDisplayedMenu = function () {
+    var cMenu = undefined;
+    for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
+        if (UI.Menus.registeredMenus[i].isMenuVisible) {
+            cMenu = UI.Menus.registeredMenus[i];
+            break;
+        }
+    }
+    return cMenu;
+};
+
+UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
+    if (currentMenu == undefined)
+    {
+        currentMenu = UI.Menus.getDisplayedMenu();
+    }
+
+    currentMenu.hideMenu();
+    if (!newMenu.isMenuVisible) {
+        newMenu.showMenu();
+    } else {
+        newMenu.hideMenu();
+    }
 };
 
 /*----------------------------------------------------------------
@@ -1786,9 +1788,349 @@ UI.Alerts = {};
 
 UI.Alerts.onScreen = [];
 
-UI.Alerts.Alert = function () {};
+UI.Alerts.Alert = function (settings) {
+    this.settings = {};
 
-UI.Alerts.show = function (type, line) {};
+    if (settings.image != undefined) {
+        this.settings.image = settings.image;
+    } else {
+        this.settings.image = undefined;
+    }
+
+    if (settings.text != undefined) {
+        this.settings.text = settings.text;
+    } else {
+        this.settings.text = undefined;
+    }
+
+    if (settings.xPosition != undefined) {
+        this.settings.xPosition = settings.xPosition;
+    } else {
+        this.settings.xPosition = undefined;
+    }
+
+    if (settings.yPosition != undefined) {
+        this.settings.yPosition = settings.yPosition;
+    } else {
+        this.settings.yPosition = undefined;
+    }
+
+    if (settings.height != undefined) {
+        this.settings.height = settings.height;
+    } else {
+        this.settings.height = undefined;
+    }
+
+    if (settings.width != undefined) {
+        this.settings.width = settings.width;
+    } else {
+        this.settings.width = undefined;
+    }
+
+    if (settings.autoClose != undefined) {
+        this.settings.autoClose = settings.autoClose;
+    } else {
+        this.settings.autoClose = 3;
+    }
+
+    if (settings.transparency != undefined) {
+        this.settings.transparency = settings.transparency;
+    } else {
+        this.settings.transparency = 40;
+    }
+
+    this.isWindowVisible = false;
+
+    this.cachedAlertBaseText = "";
+    this.cachedAlertContentText = "";
+    this.cachedAlertEffectText = "";
+
+    // For convienience
+    this.x1 = this.settings.xPosition;
+    this.y1 = this.settings.yPosition;
+    this.x2 = this.settings.xPosition + this.settings.width;
+    this.y2 = this.settings.yPosition + this.settings.height;
+
+    this.autoCloseStart = -1;
+    this.zStart = 998;
+};
+
+UI.Alerts.Alert.prototype._construct = function ()
+{
+    this.cachedAlertBaseText = "";
+    this.cachedAlertContentText = "";
+    this.cachedAlertEffectText = "";
+
+    this.cachedAlertBaseText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
+    this.cachedAlertContentText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
+    this.cachedAlertEffectText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
+
+    this.cachedAlertBaseText += UI.SSA.setBorder(0);
+    this.cachedAlertBaseText += UI.SSA.setShadow(2);
+    this.cachedAlertBaseText += UI.SSA.setBorderColor("ffffff");
+    this.cachedAlertBaseText += UI.SSA.setShadowColor("000000");
+    this.cachedAlertBaseText += UI.SSA.setSecondaryColor("000000");
+
+    // start draw mode
+    this.cachedAlertBaseText += "{\\p1}";
+    // draw box
+    this.cachedAlertBaseText +=
+        "m " +
+        this.x1 +
+        " " +
+        this.y1 +
+        " l " +
+        this.x2 +
+        " " +
+        this.y1 +
+        " l " +
+        this.x2 +
+        " " +
+        this.y2 +
+        " l " +
+        this.x1 +
+        " " +
+        this.y2;
+    // end draw mode
+    this.cachedAlertBaseText += "{\\p0}";
+
+    this.cachedAlertEffectText += this.settings.image;
+    this.cachedAlertContentText += this.settings.text.replaceAll(
+        "@br@",
+        "\n" + UI.SSA.setTransparencyPercentage(this.settings.transparency)
+    );
+}
+
+UI.Alerts.Alert.prototype._fadeOut = function () {
+    var x = this;
+    this.fadeOutInterval = setInterval(function () {
+        if (x.settings.transparency != 100) {
+            x.settings.transparency = Number(x.settings.transparency) + 1;
+            x._construct();
+            x._draw();
+        } else {
+            /*
+            mp.commandv(
+                "osd-overlay",
+                x.baseOSD.id,
+                "none",
+                "",
+                0,
+                0,
+                0,
+                "no",
+                "no"
+            );
+            */
+            mp.commandv(
+                "osd-overlay",
+                x.contentOSD.id,
+                "none",
+                "",
+                0,
+                0,
+                0,
+                "no",
+                "no"
+            );
+            mp.commandv(
+                "osd-overlay",
+                x.effectOSD.id,
+                "none",
+                "",
+                0,
+                0,
+                0,
+                "no",
+                "no"
+            );
+            //x.baseOSD = undefined;
+            x.contentOSD = undefined;
+            x.effectOSD = undefined;
+            x.isAlertVisible = false;
+            x.settings.transparency = 40;
+            clearInterval(x.fadeOutInterval);
+        }
+    }, 35);
+    this.fadeOutInterval.start;
+};
+
+UI.Alerts.Alert.prototype._draw = function () {
+    /*
+    if (this.baseOSD == undefined) {
+        this.baseOSD = mp.create_osd_overlay("ass-events");
+        this.baseOSD.res_y = mp.get_property("osd-height");
+        this.baseOSD.res_x = mp.get_property("osd-width");
+        this.baseOSD.z = this.zStart - 2;
+    }
+    */
+    if (this.contentOSD == undefined) {
+        this.contentOSD = mp.create_osd_overlay("ass-events");
+        this.contentOSD.res_y = mp.get_property("osd-height");
+        this.contentOSD.res_x = mp.get_property("osd-width");
+        this.contentOSD.z = this.zStart - 1;
+    }
+
+    if (this.effectOSD == undefined) {
+        this.effectOSD = mp.create_osd_overlay("ass-events");
+        this.effectOSD.res_y = mp.get_property("osd-height");
+        this.effectOSD.res_x = mp.get_property("osd-width");
+        this.effectOSD.z = this.zStart;
+    }
+
+    /*
+    this.baseOSD.data = this.cachedAlertBaseText;
+    this.baseOSD.update();
+    */
+    this.contentOSD.data = this.cachedAlertContentText;
+    this.contentOSD.update();
+    this.effectOSD.data = this.cachedAlertEffectText;
+    this.effectOSD.update();
+};
+
+UI.Alerts.Alert.prototype._handleAutoClose = function () {
+    if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1) {
+        return;
+    }
+    if (this.autoCloseStart <= mp.get_time() - this.settings.autoClose) {
+        this.hide();
+    }
+};
+
+UI.Alerts.Alert.prototype._startTimer = function () {
+    var x = this;
+    if (this.alertInterval != undefined) {
+        clearInterval(this.alertInterval);
+    }
+    this.alertInterval = setInterval(function () {
+        x._handleAutoClose();
+    }, 1000);
+};
+
+UI.Alerts.Alert.prototype._stopTimer = function () {
+    if (this.alertInterval != undefined) {
+        clearInterval(this.alertInterval);
+        this.alertInterval = undefined;
+    }
+};
+
+UI.Alerts.Alert.prototype.onClose = function () {};
+
+UI.Alerts.Alert.prototype.hide = function () {
+    if (this.isAlertVisible) {
+        this._stopTimer();
+        this.onClose();
+        this._fadeOut();
+    }
+};
+
+UI.Alerts.Alert.prototype.show = function () {
+    if (!this.isAlertVisible) {
+        this.isAlertVisible = true;
+        this.autoCloseStart = mp.get_time();
+        this._construct();
+        this._draw();
+        this._startTimer();
+    }
+};
+
+UI.Alerts.show = function (type, line) {
+    var osdHeight = mp.get_property("osd-height");
+    var osdWidth = mp.get_property("osd-width");
+    //var xScale = 1 - Math.floor(osdWidth / 1920);
+    //var yScale = 1 - Math.floor(osdHeight / 1080);
+
+    var xOffset = 80; // * (Math.floor(osdWidth) / 1920) / 2);
+
+    var width = 500; // * xScale;
+    var height = 100; // * yScale;
+    var yOffset =
+        10 +
+        height * UI.Alerts.onScreen.length +
+        10 * UI.Alerts.onScreen.length;
+    var message = "";
+    var messageXPosition = osdWidth - (width + (xOffset + 100));
+
+    var prefix = UI.SSA.setPosition(messageXPosition + 250, yOffset + 40) +
+    UI.SSA.setBorder(1) +
+    UI.SSA.setSize("33") +
+    UI.SSA.setFont(Utils.commonFontName);
+
+    message += line.replaceAll("@br@",prefix+"@br@");
+
+    var image = "";
+
+    if (type == "info") {
+        image =
+            UI.SSA.setPosition(messageXPosition + 145, yOffset + 35) +
+            UI.SSA.setScale("200") +
+            UI.SSA.Images.info();
+    } else if (type == "warning") {
+        image =
+            UI.SSA.setPosition(messageXPosition + 150, yOffset + 45) +
+            UI.SSA.setScale("75") +
+            UI.SSA.Images.warning();
+    } else if (type == "error") {
+        image =
+            UI.SSA.setPosition(messageXPosition + 150, yOffset + 40) +
+            UI.SSA.setScale("33") +
+            UI.SSA.Images.error();
+    }
+
+    var alert = new UI.Alerts.Alert({
+        xPosition: osdWidth - (width + xOffset),
+        yPosition: yOffset,
+        width: width,
+        height: height,
+        image: image,
+        text: message,
+    });
+    mp.observe_property("osd-height", undefined, function () {
+        if (
+            mp.get_property("osd-height") != osdHeight ||
+            mp.get_property("osd-width") != osdWidth
+        ) {
+            alert.settings.fadeOut = false;
+            alert.hide();
+        }
+    });
+
+    mp.observe_property("osd-width", undefined, function () {
+        if (
+            mp.get_property("osd-height") != osdHeight ||
+            mp.get_property("osd-width") != osdWidth
+        ) {
+            alert.settings.fadeOut = false;
+            alert.hide();
+        }
+    });
+
+    UI.Alerts.onScreen.push(alert);
+
+    if (
+        mp.get_property("osd-height") < 1090 &&
+        mp.get_property("osd-height") > 1070 &&
+        mp.get_property("osd-width") < 1930 &&
+        mp.get_property("osd-width") > 1910
+    ) {
+        alert.settings.drawBaseOSD = true;
+        alert.settings.drawEffectOSD = true;
+        alert.settings.transparency = "40";
+    } else {
+        alert.settings.drawBaseOSD = false;
+        alert.settings.drawEffectOSD = false;
+        alert.settings.transparency = "0";
+    }
+
+    alert.show();
+    alert.onClose = function () {
+        for (var i = 0; i <= UI.Alerts.onScreen.length - 1; i++) {
+            if (UI.Alerts.onScreen[i] == alert) {
+                UI.Alerts.onScreen.splice(i, 1);
+            }
+        }
+    };
+};
 
 /*----------------------------------------------------------------
 CLASS: UI.Input

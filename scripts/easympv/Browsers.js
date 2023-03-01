@@ -236,6 +236,7 @@ Browsers.FileBrowser.fileExtensionWhitelist = [
     { type: "photo", name: "JPEG Image", extension: ".jpeg" },
     { type: "photo", name: "BitMap Image", extension: ".bmp" },
     { type: "photo", name: "WebP Image", extension: ".webp" },
+    { type: "photo", name: "GIF Image", extension: ".gif" }
 ];
 
 Browsers.Selector.menuEventHandler = function (event, item) {
@@ -303,7 +304,7 @@ Browsers.Selector.open = function (parentMenu) {
 
     Browsers.Selector.menuSettings.title = "Select Content Type";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
-    Browsers.Selector.menu = new UI.Menu(
+    Browsers.Selector.menu = new UI.Menus.Menu(
         Browsers.Selector.menuSettings,
         items,
         parentMenu
@@ -350,7 +351,7 @@ Browsers.FileBrowser.getParentDirectory = function () {
     }
     var workDirTree = workDir.split(Utils.directorySeperator);
 
-    if (Utils.OS != "win" && workDirTree.length < 3) {
+    if (!OS.isWindows && workDirTree.length < 3) {
         workDirTree[0] = "/";
     }
 
@@ -392,7 +393,6 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
         Browsers.FileBrowser.menu.redrawMenu();
         return;
     }
-
     if (event == "enter") {
         if (item == ".." + Utils.directorySeperator) {
             if (
@@ -452,6 +452,8 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             return;
         }
 
+        var contextMenuTitle = "File Actions";
+
         if (
             OS.isWindows &&
             Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
@@ -470,10 +472,41 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             }
         }
 
-        if (isFolder) {
-            if (Settings.Data["fileBrowserFavorites"].locations.indexOf(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item) == -1)
+        if (isFolder)
+        {
+            contextMenuTitle = "Folder Actions";
+        }
+
+        /*
+        var contextMenu = new UI.Menus.Menu({
+            title: contextMenuTitle,
+            description: "DESCRIPTION GOES HERE! @br@" + item,
+            autoClose: 0
+        },
+        [
             {
-                Settings.Data["fileBrowserFavorites"].locations.push(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item);
+                title: "dummy",
+                item: "unused",
+                eventHandler: function(action, menu)
+                {
+                    mp.msg.warn("dummy trigger!");
+                }
+            }
+        ],
+        Browsers.FileBrowser.menu);
+        contextMenu.eventHandler = function(){};
+
+        Browsers.FileBrowser.menu.toggleMenu();
+        contextMenu.showMenu();
+        */
+
+        // code below will get moved to new context menu
+        if (isFolder) {
+            var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
+            path = path.replaceAll("\/\/","\/");
+            if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
+            {
+                Settings.Data["fileBrowserFavorites"].locations.push(path);
                 Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
                 Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
                 Settings.save();
@@ -482,6 +515,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
             return;
         }
+        
     }
 };
 Browsers.FileBrowser.open = function (parentMenu) {
@@ -612,7 +646,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
 
 
-        if (Utils.OS != "win" && Browsers.FileBrowser.currentLocation == "/") {
+        if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
         } else {
             items.push({
                 title:
@@ -774,7 +808,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     });
                 }
 
-                var favMenu = new UI.Menu({
+                var favMenu = new UI.Menus.Menu({
                     autoClose: 0,
                     title: "File Browser",
                     description: "Use the \"right\" action to remove an entry."
@@ -810,7 +844,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     });
 
-    Browsers.FileBrowser.menu = new UI.Menu(
+    Browsers.FileBrowser.menu = new UI.Menus.Menu(
         Browsers.FileBrowser.menuSettings,
         items,
         parentMenu
@@ -940,7 +974,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 
     Browsers.DriveBrowser.menuMode = "list";
     Browsers.DriveBrowser.menuSettings.title = "Drive Browser";
-    Browsers.DriveBrowser.menu = new UI.Menu(
+    Browsers.DriveBrowser.menu = new UI.Menus.Menu(
         Browsers.DriveBrowser.menuSettings,
         items,
         parentMenu
@@ -1021,7 +1055,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
     Browsers.DeviceBrowser.menuSettings.title = "Device Browser";
     Browsers.DeviceBrowser.menuSettings.description =
         "Select a device to open.@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "Some devices can cause mpv to crash! On top of that, you should always restart mpv after you finish watching a device!";
-    Browsers.DeviceBrowser.menu = new UI.Menu(
+    Browsers.DeviceBrowser.menu = new UI.Menus.Menu(
         Browsers.DeviceBrowser.menuSettings,
         items,
         parentMenu
