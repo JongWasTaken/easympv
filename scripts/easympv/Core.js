@@ -201,6 +201,9 @@ Core.doRegistrations = function () {
                             );
                         }
                     }
+                    var cmd = function (cmd) {
+                        print(OS._call(cmd));
+                    }
                     var help = function () {
                         if (UI.Input.OSDLog.OSD == undefined) {
                             UI.Input.OSDLog.show();
@@ -208,6 +211,7 @@ Core.doRegistrations = function () {
                         //UI.Input.OSDLog.hide();
                         mp.msg.warn("help() output:\nList of helper functions:\n"+
                         "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                        "cmd(command) -> execute shell command\n"+
                         "clearOSD() -> force-removes ALL OSDs and messages on screen"
                         );
                     };
