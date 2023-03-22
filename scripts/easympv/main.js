@@ -48,7 +48,6 @@ TODO :
 
 IDEAS:
     Advanced settings, like the utility had before
-    FFI.js -> easympv-ffi.lua
     On-screen-controls -> would ensure android compatibility and tablets in general
     https://github.com/rossy/mpv-repl/blob/master/repl.lua
 
@@ -62,6 +61,7 @@ UNNAMED LIST OF "things to test on Windows specifically":
     Settings.migrate -> find mpv path
     Utils.Input -> Paste
     Browsers.DeviceBrowser.menuEventHandler -> low latency profile
+    literally everything in OS.js
 */
 
 // Polyfills and extensions first

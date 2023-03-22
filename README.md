@@ -1,6 +1,7 @@
 # easympv (mpv plugin)
 
-> :warning: **Work in progress**: Master branch can be unstable or non-working!
+> :warning: **Work in progress**: Master branch can be unstable or non-working!  
+Development currently happens on the `replace-compat` branch!
 
 ![](https://smto.pw/mpv/images/preview.png)
 
@@ -55,8 +56,24 @@ Launch mpv once to generate config files (`mpv.conf`, `input.conf`, `easympv.con
 Adjust those to your liking, then launch it again.  
 In the future there will be some sort of setup on the first start, this is currently unfinished.  
 
+## TODOs and Ideas
+#### TODOs
+- More Windows testing: My main rig runs Arch Linux, so any Windows-specific code is usually guessed
+- macOS testing: I need to set up a macOS virtual machine again
+- Test every single function in OS.js, then merge into master
+- Rework alerts once and for all, it might be possible to have them "run" across the screen
+- Rework Setting menu, make it prettier and easier to navigate, add all missing options
+- Test and prettify File Manager context menu
+- Figure out upgrading from 1.x
+- Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
+#### Ideas
+- Remove Discord integration, add a way to optionally install it after the fact (and possibly more, merge with dependency loader?)
+- Improve images, add variants up to 8k resolution and make it consistent
+- Automatic testing might be possible to a certain degree, unfortunately its not like i can just use an existing solution
+#### All TODO items need to be addressed before I can consider declaring this project stable.
+
 ## License
 All easympv code and assets (everything in `scripts/easympv/`) is licensed under the MIT License.  
 Third-Party assets in this repository use different licenses, such as fonts and shaders.  
 See `scripts/easympv/Credits.txt` for all attributions.  
-Special thanks to VideoPlayerCode for their awesome plugins, they have served as inspiration for this project, though none of their code has been used.  
+Special thanks to VideoPlayerCode for their awesome plugins, they have served as inspiration for this project, although none of their code has been reused.  
