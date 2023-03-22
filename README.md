@@ -1,6 +1,7 @@
 # easympv (mpv plugin)
 
-> :warning: **Work in progress**: Master branch can be unstable or non-working!
+> :warning: **Work in progress**: Master branch can be unstable or non-working!  
+Development currently happens on the `replace-compat` branch!
 
 ![](https://smto.pw/mpv/images/preview.png)
 
