@@ -6,7 +6,7 @@
         {
             "label": "mpv (default)",
             "type": "shell",
-            "command": "/usr/bin/mpv /mnt/smb/Anime/Incoming",
+            "command": "/usr/bin/mpv /mnt/smb/Anime/Archive",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

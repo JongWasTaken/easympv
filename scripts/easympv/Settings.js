@@ -44,6 +44,7 @@ Settings.Data = {
     simpleVRR: false,
     refreshRate: 144,
     showHiddenFiles: false,
+    allowFolderDeletion: false,
     startIPCServer: false,
     useNativeNotifications: true,
     notifyAboutUpdates: true,
@@ -187,6 +188,13 @@ Settings.save = function () {
             "# Whether to show hidden files and folders in the file browser.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "showHiddenFiles=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString +=
+        "# Whether the file browser should allow you to remove folders.\n";
+        defaultConfigString +=
+        "# IMPORTANT: There is a reason this is disabled by default! \n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "allowFolderDeletion=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to start the mpv IPC server on startup.\n";

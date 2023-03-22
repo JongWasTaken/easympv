@@ -335,8 +335,6 @@ Browsers.FileBrowser.openFileSafe = function (filename) {
                     Utils.directorySeperator +
                     filename
             );
-            Browsers.FileBrowser.menu.hideMenu();
-            Browsers.FileBrowser.menu = undefined;
             break;
         }
     }
@@ -378,16 +376,20 @@ Browsers.FileBrowser.changeDirectory = function (directory) {
         Utils.directorySeperator + Utils.directorySeperator,
         Utils.directorySeperator
     );
-    Browsers.FileBrowser.menu.hideMenu();
-    Browsers.FileBrowser.menu = undefined;
+    try {
+        Browsers.FileBrowser.menu.hideMenu();
+        Browsers.FileBrowser.menu = undefined;
+    }
+    catch(e) {} // ignore that
     Browsers.FileBrowser.open();
 };
 
 Browsers.FileBrowser.openContextMenu = function(item) {
 
+    var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
+
     var contextMenuTitle = "File Actions";
     var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
-
 
     if (
         OS.isWindows &&
@@ -407,60 +409,139 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         }
     }
 
+    var items = [];
+
+    items.push({
+        title: "Back",
+        item: "",
+        eventHandler: function(action, menu)
+        {
+            if (action != "enter")
+            {
+                return;
+            }
+            contextMenu.hideMenu();
+            Browsers.FileBrowser.open();
+        }
+    });
+
+    if(isFolder)
+    {
+        items.push({
+            title: "Add to Favorites",
+            item: "",
+            eventHandler: function(action, menu)
+            {
+                if (action != "enter")
+                {
+                    return;
+                }
+
+                if (isFolder) {
+                    contextMenu.hideMenu();
+                    path = path.replaceAll("\/\/","\/");
+                    if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
+                    {
+                        Settings.Data["fileBrowserFavorites"].locations.push(path);
+                        //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
+                        Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
+                        Settings.save();
+                        return;
+                    }
+                    Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
+                    return;
+                }
+            }
+        });
+    }
+
+    items.push({
+        title: "Open",
+        item: "",
+        eventHandler: function(action, menu)
+        {
+            if (action != "enter")
+            {
+                return;
+            }
+            contextMenu.hideMenu();
+            if(isFolder)
+            {
+                Browsers.FileBrowser.changeDirectory(
+                    Browsers.FileBrowser.currentLocation +
+                        Utils.directorySeperator +
+                        item
+                );
+            }
+            else
+            {
+                Browsers.FileBrowser.openFileSafe(item);
+            }
+        }
+    });
+
+    if (!isFolder)
+    {
+        items.push({
+            title: "Remove",
+            item: "",
+            eventHandler: function(action, menu)
+            {
+                if (action != "enter")
+                {
+                    return;
+                }
+
+                if(isFolder && !Settings.Data.allowFolderDeletion)
+                {
+                    this.title = UI.SSA.setColorRed() + "Removing folders is disabled";
+                    contextMenu.redrawMenu();
+                    return;
+                }
+
+                if (deleteConfirm)
+                {
+                    if (OS.fileRemoveSystemwide(path))
+                    {
+                        Utils.showAlert(
+                            "info",
+                            "Removed file: " + item
+                        );
+                    }
+                    else
+                    {
+                        Utils.showAlert(
+                            "error",
+                            "Could not remove file: " + item
+                        );
+                    }
+                    contextMenu.hideMenu();
+                    Browsers.FileBrowser.open();
+                } else {
+                    this.title = UI.SSA.setColorRed() + "Are you sure?";
+                    deleteConfirm = true;
+                    contextMenu.redrawMenu();
+                }
+            }
+        });
+    };
+
     if (isFolder)
     {
         contextMenuTitle = "Folder Actions";
         contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
     }
 
+    var deleteConfirm = false;
+
     var contextMenu = new UI.Menus.Menu({
         title: contextMenuTitle,
-        description: "Select what to do with this item. @br@" + contextMenuDescriptionIcon,
+        description: "Select what to do with this item. @br@@br@" + contextMenuDescriptionIcon + "@br@",
         autoClose: 0
-    },
-    [
-        {
-            title: "back",
-            item: "unused",
-            eventHandler: function(action, menu)
-            {
-                contextMenu.hideMenu();
-                Browsers.FileBrowser.open();
-            }
-        },
-        {
-            title: "open",
-            item: "unused",
-            eventHandler: function(action, menu)
-            {
-                contextMenu.hideMenu();
-                Browsers.FileBrowser.open();
-            }
-        }
-    ],
+    },items,
     Browsers.FileBrowser.menu);
     contextMenu.eventHandler = function(){};
-
     contextMenu.showMenu();
-
-    /*
-    // code below will get moved to new context menu
-    if (isFolder) {
-        var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
-        path = path.replaceAll("\/\/","\/");
-        if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
-        {
-            Settings.Data["fileBrowserFavorites"].locations.push(path);
-            Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-            Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
-            Settings.save();
-            return;
-        }
-        Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
-        return;
-    }
-    */
-
 };
 
 Browsers.FileBrowser.menuEventHandler = function (event, item) {
@@ -539,6 +620,8 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                 }
             } else {
                 Browsers.FileBrowser.openFileSafe(item);
+                Browsers.FileBrowser.menu.hideMenu();
+                Browsers.FileBrowser.menu = undefined;
             }
         }
         return;

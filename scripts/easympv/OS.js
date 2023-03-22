@@ -485,14 +485,19 @@ OS.fileRemove = function (file) {
     return exitCode == 0 ? true: false;
 }
 
-OS.fileRemoveWindowsSystemwide = function (path) {
+OS.fileRemoveSystemwide = function (path) {
+    if (mp.utils.file_info(path) == undefined)
+    {
+        return false;
+    }
+
     if(OS.isWindows)
     {
-        if (mp.utils.file_info(path) == undefined)
-        {
-            return false;
-        }
         return OS._call("Remove-Item -Path \""+path+"\" -Force").status == 0 ? true: false;
+    }
+    else
+    {
+        return OS._call("rm -rf \"" + path + "\"").status == 0 ? true: false;
     }
 }
 
