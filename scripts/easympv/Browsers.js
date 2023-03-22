@@ -251,7 +251,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
         } else if (item == "device") {
             Browsers.DeviceBrowser.open(Browsers.Selector.cachedParentMenu);
         } else if (item == "url") {
-            var handleURL = function (success, input) {
+            UI.Input.show(function (success, input) {
                 if (success) {
                     if (input.includes("://")) {
                         if (input.includes("&list=")) {
@@ -266,8 +266,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                         Utils.showAlert("info", "Input is not a valid URL!");
                     }
                 }
-            }
-            UI.Input.show(handleURL,"URL: ");
+            },"URL: ");
         }
     }
 };
@@ -384,6 +383,85 @@ Browsers.FileBrowser.changeDirectory = function (directory) {
     Browsers.FileBrowser.open();
 };
 
+Browsers.FileBrowser.openContextMenu = function(item) {
+    Browsers.FileBrowser.menu.hideMenu();
+    Browsers.FileBrowser.menu = undefined;
+
+    var contextMenuTitle = "File Actions";
+
+    if (
+        OS.isWindows &&
+        Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
+    ) {
+        var isFolder = true;
+    } else {
+        var temp = mp.utils.file_info(
+            Browsers.FileBrowser.currentLocation +
+                Utils.directorySeperator +
+                item
+        );
+        if (temp != undefined) {
+            var isFolder = temp.is_dir;
+        } else {
+            var isFolder = true;
+        }
+    }
+
+    if (isFolder)
+    {
+        contextMenuTitle = "Folder Actions";
+    }
+
+    var contextMenu = new UI.Menus.Menu({
+        title: contextMenuTitle,
+        description: "DESCRIPTION GOES HERE! @br@" + item,
+        autoClose: 0
+    },
+    [
+        {
+            title: "back",
+            item: "unused",
+            eventHandler: function(action, menu)
+            {
+                contextMenu.hideMenu();
+                Browsers.FileBrowser.open();
+            }
+        },
+        {
+            title: "open",
+            item: "unused",
+            eventHandler: function(action, menu)
+            {
+                contextMenu.hideMenu();
+                Browsers.FileBrowser.open();
+            }
+        }
+    ],
+    Browsers.FileBrowser.menu);
+    contextMenu.eventHandler = function(){};
+
+    contextMenu.showMenu();
+
+    /*
+    // code below will get moved to new context menu
+    if (isFolder) {
+        var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
+        path = path.replaceAll("\/\/","\/");
+        if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
+        {
+            Settings.Data["fileBrowserFavorites"].locations.push(path);
+            Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
+            Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
+            Settings.save();
+            return;
+        }
+        Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
+        return;
+    }
+    */
+
+};
+
 Browsers.FileBrowser.menuEventHandler = function (event, item) {
     if (event == "show") {
         if (Browsers.FileBrowser.menu.items.length >= 5)
@@ -393,7 +471,29 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
         Browsers.FileBrowser.menu.redrawMenu();
         return;
     }
+
+    if (event == "right") {
+
+        if (item == ".." + Utils.directorySeperator) {
+            return;
+        }
+
+        if (item == "@back@") {
+            return;
+        }
+
+        // TODO: WHY DOES THIS NOT WORK I AM  L O S I N G  MY MIND, WTF WOULD A WORKAROUND EVEN BE???
+        //Browsers.FileBrowser.menu.hideMenu();
+        //Browsers.FileBrowser.openContextMenu(item);
+
+        //Browsers.FileBrowser.menu.hideMenu();
+        //Browsers.FileBrowser.menu = undefined;
+        return;
+    }
+
     if (event == "enter") {
+        //Browsers.FileBrowser.openContextMenu(item);
+        //return;
         if (item == ".." + Utils.directorySeperator) {
             if (
                 OS.isWindows &&
@@ -446,78 +546,9 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             }
         }
         return;
-    } else if (event == "right") {
-
-        if (item == ".." + Utils.directorySeperator) {
-            return;
-        }
-
-        var contextMenuTitle = "File Actions";
-
-        if (
-            OS.isWindows &&
-            Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
-        ) {
-            var isFolder = true;
-        } else {
-            var temp = mp.utils.file_info(
-                Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
-                    item
-            );
-            if (temp != undefined) {
-                var isFolder = temp.is_dir;
-            } else {
-                var isFolder = true;
-            }
-        }
-
-        if (isFolder)
-        {
-            contextMenuTitle = "Folder Actions";
-        }
-
-        /*
-        var contextMenu = new UI.Menus.Menu({
-            title: contextMenuTitle,
-            description: "DESCRIPTION GOES HERE! @br@" + item,
-            autoClose: 0
-        },
-        [
-            {
-                title: "dummy",
-                item: "unused",
-                eventHandler: function(action, menu)
-                {
-                    mp.msg.warn("dummy trigger!");
-                }
-            }
-        ],
-        Browsers.FileBrowser.menu);
-        contextMenu.eventHandler = function(){};
-
-        Browsers.FileBrowser.menu.toggleMenu();
-        contextMenu.showMenu();
-        */
-
-        // code below will get moved to new context menu
-        if (isFolder) {
-            var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
-            path = path.replaceAll("\/\/","\/");
-            if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
-            {
-                Settings.Data["fileBrowserFavorites"].locations.push(path);
-                Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
-                Settings.save();
-                return;
-            }
-            Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
-            return;
-        }
-        
     }
 };
+
 Browsers.FileBrowser.open = function (parentMenu) {
     if (parentMenu == undefined) {
         parentMenu = Browsers.FileBrowser.cachedParentMenu;
