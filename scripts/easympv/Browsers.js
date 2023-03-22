@@ -384,10 +384,10 @@ Browsers.FileBrowser.changeDirectory = function (directory) {
 };
 
 Browsers.FileBrowser.openContextMenu = function(item) {
-    Browsers.FileBrowser.menu.hideMenu();
-    Browsers.FileBrowser.menu = undefined;
 
     var contextMenuTitle = "File Actions";
+    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
+
 
     if (
         OS.isWindows &&
@@ -410,11 +410,12 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if (isFolder)
     {
         contextMenuTitle = "Folder Actions";
+        contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
     }
 
     var contextMenu = new UI.Menus.Menu({
         title: contextMenuTitle,
-        description: "DESCRIPTION GOES HERE! @br@" + item,
+        description: "Select what to do with this item. @br@" + contextMenuDescriptionIcon,
         autoClose: 0
     },
     [
@@ -482,18 +483,13 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             return;
         }
 
-        // TODO: WHY DOES THIS NOT WORK I AM  L O S I N G  MY MIND, WTF WOULD A WORKAROUND EVEN BE???
-        //Browsers.FileBrowser.menu.hideMenu();
-        //Browsers.FileBrowser.openContextMenu(item);
-
-        //Browsers.FileBrowser.menu.hideMenu();
-        //Browsers.FileBrowser.menu = undefined;
+        Browsers.FileBrowser.menu.hideMenu();
+        Browsers.FileBrowser.menu = undefined;
+        Browsers.FileBrowser.openContextMenu(item);
         return;
     }
 
     if (event == "enter") {
-        //Browsers.FileBrowser.openContextMenu(item);
-        //return;
         if (item == ".." + Utils.directorySeperator) {
             if (
                 OS.isWindows &&

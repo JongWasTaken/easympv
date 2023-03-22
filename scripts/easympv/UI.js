@@ -547,8 +547,8 @@ USAGE:
                                 Requires OSD.js, as well as 3 versions of the image in different scales
                                 (It is probably better to to just load custom fonts for things like logos)
         "title"                 String, title gets displayed when no image or impossible to draw image
-        "titleColor"            Hex string, name of font
-        "titleFont"             String, color of title
+        "titleColor"            Hex string, color of title
+        "titleFont"             String, name of font
         "description"           String, supports special substrings (see below)
         "descriptionColor"      Hex string, color of description
         "itemPrefix"            String, gets prepended to selected item
@@ -593,7 +593,7 @@ USAGE:
                                 Two arguments get passed to this function:
                                 "event" - String, see below
                                 "menu" - Object, the menu calling this function
-    "title" and "item" are required.
+    "title" and "item" are required, though "item" can be left empty if the menuitem is only used with its own eventHandler.
 
     "title" and "description" can include these special substrings:
         @br@ - Insert blank line after item
@@ -623,7 +623,7 @@ USAGE:
     By default we use mpv's new osd-overlay system instead of just using the regular mp.osd_message().
     The main benefit is that all other messages will appear below the menu,
     making it "unbreakable". It will also scale with the window size (1080p is 100%).
-    Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
+    This can be changed with MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
 
     The definition of UI.Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
@@ -1068,7 +1068,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
 
         "overlay" displayMethod:
         +  Automatically scales to window size
-        +  More fine-grained sizings (fontSize is just height in pixels)
+        +  More fine-grained font sizings
         +  will always be on top of every mp.osd_message (no Z-fighting)
         -  A pain to program, but the work is already done and works well
         ?  Requires at least mpv v0.33.0
@@ -1263,7 +1263,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
              - Description Text Lines might overlap on low window resolutions.
                 -> Not really a concern
          */
-        var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage
+        var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage, 10.8 for 1080p
         var transparency = this.settings.transparency;
         var scale = UI.SSA.setScale(scaleFactor);
         var border =
@@ -1595,11 +1595,12 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action) {
                 this.eventLocked = false;
             } else {
                 this._dispatchEvent(action, item);
+                /*
                 if (action != "enter") {
                     this._constructMenuCache();
                     this._drawMenu();
                     this.eventLocked = false;
-                }
+                }*/
                 this.eventLocked = false;
             }
         }
