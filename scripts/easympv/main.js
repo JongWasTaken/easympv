@@ -120,7 +120,6 @@ var OS = require("./OS");
 var Settings = require("./Settings");
 var Shaders = require("./Shaders");
 var Utils = require("./Utils");
-var WindowSystem = require("./WindowSystem");
 
 var Environment = {};
 Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");

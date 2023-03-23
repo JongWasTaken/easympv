@@ -17,7 +17,6 @@ operations on the watch_later folder, and other "nice to have" things.
 "use strict";
 
 var Settings = require("./Settings");
-var Windows = require("./WindowSystem");
 var OS = require("./OS");
 
 /**
