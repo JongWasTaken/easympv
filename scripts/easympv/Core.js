@@ -487,7 +487,7 @@ Core.defineMenus = function () {
 
     var ShadersMenuItems = [
         {
-            title: "[Disable All Shaders]@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable All Shaders@br@@us10@@br@",
             item: "none",
         },
         {
@@ -1017,7 +1017,7 @@ Core.defineMenus = function () {
 
     var ColorsMenuItems = [
         {
-            title: "None@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable all profiles@br@@us10@@br@",
             item: "none",
         },
     ];

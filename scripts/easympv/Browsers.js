@@ -388,7 +388,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
     var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
 
-    var contextMenuTitle = "File Actions";
+    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
     var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
 
     if (
@@ -412,7 +412,8 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     var items = [];
 
     items.push({
-        title: "Back",
+        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Back@br@@br@",
+        color: "909090",
         item: "",
         eventHandler: function(action, menu)
         {
@@ -428,7 +429,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if(isFolder)
     {
         items.push({
-            title: "Add to Favorites",
+            title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Add to Favorites",
             item: "",
             eventHandler: function(action, menu)
             {
@@ -456,7 +457,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     }
 
     items.push({
-        title: "Open",
+        title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Open",
         item: "",
         eventHandler: function(action, menu)
         {
@@ -483,7 +484,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if (!isFolder)
     {
         items.push({
-            title: "Remove",
+            title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Remove",
             item: "",
             eventHandler: function(action, menu)
             {
@@ -528,7 +529,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
     if (isFolder)
     {
-        contextMenuTitle = "Folder Actions";
+        contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "Folder Actions";
         contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
     }
 
@@ -872,7 +873,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     }
 
-    Browsers.FileBrowser.menuSettings.title = "File Browser";
+    Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + "File Browser";
     Browsers.FileBrowser.menuSettings.description =
         UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) +
         Browsers.FileBrowser.currentLocation.replaceAll(
@@ -880,12 +881,14 @@ Browsers.FileBrowser.open = function (parentMenu) {
             "Drive Selection"
         ) + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
     Browsers.FileBrowser.menuSettings.backButtonTitle =
+        UI.SSA.insertSymbolFA(" ", 26, 30) + "Back to main menu@br@";
+        /*
         UI.SSA.insertSymbolFA(
             "",
             32,
             35
         ) + UI.SSA.setFont(Utils.commonFontName) + " Back to main menu@br@";
-
+        */
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
