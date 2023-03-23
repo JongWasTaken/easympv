@@ -1,7 +1,7 @@
 /*
  * SETTINGS.JS (MODULE)
  *
- * Author:                    Jong
+ * Author:                     Jong
  * URL:                        https://smto.pw/mpv
  * License:                    MIT License
  */
