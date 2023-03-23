@@ -14,7 +14,7 @@
             },
             "options": {
                 "env": {
-                    "EASYMPV_ARGS": "options=showHiddenFiles:true,useNativeNotifications:false;debug=true",
+                    "EASYMPV_ARGS": "options=debugMode:true,showHiddenFiles:true,useNativeNotifications:false;debug=true",
                 }
             }
         },

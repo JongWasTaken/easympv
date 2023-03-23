@@ -162,20 +162,42 @@ Core.doRegistrations = function () {
         }
         UI.Input.OSDLog.hide();
     });
-    mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
-        var readCommand = function (success, result) {
-            if (success) {
-                try{
-                    var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
-                    var clearOSD = function(id) {
-                        mp.osd_message("");
-                        if (id == undefined){
-                            mp.msg.warn("Force-removing all overlays: you might see error messages!");
-                            for (var i = 0; i < 1000; i++)
+
+    if(Settings.Data.debugMode)
+    {
+        mp.add_forced_key_binding("Ctrl+M", "empv_tests_hotkey", function() {
+            Core.Menus.TestsMenu.showMenu();
+        });
+
+        mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+            var readCommand = function (success, result) {
+                if (success) {
+                    try{
+                        var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
+                        var clearOSD = function(id) {
+                            mp.osd_message("");
+                            if (id == undefined){
+                                mp.msg.warn("Force-removing all overlays: you might see error messages!");
+                                for (var i = 0; i < 1000; i++)
+                                {
+                                    mp.commandv(
+                                        "osd-overlay",
+                                        i,
+                                        "none",
+                                        "",
+                                        0,
+                                        0,
+                                        0,
+                                        "no",
+                                        "no"
+                                    );
+                                }
+                            }
+                            else
                             {
                                 mp.commandv(
                                     "osd-overlay",
-                                    i,
+                                    id,
                                     "none",
                                     "",
                                     0,
@@ -186,53 +208,38 @@ Core.doRegistrations = function () {
                                 );
                             }
                         }
-                        else
-                        {
-                            mp.commandv(
-                                "osd-overlay",
-                                id,
-                                "none",
-                                "",
-                                0,
-                                0,
-                                0,
-                                "no",
-                                "no"
+                        var cmd = function (cmd) {
+                            print(OS._call(cmd));
+                        }
+                        var help = function () {
+                            if (UI.Input.OSDLog.OSD == undefined) {
+                                UI.Input.OSDLog.show();
+                            }
+                            //UI.Input.OSDLog.hide();
+                            mp.msg.warn("help() output:\nList of helper functions:\n"+
+                            "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                            "cmd(command) -> execute shell command\n"+
+                            "clearOSD() -> force-removes ALL OSDs and messages on screen"
                             );
-                        }
-                    }
-                    var cmd = function (cmd) {
-                        print(OS._call(cmd));
-                    }
-                    var help = function () {
-                        if (UI.Input.OSDLog.OSD == undefined) {
-                            UI.Input.OSDLog.show();
-                        }
-                        //UI.Input.OSDLog.hide();
-                        mp.msg.warn("help() output:\nList of helper functions:\n"+
-                        "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
-                        "cmd(command) -> execute shell command\n"+
-                        "clearOSD() -> force-removes ALL OSDs and messages on screen"
+                        };
+                        eval(result);
+                        Utils.showAlert(
+                            "info",
+                            "Expression evaluated! Check log for more info."
                         );
-                    };
-
-                    eval(result);
-                    Utils.showAlert(
-                        "info",
-                        "Expression evaluated! Check log for more info."
-                    );
+                    }
+                    catch(e)
+                    {
+                        Utils.showAlert(
+                            "error",
+                            "Invalid Expression! Error: " + e
+                        );
+                    }
                 }
-                catch(e)
-                {
-                    Utils.showAlert(
-                        "error",
-                        "Invalid Expression! Error: " + e
-                    );
-                }
-            }
-        };
-        UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
-    });
+            };
+            UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
+        });
+    }
 
     // Registering functions to events
     mp.register_event("file-loaded", Core.onFileLoad);
@@ -1105,6 +1112,26 @@ Core.defineMenus = function () {
                 break;
         }
     };
+
+    Core.Menus.TestsMenu = new UI.Menus.Menu({
+        title: "Tests",
+        description: "This menu lets you launch tests.",
+        autoClose: 0
+    },
+    [
+        {
+            title: "Close",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Core.Menus.TestsMenu.hideMenu();
+                }
+            }
+        },
+    ],
+    undefined);
 }
 
 Core.doFileChecks = function () {
