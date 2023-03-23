@@ -1595,6 +1595,7 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action) {
                 this.eventLocked = false;
             } else {
                 this._dispatchEvent(action, item);
+                // i dont remember why i wrote the code below, it wasted like a whole day because i forgot about it
                 /*
                 if (action != "enter") {
                     this._constructMenuCache();
@@ -1934,6 +1935,7 @@ UI.Alerts.Alert.prototype._fadeOut = function () {
                 "no",
                 "no"
             );
+            /*
             mp.commandv(
                 "osd-overlay",
                 x.effectOSD.id,
@@ -1944,7 +1946,7 @@ UI.Alerts.Alert.prototype._fadeOut = function () {
                 0,
                 "no",
                 "no"
-            );
+            );*/
             //x.baseOSD = undefined;
             x.contentOSD = undefined;
             x.effectOSD = undefined;
@@ -1971,13 +1973,13 @@ UI.Alerts.Alert.prototype._draw = function () {
         this.contentOSD.res_x = mp.get_property("osd-width");
         this.contentOSD.z = this.zStart - 1;
     }
-
+    /*
     if (this.effectOSD == undefined) {
         this.effectOSD = mp.create_osd_overlay("ass-events");
         this.effectOSD.res_y = mp.get_property("osd-height");
         this.effectOSD.res_x = mp.get_property("osd-width");
         this.effectOSD.z = this.zStart;
-    }
+    }*/
 
     /*
     this.baseOSD.data = this.cachedAlertBaseText;
@@ -1985,8 +1987,9 @@ UI.Alerts.Alert.prototype._draw = function () {
     */
     this.contentOSD.data = this.cachedAlertContentText;
     this.contentOSD.update();
+    /*
     this.effectOSD.data = this.cachedAlertEffectText;
-    this.effectOSD.update();
+    this.effectOSD.update();*/
 };
 
 UI.Alerts.Alert.prototype._handleAutoClose = function () {
