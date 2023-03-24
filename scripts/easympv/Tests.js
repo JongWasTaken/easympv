@@ -26,50 +26,83 @@ Tests.run = function(name) {
         return;
     }
 
-    Utils.log("Starting test: \"" + name + "\"","Tests","info");
+    Utils.log("Starting test: \"" + name + "\"","Tests","warn");
 
-    var output = {};
-
-    var toEval = "output = ";
-    toEval += test.target + "(";
-    for (var i = 0; i < test.arguments.length; i++) {
-        var arg = test.arguments[i];
-        if (typeof(arg) == "string")
-        {
-            if (arg.includes("~~"))
-            {
-                arg = mp.utils.get_user_path(arg);
-            }
-            toEval += "\"" + arg + "\"";
-        }
-        else
-        {
-            toEval += arg;
-        }
-
-        if ((i+1) != test.arguments.length)
-        {
-            toEval += ",";
-        }
-    }
-    toEval += ");";
-    Utils.log("Assembled eval string: " + toEval,"Tests","info");
-
-    eval(toEval);
-
-    if (typeof(output) == "object")
+    if (test.states != undefined)
     {
-        output = JSON.stringify(output);
+        Utils.log("Setting states...","Tests","info");
+        for (var i = 0; i < test.states.length; i++) {
+            eval("var " + test.states[i] + " = undefined;");
+        }
     }
+
+    var evaluate = function(target, arguments, destination)
+    {
+        var output = {};
+
+        // target
+        var toEval = target + "(";
+
+        // arguments
+        for (var i = 0; i < arguments.length; i++) {
+            var arg = arguments[i];
+            if (typeof(arg) == "string" && arg.charAt(0) != "@")
+            {
+                if (arg.includes("~~"))
+                {
+                    arg = mp.utils.get_user_path(arg);
+                }
+                toEval += "\"" + arg + "\"";
+            }
+            else
+            {
+                toEval += arg.replaceAll("@","");
+            }
+
+            if ((i+1) != arguments.length)
+            {
+                toEval += ",";
+            }
+        }
+        toEval += ");";
+        Utils.log("Assembled eval string: " + toEval,"Tests","info");
+
+        eval("output = " + toEval);
+
+        if(destination != undefined)
+        {
+            eval(destination + " = output;");
+        }
+
+        // expectedResult
+        if (typeof(output) == "object")
+        {
+            output = JSON.stringify(output);
+        }
+        return output;
+    }
+
+    if (test.preparation != undefined)
+    {
+        Utils.log("Evaluating preparation functions...","Tests","info");
+        for (var i = 0; i < test.preparation.length; i++) {
+            var output = evaluate(test.preparation[i].target,test.preparation[i].arguments,test.preparation[i].destination);
+            Utils.log("Preparation function returned \"" + output + "\"","Tests","info");
+        }
+    }
+
+    Utils.log("Evaluating main function...","Tests","info");
+    var output = evaluate(test.target,test.arguments);
 
     if (typeof(test.expectedResult) == "object")
     {
         test.expectedResult = JSON.stringify(test.expectedResult);
     }
 
-    Utils.log("Eval output: " + output,"Tests","info");
+    Utils.log("Test eval output: " + output,"Tests","info");
     Utils.log("Expected output: " + test.expectedResult,"Tests","info");
 
+    // cleanup
     if (test.cleanup != undefined)
     {
         Utils.log("Cleaning up...","Tests","info")
@@ -88,10 +121,10 @@ Tests.run = function(name) {
     }
     if (output == test.expectedResult)
     {
-        Utils.log("Test \"" + name + "\" PASSED!","Tests","info");
+        Utils.log("Test \"" + name + "\" PASSED!","Tests","warn");
         return true;
     }
-    Utils.log("Test \"" + name + "\" FAILED!","Tests","info");
+    Utils.log("Test \"" + name + "\" FAILED!","Tests","warn");
     return false;
 };
 

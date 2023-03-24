@@ -1129,7 +1129,8 @@ Core.defineMenus = function () {
     for (var test in Tests.json) {
         testsMenuitems.push({
             title: test,
-            item: test
+            item: test,
+            description: Tests.json[test].description
         });
     }
     testsMenuitems.push({
