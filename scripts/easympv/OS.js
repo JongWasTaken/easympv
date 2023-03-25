@@ -107,11 +107,19 @@ OS._call = function (cmd,async,callback) {
     }
 
     if (OS.isWindows) {
+        mp.utils.write_file(
+            "file://" + mp.utils.get_user_path("~~/.tmp-powershell.ps1"),
+            cmd
+        );
+    }
+
+    if (OS.isWindows) {
         var args = [
             "powershell",
             "-NoProfile",
             "-Command",
-            cmd,
+            mp.utils.get_user_path("~~/.tmp-powershell.ps1")
+            //cmd,
         ];
     } else {
         var args = [
