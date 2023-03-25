@@ -1,4 +1,33 @@
 {
+    "Tests: all test features/reference": {
+        "description": "May god help you if this fails.",
+        "variables": [
+            "myAwesomeVariable = undefined"
+        ],
+        "preparation": [
+            {
+                "target": "mp.msg.warn",
+                "arguments": ["reference"],
+                "destination": "myAwesomeVariable"
+            },
+            {
+                "target": "mp.msg.warn",
+                "arguments": ["@myAwesomeVariable"]
+            }
+        ],
+        "target": "mp.utils.write_file",
+        "arguments": [
+            "file://~~/temp.txt",
+            "incredible file content"
+        ],
+        "expectedResult": true,
+        "cleanup": [
+            {
+                "type": "file",
+                "content": "~~/temp.txt"
+            }
+        ]
+    },
     "OS: download file": {
         "target": "OS.dependencyDownload",
         "arguments": [

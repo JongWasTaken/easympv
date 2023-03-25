@@ -28,11 +28,11 @@ Tests.run = function(name) {
 
     Utils.log("Starting test: \"" + name + "\"","Tests","warn");
 
-    if (test.states != undefined)
+    if (test.variables != undefined)
     {
-        Utils.log("Setting states...","Tests","info");
-        for (var i = 0; i < test.states.length; i++) {
-            eval("var " + test.states[i] + " = undefined;");
+        Utils.log("Setting variables...","Tests","info");
+        for (var i = 0; i < test.variables.length; i++) {
+            eval("var " + test.variables[i] + ";");
         }
     }
 
@@ -67,7 +67,12 @@ Tests.run = function(name) {
         toEval += ");";
         Utils.log("Assembled eval string: " + toEval,"Tests","info");
 
-        eval("output = " + toEval);
+        try {
+            eval("output = " + toEval);
+        } catch(e) {
+            Utils.log("Eval execution crashed!","Tests","error");
+            output = "*crashed*";
+        }
 
         if(destination != undefined)
         {
