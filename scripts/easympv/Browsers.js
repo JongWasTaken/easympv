@@ -481,7 +481,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         }
     });
 
-    if (!isFolder)
+    if (!isFolder || Settings.Data.allowFolderDeletion)
     {
         items.push({
             title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Remove",
