@@ -758,6 +758,7 @@ Settings.presets.load = function () {
 
     Settings.presets.shadersets = [];
     Settings.presets.colorpresets = [];
+    Settings.presets.fileextensions = [];
     Settings.presets.hints = [];
     Settings.presets.shadersetsUser =  [];
     Settings.presets.colorpresetsUser =  [];
@@ -827,6 +828,11 @@ Settings.presets.load = function () {
                 );
             }
         }
+        if (json["fileextensions"] != undefined) {
+            for (var i = 0; i <= json["fileextensions"].length-1; i++) {
+                Settings.presets.fileextensions.push(json["fileextensions"][i]);
+            }
+        }
         if (json["hints"] != undefined) {
             for (var i = 0; i <= json["hints"].length-1; i++) {
                 Settings.presets.hints.push(json["hints"][i]);
@@ -881,6 +887,12 @@ Settings.presets.load = function () {
             }
         }
 
+        if (jsonUser["fileextensions"] != undefined) {
+            for (var i = 0; i <= jsonUser["fileextensions"].length-1; i++) {
+                Settings.presets.fileextensions.push(jsonUser["fileextensions"][i]);
+            }
+        }
+
         if (jsonUser["hints"] != undefined) {
             for (var i = 0; i <= jsonUser["hints"].length-1; i++) {
                 Settings.presets.hints.push(jsonUser["hints"][i]);
@@ -910,7 +922,8 @@ Settings.presets.load = function () {
             "_comment": "For more information please visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Presets",
             "shadersets": {},
             "colorpresets": {},
-            "tips": [],
+            "fileextensions": [],
+            "hints": [],
             "images": []
         };
 
