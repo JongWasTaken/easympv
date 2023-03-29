@@ -2280,6 +2280,7 @@ UI.Input.keybindOverrides = [
 
     { key: "Ctrl+a", id: "empv_input_ctrl_a" },
     { key: "Ctrl+v", id: "empv_input_ctrl_v" },
+    { key: "Ctrl+c", id: "empv_input_ctrl_c" },
 ];
 
 UI.Input.returnBufferInserted = function(insert)
@@ -2307,7 +2308,7 @@ UI.Input.handleKeyPress = function (key)
     {
         UI.Input.Buffer = UI.Input.returnBufferInserted(" ");
     }
-    else if (key == "ESC" || key == "MBTN_LEFT")
+    else if (key == "ESC" || key == "MBTN_LEFT" || key == "Ctrl+c")
     {
         UI.Input.hide(false);
         return;
@@ -2452,7 +2453,7 @@ UI.Input.hide = function (success) {
     UI.Input.OSD = undefined;
     if(success)
     {
-        UI.Input.Memory.push(UI.Input.Buffer);
+        UI.Input.Memory.unshift(UI.Input.Buffer);
     }
     UI.Input.Callback(success,UI.Input.Buffer.slice().replace(/\\/g,''));
     UI.Input.Buffer = "";
