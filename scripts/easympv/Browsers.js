@@ -502,18 +502,21 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
                 if (deleteConfirm)
                 {
+                    var type = "file";
+                    if (isFolder) { type = "folder"; };
+
                     if (OS.fileRemoveSystemwide(path))
                     {
                         Utils.showAlert(
                             "info",
-                            "Removed file: " + item
+                            "Removed " + type + ": " + item
                         );
                     }
                     else
                     {
                         Utils.showAlert(
                             "error",
-                            "Could not remove file: " + item
+                            "Could not remove " + type + ": " + item
                         );
                     }
                     contextMenu.hideMenu();
@@ -746,15 +749,15 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
-            currentLocationFolders.sort();
         } else {
             Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
             var currentLocationFolders = mp.utils.readdir(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
-            currentLocationFolders.sort();
         }
+        // Possible TODO: improve sort
+        currentLocationFolders.sort();
 
 
         if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
@@ -809,63 +812,45 @@ Browsers.FileBrowser.open = function (parentMenu) {
         );
         currentLocationFiles.sort();
         for (var i = 0; i < currentLocationFiles.length; i++) {
-            if (currentLocationFiles[i].charAt(0) == ".") {
-                if (Settings.Data.showHiddenFiles) {
-                    var color = "909090";
+            var color = "909090";
+            var icon = " ";
 
-                    for (
-                        var t = 0;
-                        t < Browsers.FileBrowser.fileExtensionWhitelist.length;
-                        t++
-                    ) {
-                        if (
-                            currentLocationFiles[i].includes(
-                                Browsers.FileBrowser.fileExtensionWhitelist[t]
-                                    .extension
-                            )
-                        ) {
-                            color = "ffffff";
-                            break;
-                        }
-                    }
-
-                    var title = currentLocationFiles[i];
-                    if (title.length >= 36) {
-                        title = title.substring(0, 50) + "...";
-                    }
-
-                    items.push({
-                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
-                        item: currentLocationFiles[i],
-                        color: color,
-                    });
-                }
-            } else {
-                var color = "909090";
-
-                for (
-                    var j = 0;
-                    j < Browsers.FileBrowser.fileExtensionWhitelist.length;
-                    j++
+            for (
+                var j = 0;
+                j < Browsers.FileBrowser.fileExtensionWhitelist.length;
+                j++
+            ) {
+                var whitelist = Browsers.FileBrowser.fileExtensionWhitelist[j];
+                if (
+                    currentLocationFiles[i].includes(whitelist.extension)
                 ) {
-                    if (
-                        currentLocationFiles[i].includes(
-                            Browsers.FileBrowser.fileExtensionWhitelist[j]
-                                .extension
-                        )
-                    ) {
-                        color = "ffffff";
-                        break;
+
+                    if (whitelist.type == "video")
+                    {
+                        icon = " ";
                     }
-                }
+                    else if (whitelist.type == "audio")
+                    {
+                        icon = " ";
+                    }
+                    else if (whitelist.type == "photo")
+                    {
+                        icon = " ";
+                    }
 
-                var title = currentLocationFiles[i];
-                if (title.length >= 36) {
-                    title = title.substring(0, 50) + "...";
+                    color = "ffffff";
+                    break;
                 }
+            }
 
+            var title = currentLocationFiles[i];
+            if (title.length >= 36) {
+                title = title.substring(0, 50) + "...";
+            }
+
+            if (currentLocationFiles[i].charAt(0) != "." || Settings.Data.showHiddenFiles) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
+                    title: UI.SSA.insertSymbolFA(icon, 26, 30) + title,
                     item: currentLocationFiles[i],
                     color: color,
                 });
@@ -882,13 +867,6 @@ Browsers.FileBrowser.open = function (parentMenu) {
         ) + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
     Browsers.FileBrowser.menuSettings.backButtonTitle =
         UI.SSA.insertSymbolFA(" ", 26, 30) + "Back to main menu@br@";
-        /*
-        UI.SSA.insertSymbolFA(
-            "",
-            32,
-            35
-        ) + UI.SSA.setFont(Utils.commonFontName) + " Back to main menu@br@";
-        */
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
