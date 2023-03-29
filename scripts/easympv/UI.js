@@ -2272,6 +2272,8 @@ UI.Input.keybindOverrides = [
     { key: "LEFT", id: "empv_input_left" },
     { key: "RIGHT", id: "empv_input_right" },
 
+    { key: "MBTN_LEFT", id: "empv_input_mbtn_left" },
+    { key: "MBTN_RIGHT", id: "empv_input_mbtn_right" },
     { key: "MBTN_MID", id: "empv_input_mbtn_mid" },
     { key: "WHEEL_UP", id: "empv_input_mbtn_up" },
     { key: "WHEEL_DOWN", id: "empv_input_mbtn_down" },
@@ -2287,7 +2289,7 @@ UI.Input.returnBufferInserted = function(insert)
 
 UI.Input.handleKeyPress = function (key)
 {
-    if(key == "Ctrl+v" || key == "INS") {
+    if(key == "Ctrl+v" || key == "INS" || key == "MBTN_MID") {
         UI.Input.Buffer = UI.Input.returnBufferInserted(OS.getClipboard().replace(/\{/g,'\{').replace(/\}/g,'\}'));
     }
     else if (key == "Ctrl+a")
@@ -2305,12 +2307,12 @@ UI.Input.handleKeyPress = function (key)
     {
         UI.Input.Buffer = UI.Input.returnBufferInserted(" ");
     }
-    else if (key == "ESC")
+    else if (key == "ESC" || key == "MBTN_LEFT")
     {
         UI.Input.hide(false);
         return;
     }
-    else if (key == "ENTER" || key == "KP_ENTER")
+    else if (key == "ENTER" || key == "KP_ENTER" || key == "MBTN_RIGHT")
     {
         UI.Input.hide(true);
         return;
@@ -2351,7 +2353,7 @@ UI.Input.handleKeyPress = function (key)
             UI.Input.Position = UI.Input.Position - 1;
         }
     }
-    else if (key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
+    else if (key == "WHEEL_UP" || key == "WHEEL_DOWN")
     {}
     else
     {
@@ -2382,9 +2384,9 @@ UI.Input.show = function (callback, prefix) {
 
     UI.Input.Prefix =
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press Enter to submit your Input. Press ESC to abort.\n" +
+        "Press Enter or right mouse button to submit your Input. Press ESC or left mouse button to abort.\n" +
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press CTRL+V to paste.\n" +
+        "Press CTRL+V or middle mouse button to paste.\n" +
         UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)
