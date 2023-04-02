@@ -84,7 +84,7 @@ Core.onFileLoad = function () {
                 cFile.replaceAll("./", "");
         }
     }
-
+    //Autoload.loadedFile = cFile;
     Browsers.FileBrowser.currentLocation = cFile;
     Browsers.FileBrowser.gotoParentDirectory();
 
@@ -239,6 +239,39 @@ Core.doRegistrations = function () {
             };
             UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
         });
+    }
+
+    if(OS.isSteamGamepadUI)
+    {
+        // override keys to work with gamepad
+        // THIS ASSUMES THE DEFAULT KEYBOARD+MOUSE EMULATION PRESET IN STEAM INPUT
+        // using commandv does not give user feedback, so we need to that
+
+        // left stick
+        mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mp.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
+        mp.add_forced_key_binding("s", "empv_steaminput_ldown", function() { mp.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
+        mp.add_forced_key_binding("a", "empv_steaminput_lleft", function() { mp.commandv("script_binding","chapter_prev"); });
+        mp.add_forced_key_binding("d", "empv_steaminput_lright", function() { mp.commandv("script_binding","chapter_next"); });
+
+        // dpad
+        mp.add_forced_key_binding("1", "empv_steaminput_dup", function() { mp.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("3", "empv_steaminput_ddown", function() { mp.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("4", "empv_steaminput_dleft", function() { mp.commandv("seek","5"); });
+        mp.add_forced_key_binding("2", "empv_steaminput_dright", function() { mp.commandv("seek","-5"); });
+
+        // right stick is mouse
+
+        // buttons
+        mp.add_forced_key_binding("esc", "empv_steaminput_start", function() { mp.commandv("script_binding","easympv"); });
+        mp.add_forced_key_binding("tab", "empv_steaminput_select", function() { mp.commandv("script_binding","stats/display-stats-toggle"); });
+        mp.add_forced_key_binding("space", "empv_steaminput_a", function() { mp.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("e", "empv_steaminput_b", function() { mp.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("r", "empv_steaminput_x", function() { mp.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mp.get_property("video-aspect-override")); });
+        mp.add_forced_key_binding("f", "empv_steaminput_y", function() { mp.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mp.get_property("sub-scale")).toFixed(3)); });
+        mp.add_forced_key_binding("WHEEL_UP", "empv_steaminput_rb", function() { mp.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("WHEEL_DOWN", "empv_steaminput_lb", function() { mp.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
+
+        // lt and rt are mouse buttons
     }
 
     // Registering functions to events
@@ -405,6 +438,7 @@ Core.defineMenus = function () {
         },
     ];
 
+    /*
     // TODO: this needs to be moved to onFileLoad
     if (Number(mp.get_property("playlist-count")) > 1) {
         MainMenuItems.splice(2, 0, {
@@ -416,7 +450,7 @@ Core.defineMenus = function () {
             }
         });
     }
-
+    */
     Core.Menus.MainMenu = new UI.Menus.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;

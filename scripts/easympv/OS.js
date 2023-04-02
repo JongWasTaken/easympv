@@ -15,6 +15,7 @@ OS.gitAvailable = false;
 
 OS.name = undefined;
 OS.isWindows = false;
+OS.isSteamGamepadUI = false;
 OS.directorySeperator = "/";
 
 OS._connectionChecked = false;
@@ -58,6 +59,11 @@ OS.init = function () {
                 Utils.log(
                     "Your OS is untested, but if it is similar to Linux it will probably be fine.","startup","error"
                 );
+            }
+            if (mp.utils.getenv("SteamGamepadUI") != undefined)
+            {
+                Utils.log("Detected Steam GamepadUI","startup","info");
+                OS.isSteamGamepadUI = true;
             }
         }
     }

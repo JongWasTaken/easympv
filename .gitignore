@@ -4,6 +4,7 @@
 *.code-workspace
 *.conf
 *.so
+*.env
 easympv.json
 easympv-cache.json
 updatenote.lua
