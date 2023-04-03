@@ -302,6 +302,29 @@ Core.doUnregistrations = function () {
     mp.remove_key_binding("empv_log_hotkey");
     mp.remove_key_binding("empv_eval_hotkey");
 
+    if(OS.isSteamGamepadUI)
+    {
+        try {
+            mp.remove_key_binding("empv_steaminput_lup");
+            mp.remove_key_binding("empv_steaminput_ldown");
+            mp.remove_key_binding("empv_steaminput_lleft");
+            mp.remove_key_binding("empv_steaminput_lright");
+            mp.remove_key_binding("empv_steaminput_dup");
+            mp.remove_key_binding("empv_steaminput_ddown");
+            mp.remove_key_binding("empv_steaminput_dleft");
+            mp.remove_key_binding("empv_steaminput_dright");
+            mp.remove_key_binding("empv_steaminput_start");
+            mp.remove_key_binding("empv_steaminput_select");
+            mp.remove_key_binding("empv_steaminput_a");
+            mp.remove_key_binding("empv_steaminput_b");
+            mp.remove_key_binding("empv_steaminput_x");
+            mp.remove_key_binding("empv_steaminput_y");
+            mp.remove_key_binding("empv_steaminput_rb");
+            mp.remove_key_binding("empv_steaminput_lb");
+        }
+        catch(x) {}
+    }
+
     mp.unregister_event(UI.Input.OSDLog.addToBuffer);
     mp.unregister_event(Core.onFileLoad);
     mp.unregister_event(Core.onShutdown);
