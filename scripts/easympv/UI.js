@@ -2480,6 +2480,8 @@ UI.Input.OSDLog.show = function () {
     }, 100);
 }
 
+UI.Input.OSDLog.blacklistedPrefixes = {"osd/libass":1, "vo/gpu/libplacebo":1};
+
 UI.Input.OSDLog.addToBuffer = function (msg) {
     var color = "";
     if (msg.level == "debug")
@@ -2503,7 +2505,7 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
         UI.Input.OSDLog.Buffer = UI.Input.OSDLog.Buffer.substring(0,15000)
         UI.Input.OSDLog.BufferCounter = 0;
     }
-    if (msg.prefix != "osd/libass")
+    if (UI.Input.OSDLog.blacklistedPrefixes[msg.prefix] == undefined)
     {
         var time = mp.get_property("time-pos");
         if (time == undefined) { time = "0.000000"; }
