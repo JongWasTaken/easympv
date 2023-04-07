@@ -209,9 +209,6 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
     var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
 
-    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
-    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
-
     if (
         OS.isWindows &&
         Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
@@ -229,6 +226,38 @@ Browsers.FileBrowser.openContextMenu = function(item) {
             var isFolder = true;
         }
     }
+
+    var icon = " ";
+
+    if(!isFolder){
+        for (
+            var j = 0;
+            j < Settings.presets.fileextensions.length;
+            j++
+        ) {
+            var whitelist = Settings.presets.fileextensions[j];
+            if (
+                item.includes(whitelist.extension)
+            ) {
+                if (whitelist.type == "video")
+                {
+                    icon = " ";
+                }
+                else if (whitelist.type == "audio")
+                {
+                    icon = " ";
+                }
+                else if (whitelist.type == "photo")
+                {
+                    icon = " ";
+                }
+                break;
+            }
+        }
+    }
+
+    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
+    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(icon, 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
 
     var items = [];
 
