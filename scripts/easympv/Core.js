@@ -170,6 +170,8 @@ Core.doRegistrations = function () {
         });
 
         mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+            UI.Input.showJavascriptInput();
+            return;
             var readCommand = function (success, result) {
                 if (success) {
                     try{
@@ -362,23 +364,16 @@ Core.defineMenus = function () {
     };
     var descriptionSettings = function (a, b) {
         return (
-            "mpv " +
-            b +
-            "@br@" +
-            "easympv " +
-            a +
-            "@br@" +
-            "ffmpeg " +
-            Utils.ffmpegVersion +
-            "@br@" +
-            "libass" +
-            Utils.libassVersion
+            "mpv " + b +
+            "@br@easympv " + a
         );
     };
 
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
         description: "",
+        fadeIn: true,
+        fadeOut: true,
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
     };
@@ -714,7 +709,118 @@ Core.defineMenus = function () {
         }
     };
 
+    var SettingsDevelopmentSubMenuItems = [
+        {
+            title: "Do config migration now",
+            item: "do_config_migration",
+            eventHandler: function(event, menu) {
+                if (event == "enter")
+                {
+                    menu.hideMenu();
+                    Settings.migrate();
+                    Settings.reload();
+                }
+            }
+        },
+        {
+            title: "Redo First Time Setup",
+            item: "do_config_migration",
+            eventHandler: function(event, menu) {
+                if (event == "enter")
+                {
+                    menu.hideMenu();
+                    Settings.Data.isFirstLaunch = true;
+                    Settings.save();
+                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                }
+            }
+        },
+        {
+            title: "Create Log File",
+            item: "create_log_file",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
+                    buffer.reverse();
+                    mp.utils.write_file(
+                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+                        buffer.join("\n")
+                    );
+                    Utils.showAlert("info", "Log exported to Desktop!");
+                }
+            }
+        },
+        {
+            title: "Toggle On-Screen Log",
+            item: "toggle_on_screen_log",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (UI.Input.OSDLog.OSD == undefined) {
+                        UI.Input.OSDLog.show();
+                        return;
+                    }
+                    UI.Input.OSDLog.hide();
+                }
+            }
+        },
+        {
+            title: "Toggle Debug Mode",
+            item: "toggle_debug_mode",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (Settings.Data.debugMode)
+                    {
+                        Settings.Data.debugMode = false;
+                        mp.enable_messages("info");
+                        Utils.showAlert("info", "Debug mode has been disabled!");
+                    }
+                    else
+                    {
+                        Settings.Data.debugMode = true;
+                        mp.enable_messages("debug");
+                        Utils.showAlert("info", "Debug mode has been enabled!");
+                    }
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Command Input",
+            item: "command_input",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    UI.Input.showInteractiveCommandInput();
+                }
+            }
+        },
+        {
+            title: "JavaScript Input",
+            item: "javascript_input",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    UI.Input.showJavascriptInput();
+                }
+            }
+        },
+        {
+            title: "Open Tests Menu",
+            item: "open_tests_menu",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Core.Menus.TestsMenu.showMenu();
+                }
+            }
+        }
+    ];
+
     var SettingsMenuSettings = {
+        autoClose: 0,
         image: "settings",
         title:
             "{\\1c&H782B78&}" +
@@ -728,26 +834,89 @@ Core.defineMenus = function () {
         customKeyEvents: [{key: "h", event: "help"}]
     };
 
+    /*
+        Settings menu redesign Feature Tree:
+        -> Settings
+            -> Configuration
+                - Notify about new updates
+                - Menu Fade In/Out
+                - Show hidden Files in File Explorer
+                - Allow deleting folders in File Explorer
+                - Use system notifications instead of on-screen messages
+                ----
+                - SimpleVRR
+                - SimpleVRR Target Refresh Rate
+                - IPC server
+                - Save full log
+            -> Updates
+            -> Credits
+            ----
+            - Open config folder
+            - Reload config
+            - Reinitialize plugin
+            ----
+            -> Development Options
+                - Do config migration now
+                - Redo First Time Setup
+                - Create Log File
+                - On-Screen Log
+                - Debug mode
+                - Command Input
+                - JS Console
+                - Open Tests Menu
+
     var SettingsMenuItems = [
         {
-            title: "Toggle Discord RPC@br@@us10@@br@",
-            item: "discord",
+            title: "Edit easympv.conf",
+            item: "easympvconf",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    mp.commandv("script-binding", "drpc_toggle");
+                    Utils.openFile("easympv.conf");
                 }
             }
         },
         {
-            title: "Check for updates",
-            item: "updater",
+            title: "Edit mpv.conf",
+            item: "mpvconf",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile("mpv.conf");
+                }
+            }
+        },
+        {
+            title: "Edit input.conf",
+            item: "inputconf",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.openFile("input.conf");
+                }
+            }
+        },
+    ];
+    */
+
+    var SettingsMenuItems = [
+        {
+            title: "Configuration",
+            item: "configuration",
+            eventHandler: function (event, menu) {
+                // pre-create the other menu and just open it here
+                menu.hideMenu();
+                Core.Menus.SettingsConfigurationSubMenu.showMenu();
+            }
+        },
+        {
+            title: "Updates",
+            item: "updates",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     var isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
                     menu.hideMenu();
                     var updateConfirmation = false;
-
                     var setDescription = function()
                     {
                         var d = "You are on version " +
@@ -763,7 +932,6 @@ Core.defineMenus = function () {
                         d += "@br@@br@" + Utils.latestUpdateData.changelog;
                         return d;
                     }
-
                     var umenu = new UI.Menus.Menu(
                         {
                             title: "Update",
@@ -788,7 +956,6 @@ Core.defineMenus = function () {
                                 updateConfirmation = true;
                             }
                         } else if (event == "show") {
-
                             if(isGit)
                             {
                                 if (umenu.items.length == 1) {
@@ -799,7 +966,6 @@ Core.defineMenus = function () {
                                     });
                                 }
                             }
-
                             if (Utils.updateAvailable && !isGit)
                             {
                                 if (umenu.items.length == 1) {
@@ -817,7 +983,6 @@ Core.defineMenus = function () {
                     if (Settings.Data.debugMode) {
                         umenu.settings.description +=
                             "@br@@br@[Debug Mode Information]@br@These files will be removed:@br@";
-
                         for (
                             var i = 0;
                             i < Utils.latestUpdateData.removeFiles.length;
@@ -868,38 +1033,18 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Edit easympv.conf",
-            item: "easympvconf",
+            title: "Open config folder",
+            item: "open_config_folder",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Utils.openFile("easympv.conf");
-                }
-            }
-        },
-        {
-            title: "Edit mpv.conf",
-            item: "mpvconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("mpv.conf");
-                }
-            }
-        },
-        {
-            title: "Edit input.conf",
-            item: "inputconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("input.conf");
+                    Utils.openFile();
                 }
             }
         },
         {
             title: "Reload config",
-            item: "reload",
+            item: "reload_config",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
@@ -912,87 +1057,27 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Restart plugin",
-            item: "restart",
+            title: "Reinitialize plugin@br@@us10@@br@",
+            item: "reinitialize_plugin",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
+                    menu.settings.fadeOut = false;
                     menu.hideMenu();
                     mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
         {
-            title: "Open config folder@br@@us10@@br@",
-            item: "config",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
+            title: "Development Options",
+            item: "development_options",
+            eventHandler: function (event, menu) {
+                if (event == "enter")
+                {
                     menu.hideMenu();
-                    Utils.openFile();
+                    Core.Menus.SettingsDevelopmentSubMenu.showMenu();
                 }
             }
-        },
-        {
-            title: "Create Log File",
-            item: "log.export",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
-                    buffer.reverse();
-                    mp.utils.write_file(
-                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
-                        buffer.join("\n")
-                    );
-                    Utils.showAlert("info", "Log exported to Desktop!");
-                }
-            }
-        },
-        {
-            title: "Toggle On-Screen Log",
-            item: "log.osd",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    if (UI.Input.OSDLog.OSD == undefined) {
-                        UI.Input.OSDLog.show();
-                        return;
-                    }
-                    UI.Input.OSDLog.hide();
-                }
-            }
-        },
-        {
-            title: "Toggle Debug Mode",
-            item: "debugmode",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    if (Settings.Data.debugMode)
-                    {
-                        Settings.Data.debugMode = false;
-                        mp.enable_messages("info");
-                        Utils.showAlert("info", "Debug mode has been disabled!");
-                    }
-                    else
-                    {
-                        Settings.Data.debugMode = true;
-                        mp.enable_messages("debug");
-                        Utils.showAlert("info", "Debug mode has been enabled!");
-                    }
-                    Settings.save();
-                }
-            }
-        },
-        {
-            title: "Input a command",
-            item: "command",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    UI.Input.showInteractiveCommandInput();
-                }
-            }
-        },
+        }
     ];
 
     Core.Menus.SettingsMenu = new UI.Menus.Menu(
@@ -1000,6 +1085,270 @@ Core.defineMenus = function () {
         SettingsMenuItems,
         Core.Menus.MainMenu
     );
+
+    Core.Menus.SettingsDevelopmentSubMenu = new UI.Menus.Menu(
+        {
+            autoClose: 0,
+            title:
+                "{\\1c&H782B78&}" +
+                UI.SSA.insertSymbolFA("") +
+                UI.SSA.setColorWhite() +
+                "Development Options",
+            description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
+            //customKeyEvents: [{key: "h", event: "help"}]
+        },
+        SettingsDevelopmentSubMenuItems,
+        Core.Menus.SettingsMenu
+    );
+    Core.Menus.SettingsDevelopmentSubMenu.eventHandler = function(){};
+
+    var SettingsConfigurationSubMenuItems = [
+        {
+            title: "Notify about new updates",
+            item: "notify_about_updates",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.notifyAboutUpdates)
+                    {
+                        Settings.Data.notifyAboutUpdates = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.notifyAboutUpdates = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Menu Fade In/Out",
+            item: "menu_fade_in_out",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.fadeMenus)
+                    {
+                        Settings.Data.fadeMenus = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.fadeMenus = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Show hidden Files in File Explorer",
+            item: "show_hidden_files",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.showHiddenFiles)
+                    {
+                        Settings.Data.showHiddenFiles = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.showHiddenFiles = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Allow deleting folders in File Explorer",
+            item: "allow_deleting_folders",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.allowFolderDeletion)
+                    {
+                        Settings.Data.allowFolderDeletion = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.allowFolderDeletion = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Use system notifications instead of on-screen messages",
+            item: "use_system_notifications",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.useNativeNotifications)
+                    {
+                        Settings.Data.useNativeNotifications = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.useNativeNotifications = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "IPC Server",
+            item: "ipc_server",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.startIPCServer)
+                    {
+                        Settings.Data.startIPCServer = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.startIPCServer = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: "Save full log",
+            item: "save_full_log",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.saveFullLog)
+                    {
+                        Settings.Data.saveFullLog = false;
+                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                    }
+                    else
+                    {
+                        Settings.Data.saveFullLog = true;
+                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        }
+    ];
+
+    Core.Menus.SettingsConfigurationSubMenu = new UI.Menus.Menu(
+        {
+            autoClose: 0,
+            title:
+                "{\\1c&H782B78&}" +
+                UI.SSA.insertSymbolFA("") +
+                UI.SSA.setColorWhite() +
+                "Configuration Options",
+            description: "Edit the configuration file directly for more options."
+            //customKeyEvents: [{key: "h", event: "help"}]
+        },
+        SettingsConfigurationSubMenuItems,
+        Core.Menus.SettingsMenu
+    );
+
+    var getItemByName = function (name) {
+        for(var i = 0; i < SettingsConfigurationSubMenuItems.length; i++)
+        {
+            if (SettingsConfigurationSubMenuItems[i].item == name)
+            return SettingsConfigurationSubMenuItems[i];
+        }
+    }
+
+    Core.Menus.SettingsConfigurationSubMenu.eventHandler = function(event, action) {
+        if (event == "show")
+        {
+            if(Settings.Data.notifyAboutUpdates)
+            {
+                getItemByName("notify_about_updates").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("notify_about_updates").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.fadeMenus)
+            {
+                getItemByName("menu_fade_in_out").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("menu_fade_in_out").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.showHiddenFiles)
+            {
+                getItemByName("show_hidden_files").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("show_hidden_files").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.allowFolderDeletion)
+            {
+                getItemByName("allow_deleting_folders").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("allow_deleting_folders").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.useNativeNotifications)
+            {
+                getItemByName("use_system_notifications").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("use_system_notifications").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.startIPCServer)
+            {
+                getItemByName("ipc_server").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("ipc_server").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+
+            if(Settings.Data.saveFullLog)
+            {
+                getItemByName("save_full_log").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+            }
+            else
+            {
+                getItemByName("save_full_log").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+            }
+        }
+    };
 
     Core.Menus.SettingsMenu.eventHandler = function (event, action) {
             /*
@@ -1040,16 +1389,6 @@ Core.defineMenus = function () {
                         UI.SSA.setColorYellow() + "default.sofa"
                     );
                 }
-            }
-            if (action == "clearwld") {
-                Utils.clearWL();
-                return;
-            }
-            if (action == "remote") {
-                Settings.Data.useRandomPipeName = false;
-                Utils.setIPCServer(Settings.Data.useRandomPipeName);
-                Settings.save();
-                return;
             }
             return;
             */

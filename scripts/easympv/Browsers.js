@@ -39,6 +39,7 @@ Browsers.FileBrowser.menu = undefined;
 Browsers.FileBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
+    fadeOut: false
 };
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
@@ -47,6 +48,7 @@ Browsers.DriveBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
+    fadeOut: false
 };
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
@@ -57,6 +59,7 @@ Browsers.DeviceBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
+    fadeOut: false
 };
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
@@ -295,7 +298,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     {
                         Settings.Data["fileBrowserFavorites"].locations.push(path);
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                        Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
+                        Utils.showAlert("info","Added Folder \""+item+"\" to Favorites.");
                         Settings.save();
                         return;
                     }
@@ -391,7 +394,8 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     var contextMenu = new UI.Menus.Menu({
         title: contextMenuTitle,
         description: "Select what to do with this item. @br@@br@" + contextMenuDescriptionIcon + "@br@",
-        autoClose: 0
+        autoClose: 0,
+        fadeOut: false
     },items,
     Browsers.FileBrowser.menu);
     contextMenu.eventHandler = function(){};

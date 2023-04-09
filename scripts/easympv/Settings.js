@@ -39,6 +39,7 @@ Settings.cache = {};
 Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    fadeMenus: true,
     defaultShaderSet: "none",
     defaultColorProfile: "none",
     simpleVRR: false,
@@ -152,10 +153,16 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "# The key that easympv will force its menu on.\n";
         defaultConfigString += "# Default: m\n";
-        defaultConfigString += "# Set this to \"disable\" to revert to the old behavior.\n";
-        defaultConfigString += "# In that case, you will need to add your own keybinding to input.conf:\n";
+        defaultConfigString += "# Set this to \"disable\" to disable forcing the keybind.\n";
+        defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to use fade-ins and fade-outs on menus.\n";
+        defaultConfigString += "# Having this enabled might result in a performance penalty.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "fadeMenus=true\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Default shader set to load at launch.\n";
         defaultConfigString += "# Default: none\n";
@@ -192,7 +199,7 @@ Settings.save = function () {
         defaultConfigString +=
         "# Whether the file browser should allow you to remove folders.\n";
         defaultConfigString +=
-        "# IMPORTANT: There is a reason this is disabled by default! \n";
+        "# IMPORTANT: There is a reason this is disabled by default!\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "allowFolderDeletion=x\n";
         defaultConfigString += "\n";

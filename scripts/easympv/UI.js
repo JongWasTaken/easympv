@@ -559,6 +559,10 @@ USAGE:
         "selectedItemColor"     Hex string, color of selected item
         "transparency"          Percentage, 0 -> solid, 100 -> invisible, default is 0
                                 (Does not apply to the image)
+        "menuId"                String, unique id for this menu
+                                Defaults to random number (there is not much point in setting this)
+        "fadeIn"                Boolean, whether to fade in the menu (possible performance penalty)
+        "fadeOut"               Boolean, whether to fade out the menu (possible performance penalty)
         "scrollingEnabled"      Boolean, whether to scroll when items overflow, default is false
         "scrollingPosition"     Number, where to "freeze" the cursor on screen, default is 1
                                 0 -> 10 are allowed, lower number is higher on screen
@@ -714,6 +718,26 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
         this.settings.transparency = settings.transparency;
     } else {
         this.settings.transparency = "0";
+    }
+
+    this.settings.transparencyBackup = this.settings.transparency;
+
+    if (settings.menuId != undefined) {
+        this.settings.menuId = settings.menuId;
+    } else {
+        this.settings.menuId = String(Math.floor(Math.random()*90) + 10);
+    }
+
+    if (settings.fadeIn != undefined) {
+        this.settings.fadeIn = settings.fadeIn;
+    } else {
+        this.settings.fadeIn = Settings.Data.fadeMenus;
+    }
+
+    if (settings.fadeOut != undefined) {
+        this.settings.fadeOut = settings.fadeOut;
+    } else {
+        this.settings.fadeOut = Settings.Data.fadeMenus;
     }
 
     if (settings.borderSize != undefined) {
@@ -1083,7 +1107,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
         The code below is quite messy, sorry.
     */
 
-    this.allowDrawImage = false;
+    //this.allowDrawImage = false;
     this.itemCount = 0;
 
     // Start
@@ -1556,7 +1580,7 @@ UI.Menus.Menu.prototype._overrideKeybinds = function () {
 
         mp.add_forced_key_binding(
             currentKey.key,
-            currentKey.id,
+            currentKey.id + this.settings.menuId,
             tempFunction(this, currentKey.action),
             { repeatable: true }
         );
@@ -1567,7 +1591,7 @@ UI.Menus.Menu.prototype._revertKeybinds = function () {
     for (var i = 0; i < this.settings.keybindOverrides.length; i++) {
         var currentKey = this.settings.keybindOverrides[i];
 
-        mp.remove_key_binding(currentKey.id);
+        mp.remove_key_binding(currentKey.id + this.settings.menuId);
     }
 };
 
@@ -1667,16 +1691,75 @@ UI.Menus.Menu.prototype._stopTimer = function () {
     }
 };
 
+UI.Menus.Menu.prototype._fadeIn = function () {
+    var x = this;
+    this.settings.transparency = 100;
+    this.fadeInInterval = setInterval(function () {
+        if (x.settings.transparency != x.settings.transparencyBackup) {
+            x.settings.transparency = Number(x.settings.transparency) - 5;
+            x._constructMenuCache();
+            x._drawMenu();
+        } else {
+            clearInterval(x.fadeInInterval);
+        }
+    }, 5);
+    this.fadeInInterval.start;
+};
+
+
+UI.Menus.Menu.prototype._fadeOut = function () {
+    var x = this;
+    this.fadeOutInterval = setInterval(function () {
+        if (x.settings.transparency != 100) {
+            x.settings.transparency = Number(x.settings.transparency) + 5;
+            x._constructMenuCache();
+            x._drawMenu();
+        } else {
+            mp.commandv(
+                "osd-overlay",
+                x.OSD.id,
+                "none",
+                "",
+                0,
+                0,
+                0,
+                "no",
+                "no"
+            );
+            x._revertKeybinds();
+            x.isMenuVisible = false;
+            x.removeSuffix();
+            x.OSD = undefined;
+            x.settings.transparency = x.settings.transparencyBackup;
+            clearInterval(x.fadeOutInterval);
+            UI.Image.hide(x.settings.image);
+        }
+    }, 5);
+    this.fadeOutInterval.start;
+};
+
 UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
+        this.allowDrawImage = false;
         //this._dispatchEvent("preshow");
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
         this.isMenuVisible = true;
         this._dispatchEvent("show");
-        this._constructMenuCache();
-        this._drawMenu();
+        if(this.settings.fadeIn)
+        {
+            // workaround for allowDrawImage race condition
+            this.settings.transparency = 100;
+            this._constructMenuCache();
+
+            this._fadeIn();
+        }
+        else
+        {
+            this._constructMenuCache();
+            this._drawMenu();
+        }
         this._startTimer();
         if (this.allowDrawImage) {
             UI.Image.show(this.settings.image, 25, 25);
@@ -1697,32 +1780,36 @@ UI.Menus.Menu.prototype.hideMenu = function () {
             //}
         }
         mp.osd_message("");
+        UI.Image.hide(this.settings.image);
     }
     if (this.settings.displayMethod == "overlay") {
         if (this.isMenuVisible) {
             this._stopTimer();
-            mp.commandv(
-                "osd-overlay",
-                this.OSD.id,
-                "none",
-                "",
-                0,
-                0,
-                0,
-                "no",
-                "no"
-            );
-            this._revertKeybinds();
-            this.isMenuVisible = false;
-            this.removeSuffix();
-            //if (this.allowDrawImage) {
-            //    OSD.hide(this.settings.image);
-            //}
-            this.OSD = undefined;
+            if (this.settings.fadeOut)
+            {
+                this._fadeOut();
+            }
+            else
+            {
+                mp.commandv(
+                    "osd-overlay",
+                    this.OSD.id,
+                    "none",
+                    "",
+                    0,
+                    0,
+                    0,
+                    "no",
+                    "no"
+                );
+                this._revertKeybinds();
+                this.isMenuVisible = false;
+                this.removeSuffix();
+                this.OSD = undefined;
+                UI.Image.hide(this.settings.image);
+            }
         }
     }
-    UI.Image.hide(this.settings.image);
-    //OSD.hideAll();
 };
 
 UI.Menus.Menu.prototype.toggleMenu = function () {
@@ -2543,6 +2630,77 @@ UI.Input.showInteractiveCommandInput = function () {
         }
     };
     UI.Input.show(readCommand,"Command: ");
+}
+
+UI.Input.showJavascriptInput = function () {
+        var readCommand = function (success, result) {
+            if (success) {
+                try{
+                    var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
+                    var clearOSD = function(id) {
+                        mp.osd_message("");
+                        if (id == undefined){
+                            mp.msg.warn("Force-removing all overlays: you might see error messages!");
+                            for (var i = 0; i < 1000; i++)
+                            {
+                                mp.commandv(
+                                    "osd-overlay",
+                                    i,
+                                    "none",
+                                    "",
+                                    0,
+                                    0,
+                                    0,
+                                    "no",
+                                    "no"
+                                );
+                            }
+                        }
+                        else
+                        {
+                            mp.commandv(
+                                "osd-overlay",
+                                id,
+                                "none",
+                                "",
+                                0,
+                                0,
+                                0,
+                                "no",
+                                "no"
+                            );
+                        }
+                    }
+                    var cmd = function (cmd) {
+                        print(OS._call(cmd));
+                    }
+                    var help = function () {
+                        if (UI.Input.OSDLog.OSD == undefined) {
+                            UI.Input.OSDLog.show();
+                        }
+                        //UI.Input.OSDLog.hide();
+                        mp.msg.warn("help() output:\nList of helper functions:\n"+
+                        "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                        "cmd(command) -> execute shell command\n"+
+                        "clearOSD() -> force-removes ALL OSDs and messages on screen"
+                        );
+                    };
+                    eval(result);
+                    Utils.showAlert(
+                        "info",
+                        "Expression evaluated! Check log for more info."
+                    );
+                }
+                catch(e)
+                {
+                    Utils.showAlert(
+                        "error",
+                        "Invalid Expression! Error: " + e
+                    );
+                }
+            }
+        };
+        UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
 }
 
 module.exports = UI;
