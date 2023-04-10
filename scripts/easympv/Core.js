@@ -110,8 +110,14 @@ Core.onShutdown = function () {
 var redrawMenus = function () {
     var currentmenu = UI.Menus.getDisplayedMenu();
     if (currentmenu != undefined) {
+        var temp1 = currentmenu.settings.fadeIn;
+        var temp2 = currentmenu.settings.fadeOut;
+        currentmenu.settings.fadeIn = false;
+        currentmenu.settings.fadeOut = false;
         currentmenu.hideMenu();
         currentmenu.showMenu();
+        currentmenu.settings.fadeIn = temp1;
+        currentmenu.settings.fadeOut = temp2;
     }
 };
 
@@ -711,7 +717,7 @@ Core.defineMenus = function () {
 
     var SettingsDevelopmentSubMenuItems = [
         {
-            title: "Do config migration now",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Do config migration now",
             item: "do_config_migration",
             eventHandler: function(event, menu) {
                 if (event == "enter")
@@ -723,7 +729,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Redo First Time Setup",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Redo First Time Setup@br@@us10@",
             item: "do_config_migration",
             eventHandler: function(event, menu) {
                 if (event == "enter")
@@ -736,7 +742,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Create Log File",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Create Log File",
             item: "create_log_file",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -752,7 +758,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Toggle On-Screen Log",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle On-Screen Log",
             item: "toggle_on_screen_log",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -766,7 +772,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Toggle Debug Mode",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Debug Mode@br@@us10@",
             item: "toggle_debug_mode",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -788,7 +794,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Command Input",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Command Input",
             item: "command_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -798,7 +804,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "JavaScript Input",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "JavaScript Input@br@@us10@",
             item: "javascript_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -808,7 +814,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Open Tests Menu",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu",
             item: "open_tests_menu",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -901,7 +907,7 @@ Core.defineMenus = function () {
 
     var SettingsMenuItems = [
         {
-            title: "Configuration",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Configuration",
             item: "configuration",
             eventHandler: function (event, menu) {
                 // pre-create the other menu and just open it here
@@ -910,7 +916,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Updates",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Updates",
             item: "updates",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1009,7 +1015,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Credits@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Credits@br@@us10@",
             item: "credits",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1033,7 +1039,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Open config folder",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open config folder",
             item: "open_config_folder",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1043,21 +1049,22 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Reload config",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Reload config",
             item: "reload_config",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Settings.reload();
+                    UI.Image.hide("settings");
                     Settings.mpvConfig.reload();
                     Settings.inputConfig.reload();
                     Settings.presets.reload();
+                    Settings.reload();
                     Utils.showAlert("info", "Configuration reloaded.");
                 }
             }
         },
         {
-            title: "Reinitialize plugin@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Reinitialize plugin@br@@us10@",
             item: "reinitialize_plugin",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1068,7 +1075,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Development Options",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Development Options",
             item: "development_options",
             eventHandler: function (event, menu) {
                 if (event == "enter")
@@ -1091,7 +1098,7 @@ Core.defineMenus = function () {
             autoClose: 0,
             title:
                 "{\\1c&H782B78&}" +
-                UI.SSA.insertSymbolFA("") +
+                UI.SSA.insertSymbolFA("") +
                 UI.SSA.setColorWhite() +
                 "Development Options",
             description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
@@ -1104,8 +1111,9 @@ Core.defineMenus = function () {
 
     var SettingsConfigurationSubMenuItems = [
         {
-            title: "Notify about new updates",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Notify about new updates",
             item: "notify_about_updates",
+            descriptionPrefix: "Whether to alert you when a new version is available.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1113,12 +1121,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.notifyAboutUpdates)
                     {
                         Settings.Data.notifyAboutUpdates = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.notifyAboutUpdates = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1126,8 +1134,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Menu Fade In/Out",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Menu Fade In/Out",
             item: "menu_fade_in_out",
+            descriptionPrefix: "Makes some menus fade in and out (possbile performance impact).@br@Leave this disabled if unsure.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1135,12 +1144,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.fadeMenus)
                     {
                         Settings.Data.fadeMenus = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.fadeMenus = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1148,8 +1157,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Show hidden Files in File Explorer",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show hidden Files in File Explorer",
             item: "show_hidden_files",
+            descriptionPrefix: "Hidden files can be annoying, especially on Linux.@br@Enable this to hide them.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1157,12 +1167,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.showHiddenFiles)
                     {
                         Settings.Data.showHiddenFiles = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.showHiddenFiles = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1170,8 +1180,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Allow deleting folders in File Explorer",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Allow deleting folders in File Explorer",
             item: "allow_deleting_folders",
+            descriptionPrefix: "Whether to show the \"Remove\" option for folders.@br@IMPORTANT: You could totally delete something important by accident, so you should probably leave this disabled.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1179,12 +1190,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.allowFolderDeletion)
                     {
                         Settings.Data.allowFolderDeletion = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.allowFolderDeletion = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1192,8 +1203,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Use system notifications instead of on-screen messages",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Use system notifications instead of on-screen messages@br@@us10@",
             item: "use_system_notifications",
+            descriptionPrefix: "On-screen messages are quite buggy right now, so using system notifications instead might be more desirable.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1201,12 +1213,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.useNativeNotifications)
                     {
                         Settings.Data.useNativeNotifications = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.useNativeNotifications = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1214,8 +1226,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "IPC Server",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "IPC Server",
             item: "ipc_server",
+            descriptionPrefix: "Automatically launches an ipc server named \"mpv\".@br@If you don't know what that is, you should probably leave this disabled.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1223,12 +1236,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.startIPCServer)
                     {
                         Settings.Data.startIPCServer = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.startIPCServer = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1236,8 +1249,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Save full log",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Save full log",
             item: "save_full_log",
+            descriptionPrefix: "FOR TROUBLESHOOTING ONLY: You should not enable this unless you know what you are doing.@br@Having this enabled for extended periods of time will freeze or even crash mpv.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1245,12 +1259,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.saveFullLog)
                     {
                         Settings.Data.saveFullLog = false;
-                        this.description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
                     }
                     else
                     {
                         Settings.Data.saveFullLog = true;
-                        this.description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1264,10 +1278,10 @@ Core.defineMenus = function () {
             autoClose: 0,
             title:
                 "{\\1c&H782B78&}" +
-                UI.SSA.insertSymbolFA("") +
+                UI.SSA.insertSymbolFA("") +
                 UI.SSA.setColorWhite() +
                 "Configuration Options",
-            description: "Edit the configuration file directly for more options."
+            description: "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu)."
             //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsConfigurationSubMenuItems,
@@ -1285,67 +1299,76 @@ Core.defineMenus = function () {
     Core.Menus.SettingsConfigurationSubMenu.eventHandler = function(event, action) {
         if (event == "show")
         {
+            var item = undefined;
+
+            item = getItemByName("notify_about_updates")
             if(Settings.Data.notifyAboutUpdates)
             {
-                getItemByName("notify_about_updates").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("notify_about_updates").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("menu_fade_in_out");
             if(Settings.Data.fadeMenus)
             {
-                getItemByName("menu_fade_in_out").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("menu_fade_in_out").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("show_hidden_files");
             if(Settings.Data.showHiddenFiles)
             {
-                getItemByName("show_hidden_files").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("show_hidden_files").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("allow_deleting_folders");
             if(Settings.Data.allowFolderDeletion)
             {
-                getItemByName("allow_deleting_folders").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("allow_deleting_folders").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("use_system_notifications");
             if(Settings.Data.useNativeNotifications)
             {
-                getItemByName("use_system_notifications").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("use_system_notifications").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("ipc_server");
             if(Settings.Data.startIPCServer)
             {
-                getItemByName("ipc_server").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("ipc_server").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
 
+            item = getItemByName("save_full_log");
             if(Settings.Data.saveFullLog)
             {
-                getItemByName("save_full_log").description = "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
             }
             else
             {
-                getItemByName("save_full_log").description = "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
             }
         }
     };
