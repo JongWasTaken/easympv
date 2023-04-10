@@ -1882,6 +1882,12 @@ UI.Alerts.onScreen = [];
 UI.Alerts.Alert = function (settings) {
     this.settings = {};
 
+    if (settings.fadeOut != undefined) {
+        this.settings.fadeOut = settings.fadeOut;
+    } else {
+        this.settings.fadeOut = undefined;
+    }
+
     if (settings.image != undefined) {
         this.settings.image = settings.image;
     } else {
@@ -1993,6 +1999,25 @@ UI.Alerts.Alert.prototype._construct = function ()
 }
 
 UI.Alerts.Alert.prototype._fadeOut = function () {
+
+    if (!this.settings.fadeOut)
+    {
+        mp.commandv(
+            "osd-overlay",
+            this.contentOSD.id,
+            "none",
+            "",
+            0,
+            0,
+            0,
+            "no",
+            "no"
+        );
+        this.contentOSD = undefined;
+        this.isAlertVisible = false;
+        this.settings.transparency = 40;
+    }
+
     var x = this;
     this.fadeOutInterval = setInterval(function () {
         if (x.settings.transparency != 100) {
