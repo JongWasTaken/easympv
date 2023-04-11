@@ -173,79 +173,12 @@ Core.doRegistrations = function () {
     {
         mp.add_forced_key_binding("Ctrl+M", "empv_tests_hotkey", function() {
             Core.Menus.TestsMenu.showMenu();
+            return;
         });
 
         mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
             UI.Input.showJavascriptInput();
             return;
-            var readCommand = function (success, result) {
-                if (success) {
-                    try{
-                        var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
-                        var clearOSD = function(id) {
-                            mp.osd_message("");
-                            if (id == undefined){
-                                mp.msg.warn("Force-removing all overlays: you might see error messages!");
-                                for (var i = 0; i < 1000; i++)
-                                {
-                                    mp.commandv(
-                                        "osd-overlay",
-                                        i,
-                                        "none",
-                                        "",
-                                        0,
-                                        0,
-                                        0,
-                                        "no",
-                                        "no"
-                                    );
-                                }
-                            }
-                            else
-                            {
-                                mp.commandv(
-                                    "osd-overlay",
-                                    id,
-                                    "none",
-                                    "",
-                                    0,
-                                    0,
-                                    0,
-                                    "no",
-                                    "no"
-                                );
-                            }
-                        }
-                        var cmd = function (cmd) {
-                            print(OS._call(cmd));
-                        }
-                        var help = function () {
-                            if (UI.Input.OSDLog.OSD == undefined) {
-                                UI.Input.OSDLog.show();
-                            }
-                            //UI.Input.OSDLog.hide();
-                            mp.msg.warn("help() output:\nList of helper functions:\n"+
-                            "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
-                            "cmd(command) -> execute shell command\n"+
-                            "clearOSD() -> force-removes ALL OSDs and messages on screen"
-                            );
-                        };
-                        eval(result);
-                        Utils.showAlert(
-                            "info",
-                            "Expression evaluated! Check log for more info."
-                        );
-                    }
-                    catch(e)
-                    {
-                        Utils.showAlert(
-                            "error",
-                            "Invalid Expression! Error: " + e
-                        );
-                    }
-                }
-            };
-            UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
         });
     }
 
@@ -386,7 +319,7 @@ Core.defineMenus = function () {
 
     var MainMenuItems = [
         {
-            title: "Close@br@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Close@br@@br@",
             item: "close",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -395,7 +328,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Open...",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open...@br@@us10@",
             item: "open",
             description: "Files, Discs, Devices & URLs",
             eventHandler: function(event, menu) {
@@ -406,7 +339,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Shaders",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Shaders",
             item: "shaders",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -416,7 +349,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Colors",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Colors",
             item: "colors",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -425,7 +358,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Chapters@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Chapters@br@@us10@",
             item: "chapters",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -434,7 +367,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Preferences@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Preferences",
             item: "options",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -443,7 +376,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Quit mpv",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Quit mpv",
             item: "quit",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -552,7 +485,7 @@ Core.defineMenus = function () {
 
     var ShadersMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable All Shaders@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable All Shaders@br@@us10@",
             item: "none",
         },
         {
@@ -564,7 +497,7 @@ Core.defineMenus = function () {
             item: "Automatic Anime4K (Worse, but less demanding)",
         },
         {
-            title: "Recommended Anime4K Settings (Better, but more demanding)@br@@us10@@br@",
+            title: "Recommended Anime4K Settings (Better, but more demanding)@br@@us10@",
             item: "Automatic Anime4K (Better, but more demanding)",
         },
     ];
@@ -671,7 +604,7 @@ Core.defineMenus = function () {
 
     var ChaptersMenuItems = [
         {
-            title: "Change Mode",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Change Mode",
             item: "tmode",
             description: UI.SSA.setColorYellow() + "Current mode: " + Chapters.mode,
             eventHandler: function(event, menu)
@@ -686,7 +619,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Toggle",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle",
             item: "tstatus",
             description: UI.SSA.setColorYellow() + "Currently " + Chapters.status,
             eventHandler: function(event, menu)
@@ -962,28 +895,31 @@ Core.defineMenus = function () {
                                 updateConfirmation = true;
                             }
                         } else if (event == "show") {
-                            if(isGit)
-                            {
-                                if (umenu.items.length == 1) {
-                                    umenu.items.push({
-                                        title:
-                                            "Pull latest changes",
-                                        item: "update",
-                                    });
+                            // there is a silly way to crash everything here, so try{} it is
+                            try {
+                                if(isGit)
+                                {
+                                    if (umenu.items.length == 1) {
+                                        umenu.items.push({
+                                            title:
+                                                "Pull latest changes",
+                                            item: "update",
+                                        });
+                                    }
                                 }
-                            }
-                            if (Utils.updateAvailable && !isGit)
-                            {
-                                if (umenu.items.length == 1) {
-                                    umenu.items.push({
-                                        title:
-                                            "Update to version " +
-                                            UI.SSA.setColorYellow() +
-                                            Settings.Data.newestVersion,
-                                        item: "update",
-                                    });
+                                if (Utils.updateAvailable && !isGit)
+                                {
+                                    if (umenu.items.length == 1) {
+                                        umenu.items.push({
+                                            title:
+                                                "Update to version " +
+                                                UI.SSA.setColorYellow() +
+                                                Settings.Data.newestVersion,
+                                            item: "update",
+                                        });
+                                    }
                                 }
-                            }
+                            } catch(x) {}
                         }
                     };
                     if (Settings.Data.debugMode) {
@@ -1443,7 +1379,7 @@ Core.defineMenus = function () {
 
     var ColorsMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable all profiles@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable all profiles@br@@us10@",
             item: "none",
         },
     ];
@@ -1535,7 +1471,7 @@ Core.defineMenus = function () {
     var testsMenuitems = [];
 
     testsMenuitems.push({
-        title: "Close@br@@us10@@br@",
+        title: "Close@br@@us10@",
         item: "",
         eventHandler: function(event, menu)
         {

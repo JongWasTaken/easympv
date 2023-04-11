@@ -62,7 +62,6 @@ In the future there will be some sort of setup on the first start, this is curre
 - macOS testing: I need to set up a macOS virtual machine again
 - Test every single function in OS.js, then merge into master
 - Rework alerts once and for all, it might be possible to have them "run" across the screen
-- Rework Setting menu, make it prettier and easier to navigate, add all missing options
 - Figure out upgrading from 1.x
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
 #### Ideas

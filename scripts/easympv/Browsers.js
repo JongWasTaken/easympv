@@ -105,22 +105,22 @@ Browsers.Selector.open = function (parentMenu) {
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "File",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "File",
         item: "file",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Disc",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Disc",
         item: "disc",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Device",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Device",
         item: "device",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "URL",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "URL",
         item: "url",
         color: "ffffff",
     });
@@ -260,12 +260,12 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     }
 
     var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
-    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(icon, 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
+    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
 
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Back@br@@br@",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back@br@@br@",
         color: "909090",
         item: "",
         eventHandler: function(action, menu)
@@ -282,7 +282,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if(isFolder)
     {
         items.push({
-            title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Add to Favorites",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Add to Favorites",
             item: "",
             eventHandler: function(action, menu)
             {
@@ -310,7 +310,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     }
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Open",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open",
         item: "",
         eventHandler: function(action, menu)
         {
@@ -337,7 +337,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if (!isFolder || Settings.Data.allowFolderDeletion)
     {
         items.push({
-            title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Remove",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Remove",
             item: "",
             eventHandler: function(action, menu)
             {
@@ -386,7 +386,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if (isFolder)
     {
         contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "Folder Actions";
-        contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
+        contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
     }
 
     var deleteConfirm = false;
@@ -522,7 +522,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -555,7 +555,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -588,7 +588,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < drives.length; i++) {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -618,7 +618,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         } else {
             items.push({
                 title:
-                    UI.SSA.insertSymbolFA(" ", 30, 30) +
+                    UI.SSA.insertSymbolFA(" ", 30, 35, Utils.commonFontName) +
                     ".." +
                     Utils.directorySeperator,
                 item: ".." + Utils.directorySeperator,
@@ -635,7 +635,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             title +
                             Utils.directorySeperator,
                         item:
@@ -652,7 +652,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 items.push({
                     title:
-                        UI.SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                         title +
                         Utils.directorySeperator,
                     item: currentLocationFolders[i] + Utils.directorySeperator,
@@ -704,7 +704,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
             if (currentLocationFiles[i].charAt(0) != "." || Settings.Data.showHiddenFiles) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(icon, 26, 30) + title,
+                    title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + title,
                     item: currentLocationFiles[i],
                     color: color,
                 });
@@ -714,17 +714,17 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
     Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + "File Browser";
     Browsers.FileBrowser.menuSettings.description =
-        UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 30) + UI.SSA.setBold(true) +
+        UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) +
         Browsers.FileBrowser.currentLocation.replaceAll(
             "@DRIVESELECTOR@",
             "Drive Selection"
         ) + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
     Browsers.FileBrowser.menuSettings.backButtonTitle =
-        UI.SSA.insertSymbolFA(" ", 26, 30) + "Back to main menu@br@";
+        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back to main menu@br@@us10@";
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
-            title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Open in File Explorer",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open in File Explorer@br@@us10@",
             color: "999999",
             eventHandler: function(event, menu)
             {
@@ -737,7 +737,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
     }
 
     items.unshift({
-        title: UI.SSA.insertSymbolFA(" ", 25, 30) + "Favorites",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Favorites",
         color: "999999",
         eventHandler: function(event, menu)
         {
@@ -747,7 +747,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++)
                 {
                     favItems.push({
-                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["fileBrowserFavorites"].locations[i],
+                        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.Data["fileBrowserFavorites"].locations[i],
                         item: Settings.Data["fileBrowserFavorites"].locations[i],
                         color: "FFFF90"
                     });
@@ -809,17 +809,17 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
         Browsers.DriveBrowser.menu.items = [];
         Browsers.DriveBrowser.menu.items.push(temp);
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "CD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "CD",
             item: "ccda",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "DVD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "DVD",
             item: "dvd",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "BluRay",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "BluRay",
             item: "bd",
             color: "ffffff",
         });
@@ -889,7 +889,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
             for (var i = 0; i < drives.length; i++) {
                 items.push({
                     title:
-                        UI.SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                         drives[i].trim() +
                         "\\",
                     item: drives[i].trim() + "\\",
@@ -903,7 +903,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("sr")) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i],
+                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i],
                     item: deviceList[i],
                     color: "ffffff",
                 });
@@ -971,7 +971,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             devices = r.stdout.split("|");
             for (var i = 0; i < devices.length - 1; i++) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + devices[i].trim(),
+                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + devices[i].trim(),
                     item: devices[i].trim(),
                     color: "ffffff",
                 });
@@ -982,7 +982,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
         deviceList.sort();
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("video")) {
-                var title = UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i];
+                var title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i];
                 title +=
                     " - " +
                     Utils.executeCommand([

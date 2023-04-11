@@ -755,7 +755,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 30) + "Back@br@@br@";
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back@br@@us10@";
         /*
         UI.SSA.insertSymbolFA(
             "",
