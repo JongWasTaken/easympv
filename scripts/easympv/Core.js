@@ -1095,7 +1095,7 @@ Core.defineMenus = function () {
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show hidden Files in File Explorer",
             item: "show_hidden_files",
-            descriptionPrefix: "Hidden files can be annoying, especially on Linux.@br@Enable this to hide them.@br@",
+            descriptionPrefix: "Hidden files can be annoying, especially on Linux.@br@Enable this to show them.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
