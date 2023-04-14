@@ -39,7 +39,8 @@ Browsers.FileBrowser.menu = undefined;
 Browsers.FileBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
-    fadeOut: false
+    fadeOut: false,
+    fadeIn: false
 };
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
@@ -48,7 +49,8 @@ Browsers.DriveBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
-    fadeOut: false
+    fadeOut: false,
+    fadeIn: false
 };
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
@@ -59,7 +61,8 @@ Browsers.DeviceBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
-    fadeOut: false
+    fadeOut: false,
+    fadeIn: false
 };
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
@@ -395,7 +398,8 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         title: contextMenuTitle,
         description: "Select what to do with this item. @br@@br@" + contextMenuDescriptionIcon + "@br@",
         autoClose: 0,
-        fadeOut: false
+        fadeOut: false,
+        fadeIn: false
     },items,
     Browsers.FileBrowser.menu);
     contextMenu.eventHandler = function(){};
