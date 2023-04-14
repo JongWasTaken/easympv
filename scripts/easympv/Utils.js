@@ -284,7 +284,7 @@ Utils.showSystemMessagebox = function (text, async) {
 
         if(!worked)
         {
-            Windows.Alerts.show(type,text);
+            UI.Alerts.show(type,text);
         }
     }
     else
