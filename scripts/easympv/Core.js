@@ -1045,6 +1045,9 @@ Core.defineMenus = function () {
     );
     Core.Menus.SettingsDevelopmentSubMenu.eventHandler = function(){};
 
+    var enabledText = "Currently "+ UI.SSA.setColorGreen() + "enabled" + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+    var disabledText = "Currently "+ UI.SSA.setColorRed() +"disabled" + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+
     var SettingsConfigurationSubMenuItems = [
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Notify about new updates",
@@ -1057,12 +1060,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.notifyAboutUpdates)
                     {
                         Settings.Data.notifyAboutUpdates = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.notifyAboutUpdates = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1080,12 +1083,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.fadeMenus)
                     {
                         Settings.Data.fadeMenus = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.fadeMenus = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1103,12 +1106,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.showHiddenFiles)
                     {
                         Settings.Data.showHiddenFiles = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.showHiddenFiles = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1126,12 +1129,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.allowFolderDeletion)
                     {
                         Settings.Data.allowFolderDeletion = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.allowFolderDeletion = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1149,12 +1152,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.useNativeNotifications)
                     {
                         Settings.Data.useNativeNotifications = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.useNativeNotifications = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1172,12 +1175,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.startIPCServer)
                     {
                         Settings.Data.startIPCServer = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.startIPCServer = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1195,12 +1198,12 @@ Core.defineMenus = function () {
                     if(Settings.Data.saveFullLog)
                     {
                         Settings.Data.saveFullLog = false;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
                         Settings.Data.saveFullLog = true;
-                        this.description = this.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                        this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
                     Settings.save();
@@ -1240,71 +1243,71 @@ Core.defineMenus = function () {
             item = getItemByName("notify_about_updates")
             if(Settings.Data.notifyAboutUpdates)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("menu_fade_in_out");
             if(Settings.Data.fadeMenus)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("show_hidden_files");
             if(Settings.Data.showHiddenFiles)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("allow_deleting_folders");
             if(Settings.Data.allowFolderDeletion)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("use_system_notifications");
             if(Settings.Data.useNativeNotifications)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("ipc_server");
             if(Settings.Data.startIPCServer)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
 
             item = getItemByName("save_full_log");
             if(Settings.Data.saveFullLog)
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorGreen() + "enabled";
+                item.description = item.descriptionPrefix + enabledText;
             }
             else
             {
-                item.description = item.descriptionPrefix + "Currently "+ UI.SSA.setColorRed() +"disabled";
+                item.description = item.descriptionPrefix + disabledText;
             }
         }
     };
