@@ -5,6 +5,7 @@
 *.conf
 *.so
 *.env
+*.test
 easympv.json
 easympv-cache.json
 updatenote.lua

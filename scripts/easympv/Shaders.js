@@ -18,8 +18,8 @@ var Shaders = {};
 Shaders.name = "none";
 Shaders.manualSelection = false;
 
-var Utils = require("./Utils");
-var Settings = require("./Settings");
+//var Utils = require("./Utils");
+//var Settings = require("./Settings");
 
 /**
  * Applies shaderset.

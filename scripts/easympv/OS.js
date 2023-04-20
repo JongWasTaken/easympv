@@ -399,7 +399,7 @@ OS.gitUpdate = function () {
     }
     else
     {
-        exitCode = OS._call("cd $HOME/.config/mpv/ && git pull").status;
+        exitCode = OS._call("cd ~/.config/mpv/ && git pull").status;
     }
     return exitCode == 0 ? true: false;
 }

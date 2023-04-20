@@ -311,8 +311,6 @@ Core.defineMenus = function () {
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
         description: "",
-        fadeIn: true,
-        fadeOut: true,
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
     };
@@ -1471,45 +1469,98 @@ Core.defineMenus = function () {
         }
     };
 
-    var testsMenuitems = [];
-
-    testsMenuitems.push({
-        title: "Close@br@@us10@",
-        item: "",
-        eventHandler: function(event, menu)
-        {
-            if (event == "enter")
-            {
-                Core.Menus.TestsMenu.hideMenu();
-            }
-        }
-    });
-    for (var test in Tests.json) {
-        testsMenuitems.push({
-            title: test,
-            item: test,
-            description: Tests.json[test].description
-        });
-    }
-    testsMenuitems.push({
-        title: "[RUN ALL TESTS ABOVE]",
-        item: "",
-        eventHandler: function(event, menu)
-        {
-            if (event == "enter")
-            {
-                for (var i = 1; i < menu.items.length-1; i++)
-                {
-                    menu._dispatchEvent("enter",menu.items[i]);
-                }
-            }
-        }
-    });
     Core.Menus.TestsMenu = new UI.Menus.Menu({
         title: "Tests",
         description: "This menu lets you launch tests.",
         autoClose: 0
-    },testsMenuitems,undefined);
+    },[],undefined);
+
+    var createItemList = function()
+    {
+        var testsMenuitems = [];
+        testsMenuitems.push({
+            title: "Close@br@@us10@",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Core.Menus.TestsMenu.hideMenu();
+                }
+            }
+        });
+
+        for (var test in Tests.list) {
+            var item = {
+                title: test,
+                item: test
+            };
+            if (Tests.list[test].description != undefined)
+            {
+                item.description = Tests.list[test].description;
+            }
+            testsMenuitems.push(item);
+        }
+
+        testsMenuitems.push({
+            title: "[RUN ALL TESTS ABOVE]",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    for (var i = 1; i < menu.items.length-2; i++)
+                    {
+                        menu._dispatchEvent("enter",menu.items[i]);
+                    }
+                }
+            }
+        });
+
+        testsMenuitems.push({
+            title: "[RESET ALL TESTS]",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    createItemList();
+                    menu.redrawMenu();
+                }
+            }
+        });
+
+        Core.Menus.TestsMenu.items = testsMenuitems;
+    }
+
+    createItemList();
+
+    Core.Menus.TestsMenu.setResultForItem = function(name, result)
+    {
+        var grade = UI.SSA.setColorRed() + "[FAIL]" + UI.SSA.setColorWhite();
+
+        if (result == undefined)
+        {
+            grade = UI.SSA.setColorBlue() + "[DONE]" + UI.SSA.setColorWhite();
+        }
+        else
+        {
+            if (result)
+            {
+                grade = UI.SSA.setColorGreen() + "[PASS]" + UI.SSA.setColorWhite();
+            }
+        }
+
+        for (var i = 0; i < Core.Menus.TestsMenu.items.length; i++) {
+            if (Core.Menus.TestsMenu.items[i].title == name)
+            {
+                Core.Menus.TestsMenu.items[i].title = grade + " " + Core.Menus.TestsMenu.items[i].title;
+                Core.Menus.TestsMenu.items[i].item = "ignore";
+                break;
+            }
+        }
+    }
+
     Core.Menus.TestsMenu.eventHandler = function(action, item) {
         if (action == "enter")
         {
@@ -1519,21 +1570,7 @@ Core.defineMenus = function () {
             }
             Core.Menus.TestsMenu.setDescription("Test in progress!@br@(DO NOT CLOSE THIS MENU!)");
             Core.Menus.TestsMenu.redrawMenu();
-            var result = Tests.run(item);
-            var grade = UI.SSA.setColorRed() + "[FAIL]" + UI.SSA.setColorWhite();
-
-            if (result)
-            {
-                grade = UI.SSA.setColorGreen() + "[PASS]" + UI.SSA.setColorWhite();
-            }
-
-            for (var i = 0; i < Core.Menus.TestsMenu.items.length; i++) {
-                if (Core.Menus.TestsMenu.items[i].item == item)
-                {
-                    Core.Menus.TestsMenu.items[i].title = grade + " " + Core.Menus.TestsMenu.items[i].title;
-                    Core.Menus.TestsMenu.items[i].item = "ignore";
-                }
-            }
+            Tests.run(item);
             Core.Menus.TestsMenu.setDescription("Tests finished.");
             Core.Menus.TestsMenu.redrawMenu();
         }
@@ -1619,7 +1656,6 @@ Core.startExecution = function () {
     Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
 
     OS.init();
-    Tests.init();
     Utils.log("Checking for updates...","startup","info");
     setTimeout(function() {
         Utils.getLatestUpdateData();

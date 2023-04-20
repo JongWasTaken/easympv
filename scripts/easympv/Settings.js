@@ -39,7 +39,7 @@ Settings.cache = {};
 Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
-    fadeMenus: true,
+    fadeMenus: false,
     defaultShaderSet: "none",
     defaultColorProfile: "none",
     simpleVRR: false,

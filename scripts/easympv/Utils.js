@@ -24,11 +24,13 @@ var OS = require("./OS");
  */
 var Utils = {};
 
+// these are for compatibility reasons
 Utils.OS = OS.name;
 Utils.OSisWindows = OS.isWindows;
+Utils.directorySeperator = OS.directorySeperator;
+//
 
 Utils.commonFontName = "Overpass"; //"Overpass SemiBold";
-Utils.directorySeperator = OS.directorySeperator;
 
 Utils.updateInProgress = false;
 Utils.isOnline = false;
@@ -46,6 +48,7 @@ Utils.displayVersionMpv = "";
  * Does not return anything, instead Utils.OS and Utils.directorySeperator get updated.
  */
 Utils.determineOS = function () {
+    return;
     if (mp.utils.getenv("OS") == "Windows_NT") {
         Utils.OS = "win";
         Utils.OSisWindows = true;
@@ -857,23 +860,5 @@ Utils.restartMpv = function () {
     Utils.log("!!! Any custom options have not been passed to the new mpv instance, please restart manually if neccessary !!!","restart","warn")
     mp.commandv("quit-watch-later");
 }
-
-/**
- * Clears watch_later folder and creates a dummy file.
- */
-Utils.clearWL = function () {
-    Utils.log("Clearing watch_later folder","main","info")
-    var folder = mp.utils.get_user_path("~~/watch_later");
-    if (Utils.OSisWindows) {
-        folder = folder.replaceAll("/", "\\");
-        Utils.executeCommand(["del", "/Q", "/S", folder]);
-        Utils.executeCommand(["mkdir", folder]);
-        Utils.WL.createDummy();
-    } else {
-        Utils.executeCommand(["rm", "-rf", folder]);
-        Utils.executeCommand(["mkdir", folder]);
-        Utils.WL.createDummy();
-    }
-};
 
 module.exports = Utils;

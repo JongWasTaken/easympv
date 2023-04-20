@@ -196,6 +196,10 @@ UI.SSA.setColorBlack = function () {
     return UI.SSA.setColor("000000");
 };
 
+UI.SSA.setColorBlue = function () {
+    return UI.SSA.setColor("0096FF");
+};
+
 /**
  * Using https://qgustavor.github.io/svg2ass-gui/ , any svg file can
  * be displayed. However mpv has a quirk with this, files that consist
@@ -364,7 +368,7 @@ UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
  * Place the correctly formated image file in ~~/scripts/easympv/images/.
  * @param {string} name internal name for image file, used when drawing/removing overlay
  * @param {string} file file name with extension
- 
+
 UI.Image.addImage = function (name, file) {
     var imgdata = __getImageInfo(file);
     var height = imgdata.h;
@@ -531,8 +535,7 @@ CLASS: UI.Menu
 DESCRIPTION:
     This class implements a menu system similar to VideoPlayerCode's SelectionMenu.js.
     I decided to create my own implementation instead of using SelectionMenu.js because
-    it was hard to read and felt a bit overengineered at times, while not offering enough
-    customization options.
+    it was not offering enough customization options.
     This implementation puts customization first and should be easy to modifiy to suit your needs.
 USAGE:
     Create a new instance of UI.Menus.Menu(Settings,Items[,ParentMenuInstance])
@@ -570,7 +573,7 @@ USAGE:
         "borderColor"           Hex string, color of border
         "backButtonTitle"       String, name of the back button entry if parentMenu is set
         "backButtonColor"       Hex string, color of the back button entry if parentMenu is set
-        "displayMethod"         String, either "overlay" or "message", check below for explanation
+        "displayMethod"         String, either "overlay" or "message", check the end of this text block for explanation
                                 "message" displayMethod is intended as a fallback only, it is not really maintained
         "zIndex"                Number, on which zIndex to show this menu on, default is 999
         "maxTitleLength"        Number, number of characters before a title gets cut off
