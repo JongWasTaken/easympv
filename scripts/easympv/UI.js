@@ -1583,7 +1583,7 @@ UI.Menus.Menu.prototype._overrideKeybinds = function () {
 
         mp.add_forced_key_binding(
             currentKey.key,
-            currentKey.id + this.settings.menuId,
+            currentKey.id + "_menu_id_" + this.settings.menuId,
             tempFunction(this, currentKey.action),
             { repeatable: true }
         );
@@ -1594,7 +1594,7 @@ UI.Menus.Menu.prototype._revertKeybinds = function () {
     for (var i = 0; i < this.settings.keybindOverrides.length; i++) {
         var currentKey = this.settings.keybindOverrides[i];
 
-        mp.remove_key_binding(currentKey.id + this.settings.menuId);
+        mp.remove_key_binding(currentKey.id  + "_menu_id_" + this.settings.menuId);
     }
 };
 
@@ -1740,6 +1740,14 @@ UI.Menus.Menu.prototype._fadeOut = function () {
     }, 5);
     this.fadeOutInterval.start;
 };
+
+UI.Menus.Menu.prototype.getItemByName = function (name) {
+    for(var i = 0; i < this.items.length; i++)
+    {
+        if (this.items[i].item == name)
+        return this.items[i];
+    }
+}
 
 UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {

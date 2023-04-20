@@ -39,11 +39,14 @@ var Impl_createmenu = function (json) {
             {
                 json.arguments.menuDescription = "Added by " + json.sender;
             }
-            root.items.splice(root.items.length-1, 0, {
+            root.items.splice(root.items.length, 0, {
                 "title": json.arguments.menuName,
                 "item": json.context,
-                "description": json.arguments.menuDescription
+                "description": json.arguments.menuDescription,
+                "eventHandler": function (event, menu) { if (event == "enter") { API.openForeignMenu(this.item); } }
             });
+            Core.Menus.MainMenu.getItemByName("quit").hasUnderscore = true;
+            Core.Menus.MainMenu._dispatchEvent("hide");
             var menu = new UI.Menus.Menu(json.arguments.menuSettings,json.arguments.menuItems,root);
 
             menu.foreign = {};
@@ -98,7 +101,7 @@ var Impl_removemenu = function (json) {
         {
             if (menu.foreign.owner == json.sender)
             {
-                API.foreignMenus[json.context] = undefined;
+                delete API.foreignMenus[json.context];
                 for (var k = 0; k < root.items.length; k++)
                 {
                     if (root.items[k].item == json.context)
@@ -108,6 +111,13 @@ var Impl_removemenu = function (json) {
                     }
                 }
             }
+
+            if (Object.keys(API.foreignMenus).length == 0)
+            {
+                Core.Menus.MainMenu.getItemByName("quit").hasUnderscore = false;
+                Core.Menus.MainMenu._dispatchEvent("hide");
+            }
+
             return "{\"result\":\"success\",\"context\":\""+json.context+"\"}";
         }
         else

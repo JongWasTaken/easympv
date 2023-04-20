@@ -375,6 +375,7 @@ Core.defineMenus = function () {
         },
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Quit mpv",
+            hasUnderscore: false,
             item: "quit",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -383,9 +384,10 @@ Core.defineMenus = function () {
                         Utils.exitMpv();
                         menu.hideMenu();
                     } else {
-                        quitTitle = this.title;
+                        quitTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Quit mpv";
                         this.title =
                             UI.SSA.setColorRed() + "Are you sure?";
+                        if (this.hasUnderscore) { this.title += "@br@@us10@"}
                         menu.redrawMenu();
                     }
                 }
@@ -408,7 +410,7 @@ Core.defineMenus = function () {
     */
     Core.Menus.MainMenu = new UI.Menus.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
-    var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;
+    var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
 /*
             if (action == "show-playlist") {
@@ -429,12 +431,10 @@ Core.defineMenus = function () {
                 mp.osd_message(UI.SSA.startSequence() + UI.SSA.setSize(8) + playlist, 3);
             }
 */
-        if (event == "enter") {
-            API.openForeignMenu(action);
-            return;
-        }
         if (event == "hide") {
-            Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title = quitTitle;
+            var quitItem = Core.Menus.MainMenu.getItemByName("quit");
+            quitItem.title = quitTitle;
+            if (quitItem.hasUnderscore) { quitItem.title += "@br@@us10@"; }
             quitCounter = 0;
             return;
         }
@@ -1225,20 +1225,12 @@ Core.defineMenus = function () {
         Core.Menus.SettingsMenu
     );
 
-    var getItemByName = function (name) {
-        for(var i = 0; i < SettingsConfigurationSubMenuItems.length; i++)
-        {
-            if (SettingsConfigurationSubMenuItems[i].item == name)
-            return SettingsConfigurationSubMenuItems[i];
-        }
-    }
-
     Core.Menus.SettingsConfigurationSubMenu.eventHandler = function(event, action) {
         if (event == "show")
         {
             var item = undefined;
 
-            item = getItemByName("notify_about_updates")
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("notify_about_updates")
             if(Settings.Data.notifyAboutUpdates)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1248,7 +1240,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("menu_fade_in_out");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("menu_fade_in_out");
             if(Settings.Data.fadeMenus)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1258,7 +1250,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("show_hidden_files");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_hidden_files");
             if(Settings.Data.showHiddenFiles)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1268,7 +1260,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("allow_deleting_folders");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("allow_deleting_folders");
             if(Settings.Data.allowFolderDeletion)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1278,7 +1270,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("use_system_notifications");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("use_system_notifications");
             if(Settings.Data.useNativeNotifications)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1288,7 +1280,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("ipc_server");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("ipc_server");
             if(Settings.Data.startIPCServer)
             {
                 item.description = item.descriptionPrefix + enabledText;
@@ -1298,7 +1290,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
-            item = getItemByName("save_full_log");
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("save_full_log");
             if(Settings.Data.saveFullLog)
             {
                 item.description = item.descriptionPrefix + enabledText;
