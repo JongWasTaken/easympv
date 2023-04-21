@@ -837,6 +837,16 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
         );
     } // ✓
 
+    if (settings.doubleScrollWorkaround != undefined) {
+        this.settings.doubleScrollWorkaround = settings.doubleScrollWorkaround;
+    } else {
+        if (mp.utils.getenv("XDG_CURRENT_DESKTOP") == "GNOME") {
+            this.settings.doubleScrollWorkaround = true;
+        } else {
+            this.settings.doubleScrollWorkaround = false;
+        }
+    }
+
     if (settings.keybindOverrides != undefined) {
         this.settings.keybindOverrides = settings.keybindOverrides;
     } else {
@@ -1572,9 +1582,9 @@ UI.Menus.Menu.prototype.getSelectedItem = function () {
 };
 
 UI.Menus.Menu.prototype._overrideKeybinds = function () {
-    var tempFunction = function (x, action) {
+    var tempFunction = function (x, action, key) {
         return function () {
-            x._keyPressHandler(action);
+            x._keyPressHandler(action, key);
         };
     };
 
@@ -1584,7 +1594,7 @@ UI.Menus.Menu.prototype._overrideKeybinds = function () {
         mp.add_forced_key_binding(
             currentKey.key,
             currentKey.id + "_menu_id_" + this.settings.menuId,
-            tempFunction(this, currentKey.action),
+            tempFunction(this, currentKey.action, currentKey.key),
             { repeatable: true }
         );
     }
@@ -1598,7 +1608,21 @@ UI.Menus.Menu.prototype._revertKeybinds = function () {
     }
 };
 
-UI.Menus.Menu.prototype._keyPressHandler = function (action) {
+UI.Menus.Menu.prototype.scrollWorkaroundState = false;
+
+UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
+    if (this.settings.doubleScrollWorkaround)
+    {
+        if (key == "WHEEL_UP" || key == "WHEEL_DOWN")
+        {
+            if (this.scrollWorkaroundState)
+            {
+                this.scrollWorkaroundState = false;
+                return;
+            }
+            else { this.scrollWorkaroundState = true; }
+        }
+    }
     this.autoCloseStart = mp.get_time();
     if (!this.eventLocked) {
         this.eventLocked = true;

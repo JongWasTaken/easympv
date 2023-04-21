@@ -6,7 +6,7 @@
         {
             "label": "mpv (default)",
             "type": "shell",
-            "command": "/usr/bin/mpv /mnt/smb/Anime/Archive",
+            "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no /mnt/smb/Anime/Archive",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -21,7 +21,7 @@
         {
             "label": "mpv (steam env set)",
             "type": "shell",
-            "command": "/usr/bin/mpv /mnt/smb/Anime/Archive",
+            "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no /mnt/smb/Anime/Archive",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -37,7 +37,7 @@
         {
             "label": "mpv (no file/ no log)",
             "type": "shell",
-            "command": "/usr/bin/mpv --player-operation-mode=pseudo-gui --",
+            "command": "/usr/bin/mpv --player-operation-mode=pseudo-gui --script-opts=osc-windowcontrols=no --",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
@@ -52,7 +52,7 @@
         {
             "label": "mpv (testing snapshot)",
             "type": "shell",
-            "command": "/usr/bin/mpv --config-dir=\"snapshots/testing\" \"/mnt/smb/Anime/Incoming\"",
+            "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no --config-dir=\"snapshots/testing\" \"/mnt/smb/Anime/Incoming\"",
             "problemMatcher": [],
             "group": {
                 "kind": "build",
