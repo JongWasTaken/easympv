@@ -2289,8 +2289,17 @@ UI.Alerts.show = function (type, line) {
 CLASS: UI.Input
 DESCRIPTION:
     This static class is used to capture user inputs.
+    This is currently used in 3 different parts of the plugin,
+    which in my opinion is not enough the warrant making this
+    non-static.
 USAGE:
-    (TODO)
+    Call UI.Input.show(callback,prefix_description), where:
+    callback should be something like function(success, result),
+        success is a boolean, indicates whether input has been sent
+        result is the actual input string
+    prefix_description -> the text in front of the input field
+        example: "Command: "
+    Simple stuff.
 ----------------------------------------------------------------*/
 
 UI.Input = {};

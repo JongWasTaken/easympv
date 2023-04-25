@@ -861,4 +861,15 @@ Utils.restartMpv = function () {
     mp.commandv("quit-watch-later");
 }
 
+Utils.printCallStack = function(name) {
+    var ename = "";
+    if (name != undefined)
+    {
+        ename = name;
+    }
+    var e = new Error(ename);
+    e.name = "Utils.printCallStack"
+    dump(e.stack);
+}
+
 module.exports = Utils;

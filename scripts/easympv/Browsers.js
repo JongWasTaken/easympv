@@ -139,7 +139,24 @@ Browsers.Selector.open = function (parentMenu) {
     Browsers.Selector.menu.showMenu();
 };
 
-Browsers.FileBrowser.openFileSafe = function (filename) {
+Browsers.FileBrowser.openFileSafe = function (entry) {
+    if(entry.supported)
+    {
+        Utils.showAlert(
+            "info",
+            "Playing " +
+                entry.type +
+                " file: " + entry.item
+        );
+        mp.commandv(
+            "loadfile",
+            Browsers.FileBrowser.currentLocation +
+                Utils.directorySeperator +
+                entry.item
+        );
+    }
+
+/*
     for (
         var i = 0;
         i < Settings.presets.fileextensions.length;
@@ -165,6 +182,7 @@ Browsers.FileBrowser.openFileSafe = function (filename) {
             break;
         }
     }
+*/
 };
 
 Browsers.FileBrowser.getParentDirectory = function () {
@@ -332,7 +350,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
             }
             else
             {
-                Browsers.FileBrowser.openFileSafe(item);
+                Browsers.FileBrowser.openFileSafe(menu.getItemByName(item));
             }
         }
     });
@@ -481,9 +499,13 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                     );
                 }
             } else {
-                Browsers.FileBrowser.openFileSafe(item);
-                Browsers.FileBrowser.menu.hideMenu();
-                Browsers.FileBrowser.menu = undefined;
+                item = Browsers.FileBrowser.menu.getItemByName(item);
+                if (item.supported)
+                {
+                    Browsers.FileBrowser.openFileSafe(item);
+                    Browsers.FileBrowser.menu.hideMenu();
+                    Browsers.FileBrowser.menu = undefined;
+                }
             }
         }
         return;
@@ -646,6 +668,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
                             currentLocationFolders[i] +
                             Utils.directorySeperator,
                         color: "FFFF90",
+                        type: "folder",
+                        supported: true
                     });
                 }
             } else {
@@ -661,6 +685,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
                         Utils.directorySeperator,
                     item: currentLocationFolders[i] + Utils.directorySeperator,
                     color: "FFFF90",
+                    type: "folder",
+                    supported: true
                 });
             }
         }
@@ -672,6 +698,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
         for (var i = 0; i < currentLocationFiles.length; i++) {
             var color = "909090";
             var icon = " ";
+            var type = "other";
+            var supported = false;
 
             for (
                 var j = 0;
@@ -695,8 +723,9 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     {
                         icon = " ";
                     }
-
+                    type = whitelist.type;
                     color = "ffffff";
+                    supported = true;
                     break;
                 }
             }
@@ -711,6 +740,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + title,
                     item: currentLocationFiles[i],
                     color: color,
+                    type: type,
+                    supported: supported
                 });
             }
         }
@@ -739,6 +770,19 @@ Browsers.FileBrowser.open = function (parentMenu) {
             }
         });
     }
+
+    items.unshift({
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Refresh",
+        color: "999999",
+        eventHandler: function(event, menu)
+        {
+            if (event == "enter")
+            {
+                menu.hideMenu();
+                Browsers.FileBrowser.open();
+            }
+        }
+    });
 
     items.unshift({
         title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Favorites",
