@@ -140,20 +140,37 @@ Browsers.Selector.open = function (parentMenu) {
 };
 
 Browsers.FileBrowser.openFileSafe = function (entry) {
+    dump(entry);
     if(entry.supported)
     {
-        Utils.showAlert(
-            "info",
-            "Playing " +
-                entry.type +
-                " file: " + entry.item
-        );
-        mp.commandv(
-            "loadfile",
-            Browsers.FileBrowser.currentLocation +
-                Utils.directorySeperator +
-                entry.item
-        );
+        if (entry.type != "subtitle")
+        {
+            Utils.showAlert(
+                "info",
+                "Playing " +
+                    entry.type +
+                    " file: " + entry.item
+            );
+            mp.commandv(
+                "loadfile",
+                Browsers.FileBrowser.currentLocation +
+                    Utils.directorySeperator +
+                    entry.item
+            );
+        }
+        else
+        {
+            Utils.showAlert(
+                "info",
+                "Loading subtitles: " + entry.item
+            );
+            mp.commandv(
+                "sub-add",
+                Browsers.FileBrowser.currentLocation +
+                    Utils.directorySeperator +
+                    entry.item
+            );
+        }
     }
 
 /*
@@ -274,6 +291,10 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                 else if (whitelist.type == "photo")
                 {
                     icon = " ";
+                }
+                else if (whitelist.type == "subtitle")
+                {
+                    icon = " ";
                 }
                 break;
             }
@@ -708,7 +729,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             ) {
                 var whitelist = Settings.presets.fileextensions[j];
                 if (
-                    currentLocationFiles[i].includes(whitelist.extension)
+                    "." + currentLocationFiles[i].split('.').pop() == whitelist.extension
                 ) {
 
                     if (whitelist.type == "video")
@@ -722,6 +743,10 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     else if (whitelist.type == "photo")
                     {
                         icon = " ";
+                    }
+                    else if (whitelist.type == "subtitle")
+                    {
+                        icon = " ";
                     }
                     type = whitelist.type;
                     color = "ffffff";

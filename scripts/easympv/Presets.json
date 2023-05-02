@@ -288,155 +288,123 @@
         { "type": "photo", "name": "JPEG Image", "extension": ".jpeg" },
         { "type": "photo", "name": "BitMap Image", "extension": ".bmp" },
         { "type": "photo", "name": "WebP Image", "extension": ".webp" },
-        { "type": "photo", "name": "GIF Image", "extension": ".gif" }
+        { "type": "photo", "name": "GIF Image", "extension": ".gif" },
+
+        { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ass" },
+        { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ssa" },
+        { "type": "subtitle", "name": "Text Subtitles", "extension": ".srt" }
     ],
     "hints": [
         "Press \"I\" during playback to display various statistics.@br@While shown, press the number keys to switch through different pages."
     ],
     "images": [
         {
-            "data": {
-                "file": "4warning.bmp",
-                "height": 82,
-                "offset": 122,
-                "width": 90
-            }
+            "file": "4warning.bmp",
+            "height": 82,
+            "offset": 122,
+            "width": 90
         },
         {
-            "data": {
-                "file": "shaders.bmp",
-                "height": 60,
-                "offset": 54,
-                "width": 200
-            }
+            "file": "shaders.bmp",
+            "height": 60,
+            "offset": 54,
+            "width": 200
         },
         {
-            "data": {
-                "file": "2warning.bmp",
-                "height": 82,
-                "offset": 122,
-                "width": 90
-            }
+            "file": "2warning.bmp",
+            "height": 82,
+            "offset": 122,
+            "width": 90
         },
         {
-            "data": {
-                "file": "2logo.bmp",
-                "height": 90,
-                "offset": 54,
-                "width": 300
-            }
+            "file": "2logo.bmp",
+            "height": 90,
+            "offset": 54,
+            "width": 300
         },
         {
-            "data": {
-                "file": "colors.bmp",
-                "height": 60,
-                "offset": 54,
-                "width": 200
-            }
+            "file": "colors.bmp",
+            "height": 60,
+            "offset": 54,
+            "width": 200
         },
         {
-            "data": {
-                "file": "2chapters.bmp",
-                "height": 90,
-                "offset": 54,
-                "width": 300
-            }
+            "file": "2chapters.bmp",
+            "height": 90,
+            "offset": 54,
+            "width": 300
         },
         {
-            "data": {
-                "file": "2colors.bmp",
-                "height": 90,
-                "offset": 54,
-                "width": 300
-            }
+            "file": "2colors.bmp",
+            "height": 90,
+            "offset": 54,
+            "width": 300
         },
         {
-            "data": {
-                "file": "chapters.bmp",
-                "height": 60,
-                "offset": 54,
-                "width": 200
-            }
+            "file": "chapters.bmp",
+            "height": 60,
+            "offset": 54,
+            "width": 200
         },
         {
-            "data": {
-                "file": "2shaders.bmp",
-                "height": 90,
-                "offset": 54,
-                "width": 300
-            }
+            "file": "2shaders.bmp",
+            "height": 90,
+            "offset": 54,
+            "width": 300
         },
         {
-            "data": {
-                "file": "4shaders.bmp",
-                "height": 120,
-                "offset": 54,
-                "width": 400
-            }
+            "file": "4shaders.bmp",
+            "height": 120,
+            "offset": 54,
+            "width": 400
         },
         {
-            "data": {
-                "file": "settings.bmp",
-                "height": 60,
-                "offset": 54,
-                "width": 200
-            }
+            "file": "settings.bmp",
+            "height": 60,
+            "offset": 54,
+            "width": 200
         },
         {
-            "data": {
-                "file": "4chapters.bmp",
-                "height": 120,
-                "offset": 54,
-                "width": 400
-            }
+            "file": "4chapters.bmp",
+            "height": 120,
+            "offset": 54,
+            "width": 400
         },
         {
-            "data": {
-                "file": "logo.bmp",
-                "height": 60,
-                "offset": 54,
-                "width": 200
-            }
+            "file": "logo.bmp",
+            "height": 60,
+            "offset": 54,
+            "width": 200
         },
         {
-            "data": {
-                "file": "4colors.bmp",
-                "height": 120,
-                "offset": 54,
-                "width": 400
-            }
+            "file": "4colors.bmp",
+            "height": 120,
+            "offset": 54,
+            "width": 400
         },
         {
-            "data": {
-                "file": "warning.bmp",
-                "height": 82,
-                "offset": 54,
-                "width": 90
-            }
+            "file": "warning.bmp",
+            "height": 82,
+            "offset": 54,
+            "width": 90
         },
         {
-            "data": {
-                "file": "2settings.bmp",
-                "height": 90,
-                "offset": 54,
-                "width": 300
-            }
+            "file": "2settings.bmp",
+            "height": 90,
+            "offset": 54,
+            "width": 300
         },
         {
-            "data": {
-                "file": "4logo.bmp",
-                "height": 120,
-                "offset": 54,
-                "width": 400
-            }
+            "file": "4logo.bmp",
+            "height": 120,
+            "offset": 54,
+            "width": 400
         },
         {
-            "data": {
-                "file": "4settings.bmp",
-                "height": 120,
-                "offset": 54,
-                "width": 400
-            }
+            "file": "4settings.bmp",
+            "height": 120,
+            "offset": 54,
+            "width": 400
         }
     ]
 }

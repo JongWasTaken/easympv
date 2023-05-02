@@ -847,16 +847,16 @@ Settings.presets.load = function () {
         }
         if (json["images"] != undefined) {
             for (var i = 0; i <= json["images"].length-1; i++) {
-                var file = json["images"][i].data.file;
-                json["images"][i].data.file = "~~/scripts/easympv/images/" + json["images"][i].data.file;
+                var file = json["images"][i].file;
+                json["images"][i].file = "~~/scripts/easympv/images/" + json["images"][i].file;
                 json["images"][i].name = file.substring(0,file.length-4);
-                json["images"][i].data.active = false;
-                json["images"][i].data.id = i;
-                if (json["images"][i].data.height == undefined || json["images"][i].data.width == undefined || json["images"][i].data.offset == undefined) {
-                    var x = ImageOSD.getImageInfo(json["images"][i].data.file);
-                    json["images"][i].data.height = x.h;
-                    json["images"][i].data.width = x.w;
-                    json["images"][i].data.offset = x.offset;
+                json["images"][i].active = false;
+                json["images"][i].id = i;
+                if (json["images"][i].height == undefined || json["images"][i].width == undefined || json["images"][i].offset == undefined) {
+                    var x = ImageOSD.getImageInfo(json["images"][i].file);
+                    json["images"][i].height = x.h;
+                    json["images"][i].width = x.w;
+                    json["images"][i].offset = x.offset;
                 }
             }
             Settings.presets.images = json["images"];
@@ -908,16 +908,16 @@ Settings.presets.load = function () {
 
         if (jsonUser["images"] != undefined) {
             for (var i = 0; i <= jsonUser["images"].length-1; i++) {
-                var file = jsonUser["images"][i].data.file;
-                jsonUser["images"][i].data.file = "~~/images/" + jsonUser["images"][i].data.file;
+                var file = jsonUser["images"][i].file;
+                jsonUser["images"][i].file = "~~/images/" + jsonUser["images"][i].file;
                 jsonUser["images"][i].name = file.substring(0,file.length-4);
-                jsonUser["images"][i].data.active = false;
-                jsonUser["images"][i].data.id = i;
-                if (jsonUser["images"][i].data.height == undefined || jsonUser["images"][i].data.width == undefined || jsonUser["images"][i].data.offset == undefined) {
-                    var x = ImageOSD.getImageInfo(jsonUser["images"][i].data.file);
-                    jsonUser["images"][i].data.height = x.h;
-                    jsonUser["images"][i].data.width = x.w;
-                    jsonUser["images"][i].data.offset = x.offset;
+                jsonUser["images"][i].active = false;
+                jsonUser["images"][i].id = i;
+                if (jsonUser["images"][i].height == undefined || jsonUser["images"][i].width == undefined || jsonUser["images"][i].offset == undefined) {
+                    var x = ImageOSD.getImageInfo(jsonUser["images"][i].file);
+                    jsonUser["images"][i].height = x.h;
+                    jsonUser["images"][i].width = x.w;
+                    jsonUser["images"][i].offset = x.offset;
                 }
             }
             Settings.presets.images = Settings.presets.images.concat(jsonUser["images"]);

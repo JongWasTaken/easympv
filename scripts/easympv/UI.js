@@ -397,7 +397,7 @@ UI.Image.addImage = function (name, file) {
  */
 UI.Image.status = function (name) {
     var image = UI.Image.__getFilebyName(name);
-    return image.data.active;
+    return image.active;
 };
 
 UI.Image.getScale = function () {
@@ -427,22 +427,22 @@ UI.Image.show = function (name, x, y) {
         var scale = UI.Image.getScale();
         var image = UI.Image.__getFilebyName(scale + name);
 
-        image.data.x = x;
-        image.data.y = y;
-        if (!image.data.active) {
+        image.x = x;
+        image.y = y;
+        if (!image.active) {
             mp.commandv(
                 "overlay-add",
-                image.data.id,
-                image.data.x,
-                image.data.y,
-                mp.utils.get_user_path(image.data.file),
-                image.data.offset,
+                image.id,
+                image.x,
+                image.y,
+                mp.utils.get_user_path(image.file),
+                image.offset,
                 "bgra",
-                image.data.width,
-                image.data.height,
-                image.data.width * 4
+                image.width,
+                image.height,
+                image.width * 4
             );
-            image.data.active = true;
+            image.active = true;
         }
     }
 };
@@ -468,11 +468,11 @@ UI.Image.toggle = function (name, x, y) {
     }
 
     var image = UI.Image.__getFilebyName(scale + name);
-    if (!image.data.active) {
+    if (!image.active) {
         UI.Image.show(image.name, x, y);
     } else {
-        mp.commandv("overlay-remove", image.data.id);
-        image.data.active = false;
+        mp.commandv("overlay-remove", image.id);
+        image.active = false;
     }
 };
 
@@ -500,21 +500,21 @@ UI.Image.hide = function (name) {
         */
 
         image = UI.Image.__getFilebyName(name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
 
         image = UI.Image.__getFilebyName("2" + name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
 
         image = UI.Image.__getFilebyName("4" + name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
     }
 };
@@ -524,7 +524,7 @@ UI.Image.hide = function (name) {
  */
 UI.Image.hideAll = function () {
     for (i = 0; i < Settings.presets.images.length; i++) {
-        if (Settings.presets.images[i].data.active == true) {
+        if (Settings.presets.images[i].active == true) {
             UI.Image.hide(Settings.presets.images[i].name);
         }
     }
