@@ -173,6 +173,7 @@ Core.doRegistrations = function () {
     {
         mp.add_forced_key_binding("Ctrl+M", "empv_tests_hotkey", function() {
             Core.Menus.TestsMenu.showMenu();
+            UI.Time.show();
             return;
         });
 
@@ -745,12 +746,22 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu@br@@us10@",
             item: "open_tests_menu",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
                     Core.Menus.TestsMenu.showMenu();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Restart mpv in place",
+            item: "restart_mpv",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.restartMpv();
                 }
             }
         }
@@ -770,71 +781,6 @@ Core.defineMenus = function () {
         ),
         customKeyEvents: [{key: "h", event: "help"}]
     };
-
-    /*
-        Settings menu redesign Feature Tree:
-        -> Settings
-            -> Configuration
-                - Notify about new updates
-                - Menu Fade In/Out
-                - Show hidden Files in File Explorer
-                - Allow deleting folders in File Explorer
-                - Use system notifications instead of on-screen messages
-                ----
-                - SimpleVRR
-                - SimpleVRR Target Refresh Rate
-                - IPC server
-                - Save full log
-            -> Updates
-            -> Credits
-            ----
-            - Open config folder
-            - Reload config
-            - Reinitialize plugin
-            ----
-            -> Development Options
-                - Do config migration now
-                - Redo First Time Setup
-                - Create Log File
-                - On-Screen Log
-                - Debug mode
-                - Command Input
-                - JS Console
-                - Open Tests Menu
-
-    var SettingsMenuItems = [
-        {
-            title: "Edit easympv.conf",
-            item: "easympvconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("easympv.conf");
-                }
-            }
-        },
-        {
-            title: "Edit mpv.conf",
-            item: "mpvconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("mpv.conf");
-                }
-            }
-        },
-        {
-            title: "Edit input.conf",
-            item: "inputconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("input.conf");
-                }
-            }
-        },
-    ];
-    */
 
     var SettingsMenuItems = [
         {
@@ -969,6 +915,22 @@ Core.defineMenus = function () {
                         }
                     };
                     cmenu.showMenu();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Clock Overlay@br@@us10@",
+            item: "toggle_clock",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (UI.Time.OSD == undefined)
+                    {
+                        UI.Time.show();
+                    } else
+                    {
+                        UI.Time.hide();
+                    }
                 }
             }
         },

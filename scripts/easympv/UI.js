@@ -530,6 +530,73 @@ UI.Image.hideAll = function () {
     }
 };
 
+UI.Time = {};
+
+UI.Time.OSD = undefined;
+UI.Time.Timer = undefined;
+
+UI.Time.assembleContent = function()
+{
+    var content = "";
+    content += UI.SSA.setScale(100);
+    content += UI.SSA.setTransparencyPercentage(50);
+    content += Utils.getCurrentTime();
+    return content;
+}
+
+UI.Time._startTimer = function() {
+    //var x = this;
+    //if (UI.Time.Timer != undefined) {
+    //    clearInterval(UI.Time.Timer);
+    //}
+    UI.Time.Timer = setInterval(function () {
+        UI.Time.OSD.data = UI.Time.assembleContent();
+        UI.Time.OSD.update();
+    }, 1000);
+};
+
+UI.Time._stopTimer = function () {
+    if (UI.Time.Timer != undefined) {
+        clearInterval(UI.Time.Timer);
+        UI.Time.Timer = undefined;
+    }
+};
+
+UI.Time.show = function()
+{
+    // create overlay
+    if (UI.Time.OSD == undefined) {
+        UI.Time.OSD = mp.create_osd_overlay("ass-events");
+        // OSD is allowed entire window space
+        UI.Time.OSD.res_y = mp.get_property("osd-height");
+        UI.Time.OSD.res_x = mp.get_property("osd-width");
+        UI.Time.OSD.z = 1;
+    }
+
+    UI.Time.OSD.data = UI.Time.assembleContent();
+    UI.Time.OSD.update();
+    UI.Time._startTimer();
+}
+
+UI.Time.hide = function()
+{
+    UI.Time._stopTimer();
+    if (UI.Time.OSD != undefined) {
+        mp.commandv(
+            "osd-overlay",
+            UI.Time.OSD.id,
+            "none",
+            "",
+            0,
+            0,
+            0,
+            "no",
+            "no"
+        );
+        UI.Time.OSD = undefined;
+    }
+}
+
 /*----------------------------------------------------------------
 CLASS: UI.Menu
 DESCRIPTION:

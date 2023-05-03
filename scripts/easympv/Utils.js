@@ -872,4 +872,27 @@ Utils.printCallStack = function(name) {
     dump(e.stack);
 }
 
+Utils.getCurrentTime = function()
+{
+    var time = new Date().toLocaleTimeString("de-DE-u-nu-latn-ca-iso8601-hc-h24"); // hopefully this is consistent
+    var offset = time.split("+")[1].slice(0,2);
+    time = time.split(" ")[0].slice(0,5);
+    var temp = time.split(":");
+    var hour = Number(temp[0]) + Number(offset);
+    hour = hour.toString();
+
+    if (hour == "24")
+    {
+        hour = "00";
+    }
+
+    if (hour.length == 1)
+    {
+        hour = "0" + hour;
+    }
+
+    time = hour + ":" + temp[1];
+    return time;
+}
+
 module.exports = Utils;
