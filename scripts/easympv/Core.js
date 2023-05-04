@@ -1056,6 +1056,29 @@ Core.defineMenus = function () {
             }
         },
         {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Scroll Alerts",
+            item: "scroll_alerts",
+            descriptionPrefix: "Whether to move alerts across the screen (possbile performance impact).@br@Disable if unsure.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.scrollAlerts)
+                    {
+                        Settings.Data.scrollAlerts = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.scrollAlerts = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show hidden Files in File Explorer",
             item: "show_hidden_files",
             descriptionPrefix: "Hidden files can be annoying, especially on Linux.@br@Enable this to show them.@br@",
@@ -1175,6 +1198,7 @@ Core.defineMenus = function () {
     Core.Menus.SettingsConfigurationSubMenu = new UI.Menus.Menu(
         {
             autoClose: 0,
+            scrollingEnabled: true,
             title:
                 "{\\1c&H782B78&}" +
                 UI.SSA.insertSymbolFA("") +
@@ -1204,6 +1228,16 @@ Core.defineMenus = function () {
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("menu_fade_in_out");
             if(Settings.Data.fadeMenus)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("scroll_alerts");
+            if(Settings.Data.scrollAlerts)
             {
                 item.description = item.descriptionPrefix + enabledText;
             }
@@ -1261,6 +1295,10 @@ Core.defineMenus = function () {
             {
                 item.description = item.descriptionPrefix + disabledText;
             }
+        }
+        else if (event == "hide")
+        {
+            Settings.save();
         }
     };
 

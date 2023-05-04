@@ -65,6 +65,12 @@ UI.SSA.setPosition = function (x, y) {
     return s;
 };
 
+UI.SSA.setPositionPercentage = function (x, y) {
+    x = Number(mp.get_property("osd-width")) * (x / 100)
+    y = Number(mp.get_property("osd-height")) * (y / 100)
+    return UI.SSA.setPosition(x,y);
+};
+
 UI.SSA.move = function (x, y) {
     var s = "{\\p1} ";
     s += "m " + x + " " + y + "{\\p0}";
@@ -538,8 +544,9 @@ UI.Time.Timer = undefined;
 UI.Time.assembleContent = function()
 {
     var content = "";
-    content += UI.SSA.setScale(100);
-    content += UI.SSA.setTransparencyPercentage(50);
+    content += UI.SSA.setScale(100) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
+    content += UI.SSA.setPositionPercentage(1,1);
+    content += UI.SSA.insertSymbolFA(" ", 20, 32, Utils.commonFontName);
     content += Utils.getCurrentTime();
     return content;
 }
@@ -1967,7 +1974,7 @@ UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
 };
 
 /*----------------------------------------------------------------
-CLASS: UI.Alerts
+CLASS: UI.Alert
 DESCRIPTION:
     This static class is used to show alerts/notifications inside mpv.
 USAGE:
@@ -1975,343 +1982,14 @@ USAGE:
 ----------------------------------------------------------------*/
 
 UI.Alerts = {};
-//TODO: rewrite alerts:
-// - less bloated
-// - make it work on more resolutions
-
-UI.Alerts.onScreen = [];
-
-UI.Alerts.Alert = function (settings) {
-    this.settings = {};
-
-    if (settings.fadeOut != undefined) {
-        this.settings.fadeOut = settings.fadeOut;
-    } else {
-        this.settings.fadeOut = undefined;
-    }
-
-    if (settings.image != undefined) {
-        this.settings.image = settings.image;
-    } else {
-        this.settings.image = undefined;
-    }
-
-    if (settings.text != undefined) {
-        this.settings.text = settings.text;
-    } else {
-        this.settings.text = undefined;
-    }
-
-    if (settings.xPosition != undefined) {
-        this.settings.xPosition = settings.xPosition;
-    } else {
-        this.settings.xPosition = undefined;
-    }
-
-    if (settings.yPosition != undefined) {
-        this.settings.yPosition = settings.yPosition;
-    } else {
-        this.settings.yPosition = undefined;
-    }
-
-    if (settings.height != undefined) {
-        this.settings.height = settings.height;
-    } else {
-        this.settings.height = undefined;
-    }
-
-    if (settings.width != undefined) {
-        this.settings.width = settings.width;
-    } else {
-        this.settings.width = undefined;
-    }
-
-    if (settings.autoClose != undefined) {
-        this.settings.autoClose = settings.autoClose;
-    } else {
-        this.settings.autoClose = 3;
-    }
-
-    if (settings.transparency != undefined) {
-        this.settings.transparency = settings.transparency;
-    } else {
-        this.settings.transparency = 40;
-    }
-
-    this.isWindowVisible = false;
-
-    this.cachedAlertBaseText = "";
-    this.cachedAlertContentText = "";
-    this.cachedAlertEffectText = "";
-
-    // For convienience
-    this.x1 = this.settings.xPosition;
-    this.y1 = this.settings.yPosition;
-    this.x2 = this.settings.xPosition + this.settings.width;
-    this.y2 = this.settings.yPosition + this.settings.height;
-
-    this.autoCloseStart = -1;
-    this.zStart = 998;
-};
-
-UI.Alerts.Alert.prototype._construct = function ()
-{
-    this.cachedAlertBaseText = "";
-    this.cachedAlertContentText = "";
-    this.cachedAlertEffectText = "";
-
-    this.cachedAlertBaseText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
-    this.cachedAlertContentText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
-    this.cachedAlertEffectText += UI.SSA.setTransparencyPercentage(this.settings.transparency);
-
-    this.cachedAlertBaseText += UI.SSA.setBorder(0);
-    this.cachedAlertBaseText += UI.SSA.setShadow(2);
-    this.cachedAlertBaseText += UI.SSA.setBorderColor("ffffff");
-    this.cachedAlertBaseText += UI.SSA.setShadowColor("000000");
-    this.cachedAlertBaseText += UI.SSA.setSecondaryColor("000000");
-
-    // start draw mode
-    this.cachedAlertBaseText += "{\\p1}";
-    // draw box
-    this.cachedAlertBaseText +=
-        "m " +
-        this.x1 +
-        " " +
-        this.y1 +
-        " l " +
-        this.x2 +
-        " " +
-        this.y1 +
-        " l " +
-        this.x2 +
-        " " +
-        this.y2 +
-        " l " +
-        this.x1 +
-        " " +
-        this.y2;
-    // end draw mode
-    this.cachedAlertBaseText += "{\\p0}";
-
-    this.cachedAlertEffectText += this.settings.image;
-    this.cachedAlertContentText += this.settings.text.replaceAll(
-        "@br@",
-        "\n" + UI.SSA.setTransparencyPercentage(this.settings.transparency)
-    );
-}
-
-UI.Alerts.Alert.prototype._fadeOut = function () {
-
-    if (!this.settings.fadeOut)
-    {
-        mp.commandv(
-            "osd-overlay",
-            this.contentOSD.id,
-            "none",
-            "",
-            0,
-            0,
-            0,
-            "no",
-            "no"
-        );
-        this.contentOSD = undefined;
-        this.isAlertVisible = false;
-        this.settings.transparency = 40;
-    }
-
-    var x = this;
-    this.fadeOutInterval = setInterval(function () {
-        if (x.settings.transparency != 100) {
-            x.settings.transparency = Number(x.settings.transparency) + 1;
-            x._construct();
-            x._draw();
-        } else {
-            /*
-            mp.commandv(
-                "osd-overlay",
-                x.baseOSD.id,
-                "none",
-                "",
-                0,
-                0,
-                0,
-                "no",
-                "no"
-            );
-            */
-            mp.commandv(
-                "osd-overlay",
-                x.contentOSD.id,
-                "none",
-                "",
-                0,
-                0,
-                0,
-                "no",
-                "no"
-            );
-            /*
-            mp.commandv(
-                "osd-overlay",
-                x.effectOSD.id,
-                "none",
-                "",
-                0,
-                0,
-                0,
-                "no",
-                "no"
-            );*/
-            //x.baseOSD = undefined;
-            x.contentOSD = undefined;
-            x.effectOSD = undefined;
-            x.isAlertVisible = false;
-            x.settings.transparency = 40;
-            clearInterval(x.fadeOutInterval);
-        }
-    }, 35);
-    this.fadeOutInterval.start;
-};
-
-UI.Alerts.Alert.prototype._draw = function () {
-    /*
-    if (this.baseOSD == undefined) {
-        this.baseOSD = mp.create_osd_overlay("ass-events");
-        this.baseOSD.res_y = mp.get_property("osd-height");
-        this.baseOSD.res_x = mp.get_property("osd-width");
-        this.baseOSD.z = this.zStart - 2;
-    }
-    */
-    if (this.contentOSD == undefined) {
-        this.contentOSD = mp.create_osd_overlay("ass-events");
-        this.contentOSD.res_y = mp.get_property("osd-height");
-        this.contentOSD.res_x = mp.get_property("osd-width");
-        this.contentOSD.z = this.zStart - 1;
-    }
-    /*
-    if (this.effectOSD == undefined) {
-        this.effectOSD = mp.create_osd_overlay("ass-events");
-        this.effectOSD.res_y = mp.get_property("osd-height");
-        this.effectOSD.res_x = mp.get_property("osd-width");
-        this.effectOSD.z = this.zStart;
-    }*/
-
-    /*
-    this.baseOSD.data = this.cachedAlertBaseText;
-    this.baseOSD.update();
-    */
-    this.contentOSD.data = this.cachedAlertContentText;
-    this.contentOSD.update();
-    /*
-    this.effectOSD.data = this.cachedAlertEffectText;
-    this.effectOSD.update();*/
-};
-
-UI.Alerts.Alert.prototype._handleAutoClose = function () {
-    if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1) {
-        return;
-    }
-    if (this.autoCloseStart <= mp.get_time() - this.settings.autoClose) {
-        this.hide();
-    }
-};
-
-UI.Alerts.Alert.prototype._startTimer = function () {
-    var x = this;
-    if (this.alertInterval != undefined) {
-        clearInterval(this.alertInterval);
-    }
-    this.alertInterval = setInterval(function () {
-        x._handleAutoClose();
-    }, 1000);
-};
-
-UI.Alerts.Alert.prototype._stopTimer = function () {
-    if (this.alertInterval != undefined) {
-        clearInterval(this.alertInterval);
-        this.alertInterval = undefined;
-    }
-};
-
-UI.Alerts.Alert.prototype.onClose = function () {};
-
-UI.Alerts.Alert.prototype.hide = function () {
-    if (this.isAlertVisible) {
-        this._stopTimer();
-        this.onClose();
-        this._fadeOut();
-    }
-};
-
-UI.Alerts.Alert.prototype.show = function () {
-    if (!this.isAlertVisible) {
-        this.isAlertVisible = true;
-        this.autoCloseStart = mp.get_time();
-        this._construct();
-        this._draw();
-        this._startTimer();
-    }
-};
-
 UI.Alerts.show = function (type, line) {
-    var osdHeight = mp.get_property("osd-height");
-    var osdWidth = mp.get_property("osd-width");
-    //var xScale = 1 - Math.floor(osdWidth / 1920);
-    //var yScale = 1 - Math.floor(osdHeight / 1080);
-
-    var xOffset = 80; // * (Math.floor(osdWidth) / 1920) / 2);
-
-    var width = 500; // * xScale;
-    var height = 100; // * yScale;
-    var yOffset =
-        10 +
-        height * UI.Alerts.onScreen.length +
-        10 * UI.Alerts.onScreen.length;
-    var message = "";
-    var messageXPosition = osdWidth - (width + (xOffset + 100));
-
-    var prefix = UI.SSA.setPosition(messageXPosition + 250, yOffset + 40) +
-    UI.SSA.setBorder(1) +
-    UI.SSA.setSize("33") +
-    UI.SSA.setFont(Utils.commonFontName);
-
-    message += line.replaceAll("@br@",prefix+"@br@");
-
-    var image = "";
-
-    if (type == "info") {
-        image =
-            UI.SSA.setPosition(messageXPosition + 145, yOffset + 35) +
-            UI.SSA.setScale("200") +
-            UI.SSA.Images.info();
-    } else if (type == "warning") {
-        image =
-            UI.SSA.setPosition(messageXPosition + 150, yOffset + 45) +
-            UI.SSA.setScale("75") +
-            UI.SSA.Images.warning();
-    } else if (type == "error") {
-        image =
-            UI.SSA.setPosition(messageXPosition + 150, yOffset + 40) +
-            UI.SSA.setScale("33") +
-            UI.SSA.Images.error();
-    }
-
-    var alert = new UI.Alerts.Alert({
-        xPosition: osdWidth - (width + xOffset),
-        yPosition: yOffset,
-        width: width,
-        height: height,
-        image: image,
-        text: message,
-    });
+/*
     mp.observe_property("osd-height", undefined, function () {
         if (
             mp.get_property("osd-height") != osdHeight ||
             mp.get_property("osd-width") != osdWidth
         ) {
-            alert.settings.fadeOut = false;
-            alert.hide();
+            UI.Alert.hide();
         }
     });
 
@@ -2324,33 +2002,106 @@ UI.Alerts.show = function (type, line) {
             alert.hide();
         }
     });
+    */
 
-    UI.Alerts.onScreen.push(alert);
-
-    if (
-        mp.get_property("osd-height") < 1090 &&
-        mp.get_property("osd-height") > 1070 &&
-        mp.get_property("osd-width") < 1930 &&
-        mp.get_property("osd-width") > 1910
-    ) {
-        alert.settings.drawBaseOSD = true;
-        alert.settings.drawEffectOSD = true;
-        alert.settings.transparency = "40";
-    } else {
-        alert.settings.drawBaseOSD = false;
-        alert.settings.drawEffectOSD = false;
-        alert.settings.transparency = "0";
-    }
-
-    alert.show();
-    alert.onClose = function () {
-        for (var i = 0; i <= UI.Alerts.onScreen.length - 1; i++) {
-            if (UI.Alerts.onScreen[i] == alert) {
-                UI.Alerts.onScreen.splice(i, 1);
-            }
-        }
-    };
+    UI.Alert._show(line.replaceAll("@br@", " "));
 };
+
+UI.Alert = {};
+
+UI.Alert.OSD = undefined;
+UI.Alert.Timer = undefined;
+UI.Alert.startTime = undefined;
+UI.Alert.content = undefined;
+UI.Alert.isVisible = false;
+
+UI.Alert._startTimer = function() {
+    UI.Alert.Timer = setInterval(function () {
+        if (3 <= 0 || UI.Alert.startTime <= -1) {
+            return;
+        }
+        if (UI.Alert.startTime <= mp.get_time() - 3) {
+            UI.Alert._stopTimer();
+            UI.Alert._hide();
+        }
+    }, 1000);
+};
+
+UI.Alert._stopTimer = function () {
+    if (UI.Alert.Timer != undefined) {
+        clearInterval(UI.Alert.Timer);
+        UI.Alert.Timer = undefined;
+    }
+};
+
+UI.Alert._assembleContent = function (xpos,ypos) {
+    return UI.SSA.setPositionPercentage(xpos,ypos) +
+    UI.SSA.setBorder(1) +
+    UI.SSA.setSize("36") +
+    UI.SSA.setFont(Utils.commonFontName) + UI.Alert.content;
+}
+
+UI.Alert._show = function(content)
+{
+    UI.Alert.content = content;
+    UI.Alert.startTime = mp.get_time();
+
+    if (!UI.Alert.isVisible) {
+        UI.Alert.isVisible = true;
+        if (UI.Alert.OSD == undefined) {
+            UI.Alert.OSD = mp.create_osd_overlay("ass-events");
+            UI.Alert.OSD.res_y = mp.get_property("osd-height");
+            UI.Alert.OSD.res_x = mp.get_property("osd-width");
+            UI.Alert.OSD.z = 1;
+        }
+
+        if(Settings.Data.scrollAlerts)
+        {
+            var target = 110;
+            var pos = -50;
+            var interval = setInterval(function () {
+                if (pos < target)
+                {
+                    pos = pos + 0.2;
+                    UI.Alert.OSD.data = UI.Alert._assembleContent(pos,1);
+                    UI.Alert.OSD.update();
+                }
+                else
+                {
+                    clearInterval(interval);
+                    UI.Alert._hide();
+                }
+            }, 10);
+        }
+        else
+        {
+            UI.Alert.OSD.data = UI.Alert._assembleContent(33,1);
+            UI.Alert.OSD.update();
+            UI.Alert._startTimer();
+        }
+    }
+}
+
+UI.Alert._hide = function()
+{
+    UI.Alert.isVisible = false;
+    UI.Alert.startTime = undefined;
+    if (UI.Alert.OSD != undefined) {
+        mp.commandv(
+            "osd-overlay",
+            UI.Alert.OSD.id,
+            "none",
+            "",
+            0,
+            0,
+            0,
+            "no",
+            "no"
+        );
+        UI.Alert.OSD = undefined;
+    }
+}
+
 
 /*----------------------------------------------------------------
 CLASS: UI.Input

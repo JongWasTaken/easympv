@@ -40,6 +40,7 @@ Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
     fadeMenus: false,
+    scrollAlerts: true,
     defaultShaderSet: "none",
     defaultColorProfile: "none",
     simpleVRR: false,
@@ -163,6 +164,12 @@ Settings.save = function () {
         defaultConfigString += "# This ultimately comes down to personal preference.\n";
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "fadeMenus=true\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to have alerts move across the screen.\n";
+        defaultConfigString += "# Having this enabled might result in a performance penalty.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "scrollAlerts=true\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Default shader set to load at launch.\n";
         defaultConfigString += "# Default: none\n";
