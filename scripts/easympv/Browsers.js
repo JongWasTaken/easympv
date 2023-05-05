@@ -288,7 +288,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                 {
                     icon = " ";
                 }
-                else if (whitelist.type == "photo")
+                else if (whitelist.type == "image")
                 {
                     icon = " ";
                 }
@@ -740,7 +740,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     {
                         icon = " ";
                     }
-                    else if (whitelist.type == "photo")
+                    else if (whitelist.type == "image")
                     {
                         icon = " ";
                     }
