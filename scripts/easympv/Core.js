@@ -924,7 +924,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Clock Overlay@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Clock Overlay",
             item: "toggle_clock",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -936,6 +936,16 @@ Core.defineMenus = function () {
                     {
                         UI.Time.hide();
                     }
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Information Overlay@br@@us10@",
+            item: "toggle_information",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    mp.commandv("script-binding","stats/display-stats-toggle");
                 }
             }
         },

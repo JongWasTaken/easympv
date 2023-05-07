@@ -572,6 +572,7 @@ UI.Time._stopTimer = function () {
     }
 };
 
+// TODO: scale to screen size, otherwise it sticks out at 1080p
 UI.Time.show = function()
 {
     if (UI.Time.OSD != undefined) {
