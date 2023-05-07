@@ -39,6 +39,8 @@ Settings.cache = {};
 Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    showClock: false,
+    clockPosition: "top-left",
     fadeMenus: false,
     scrollAlerts: true,
     defaultShaderSet: "none",
@@ -146,7 +148,7 @@ Settings.save = function () {
         defaultConfigString += "### easympv.conf ###\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
-        defaultConfigString += "# Default: none\n";
+        defaultConfigString += "# Default: unknown\n";
         defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
         defaultConfigString += "# Use a full path. Only required on Windows!\n";
         defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
@@ -158,6 +160,18 @@ Settings.save = function () {
         defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to show a clock on screen.\n";
+        defaultConfigString += "# The clock should be pretty unobstrusive and its position can be chosen.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "showClock=false\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Where to show the clock once enabled.\n";
+        defaultConfigString += "# Choose one of the four screen corners: top-left, top-right, bottom-left, bottom-right\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: top-left\n";
+        defaultConfigString += "clockPosition=top-left\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to use fade-ins and fade-outs on menus.\n";
         defaultConfigString += "# Having this enabled might result in a performance penalty.\n";

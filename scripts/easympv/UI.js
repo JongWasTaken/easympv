@@ -540,12 +540,15 @@ UI.Time = {};
 
 UI.Time.OSD = undefined;
 UI.Time.Timer = undefined;
+UI.Time.xLocation = 1;
+UI.Time.yLocation = 1;
 
 UI.Time.assembleContent = function()
 {
     var content = "";
     content += UI.SSA.setScale(100) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
-    content += UI.SSA.setPositionPercentage(1,1);
+
+    content += UI.SSA.setPositionPercentage(UI.Time.xLocation,UI.Time.yLocation);
     content += UI.SSA.insertSymbolFA(" ", 20, 32, Utils.commonFontName);
     content += Utils.getCurrentTime();
     return content;
@@ -571,14 +574,38 @@ UI.Time._stopTimer = function () {
 
 UI.Time.show = function()
 {
-    // create overlay
-    if (UI.Time.OSD == undefined) {
-        UI.Time.OSD = mp.create_osd_overlay("ass-events");
-        // OSD is allowed entire window space
-        UI.Time.OSD.res_y = mp.get_property("osd-height");
-        UI.Time.OSD.res_x = mp.get_property("osd-width");
-        UI.Time.OSD.z = 1;
+    if (UI.Time.OSD != undefined) {
+        return;
     }
+
+    if (Settings.Data.clockPosition == "bottom-right")
+    {
+        UI.Time.xLocation = 96;
+        UI.Time.yLocation = 97;
+    }
+    else if (Settings.Data.clockPosition == "bottom-left")
+    {
+        UI.Time.xLocation = 1;
+        UI.Time.yLocation = 97;
+    }
+    else if (Settings.Data.clockPosition == "top-right")
+    {
+        UI.Time.xLocation = 96;
+        UI.Time.yLocation = 1;
+    }
+    else // top-left
+    {
+        UI.Time.xLocation = 1;
+        UI.Time.yLocation = 1;
+    }
+
+    // create overlay
+
+    UI.Time.OSD = mp.create_osd_overlay("ass-events");
+    // OSD is allowed entire window space
+    UI.Time.OSD.res_y = mp.get_property("osd-height");
+    UI.Time.OSD.res_x = mp.get_property("osd-width");
+    UI.Time.OSD.z = 1;
 
     UI.Time.OSD.data = UI.Time.assembleContent();
     UI.Time.OSD.update();
@@ -587,6 +614,10 @@ UI.Time.show = function()
 
 UI.Time.hide = function()
 {
+    if (UI.Time.OSD == undefined) {
+        return;
+    }
+
     UI.Time._stopTimer();
     if (UI.Time.OSD != undefined) {
         mp.commandv(

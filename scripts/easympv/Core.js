@@ -96,6 +96,11 @@ Core.onFileLoad = function () {
             break;
         }
     }
+
+    if (Settings.Data.showClock)
+    {
+        UI.Time.show();
+    }
 };
 
 Core.onShutdown = function () {
@@ -1033,6 +1038,93 @@ Core.defineMenus = function () {
             }
         },
         {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show Clock Overlay",
+            item: "show_clock",
+            descriptionPrefix: "Whether to show an unobstrusive clock on screen.@br@",
+            description: "",
+            eventHandler: function(event, menu) {
+                if (event == "right") {
+                    if(Settings.Data.showClock)
+                    {
+                        Settings.Data.showClock = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                        UI.Time.hide();
+                    }
+                    else
+                    {
+                        Settings.Data.showClock = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                        UI.Time.show();
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Clock overlay position on screen",
+            item: "clock_position",
+            descriptionPrefix: "Where to show the clock on screen.@br@Currently ",
+            description: "",
+            eventHandler: function(event, menu) {
+                if (event == "right") {
+                    if(Settings.Data.clockPosition == "top-left")
+                    {
+                        Settings.Data.clockPosition = "top-right";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "top-right";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "top-right")
+                    {
+                        Settings.Data.clockPosition = "bottom-left";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "bottom-left";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "bottom-left")
+                    {
+                        Settings.Data.clockPosition = "bottom-right";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "bottom-right";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "bottom-right")
+                    {
+                        Settings.Data.clockPosition = "top-left";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "top-left";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                }
+            }
+        },
+        // after you return: add clockPosition entry
+        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Menu Fade In/Out",
             item: "menu_fade_in_out",
             descriptionPrefix: "Makes some menus fade in and out (possbile performance impact).@br@Leave this disabled if unsure.@br@",
@@ -1225,6 +1317,19 @@ Core.defineMenus = function () {
             {
                 item.description = item.descriptionPrefix + disabledText;
             }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_clock")
+            if(Settings.Data.showClock)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("clock_position")
+            item.description = item.descriptionPrefix + UI.SSA.setColorYellow() + Settings.Data.clockPosition;
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("menu_fade_in_out");
             if(Settings.Data.fadeMenus)
