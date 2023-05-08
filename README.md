@@ -11,16 +11,20 @@ Currently supports Windows, macOS and Linux.
 macOS support is experimental and not fully finished.
 
 ## Features
-- Menus with custom Fonts, optionally controllable using only the mouse!
+- Menus with custom Fonts, optionally controllable using only the mouse
 - Integrated File Browser, Disc/Device Selector, URL Input
-    - Save folders to Favorites!
-    - Remove files from within mpv!
-- Automated applying of shadersets, such as Anime4K!
-- Automated applying of color profiles!
-- Automatic skipping of certain chapters (such as Openings/Endings)!
-- Automatic Updates/Git pulling!
-- On-screen log, so you don't have to launch mpv from a terminal to read it!
-- A JavaScript console for easier debugging!
+    - Save folders to Favorites
+    - Load subtitles during playback
+    - Remove files from within mpv
+- Automated applying of shadersets, such as Anime4K
+- Automated applying of color profiles
+- Automatic skipping of certain chapters (such as Openings/Endings)
+- Automatic Updates/Git pulling
+- Overlays, such as:
+    - A simple digital clock, the screen corner position can be customized
+    - On-screen log, so you don't have to launch mpv from a terminal to read it
+    - Command input for mpv commands
+    - A JavaScript console for easier debugging
 #### and a lot more!
 ## Installation
 ### Prerequisites

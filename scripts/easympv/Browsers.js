@@ -31,7 +31,9 @@ Browsers.DriveBrowser = {};
 Browsers.DeviceBrowser = {};
 
 Browsers.Selector.menu = undefined;
-Browsers.Selector.menuSettings = {};
+Browsers.Selector.menuSettings = {
+    customKeyEvents: [{key: "h", event: "help"}]
+};
 Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
@@ -40,7 +42,8 @@ Browsers.FileBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     fadeOut: false,
-    fadeIn: false
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
@@ -50,7 +53,8 @@ Browsers.DriveBrowser.menuSettings = {
     scrollingEnabled: true,
     scrollingPosition: 8,
     fadeOut: false,
-    fadeIn: false
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
@@ -62,7 +66,8 @@ Browsers.DeviceBrowser.menuSettings = {
     scrollingEnabled: true,
     scrollingPosition: 8,
     fadeOut: false,
-    fadeIn: false
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
@@ -95,6 +100,11 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                 }
             },"URL: ");
         }
+        return;
+    }
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#selector-menu", true);
+        return;
     }
 };
 
@@ -446,6 +456,12 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 };
 
 Browsers.FileBrowser.menuEventHandler = function (event, item) {
+
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
+        return;
+    }
+
     if (event == "show") {
         if (Browsers.FileBrowser.menu.items.length >= 5)
         {
@@ -873,6 +889,11 @@ Browsers.FileBrowser.open = function (parentMenu) {
 };
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#drive-browser", true);
+        return;
+    }
+
     if (event == "enter" && Browsers.DriveBrowser.menuMode == "list") {
         Browsers.DriveBrowser.cachedDriveName = item;
         Browsers.DriveBrowser.menuMode = "ask";
@@ -1003,6 +1024,11 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 };
 
 Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#device-browser", true);
+        return;
+    }
+
     if (event == "enter") {
         //mp.commandv("apply-profile", "low-latency");
         mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file

@@ -947,7 +947,7 @@ Settings.presets.load = function () {
     else
     {
         var dummyFile = {
-            "_comment": "For more information please visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Presets",
+            "_comment": "This file is intended to be edited by the user. See https://github.com/JongWasTaken/easympv/wiki/Presets for more information.",
             "shadersets": {},
             "colorpresets": {},
             "fileextensions": [],

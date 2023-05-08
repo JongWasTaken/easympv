@@ -418,6 +418,11 @@ Core.defineMenus = function () {
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
+        mp.msg.warn(event);
+        if (event == "help") {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
+            return;
+        }
 /*
             if (action == "show-playlist") {
                 Core.Menus.MainMenu.hideMenu();
@@ -464,10 +469,6 @@ Core.defineMenus = function () {
                 Core.Menus.MainMenu.setDescription(UI.SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
                 Core.Menus.MainMenu.redrawMenu();
             }
-            return;
-        }
-        if (event == "help") {
-            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
             return;
         }
     };
@@ -1306,7 +1307,7 @@ Core.defineMenus = function () {
                 UI.SSA.insertSymbolFA("") +
                 UI.SSA.setColorWhite() +
                 "Configuration Options",
-            description: "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu)."
+            description: "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu).@br@This menu will not close automatically."
             //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsConfigurationSubMenuItems,

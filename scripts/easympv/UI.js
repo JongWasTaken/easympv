@@ -543,11 +543,16 @@ UI.Time.Timer = undefined;
 UI.Time.xLocation = 1;
 UI.Time.yLocation = 1;
 
+UI.Time.observer = function()
+{
+    UI.Time._hide();
+    UI.Time._show();
+}
+
 UI.Time.assembleContent = function()
 {
     var content = "";
     content += UI.SSA.setScale(100) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
-
     content += UI.SSA.setPositionPercentage(UI.Time.xLocation,UI.Time.yLocation);
     content += UI.SSA.insertSymbolFA(" ", 20, 32, Utils.commonFontName);
     content += Utils.getCurrentTime();
@@ -572,13 +577,23 @@ UI.Time._stopTimer = function () {
     }
 };
 
-// TODO: scale to screen size, otherwise it sticks out at 1080p
 UI.Time.show = function()
 {
     if (UI.Time.OSD != undefined) {
         return;
     }
 
+    mp.observe_property(
+        "osd-width",
+        undefined,
+        UI.Time.observer
+    );
+
+    UI.Time._show();
+}
+
+UI.Time._show = function()
+{
     if (Settings.Data.clockPosition == "bottom-right")
     {
         UI.Time.xLocation = 96;
@@ -600,6 +615,11 @@ UI.Time.show = function()
         UI.Time.yLocation = 1;
     }
 
+    if (Number(mp.get_property("osd-width") < 1921) && (Settings.Data.clockPosition == "top-right" || Settings.Data.clockPosition == "bottom-right"))
+    {
+        UI.Time.xLocation = UI.Time.xLocation - 2;
+    }
+
     // create overlay
 
     UI.Time.OSD = mp.create_osd_overlay("ass-events");
@@ -611,6 +631,7 @@ UI.Time.show = function()
     UI.Time.OSD.data = UI.Time.assembleContent();
     UI.Time.OSD.update();
     UI.Time._startTimer();
+
 }
 
 UI.Time.hide = function()
@@ -619,6 +640,13 @@ UI.Time.hide = function()
         return;
     }
 
+    mp.unobserve_property(UI.Time.observer);
+
+    UI.Time._hide();
+}
+
+UI.Time._hide = function()
+{
     UI.Time._stopTimer();
     if (UI.Time.OSD != undefined) {
         mp.commandv(
@@ -1967,6 +1995,18 @@ UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
        item = { title: undefined, item: undefined, eventHandler: undefined };
     }
 
+    if (this.settings.customKeyEvents != undefined)
+    {
+        for (var i = 0; i < this.settings.customKeyEvents.length; i++)
+        {
+            if (event == this.settings.customKeyEvents[i].event)
+            {
+                item.eventHandler = undefined;
+                break;
+            }
+        }
+    }
+
     if (item.eventHandler != undefined)
     {
         item.eventHandler(event, this)
@@ -2487,7 +2527,6 @@ UI.Input.OSDLog.show = function () {
 }
 
 UI.Input.OSDLog.blacklistedPrefixes = {"osd/libass":1, "vo/gpu/libplacebo":1};
-
 UI.Input.OSDLog.addToBuffer = function (msg) {
     var color = "";
     if (msg.level == "debug")
@@ -2515,7 +2554,6 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
     {
         var time = mp.get_property("time-pos");
         if (time == undefined) { time = "0.000000"; }
-
         UI.Input.OSDLog.Buffer = UI.SSA.setFont("Roboto") + UI.SSA.setTransparency("3f") + color + UI.SSA.setSize(16) + UI.SSA.setBorder(0) + UI.SSA.setBold(true) +
             "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + UI.SSA.setBold(false) + msg.text + "\n" + UI.Input.OSDLog.Buffer;
     }
