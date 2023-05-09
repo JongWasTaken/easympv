@@ -352,6 +352,8 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
                         Utils.showAlert("info","Added Folder \""+item+"\" to Favorites.");
                         Settings.save();
+                        menu.hideMenu();
+                        Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
                         return;
                     }
                     Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
