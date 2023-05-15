@@ -418,7 +418,6 @@ Core.defineMenus = function () {
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
-        mp.msg.warn(event);
         if (event == "help") {
             Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
             return;
@@ -1744,6 +1743,28 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
+/*
+    var array = mp.utils.read_file(mp.utils.get_user_path("~/python-missing-packages-processed")).split(" ");
+    var newarray = [];
+    var store = undefined;
+    for (var i = 0; i < array.length; i++)
+    {
+        mp.msg.warn("INPUT: " + array[i]);
+        store = array[i].split("-");
+        if (Number(store[store.length-1].charAt(0)) < 10)
+        {
+            store.pop();
+            newarray.push(store.join("-"));
+            mp.msg.warn("OUTPUT: " + newarray[newarray.length-1]);
+        }
+        else
+        {
+            newarray.push(array[i]);
+        }
+    }
+    mp.utils.write_file("file://" + mp.utils.get_user_path("~/python-missing-packages-processed-2"),newarray.join(" "));
+    mp.msg.warn("DONE!");
+*/
     Settings.load();
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
