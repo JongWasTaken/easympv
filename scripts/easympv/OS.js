@@ -115,7 +115,7 @@ OS._call = function (cmd,async,callback) {
     if (OS.isWindows) {
         mp.utils.write_file(
             "file://" + mp.utils.get_user_path("~~/.tmp-powershell.ps1"),
-            cmd
+            cmd// + "\nRemove-Item -Path $MyInvocation.MyCommand.Source\nexit 0"
         );
     }
 
@@ -123,9 +123,10 @@ OS._call = function (cmd,async,callback) {
         var args = [
             "powershell",
             "-NoProfile",
+            "-ExecutionPolicy",
+            "bypass",
             "-Command",
             mp.utils.get_user_path("~~/.tmp-powershell.ps1")
-            //cmd,
         ];
     } else {
         var args = [
@@ -159,6 +160,24 @@ OS._call = function (cmd,async,callback) {
             }
         );
     }
+
+    if (OS.isWindows)
+    {
+        if (mp.utils.file_info(mp.utils.get_user_path("~~/.tmp-powershell.ps1")) != undefined)
+        {
+            var dcommand = "Remove-Item -Path \""+ mp.utils.get_user_path("~~/.tmp-powershell.ps1") +"\" -Force";
+            var r = mp.command_native(
+                {
+                    name: "subprocess",
+                    playback_only: false,
+                    capture_stdout: true,
+                    capture_stderr: false,
+                    args: ["powershell","-NoProfile","-Command",dcommand],
+                }
+            );
+        }
+    }
+
     if (r != undefined) {
         return r;
     }
@@ -194,16 +213,10 @@ OS.showMessage = function(text,async) {
 
     if (OS.isWindows)
     {
-        OS._call(" \
-        { \
-            Add-Type -AssemblyName System.Windows.Forms \
-            $result = [System.Windows.Forms.MessageBox]::Show(\""+ text +"\",\"mpv\",[System.Windows.Forms.MessageBoxButtons]::OK) \
-            if ($result -eq \"OK\") \
-            { \
-                exit 0 \
-            } \
-        } \
-        ",async,callback);
+        OS._call("Add-Type -AssemblyName System.Windows.Forms\n"+
+            "$result = [System.Windows.Forms.MessageBox]::Show(\""+ text +"\",\"mpv\",[System.Windows.Forms.MessageBoxButtons]::OK)\n"+
+            //"Remove-Item -Path $MyInvocation.MyCommand.Source\n" +
+            "exit 0\n",async,callback);
         return;
     }
 
@@ -236,31 +249,32 @@ OS.showMessage = function(text,async) {
 OS.showNotification = function(text) {
     if (OS.isWindows)
     {
-        return OS._call(" \
-        { \
-            Add-Type -AssemblyName System.Windows.Forms \
-            try { \
-                $global:balloon = New-Object System.Windows.Forms.NotifyIcon \
-                $path = (Get-Process \"mpv\").Path \
-                $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) \
-                $balloon.BalloonTipText = \""+ text +"\" \
-                $balloon.BalloonTipTitle = \"mpv\"  \
-                $balloon.Visible = $true  \
-                $balloon.ShowBalloonTip(5000) \
-            } \
-            catch \
-            { \
-                $global:balloon = New-Object System.Windows.Forms.NotifyIcon \
-                $path = (Get-Process \"explorer\").Path \
-                $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) \
-                $balloon.BalloonTipText = \""+ text +"\" \
-                $balloon.BalloonTipTitle = \"mpv\"  \
-                $balloon.Visible = $true  \
-                $balloon.ShowBalloonTip(5000) \
-            } \
-            exit 1 \
-        } \
-        ").status  == 0 ? true : false;
+        return OS._call(
+            "Add-Type -AssemblyName System.Windows.Forms \n"+
+            "try { \n"+
+            "    $global:balloon = New-Object System.Windows.Forms.NotifyIcon \n"+
+            "    $path = (Get-Process \"mpv\").Path \n"+
+            "    $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) \n"+
+            "    $balloon.BalloonTipText = \""+ text +"\"\n"+
+            "    $balloon.BalloonTipTitle = \"mpv\"  \n"+
+            "    $balloon.Visible = $true  \n"+
+            "    $balloon.ShowBalloonTip(5000) \n"+
+            //"    Remove-Item -Path $MyInvocation.MyCommand.Source \n"+
+            "    exit 0 \n"+
+            "} \n"+
+            "catch \n"+
+            "{ \n"+
+            "    $global:balloon = New-Object System.Windows.Forms.NotifyIcon \n"+
+            "    $path = (Get-Process \"explorer\").Path \n"+
+            "    $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) \n"+
+            "   $balloon.BalloonTipText = \""+ text +"\" \n"+
+            "    $balloon.BalloonTipTitle = \"mpv\"  \n"+
+            "    $balloon.Visible = $true  \n"+
+            "    $balloon.ShowBalloonTip(5000) \n"+
+            //"    Remove-Item -Path $MyInvocation.MyCommand.Source \n"+
+            "    exit 0 \n"+
+            "} \n"+
+            "exit 1 \n").status  == 0 ? true : false;
     }
 
     if (OS.name == "macos") {
@@ -314,10 +328,9 @@ OS.getConnectionStatus = function () {
 OS.dependencyGetList = function () {
     if (OS.isWindows)
     {
-        return OS._call("$webclient = New-Object System.Net.WebClient\
-        $latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/dependencies.json\")\
-        Write-Output $latest.Trim()\
-        exit 0").stdout.trim();
+        return OS._call("$webclient = New-Object System.Net.WebClient\n"+
+        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/dependencies.json\")\n"+
+        "Write-Output $latest.Trim()").stdout.trim();
     }
 
     return OS._call("curl -s https://smto.pw/mpv/hosted/dependencies.json").stdout.trim();
@@ -328,9 +341,9 @@ OS.dependencyDownload = function (url, target) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("$webclient = New-Object System.Net.WebClient \
-        try { $webclient.DownloadFile(\""+url+"\",\""+target+"\") } Catch [system.exception] {exit 1} \
-        exit 0").status;
+        exitCode = OS._call("$webclient = New-Object System.Net.WebClient \n"+
+        "try { $webclient.DownloadFile(\""+url+"\",\""+target+"\") } Catch [system.exception] {exit 1} \n"+
+        "exit 0").status;
     }
     else
     {
@@ -365,10 +378,10 @@ OS.dependencyPostInsatll = function () {
 OS.versionGetLatestAsync = function (callback) {
     if (OS.isWindows)
     {
-        return OS._call("$webclient = New-Object System.Net.WebClient\
-        $latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/latest.json\")\
-        Write-Output $latest.Trim()\
-        exit 0",true,callback);
+        return OS._call("$webclient = New-Object System.Net.WebClient\n"+
+        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/latest.json\")\n"+
+        "Write-Output $latest.Trim()\n"+
+        "exit 0",true,callback);
     }
 
     return OS._call("curl -s https://smto.pw/mpv/hosted/latest.json",true,callback);
@@ -378,10 +391,10 @@ OS.versionGetLatestAsync = function (callback) {
 OS.versionGetLatestmpvAsync = function (callback) {
     if (OS.isWindows)
     {
-        return OS._call("$webclient = New-Object System.Net.WebClient\
-        $latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/mpvLatestVersion\")\
-        Write-Output $latest.Trim()\
-        exit 0",true,callback);
+        return OS._call("$webclient = New-Object System.Net.WebClient\n"+
+        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/mpvLatestVersion\")\n"+
+        "Write-Output $latest.Trim()\n"+
+        "exit 0",true,callback);
     }
 
     return OS._call("curl -s https://smto.pw/mpv/hosted/mpvLatestVersion",true,callback);
@@ -392,10 +405,10 @@ OS.gitUpdate = function () {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("Set-Location $env:APPDATA\\mpv\\ \
-        $processOptions = @{ FilePath = \"cmd.exe\" ArgumentList = \"/k\", \"{cd $env:APPDATA\\mpv\ && git pull\" }\
-        try { Start-Process @processOptions } Catch [system.exception] {exit 1} \
-        exit 0").status;
+        exitCode = OS._call("Set-Location $env:APPDATA\\mpv\\ \n"+
+        "$processOptions = @{ FilePath = \"cmd.exe\" ArgumentList = \"/k\", \"{cd $env:APPDATA\\mpv\ && git pull\" }\n"+
+        "try { Start-Process @processOptions } Catch [system.exception] {exit 1} \n"+
+        "exit 0").status;
     }
     else
     {
@@ -414,9 +427,9 @@ OS.packageGetAsync = function (tag, callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("$webclient = New-Object System.Net.WebClient \
-        try { $webclient.DownloadFile(\"https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+"\",\"$env:appdata\\mpv\\package.zip\") } Catch [system.exception] {exit 1} \
-        exit 0",true,callback).status;
+        exitCode = OS._call("$webclient = New-Object System.Net.WebClient \n"+
+        "try { $webclient.DownloadFile(\"https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+"\",\"$env:appdata\\mpv\\package.zip\") } Catch [system.exception] {exit 1} \n"+
+        "exit 0",true,callback).status;
     }
     else
     {
@@ -435,12 +448,12 @@ OS.packageExtractAsync = function (callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("try { \
-            $shell = New-Object -ComObject Shell.Application \
-            $zip = $shell.Namespace(\"$env:APPDATA\\mpv\\package.zip\") \
-            $items = $zip.items() \
-            $shell.Namespace(\"$env:APPDATA\\mpv\").CopyHere($items, 1556) } \
-        Catch [system.exception] {exit 1} exit 0",true,callback).status;
+        exitCode = OS._call("try { \n"+
+            "$shell = New-Object -ComObject Shell.Application \n"+
+            "$zip = $shell.Namespace(\"$env:APPDATA\\mpv\\package.zip\") \n"+
+            "$items = $zip.items() \n"+
+            "$shell.Namespace(\"$env:APPDATA\\mpv\").CopyHere($items, 1556) } \n"+
+            "Catch [system.exception] {exit 1} exit 0",true,callback).status;
     }
     else
     {
@@ -465,8 +478,8 @@ OS.packageApplyAsync = function (tag,callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("Copy-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\*\" -Destination \"$env:APPDATA\\mpv\" -Recurse -Force \
-        Remove-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\" -Force -Recurse",true,callback).status;
+        exitCode = OS._call("Copy-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\*\" -Destination \"$env:APPDATA\\mpv\" -Recurse -Force \n"+
+        "Remove-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\" -Force -Recurse",true,callback).status;
     }
     else
     {
@@ -507,6 +520,10 @@ OS.fileRemoveSystemwide = function (path) {
 
     if(OS.isWindows)
     {
+        // powershell is weird with brackets
+        path = path.replaceAll("\\\\","\\");
+        path = path.replaceAll("\\[","\`\`\[");
+        path = path.replaceAll("\\]","\`\`\]");
         return OS._call("Remove-Item -Path \""+path+"\" -Force").status == 0 ? true: false;
     }
     else
@@ -519,19 +536,19 @@ OS.fileRemoveSystemwide = function (path) {
 OS.getImageInfo = function (path) {
     if(OS.isWindows)
     {
-        return OS._call("Add-Type -AssemblyName System.Drawing \
-        $fstring = \"\" \
-        try \
-        { \
-            $bmp = New-Object System.Drawing.Bitmap \""+path+"\" \
-            $fstring += $bmp.Width + \"|\" \
-            $fstring += $bmp.Height \
-            $bmp.Dispose() \
-        } \
-        Catch [system.exception] \
-        {exit 1} \
-        Write-Output $fstring \
-        exit 0");
+        return OS._call("Add-Type -AssemblyName System.Drawing \n"+
+        "$fstring = \"\" \n"+
+        "try \n"+
+        "{ \n"+
+        "    $bmp = New-Object System.Drawing.Bitmap \""+path+"\" \n"+
+        "    $fstring += $bmp.Width + \"|\" \n"+
+        "    $fstring += $bmp.Height \n"+
+        "    $bmp.Dispose() \n"+
+        "} \n"+
+        "Catch [system.exception] \n"+
+        "{exit 1} \n"+
+        "Write-Output $fstring \n"+
+        "exit 0");
     }
 
     return OS._call("file -b " + path);
@@ -543,17 +560,17 @@ OS.runElevatedCommand = function (command)
 {
     if (OS.isWindows)
     {
-        return OS._call("$processOptions = @{ \
-            FilePath = \"powershell.exe\" \
-            Verb = \"runAs\" \
-            ArgumentList = \"cmd\", \"/c\", "+ command +", \"/u\" \
-        } \
-        try \
-        { \
-            Start-Process @processOptions \
-        } \
-        Catch [system.exception] {exit 1} \
-        exit 0").status == 0 ? true: false;
+        return OS._call("$processOptions = @{ \n"+
+        "    FilePath = \"powershell.exe\" \n"+
+        "    Verb = \"runAs\" \n"+
+        "    ArgumentList = \"cmd\", \"/c\", "+ command +", \"/u\" \n"+
+        "} \n"+
+        "try \n"+
+        "{ \n"+
+        "    Start-Process @processOptions \n"+
+        "} \n"+
+        "Catch [system.exception] {exit 1} \n"+
+        "exit 0").status == 0 ? true: false;
     }
     return false;
 }
@@ -563,17 +580,17 @@ OS.updateMpvWindows = function (path)
 {
     if(OS.isWindows)
     {
-        return OS._call("$processOptions = @{ \
-            FilePath = \"powershell.exe\" \
-            Verb = \"runAs\" \
-            ArgumentList = \"powershell\", \"-Command {cd "+ path +" ; .\\installer\\updater.ps1}\", \"-NoExit\", \"-ExecutionPolicy bypass\" \
-        } \
-        try \
-        { \
-            Start-Process @processOptions \
-        } \
-        Catch [system.exception] {exit 1} \
-        exit 0").status == 0 ? true: false;
+        return OS._call("$processOptions = @{ \n"+
+        "    FilePath = \"powershell.exe\" \n"+
+        "    Verb = \"runAs\" \n"+
+        "    ArgumentList = \"powershell\", \"-Command {cd "+ path +" ; .\\installer\\updater.ps1}\", \"-NoExit\", \"-ExecutionPolicy bypass\" \n"+
+        "} \n"+
+        "try \n"+
+        "{ \n"+
+        "    Start-Process @processOptions \n"+
+        "} \n"+
+        "Catch [system.exception] {exit 1} \n"+
+        "exit 0").status == 0 ? true: false;
     }
     return false;
 }
@@ -586,17 +603,17 @@ OS.updateMpvWindows = function (path)
 OS.getWindowsDriveInfo = function (type) {
     if(OS.isWindows)
     {
-        return OS._call("$fstring = \"\" \
-        $filter = \"DriveType = "+type+"\" \
-        try { \
-            $w = Get-WmiObject -Class Win32_LogicalDisk -Filter $filter -errorvariable MyErr -erroraction Stop; \
-            $w | ForEach-Object { $fstring += $_.DeviceID + \"|\" } \
-        } \
-        Catch [system.exception] { exit 1 } \
-        if($w.Count -eq 0) { exit 1 } \
-        $fstring = $fstring -replace \"(.*)\|(.*)\", '$1$2' \
-        Write-Output $fstring \
-        exit 0").stdout.trim();
+        return OS._call("$fstring = \"\" \n"+
+        "$filter = \"DriveType = "+type+"\" \n"+
+        "try { \n"+
+        "    $w = Get-WmiObject -Class Win32_LogicalDisk -Filter $filter -errorvariable MyErr -erroraction Stop; \n"+
+        "    $w | ForEach-Object { $fstring += $_.DeviceID + \"|\" } \n"+
+        "} \n"+
+        "Catch [system.exception] { exit 1 } \n"+
+        "if($w.Count -eq 0) { exit 1 } \n"+
+        "$fstring = $fstring -replace \"(.*)\|(.*)\", '$1$2' \n"+
+        "Write-Output $fstring \n"+
+        "exit 0").stdout.trim();
     }
     return "";
 }
@@ -619,7 +636,7 @@ OS.registerMpv = function () {
             var args = [
                 "powershell",
                 "-executionpolicy",
-                "bypass",
+                "bypass", // TODO:
                 mp.utils
                     .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
                     .replaceAll("/", "\\"),

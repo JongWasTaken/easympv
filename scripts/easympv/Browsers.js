@@ -164,7 +164,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
             mp.commandv(
                 "loadfile",
                 Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
+                    OS.directorySeperator +
                     entry.item
             );
         }
@@ -177,7 +177,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
             mp.commandv(
                 "sub-add",
                 Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
+                    OS.directorySeperator +
                     entry.item
             );
         }
@@ -203,7 +203,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
             mp.commandv(
                 "loadfile",
                 Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
+                    OS.directorySeperator +
                     filename
             );
             break;
@@ -215,10 +215,10 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
 Browsers.FileBrowser.getParentDirectory = function () {
     var newDir = "";
     var workDir = Browsers.FileBrowser.currentLocation;
-    if (workDir.charAt(workDir.length - 1) == Utils.directorySeperator) {
+    if (workDir.charAt(workDir.length - 1) == OS.directorySeperator) {
         workDir = workDir.substring(0, workDir.length - 1);
     }
-    var workDirTree = workDir.split(Utils.directorySeperator);
+    var workDirTree = workDir.split(OS.directorySeperator);
 
     if (!OS.isWindows && workDirTree.length < 3) {
         workDirTree[0] = "/";
@@ -228,12 +228,12 @@ Browsers.FileBrowser.getParentDirectory = function () {
         if (i == 0) {
             newDir = workDirTree[0];
         } else {
-            newDir = newDir + Utils.directorySeperator + workDirTree[i];
+            newDir = newDir + OS.directorySeperator + workDirTree[i];
         }
     }
 
     if (newDir.charAt(newDir.length - 1) == ":") {
-        newDir += Utils.directorySeperator;
+        newDir += OS.directorySeperator;
     }
 
     return newDir;
@@ -245,8 +245,8 @@ Browsers.FileBrowser.gotoParentDirectory = function () {
 
 Browsers.FileBrowser.changeDirectory = function (directory) {
     Browsers.FileBrowser.currentLocation = directory.replaceAll(
-        Utils.directorySeperator + Utils.directorySeperator,
-        Utils.directorySeperator
+        OS.directorySeperator + OS.directorySeperator,
+        OS.directorySeperator
     );
     try {
         Browsers.FileBrowser.menu.hideMenu();
@@ -258,7 +258,7 @@ Browsers.FileBrowser.changeDirectory = function (directory) {
 
 Browsers.FileBrowser.openContextMenu = function(item) {
 
-    var path = Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item;
+    var path = Browsers.FileBrowser.currentLocation + OS.directorySeperator + item;
 
     if (
         OS.isWindows &&
@@ -268,7 +268,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     } else {
         var temp = mp.utils.file_info(
             Browsers.FileBrowser.currentLocation +
-                Utils.directorySeperator +
+                OS.directorySeperator +
                 item
         );
         if (temp != undefined) {
@@ -350,13 +350,13 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     {
                         Settings.Data["fileBrowserFavorites"].locations.push(path);
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                        Utils.showAlert("info","Added Folder \""+item+"\" to Favorites.");
+                        Utils.showAlert("info","Added Folder to Favorites.");
                         Settings.save();
                         menu.hideMenu();
                         Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
                         return;
                     }
-                    Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
+                    Utils.showAlert("error","Folder is already in Favorites!");
                     return;
                 }
             }
@@ -377,7 +377,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
             {
                 Browsers.FileBrowser.changeDirectory(
                     Browsers.FileBrowser.currentLocation +
-                        Utils.directorySeperator +
+                        OS.directorySeperator +
                         item
                 );
             }
@@ -475,7 +475,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
 
     if (event == "right") {
 
-        if (item == ".." + Utils.directorySeperator) {
+        if (item == ".." + OS.directorySeperator) {
             return;
         }
 
@@ -490,7 +490,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
     }
 
     if (event == "enter") {
-        if (item == ".." + Utils.directorySeperator) {
+        if (item == ".." + OS.directorySeperator) {
             if (
                 OS.isWindows &&
                 Browsers.FileBrowser.currentLocation.charAt(
@@ -514,7 +514,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                 // this fixes a bug where opening a mount folder of an unmounted drive would crash everything
                 var temp = mp.utils.file_info(
                     Browsers.FileBrowser.currentLocation +
-                        Utils.directorySeperator +
+                        OS.directorySeperator +
                         item
                 );
                 if (temp != undefined) {
@@ -533,7 +533,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                 } else {
                     Browsers.FileBrowser.changeDirectory(
                         Browsers.FileBrowser.currentLocation +
-                            Utils.directorySeperator +
+                            OS.directorySeperator +
                             item
                     );
                 }
@@ -685,8 +685,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 title:
                     UI.SSA.insertSymbolFA(" ", 30, 35, Utils.commonFontName) +
                     ".." +
-                    Utils.directorySeperator,
-                item: ".." + Utils.directorySeperator,
+                    OS.directorySeperator,
+                item: ".." + OS.directorySeperator,
                 color: "909090",
             });
         }
@@ -702,10 +702,10 @@ Browsers.FileBrowser.open = function (parentMenu) {
                         title:
                             UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             title +
-                            Utils.directorySeperator,
+                            OS.directorySeperator,
                         item:
                             currentLocationFolders[i] +
-                            Utils.directorySeperator,
+                            OS.directorySeperator,
                         color: "FFFF90",
                         type: "folder",
                         supported: true
@@ -721,8 +721,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     title:
                         UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                         title +
-                        Utils.directorySeperator,
-                    item: currentLocationFolders[i] + Utils.directorySeperator,
+                        OS.directorySeperator,
+                    item: currentLocationFolders[i] + OS.directorySeperator,
                     color: "FFFF90",
                     type: "folder",
                     supported: true
@@ -796,7 +796,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
         Browsers.FileBrowser.currentLocation.replaceAll(
             "@DRIVESELECTOR@",
             "Drive Selection"
-        ) + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
+        ) + " " + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
+    mp.msg.warn(Browsers.FileBrowser.menuSettings.description);
     Browsers.FileBrowser.menuSettings.backButtonTitle =
         UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back to main menu@br@@us10@";
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
@@ -868,7 +869,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
                             favMenu.redrawMenu();
-                            Utils.showAlert("info","Favorite \""+item+"\" has been removed.")
+                            Utils.showAlert("info","Favorite has been removed.")
                         }
                         return;
                     }

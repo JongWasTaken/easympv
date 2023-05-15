@@ -34,7 +34,7 @@ UI.SSA.setBold = function (bold) {
     {
         return "{\\b1}";
     }
-    return "{\\b0}";
+    return "\{\\b0}";
 }
 
 UI.SSA.setSize = function (fontSize) {
