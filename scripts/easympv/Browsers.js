@@ -797,7 +797,6 @@ Browsers.FileBrowser.open = function (parentMenu) {
             "@DRIVESELECTOR@",
             "Drive Selection"
         ) + " " + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
-    mp.msg.warn(Browsers.FileBrowser.menuSettings.description);
     Browsers.FileBrowser.menuSettings.backButtonTitle =
         UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back to main menu@br@@us10@";
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
