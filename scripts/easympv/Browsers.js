@@ -368,6 +368,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         item: "",
         eventHandler: function(action, menu)
         {
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
             if (action != "enter")
             {
                 return;
@@ -427,6 +428,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                         );
                     }
                     contextMenu.hideMenu();
+                    Browsers.FileBrowser.cachedFileBrowserPosition = Browsers.FileBrowser.cachedFileBrowserPosition - 1;
                     Browsers.FileBrowser.open();
                 } else {
                     this.title = UI.SSA.setColorRed() + "Are you sure?";
@@ -483,6 +485,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             return;
         }
 
+        Browsers.FileBrowser.cachedFileBrowserPosition = Browsers.FileBrowser.menu.selectedItemIndex;
         Browsers.FileBrowser.menu.hideMenu();
         Browsers.FileBrowser.menu = undefined;
         Browsers.FileBrowser.openContextMenu(item);
@@ -888,6 +891,12 @@ Browsers.FileBrowser.open = function (parentMenu) {
     Browsers.FileBrowser.menu.eventHandler =
         Browsers.FileBrowser.menuEventHandler;
     Browsers.FileBrowser.menu.showMenu();
+    if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
+    {
+        Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
+        Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+        Browsers.FileBrowser.menu.redrawMenu();
+    }
 };
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {

@@ -1743,6 +1743,7 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
+// needed a js runtime and setting up nodejs seemed like a pain so... mpv it is!
 /*
     var array = mp.utils.read_file(mp.utils.get_user_path("~/python-missing-packages-processed")).split(" ");
     var newarray = [];
