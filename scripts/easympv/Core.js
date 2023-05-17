@@ -19,7 +19,7 @@ var isFirstFile = true;
 //var sofaEnabled = false;
 var resetOccured = false;
 var notifyAboutUpdates = false;
-
+Core.fancyCurrentVersion = "";
 var cFile;
 
 //TODO: clean up
@@ -459,7 +459,7 @@ Core.defineMenus = function () {
                 Utils.showAlert(
                     "info",
                     "An update is available.@br@" +
-                    "Current Version: " + Settings.Data.currentVersion +
+                    "Current Version: " + Core.fancyCurrentVersion +
                     "@br@New Version: " + Settings.Data.newestVersion
                 );
             }
@@ -802,16 +802,14 @@ Core.defineMenus = function () {
             item: "updates",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    var isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
                     menu.hideMenu();
                     var updateConfirmation = false;
                     var setDescription = function()
                     {
                         var d = "You are on version " +
                         UI.SSA.setColorYellow() +
-                        Settings.Data.currentVersion;
-                        if(isGit) { d += "-git"; }
-                        if(!isGit)
+                        Core.fancyCurrentVersion;
+                        if(!OS.isGit)
                         {
                             d += "@br@The latest available version is " +
                             UI.SSA.setColorYellow() +
@@ -1743,29 +1741,6 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
-// needed a js runtime and setting up nodejs seemed like a pain so... mpv it is!
-/*
-    var array = mp.utils.read_file(mp.utils.get_user_path("~/python-missing-packages-processed")).split(" ");
-    var newarray = [];
-    var store = undefined;
-    for (var i = 0; i < array.length; i++)
-    {
-        mp.msg.warn("INPUT: " + array[i]);
-        store = array[i].split("-");
-        if (Number(store[store.length-1].charAt(0)) < 10)
-        {
-            store.pop();
-            newarray.push(store.join("-"));
-            mp.msg.warn("OUTPUT: " + newarray[newarray.length-1]);
-        }
-        else
-        {
-            newarray.push(array[i]);
-        }
-    }
-    mp.utils.write_file("file://" + mp.utils.get_user_path("~/python-missing-packages-processed-2"),newarray.join(" "));
-    mp.msg.warn("DONE!");
-*/
     Settings.load();
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
@@ -1782,10 +1757,23 @@ Core.startExecution = function () {
         mp.enable_messages("info");
     }
     mp.register_event("log-message", UI.Input.OSDLog.addToBuffer);
-
-    Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
-
     OS.init();
+    Core.fancyCurrentVersion = Settings.Data.currentVersion;
+
+    if (OS.isGit)
+    {
+        if (OS.gitAvailable)
+        {
+            Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-" + OS.gitCommit;
+        }
+        else
+        {
+            Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-git";
+        }
+    }
+
+    Utils.log("easympv " + Core.fancyCurrentVersion + " starting...","startup","info");
+
     Utils.log("Checking for updates...","startup","info");
     setTimeout(function() {
         Utils.getLatestUpdateData();

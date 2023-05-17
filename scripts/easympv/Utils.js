@@ -158,7 +158,7 @@ Utils.getLatestUpdateData = function () {
 };
 
 Utils.setDisplayVersion = function () {
-    Utils.displayVersion = UI.SSA.setColorGreen() + Settings.Data.currentVersion;
+    Utils.displayVersion = UI.SSA.setColorGreen() + Core.fancyCurrentVersion;
     Utils.displayVersionMpv = UI.SSA.setColorGreen() + Utils.mpvVersion;
     if (Utils.updateAvailable) {
         Utils.displayVersion =

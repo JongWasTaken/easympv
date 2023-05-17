@@ -12,7 +12,8 @@ var OS = {};
 
 OS.checksCompleted = false;
 OS.gitAvailable = false;
-
+OS.isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
+OS.gitCommit = "";
 OS.name = undefined;
 OS.isWindows = false;
 OS.isSteamGamepadUI = false;
@@ -67,6 +68,7 @@ OS.init = function () {
             }
         }
     }
+
 };
 
 OS._performChecks = function () {
@@ -97,8 +99,12 @@ OS._performChecks = function () {
     if (mp.utils.file_info(r.stdout.trim()) != undefined) {
         OS.gitAvailable = true;
     }
-
     OS.checksCompleted = true;
+
+
+    if (OS.gitAvailable && OS.isGit) {
+        OS.gitCommit = OS._call("git rev-parse --short HEAD").stdout.trim();
+    }
 }
 
 OS._call = function (cmd,async,callback) {
