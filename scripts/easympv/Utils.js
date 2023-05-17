@@ -452,8 +452,7 @@ Utils.doUpdate = function () {
     {
         if(OS.gitAvailable)
         {
-            OS.gitUpdate();
-            Utils.doUpdateStage5();
+            OS.gitUpdate(Utils.doUpdateStage5());
         }
 
     }

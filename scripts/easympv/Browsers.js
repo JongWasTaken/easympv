@@ -494,6 +494,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
 
     if (event == "enter") {
         if (item == ".." + OS.directorySeperator) {
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
             if (
                 OS.isWindows &&
                 Browsers.FileBrowser.currentLocation.charAt(

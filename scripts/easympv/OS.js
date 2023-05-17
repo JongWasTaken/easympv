@@ -408,18 +408,18 @@ OS.versionGetLatestmpvAsync = function (callback) {
 }
 
 // git-update
-OS.gitUpdate = function () {
+OS.gitUpdate = function (callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
         exitCode = OS._call("Set-Location $env:APPDATA\\mpv\\ \n"+
         "$processOptions = @{ FilePath = \"cmd.exe\" ArgumentList = \"/k\", \"{cd $env:APPDATA\\mpv\ && git pull\" }\n"+
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1} \n"+
-        "exit 0").status;
+        "exit 0",true,callback).status;
     }
     else
     {
-        exitCode = OS._call("cd ~/.config/mpv/ && git pull").status;
+        exitCode = OS._call("cd ~/.config/mpv/ && git pull",true,callback).status;
     }
     return exitCode == 0 ? true: false;
 }
