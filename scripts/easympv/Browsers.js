@@ -567,102 +567,51 @@ Browsers.FileBrowser.open = function (parentMenu) {
         OS.isWindows &&
         Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
     ) {
-        // Local Drives are type 3
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-local",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
-                    items.push({
-                        title:
-                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                            drives[i].trim() +
-                            "\\",
-                        item: drives[i].trim() + "\\",
-                        color: "ffffff",
-                    });
-                }
+        // local drives
+        drives = OS.getWindowsDriveInfo(3).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                items.push({
+                    title:
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                        drives[i].trim() +
+                        "\\",
+                    item: drives[i].trim() + "\\",
+                    color: "ffffff",
+                });
             }
         }
 
-        // USB Drives are type 2
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-usb",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
-                    items.push({
-                        title:
-                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                            drives[i].trim() +
-                            "\\",
-                        item: drives[i].trim() + "\\",
-                        color: "ffffff",
-                    });
-                }
+        // usb drives
+        drives = OS.getWindowsDriveInfo(2).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                items.push({
+                    title:
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                        drives[i].trim() +
+                        "\\",
+                    item: drives[i].trim() + "\\",
+                    color: "ffffff",
+                });
             }
         }
 
-        // Network Drives are type 4
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-network",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
-                    items.push({
-                        title:
-                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                            drives[i].trim() +
-                            "\\",
-                        item: drives[i].trim() + "\\",
-                        color: "ffffff",
-                    });
-                }
+        // network drives
+        drives = OS.getWindowsDriveInfo(4).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                items.push({
+                    title:
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                        drives[i].trim() +
+                        "\\",
+                    item: drives[i].trim() + "\\",
+                    color: "ffffff",
+                });
             }
         }
     } else {
@@ -970,37 +919,17 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         Browsers.DriveBrowser.cachedParentMenu = parentMenu;
     }
     if (OS.isWindows) {
-
-        var r = OS.getWindowsDriveInfo(5);
-        /*
-        mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-disc",
-            ],
-        });*/
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            drives.sort();
-            for (var i = 0; i < drives.length; i++) {
-                items.push({
-                    title:
-                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        drives[i].trim() +
-                        "\\",
-                    item: drives[i].trim() + "\\",
-                    color: "ffffff",
-                });
-            }
+        drives = OS.getWindowsDriveInfo(5).split("|");
+        drives.sort();
+        for (var i = 0; i < drives.length; i++) {
+            items.push({
+                title:
+                    UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                    drives[i].trim() +
+                    "\\",
+                item: drives[i].trim() + "\\",
+                color: "ffffff",
+            });
         }
     } else {
         var deviceList = mp.utils.readdir("/dev/", "all");

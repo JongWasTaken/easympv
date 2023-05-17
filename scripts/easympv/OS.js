@@ -360,7 +360,7 @@ OS.dependencyDownload = function (url, target) {
 }
 
 // dependency-postinstall
-OS.dependencyPostInsatll = function () {
+OS.dependencyPostInstall = function () {
     if(OS.name == "macos")
     {
         if (mp.utils.file_info("/usr/local/lib/libdiscord_game_sdk.dylib") == undefined)
@@ -426,7 +426,7 @@ OS.gitUpdate = function () {
 
 // get-package
 OS.packageGetAsync = function (tag, callback) {
-    if(mp.utils.file_info("~~" + Utils.directorySeperator + "package.zip") != undefined)
+    if(mp.utils.file_info("~~" + OS.directorySeperator + "package.zip") != undefined)
     {
         OS.fileRemove("package.zip");
     }
@@ -447,7 +447,7 @@ OS.packageGetAsync = function (tag, callback) {
 
 // extract-package
 OS.packageExtractAsync = function (callback) {
-    if(mp.utils.file_info("~~" + Utils.directorySeperator + "package.zip") == undefined)
+    if(mp.utils.file_info("~~" + OS.directorySeperator + "package.zip") == undefined)
     {
         return false;
     }
@@ -477,7 +477,7 @@ OS.packageRemoveAsync = function (callback) {
 
 // apply-package
 OS.packageApplyAsync = function (tag,callback) {
-    if(mp.utils.file_info("~~" + Utils.directorySeperator + "easympv-" + tag) == undefined)
+    if(mp.utils.file_info("~~" + OS.directorySeperator + "easympv-" + tag) == undefined)
     {
         return false;
     }
@@ -502,7 +502,7 @@ OS.fileInfo = function (file) {
 
 // remove-file
 OS.fileRemove = function (file) {
-    if (mp.utils.file_info("~~" + Utils.directorySeperator + file) == undefined)
+    if (mp.utils.file_info("~~" + OS.directorySeperator + file) == undefined)
     {
         return false;
     }

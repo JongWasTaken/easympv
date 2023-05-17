@@ -333,7 +333,7 @@ Settings.save = function () {
             .split("\n");
     }
 
-    if(Utils.OSisWindows && Settings.Data["mpvLocation"] == "unknown")
+    if(OS.isWindows && Settings.Data["mpvLocation"] == "unknown")
     {
         var searchPaths = [
             "~~home\\AppData\\Local\\mpv\\",
@@ -431,33 +431,7 @@ Settings.migrate = function () {
     }
 
     // delete easympv.conf
-    var file = "easympv.conf";
-    if (Utils.OSisWindows) {
-        var args = [
-            "powershell",
-            "-executionpolicy",
-            "bypass",
-            mp.utils
-                .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                .replaceAll("/", "\\"),
-            "remove-file " + file,
-        ];
-    } else {
-        var args = [
-            "sh",
-            "-c",
-            mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                " remove-file " +
-                file,
-        ];
-    }
-    mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: false,
-        capture_stderr: false,
-        args: args,
-    });
+    OS.fileRemove("easympv.conf");
 
     Settings.Data.doMigration = false;
 
@@ -565,34 +539,7 @@ Settings.mpvConfig.reload = function () {
 };
 
 Settings.mpvConfig.reset = function () {
-    var file = "mpv.conf";
-    if (Utils.OSisWindows) {
-        var args = [
-            "powershell",
-            "-executionpolicy",
-            "bypass",
-            mp.utils
-                .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                .replaceAll("/", "\\"),
-            "remove-file " + file,
-        ];
-    } else {
-        var args = [
-            "sh",
-            "-c",
-            mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                " remove-file " +
-                file,
-        ];
-    }
-    mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: false,
-        capture_stderr: false,
-        args: args,
-    });
-
+    OS.fileRemove("mpv.conf");
     Settings.mpvConfig.save();
 };
 
@@ -793,7 +740,7 @@ Settings.presets.load = function () {
     Settings.presets.images = [];
 
     var seperator = ":";
-    if (Utils.OSisWindows) {
+    if (OS.isWindows) {
         seperator = ";";
     };
 

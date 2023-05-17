@@ -288,7 +288,7 @@ UI.Image.getImageInfo = function (file) {
     var r = OS.getImageInfo(file);
     if (r.status == "0") {
         var input = r.stdout.trim();
-        if (Utils.OSisWindows) {
+        if (OS.isWindows) {
             var data = input.split("|");
             w = data[0];
             h = data[1];

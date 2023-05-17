@@ -39,7 +39,7 @@ Core.onFileLoad = function () {
                 .toString()
                 .replace(/\\/g, "/")
                 .substring(2);
-            if (Utils.OSisWindows)
+            if (OS.isWindows)
             {
                 mp.commandv(
                     "af",
@@ -73,7 +73,7 @@ Core.onFileLoad = function () {
     // cFile could be a relative path, so we need to expand it
     if (cFile != undefined) {
         if (
-            !Utils.OSisWindows &&
+            !OS.isWindows &&
             mp.utils.file_info(
                 mp.get_property("working-directory") + "/" + cFile
             ) != undefined
