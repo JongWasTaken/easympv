@@ -461,6 +461,16 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
 Browsers.FileBrowser.menuEventHandler = function (event, item) {
 
+    if (event == "draw")
+    {
+        if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
+        {
+            Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+        }
+        return;
+    }
+
     if (event == "help") {
         Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
         return;
@@ -841,12 +851,13 @@ Browsers.FileBrowser.open = function (parentMenu) {
     Browsers.FileBrowser.menu.eventHandler =
         Browsers.FileBrowser.menuEventHandler;
     Browsers.FileBrowser.menu.showMenu();
+    /*
     if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
     {
         Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
         Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
         Browsers.FileBrowser.menu.redrawMenu();
-    }
+    }*/
 };
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {
