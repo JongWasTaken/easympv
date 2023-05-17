@@ -844,7 +844,7 @@ Core.defineMenus = function () {
                         } else if (event == "show") {
                             // there is a silly way to crash everything here, so try{} it is
                             try {
-                                if(isGit)
+                                if(OS.isGit)
                                 {
                                     if (umenu.items.length == 1) {
                                         umenu.items.push({
@@ -854,7 +854,7 @@ Core.defineMenus = function () {
                                         });
                                     }
                                 }
-                                if (Utils.updateAvailable && !isGit)
+                                if (Utils.updateAvailable && !OS.isGit)
                                 {
                                     if (umenu.items.length == 1) {
                                         umenu.items.push({

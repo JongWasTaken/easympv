@@ -103,7 +103,8 @@ OS._performChecks = function () {
 
 
     if (OS.gitAvailable && OS.isGit) {
-        OS.gitCommit = OS._call("git rev-parse --short HEAD").stdout.trim();
+        var configdir = mp.utils.get_user_path("~~/");
+        OS.gitCommit = OS._call("cd "+configdir+" && git rev-parse --abbrev-ref HEAD").stdout.trim() + "-" + OS._call("cd "+configdir+" && git rev-parse --short HEAD").stdout.trim();
     }
 }
 
@@ -560,27 +561,6 @@ OS.getImageInfo = function (path) {
     return OS._call("file -b " + path);
 }
 
-// Windows-only:
-// elevate
-OS.runElevatedCommand = function (command)
-{
-    if (OS.isWindows)
-    {
-        return OS._call("$processOptions = @{ \n"+
-        "    FilePath = \"powershell.exe\" \n"+
-        "    Verb = \"runAs\" \n"+
-        "    ArgumentList = \"cmd\", \"/c\", "+ command +", \"/u\" \n"+
-        "} \n"+
-        "try \n"+
-        "{ \n"+
-        "    Start-Process @processOptions \n"+
-        "} \n"+
-        "Catch [system.exception] {exit 1} \n"+
-        "exit 0").status == 0 ? true: false;
-    }
-    return false;
-}
-
 // update-mpv
 OS.updateMpvWindows = function (path)
 {
@@ -624,6 +604,25 @@ OS.getWindowsDriveInfo = function (type) {
     return "";
 }
 
+OS.runScriptElevated = function (path, callback) {
+    if(OS.isWindows)
+    {
+        return OS._call("$processOptions = @{\n"+
+        "    FilePath = \"powershell.exe\"\n"+
+        "    Verb = \"runAs\"\n"+
+        "    ArgumentList = \"cmd\", \"/c\", "+ path +", \"/u\"\n"+
+        "}\n"+
+        "try\n"+
+        "{\n"+
+        "    Start-Process @processOptions\n"+
+        "}\n"+
+        "Catch [system.exception]\n"+
+        "{exit 1}\n"+
+        "exit 0", true, callback).status == 0 ? true: false;
+    }
+    return false;
+}
+
 /**
  * Registers mpv on Windows only.
  */
@@ -639,26 +638,7 @@ OS.registerMpv = function () {
 
     if (OS.isWindows) {
         if (Settings.Data.mpvLocation != "unknown") {
-            var args = [
-                "powershell",
-                "-executionpolicy",
-                "bypass", // TODO:
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "elevate",
-                Settings.Data.mpvLocation + "\\installer\\mpv-install.bat",
-            ];
-            mp.command_native_async(
-                {
-                    name: "subprocess",
-                    playback_only: false,
-                    capture_stdout: true,
-                    capture_stderr: false,
-                    args: args,
-                },
-                onFinished
-            );
+            OS.runScriptElevated(Settings.Data.mpvLocation + "\\installer\\mpv-install.bat",onFinished);
         } else {
             Utils.showAlert(
                 "error",
@@ -687,26 +667,7 @@ OS.unregisterMpv = function () {
 
     if (OS.isWindows) {
         if (Settings.Data.mpvLocation != "unknown") {
-            var args = [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "elevate",
-                Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat",
-            ];
-            mp.command_native_async(
-                {
-                    name: "subprocess",
-                    playback_only: false,
-                    capture_stdout: true,
-                    capture_stderr: false,
-                    args: args,
-                },
-                onFinished
-            );
+            OS.runScriptElevated(Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat",onFinished);
         } else {
             Utils.showAlert(
                 "error",
