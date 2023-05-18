@@ -583,14 +583,17 @@ Browsers.FileBrowser.open = function (parentMenu) {
         if (drives[0].trim() != "") {
             drives.sort();
             for (var i = 0; i < drives.length; i++) {
-                items.push({
-                    title:
-                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        drives[i].trim() +
-                        "\\",
-                    item: drives[i].trim() + "\\",
-                    color: "ffffff",
-                });
+                if(drives[i] != "")
+                {
+                    items.push({
+                        title:
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                            drives[i].trim() +
+                            "\\",
+                        item: drives[i].trim() + "\\",
+                        color: "ffffff",
+                    });
+                }
             }
         }
 
@@ -599,14 +602,17 @@ Browsers.FileBrowser.open = function (parentMenu) {
         if (drives[0].trim() != "") {
             drives.sort();
             for (var i = 0; i < drives.length; i++) {
-                items.push({
-                    title:
-                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        drives[i].trim() +
-                        "\\",
-                    item: drives[i].trim() + "\\",
-                    color: "ffffff",
-                });
+                if(drives[i] != "")
+                {
+                    items.push({
+                        title:
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                            drives[i].trim() +
+                            "\\",
+                        item: drives[i].trim() + "\\",
+                        color: "ffffff",
+                    });
+                }
             }
         }
 
@@ -615,14 +621,17 @@ Browsers.FileBrowser.open = function (parentMenu) {
         if (drives[0].trim() != "") {
             drives.sort();
             for (var i = 0; i < drives.length; i++) {
-                items.push({
-                    title:
-                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        drives[i].trim() +
-                        "\\",
-                    item: drives[i].trim() + "\\",
-                    color: "ffffff",
-                });
+                if(drives[i] != "")
+                {
+                    items.push({
+                        title:
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                            drives[i].trim() +
+                            "\\",
+                        item: drives[i].trim() + "\\",
+                        color: "ffffff",
+                    });
+                }
             }
         }
     } else {
@@ -934,14 +943,17 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         drives = OS.getWindowsDriveInfo(5).split("|");
         drives.sort();
         for (var i = 0; i < drives.length; i++) {
-            items.push({
-                title:
-                    UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                    drives[i].trim() +
-                    "\\",
-                item: drives[i].trim() + "\\",
-                color: "ffffff",
-            });
+            if(drives[i] != "")
+            {
+                items.push({
+                    title:
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                        drives[i].trim() +
+                        "\\",
+                    item: drives[i].trim() + "\\",
+                    color: "ffffff",
+                });
+            }
         }
     } else {
         var deviceList = mp.utils.readdir("/dev/", "all");
