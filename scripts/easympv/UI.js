@@ -34,7 +34,7 @@ UI.SSA.setBold = function (bold) {
     {
         return "{\\b1}";
     }
-    return "{\\b0}";
+    return "\{\\b0}";
 }
 
 UI.SSA.setSize = function (fontSize) {
@@ -63,6 +63,12 @@ UI.SSA.drawRaw = function (commands) {
 UI.SSA.setPosition = function (x, y) {
     var s = "{\\pos(" + x + "," + y + ")}";
     return s;
+};
+
+UI.SSA.setPositionPercentage = function (x, y) {
+    x = Number(mp.get_property("osd-width")) * (x / 100)
+    y = Number(mp.get_property("osd-height")) * (y / 100)
+    return UI.SSA.setPosition(x,y);
 };
 
 UI.SSA.move = function (x, y) {
@@ -196,6 +202,10 @@ UI.SSA.setColorBlack = function () {
     return UI.SSA.setColor("000000");
 };
 
+UI.SSA.setColorBlue = function () {
+    return UI.SSA.setColor("0096FF");
+};
+
 /**
  * Using https://qgustavor.github.io/svg2ass-gui/ , any svg file can
  * be displayed. However mpv has a quirk with this, files that consist
@@ -275,37 +285,10 @@ UI.Image.getImageInfo = function (file) {
     file = mp.utils.get_user_path(file);
     var h, w, offset;
     // try using system tools to get image metadata
-    if (Utils.OSisWindows) {
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-image-info",
-                file,
-            ],
-        });
-    } else {
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh"),
-                "get-image-info",
-                file,
-            ],
-        });
-    }
+    var r = OS.getImageInfo(file);
     if (r.status == "0") {
         var input = r.stdout.trim();
-        if (Utils.OSisWindows) {
+        if (OS.isWindows) {
             var data = input.split("|");
             w = data[0];
             h = data[1];
@@ -391,7 +374,7 @@ UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
  * Place the correctly formated image file in ~~/scripts/easympv/images/.
  * @param {string} name internal name for image file, used when drawing/removing overlay
  * @param {string} file file name with extension
- 
+
 UI.Image.addImage = function (name, file) {
     var imgdata = __getImageInfo(file);
     var height = imgdata.h;
@@ -420,7 +403,7 @@ UI.Image.addImage = function (name, file) {
  */
 UI.Image.status = function (name) {
     var image = UI.Image.__getFilebyName(name);
-    return image.data.active;
+    return image.active;
 };
 
 UI.Image.getScale = function () {
@@ -450,22 +433,22 @@ UI.Image.show = function (name, x, y) {
         var scale = UI.Image.getScale();
         var image = UI.Image.__getFilebyName(scale + name);
 
-        image.data.x = x;
-        image.data.y = y;
-        if (!image.data.active) {
+        image.x = x;
+        image.y = y;
+        if (!image.active) {
             mp.commandv(
                 "overlay-add",
-                image.data.id,
-                image.data.x,
-                image.data.y,
-                mp.utils.get_user_path(image.data.file),
-                image.data.offset,
+                image.id,
+                image.x,
+                image.y,
+                mp.utils.get_user_path(image.file),
+                image.offset,
                 "bgra",
-                image.data.width,
-                image.data.height,
-                image.data.width * 4
+                image.width,
+                image.height,
+                image.width * 4
             );
-            image.data.active = true;
+            image.active = true;
         }
     }
 };
@@ -491,11 +474,11 @@ UI.Image.toggle = function (name, x, y) {
     }
 
     var image = UI.Image.__getFilebyName(scale + name);
-    if (!image.data.active) {
+    if (!image.active) {
         UI.Image.show(image.name, x, y);
     } else {
-        mp.commandv("overlay-remove", image.data.id);
-        image.data.active = false;
+        mp.commandv("overlay-remove", image.id);
+        image.active = false;
     }
 };
 
@@ -523,21 +506,21 @@ UI.Image.hide = function (name) {
         */
 
         image = UI.Image.__getFilebyName(name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
 
         image = UI.Image.__getFilebyName("2" + name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
 
         image = UI.Image.__getFilebyName("4" + name);
-        if (image.data.active) {
-            mp.commandv("overlay-remove", image.data.id);
-            image.data.active = false;
+        if (image.active) {
+            mp.commandv("overlay-remove", image.id);
+            image.active = false;
         }
     }
 };
@@ -547,22 +530,149 @@ UI.Image.hide = function (name) {
  */
 UI.Image.hideAll = function () {
     for (i = 0; i < Settings.presets.images.length; i++) {
-        if (Settings.presets.images[i].data.active == true) {
+        if (Settings.presets.images[i].active == true) {
             UI.Image.hide(Settings.presets.images[i].name);
         }
     }
 };
+
+UI.Time = {};
+
+UI.Time.OSD = undefined;
+UI.Time.Timer = undefined;
+UI.Time.xLocation = 1;
+UI.Time.yLocation = 1;
+
+UI.Time.observer = function()
+{
+    UI.Time._hide();
+    UI.Time._show();
+}
+
+UI.Time.assembleContent = function()
+{
+    var content = "";
+    content += UI.SSA.setScale(100) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
+    content += UI.SSA.setPositionPercentage(UI.Time.xLocation,UI.Time.yLocation);
+    content += UI.SSA.insertSymbolFA(" ", 20, 32, Utils.commonFontName);
+    content += Utils.getCurrentTime();
+    return content;
+}
+
+UI.Time._startTimer = function() {
+    //var x = this;
+    //if (UI.Time.Timer != undefined) {
+    //    clearInterval(UI.Time.Timer);
+    //}
+    UI.Time.Timer = setInterval(function () {
+        UI.Time.OSD.data = UI.Time.assembleContent();
+        UI.Time.OSD.update();
+    }, 1000);
+};
+
+UI.Time._stopTimer = function () {
+    if (UI.Time.Timer != undefined) {
+        clearInterval(UI.Time.Timer);
+        UI.Time.Timer = undefined;
+    }
+};
+
+UI.Time.show = function()
+{
+    if (UI.Time.OSD != undefined) {
+        return;
+    }
+
+    mp.observe_property(
+        "osd-width",
+        undefined,
+        UI.Time.observer
+    );
+
+    UI.Time._show();
+}
+
+UI.Time._show = function()
+{
+    if (Settings.Data.clockPosition == "bottom-right")
+    {
+        UI.Time.xLocation = 96;
+        UI.Time.yLocation = 97;
+    }
+    else if (Settings.Data.clockPosition == "bottom-left")
+    {
+        UI.Time.xLocation = 1;
+        UI.Time.yLocation = 97;
+    }
+    else if (Settings.Data.clockPosition == "top-right")
+    {
+        UI.Time.xLocation = 96;
+        UI.Time.yLocation = 1;
+    }
+    else // top-left
+    {
+        UI.Time.xLocation = 1;
+        UI.Time.yLocation = 1;
+    }
+
+    if (Number(mp.get_property("osd-width") < 1921) && (Settings.Data.clockPosition == "top-right" || Settings.Data.clockPosition == "bottom-right"))
+    {
+        UI.Time.xLocation = UI.Time.xLocation - 2;
+    }
+
+    // create overlay
+
+    UI.Time.OSD = mp.create_osd_overlay("ass-events");
+    // OSD is allowed entire window space
+    UI.Time.OSD.res_y = mp.get_property("osd-height");
+    UI.Time.OSD.res_x = mp.get_property("osd-width");
+    UI.Time.OSD.z = 1;
+
+    UI.Time.OSD.data = UI.Time.assembleContent();
+    UI.Time.OSD.update();
+    UI.Time._startTimer();
+
+}
+
+UI.Time.hide = function()
+{
+    if (UI.Time.OSD == undefined) {
+        return;
+    }
+
+    mp.unobserve_property(UI.Time.observer);
+
+    UI.Time._hide();
+}
+
+UI.Time._hide = function()
+{
+    UI.Time._stopTimer();
+    if (UI.Time.OSD != undefined) {
+        mp.commandv(
+            "osd-overlay",
+            UI.Time.OSD.id,
+            "none",
+            "",
+            0,
+            0,
+            0,
+            "no",
+            "no"
+        );
+        UI.Time.OSD = undefined;
+    }
+}
 
 /*----------------------------------------------------------------
 CLASS: UI.Menu
 DESCRIPTION:
     This class implements a menu system similar to VideoPlayerCode's SelectionMenu.js.
     I decided to create my own implementation instead of using SelectionMenu.js because
-    it was hard to read and felt a bit overengineered at times, while not offering enough
-    customization options.
+    it was not offering enough customization options.
     This implementation puts customization first and should be easy to modifiy to suit your needs.
 USAGE:
-    Create a new instance of UI.Menu(Settings,Items[,ParentMenuInstance])
+    Create a new instance of UI.Menus.Menu(Settings,Items[,ParentMenuInstance])
     Settings can be an object with the following properties:
         "autoClose"             Number, how many to wait after the last input before closing the menu
                                 Set to 0 to disable
@@ -574,8 +684,8 @@ USAGE:
                                 Requires OSD.js, as well as 3 versions of the image in different scales
                                 (It is probably better to to just load custom fonts for things like logos)
         "title"                 String, title gets displayed when no image or impossible to draw image
-        "titleColor"            Hex string, name of font
-        "titleFont"             String, color of title
+        "titleColor"            Hex string, color of title
+        "titleFont"             String, name of font
         "description"           String, supports special substrings (see below)
         "descriptionColor"      Hex string, color of description
         "itemPrefix"            String, gets prepended to selected item
@@ -586,6 +696,10 @@ USAGE:
         "selectedItemColor"     Hex string, color of selected item
         "transparency"          Percentage, 0 -> solid, 100 -> invisible, default is 0
                                 (Does not apply to the image)
+        "menuId"                String, unique id for this menu
+                                Defaults to random number (there is not much point in setting this)
+        "fadeIn"                Boolean, whether to fade in the menu (possible performance penalty)
+        "fadeOut"               Boolean, whether to fade out the menu (possible performance penalty)
         "scrollingEnabled"      Boolean, whether to scroll when items overflow, default is false
         "scrollingPosition"     Number, where to "freeze" the cursor on screen, default is 1
                                 0 -> 10 are allowed, lower number is higher on screen
@@ -593,7 +707,7 @@ USAGE:
         "borderColor"           Hex string, color of border
         "backButtonTitle"       String, name of the back button entry if parentMenu is set
         "backButtonColor"       Hex string, color of the back button entry if parentMenu is set
-        "displayMethod"         String, either "overlay" or "message", check below for explanation
+        "displayMethod"         String, either "overlay" or "message", check the end of this text block for explanation
                                 "message" displayMethod is intended as a fallback only, it is not really maintained
         "zIndex"                Number, on which zIndex to show this menu on, default is 999
         "maxTitleLength"        Number, number of characters before a title gets cut off
@@ -617,16 +731,16 @@ USAGE:
         ["description"]         String, optional description of the item
         ["color"]               Hex string, optionally override default item color for this item only
         ["eventHandler"]        Function, gets called instead of <menu>.eventHandler if it exists
-                                3 arguments get passed to this function:
+                                Two arguments get passed to this function:
                                 "event" - String, see below
                                 "menu" - Object, the menu calling this function
-    "title" and "item" are required.
+    "title" and "item" are required, though "item" can be left empty if the menuitem is only used with its own eventHandler.
 
     "title" and "description" can include these special substrings:
         @br@ - Insert blank line after item
         (title only) @us1@ - Insert line after item , replace 1 with amount of line characters
 
-    Parent is another instance of MenuSystem.Menu, if provided, a Back button
+    Parent is another instance of UI.Menus.Menu, if provided, a Back button
     will appear as the first item of the Menu.
 
     Then just assign a function to the instances eventHandler:
@@ -636,6 +750,8 @@ USAGE:
         "show"      Executed before drawing the menu to the screen
                     "action" is undefined
         "hide"      Executed before removing the menu from the screen
+                    "action" is undefined
+        "draw"      Executed while the menu gets (re)drawn.
                     "action" is undefined
         "enter"     User pressed enter(or equivalent) on an item
                     "action" will be the selected items "item" property
@@ -648,13 +764,15 @@ USAGE:
     By default we use mpv's new osd-overlay system instead of just using the regular mp.osd_message().
     The main benefit is that all other messages will appear below the menu,
     making it "unbreakable". It will also scale with the window size (1080p is 100%).
-    Change MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
+    This can be changed with MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
 
-    The definition of UI.Menu.prototype._constructMenuCache has even more information.
+    The definition of UI.Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
-UI.registeredMenus = [];
+UI.Menus = {};
 
-UI.Menu = function (settings, items, parentMenu) {
+UI.Menus.registeredMenus = [];
+
+UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings == undefined) {
         settings = {};
     }
@@ -739,6 +857,26 @@ UI.Menu = function (settings, items, parentMenu) {
         this.settings.transparency = "0";
     }
 
+    this.settings.transparencyBackup = this.settings.transparency;
+
+    if (settings.menuId != undefined) {
+        this.settings.menuId = settings.menuId;
+    } else {
+        this.settings.menuId = String(Math.floor(Math.random()*90) + 10);
+    }
+
+    if (settings.fadeIn != undefined) {
+        this.settings.fadeIn = settings.fadeIn;
+    } else {
+        this.settings.fadeIn = Settings.Data.fadeMenus;
+    }
+
+    if (settings.fadeOut != undefined) {
+        this.settings.fadeOut = settings.fadeOut;
+    } else {
+        this.settings.fadeOut = Settings.Data.fadeMenus;
+    }
+
     if (settings.borderSize != undefined) {
         this.settings.borderSize = settings.borderSize;
     } else {
@@ -754,13 +892,15 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back@br@@us10@";
+        /*
+        UI.SSA.insertSymbolFA(
             "",
-            this.settings.fontSize - 3,
+            this.settings.fontSize - 4,
             this.settings.fontSize
         ) +
         UI.SSA.setFont(this.settings.fontName) +
-        " Back@br@@br@";
+        " Back@br@@br@";*/
     }
 
     if (settings.backButtonColor != undefined) {
@@ -772,7 +912,7 @@ UI.Menu = function (settings, items, parentMenu) {
     if (settings.displayMethod != undefined) {
         this.settings.displayMethod = settings.displayMethod;
     } else {
-        if (Utils.mpvComparableVersion < 33) {
+        if (Utils.mpvComparableVersion <= 32) {
             Utils.log(
                 "Your mpv version is too old for overlays. Expect issues!","menusystem","error"
             );
@@ -830,6 +970,16 @@ UI.Menu = function (settings, items, parentMenu) {
             this.settings.fontSize
         );
     } // ✓
+
+    if (settings.doubleScrollWorkaround != undefined) {
+        this.settings.doubleScrollWorkaround = settings.doubleScrollWorkaround;
+    } else {
+        if (mp.utils.getenv("XDG_CURRENT_DESKTOP") == "GNOME") {
+            this.settings.doubleScrollWorkaround = true;
+        } else {
+            this.settings.doubleScrollWorkaround = false;
+        }
+    }
 
     if (settings.keybindOverrides != undefined) {
         this.settings.keybindOverrides = settings.keybindOverrides;
@@ -1059,23 +1209,23 @@ UI.Menu = function (settings, items, parentMenu) {
     this.autoCloseStart = -1;
     this.eventLocked = false;
 
-    UI.registeredMenus.push(this);
+    UI.Menus.registeredMenus.push(this);
 };
 
-UI.Menu.prototype.setImage = function (name) {
+UI.Menus.Menu.prototype.setImage = function (name) {
     this.settings.image = name;
 };
 
-UI.Menu.prototype.setDescription = function (text) {
+UI.Menus.Menu.prototype.setDescription = function (text) {
     this.settings.description = text;
 };
 
-UI.Menu.prototype.redrawMenu = function () {
+UI.Menus.Menu.prototype.redrawMenu = function () {
     this._constructMenuCache();
     this._drawMenu();
 };
 
-UI.Menu.prototype._constructMenuCache = function () {
+UI.Menus.Menu.prototype._constructMenuCache = function () {
     /*
         Differences between displayMethods
 
@@ -1084,14 +1234,14 @@ UI.Menu.prototype._constructMenuCache = function () {
         +- Line spacing works by default, but cannot be changed
         -  Automatic scaling is busted
             (there might be some universal offset to fix it)
-        -  Sizes do not translate 1:1 
+        -  Sizes do not translate 1:1
             (default font size has to be 35 intead of 11 to look similar to "overlay" displayMethod)
         -  Will fight over display space (basically like Z-fighting)
         -  Deprecated, not maintained
 
         "overlay" displayMethod:
         +  Automatically scales to window size
-        +  More fine-grained sizings (fontSize is just height in pixels)
+        +  More fine-grained font sizings
         +  will always be on top of every mp.osd_message (no Z-fighting)
         -  A pain to program, but the work is already done and works well
         ?  Requires at least mpv v0.33.0
@@ -1104,7 +1254,7 @@ UI.Menu.prototype._constructMenuCache = function () {
         The code below is quite messy, sorry.
     */
 
-    this.allowDrawImage = false;
+    //this.allowDrawImage = false;
     this.itemCount = 0;
 
     // Start
@@ -1120,6 +1270,9 @@ UI.Menu.prototype._constructMenuCache = function () {
             border;
         this.cachedMenuText += UI.SSA.setFont(this.settings.fontName);
         this.cachedMenuText += UI.SSA.setSize(this.settings.fontSize);
+
+        // draw event
+        this._dispatchEvent("draw");
 
         // Title
         var title = this.settings.title;
@@ -1283,7 +1436,7 @@ UI.Menu.prototype._constructMenuCache = function () {
              - Description Text Lines might overlap on low window resolutions.
                 -> Not really a concern
          */
-        var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage
+        var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage, 10.8 for 1080p
         var transparency = this.settings.transparency;
         var scale = UI.SSA.setScale(scaleFactor);
         var border =
@@ -1370,6 +1523,9 @@ UI.Menu.prototype._constructMenuCache = function () {
             s = lineStart(4, 0, 0.0005) + lineEnd();
             return s;
         };
+
+        // draw event
+        this._dispatchEvent("draw");
 
         // Title
         var title = this.settings.title;
@@ -1467,6 +1623,7 @@ UI.Menu.prototype._constructMenuCache = function () {
 
             if (this.selectedItemIndex - startItem == i) {
                 color = UI.SSA.setColor(this.settings.selectedItemColor);
+                // + UI.SSA.setShadowColor("ffffff") + UI.SSA.setShadow(0.25);
                 title = this.settings.itemPrefix + title;
             }
 
@@ -1529,7 +1686,7 @@ UI.Menu.prototype._constructMenuCache = function () {
     }
 };
 
-UI.Menu.prototype._handleAutoClose = function () {
+UI.Menus.Menu.prototype._handleAutoClose = function () {
     if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1) {
         return;
     }
@@ -1538,55 +1695,30 @@ UI.Menu.prototype._handleAutoClose = function () {
     }
 };
 
-UI.Menu.prototype.fireEvent = function (name) {
+UI.Menus.Menu.prototype.fireEvent = function (name) {
     this._keyPressHandler(name);
 };
 
-UI.Menu.prototype.appendSuffixToCurrentItem = function () {
+UI.Menus.Menu.prototype.appendSuffixToCurrentItem = function () {
     this.suffixCacheIndex = this.selectedItemIndex;
     this._constructMenuCache();
     this._drawMenu();
 };
 
-UI.Menu.prototype.removeSuffix = function () {
+UI.Menus.Menu.prototype.removeSuffix = function () {
     this.suffixCacheIndex = -1;
     //this._constructMenuCache();
     //this._drawMenu();
 };
 
-UI.Menu.prototype.getSelectedItem = function () {
+UI.Menus.Menu.prototype.getSelectedItem = function () {
     return this.items[this.selectedItemIndex];
 };
 
-UI.getDisplayedMenu = function () {
-    var cMenu = undefined;
-    for (var i = 0; i < UI.registeredMenus.length; i++) {
-        if (UI.registeredMenus[i].isMenuVisible) {
-            cMenu = UI.registeredMenus[i];
-            break;
-        }
-    }
-    return cMenu;
-};
-
-UI.switchCurrentMenu = function (newMenu, currentMenu) {
-    if (currentMenu == undefined)
-    {
-        currentMenu = UI.getDisplayedMenu();
-    }
-
-    currentMenu.hideMenu();
-    if (!newMenu.isMenuVisible) {
-        newMenu.showMenu();
-    } else {
-        newMenu.hideMenu();
-    }
-};
-
-UI.Menu.prototype._overrideKeybinds = function () {
-    var tempFunction = function (x, action) {
+UI.Menus.Menu.prototype._overrideKeybinds = function () {
+    var tempFunction = function (x, action, key) {
         return function () {
-            x._keyPressHandler(action);
+            x._keyPressHandler(action, key);
         };
     };
 
@@ -1595,22 +1727,36 @@ UI.Menu.prototype._overrideKeybinds = function () {
 
         mp.add_forced_key_binding(
             currentKey.key,
-            currentKey.id,
-            tempFunction(this, currentKey.action),
+            currentKey.id + "_menu_id_" + this.settings.menuId,
+            tempFunction(this, currentKey.action, currentKey.key),
             { repeatable: true }
         );
     }
 };
 
-UI.Menu.prototype._revertKeybinds = function () {
+UI.Menus.Menu.prototype._revertKeybinds = function () {
     for (var i = 0; i < this.settings.keybindOverrides.length; i++) {
         var currentKey = this.settings.keybindOverrides[i];
 
-        mp.remove_key_binding(currentKey.id);
+        mp.remove_key_binding(currentKey.id  + "_menu_id_" + this.settings.menuId);
     }
 };
 
-UI.Menu.prototype._keyPressHandler = function (action) {
+UI.Menus.Menu.prototype.scrollWorkaroundState = false;
+
+UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
+    if (this.settings.doubleScrollWorkaround)
+    {
+        if (key == "WHEEL_UP" || key == "WHEEL_DOWN")
+        {
+            if (this.scrollWorkaroundState)
+            {
+                this.scrollWorkaroundState = false;
+                return;
+            }
+            else { this.scrollWorkaroundState = true; }
+        }
+    }
     this.autoCloseStart = mp.get_time();
     if (!this.eventLocked) {
         this.eventLocked = true;
@@ -1636,18 +1782,20 @@ UI.Menu.prototype._keyPressHandler = function (action) {
                 this.eventLocked = false;
             } else {
                 this._dispatchEvent(action, item);
+                // i dont remember why i wrote the code below, it wasted like a whole day because i forgot about it
+                /*
                 if (action != "enter") {
                     this._constructMenuCache();
                     this._drawMenu();
                     this.eventLocked = false;
-                }
+                }*/
                 this.eventLocked = false;
             }
         }
     }
 };
 
-UI.Menu.prototype._initOSD = function () {
+UI.Menus.Menu.prototype._initOSD = function () {
     if (this.settings.displayMethod == "overlay") {
         if (this.OSD == undefined) {
             this.OSD = mp.create_osd_overlay("ass-events");
@@ -1661,7 +1809,7 @@ UI.Menu.prototype._initOSD = function () {
     }
 };
 
-UI.Menu.prototype._drawMenu = function () {
+UI.Menus.Menu.prototype._drawMenu = function () {
     if (this.settings.displayMethod == "message") {
         mp.osd_message(this.cachedMenuText, 1000);
         // seem to be the same
@@ -1675,7 +1823,7 @@ UI.Menu.prototype._drawMenu = function () {
     }
 };
 
-UI.Menu.prototype._startTimer = function () {
+UI.Menus.Menu.prototype._startTimer = function () {
     if (this.settings.displayMethod == "message") {
         var x = this;
         if (this.menuInterval != undefined) {
@@ -1697,30 +1845,98 @@ UI.Menu.prototype._startTimer = function () {
     }
 };
 
-UI.Menu.prototype._stopTimer = function () {
+UI.Menus.Menu.prototype._stopTimer = function () {
     if (this.menuInterval != undefined) {
         clearInterval(this.menuInterval);
         this.menuInterval = undefined;
     }
 };
 
-UI.Menu.prototype.showMenu = function () {
+UI.Menus.Menu.prototype._fadeIn = function () {
+    var x = this;
+    this.settings.transparency = 100;
+    this.fadeInInterval = setInterval(function () {
+        if (x.settings.transparency != x.settings.transparencyBackup) {
+            x.settings.transparency = Number(x.settings.transparency) - 5;
+            x._constructMenuCache();
+            x._drawMenu();
+        } else {
+            clearInterval(x.fadeInInterval);
+        }
+    }, 5);
+    this.fadeInInterval.start;
+};
+
+
+UI.Menus.Menu.prototype._fadeOut = function () {
+    var x = this;
+    this.fadeOutInterval = setInterval(function () {
+        if (x.settings.transparency != 100) {
+            x.settings.transparency = Number(x.settings.transparency) + 5;
+            x._constructMenuCache();
+            x._drawMenu();
+        } else {
+            mp.commandv(
+                "osd-overlay",
+                x.OSD.id,
+                "none",
+                "",
+                0,
+                0,
+                0,
+                "no",
+                "no"
+            );
+            x._revertKeybinds();
+            x.isMenuVisible = false;
+            x.removeSuffix();
+            x.OSD = undefined;
+            x.settings.transparency = x.settings.transparencyBackup;
+            clearInterval(x.fadeOutInterval);
+            UI.Image.hide(x.settings.image);
+        }
+    }, 5);
+    this.fadeOutInterval.start;
+};
+
+UI.Menus.Menu.prototype.getItemByName = function (name) {
+    for(var i = 0; i < this.items.length; i++)
+    {
+        if (this.items[i].item == name)
+        return this.items[i];
+    }
+}
+
+UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
-        this._dispatchEvent("show", { title: undefined, item: undefined, eventHandler: undefined });
+        this.allowDrawImage = false;
+        //this._dispatchEvent("preshow");
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
         this.isMenuVisible = true;
-        this._constructMenuCache();
-        this._drawMenu();
+        this._dispatchEvent("show");
+        if(this.settings.fadeIn)
+        {
+            // workaround for allowDrawImage race condition
+            this.settings.transparency = 100;
+            this._constructMenuCache();
+
+            this._fadeIn();
+        }
+        else
+        {
+            this._constructMenuCache();
+            this._drawMenu();
+        }
         this._startTimer();
         if (this.allowDrawImage) {
             UI.Image.show(this.settings.image, 25, 25);
         }
     }
 };
-UI.Menu.prototype.hideMenu = function () {
-    this._dispatchEvent("hide", { title: undefined, item: undefined, eventHandler: undefined });
+UI.Menus.Menu.prototype.hideMenu = function () {
+    this._dispatchEvent("hide");
     if (this.settings.displayMethod == "message") {
         mp.osd_message("");
         if (this.isMenuVisible) {
@@ -1733,36 +1949,39 @@ UI.Menu.prototype.hideMenu = function () {
             //}
         }
         mp.osd_message("");
+        UI.Image.hide(this.settings.image);
     }
-
     if (this.settings.displayMethod == "overlay") {
         if (this.isMenuVisible) {
             this._stopTimer();
-            mp.commandv(
-                "osd-overlay",
-                this.OSD.id,
-                "none",
-                "",
-                0,
-                0,
-                0,
-                "no",
-                "no"
-            );
-            this._revertKeybinds();
-            this.isMenuVisible = false;
-            this.removeSuffix();
-            //if (this.allowDrawImage) {
-            //    OSD.hide(this.settings.image);
-            //}
-            this.OSD = undefined;
+            if (this.settings.fadeOut)
+            {
+                this._fadeOut();
+            }
+            else
+            {
+                mp.commandv(
+                    "osd-overlay",
+                    this.OSD.id,
+                    "none",
+                    "",
+                    0,
+                    0,
+                    0,
+                    "no",
+                    "no"
+                );
+                this._revertKeybinds();
+                this.isMenuVisible = false;
+                this.removeSuffix();
+                this.OSD = undefined;
+                UI.Image.hide(this.settings.image);
+            }
         }
     }
-    UI.Image.hide(this.settings.image);
-    //OSD.hideAll();
 };
 
-UI.Menu.prototype.toggleMenu = function () {
+UI.Menus.Menu.prototype.toggleMenu = function () {
     if (!this.isMenuVisible) {
         this.showMenu();
     } else {
@@ -1770,21 +1989,64 @@ UI.Menu.prototype.toggleMenu = function () {
     }
 };
 
-UI.Menu.prototype._dispatchEvent = function (event, item) {
+UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
+    if (this.settings.customKeyEvents != undefined)
+    {
+        for (var i = 0; i < this.settings.customKeyEvents.length; i++)
+        {
+            if (event == this.settings.customKeyEvents[i].event)
+            {
+                item.eventHandler = undefined;
+                break;
+            }
+        }
+    }
+
     if (item.eventHandler != undefined)
     {
         item.eventHandler(event, this)
         return;
     }
+
     this.eventHandler(event, item.item);
 }
 
-UI.Menu.prototype.eventHandler = function () {
+UI.Menus.Menu.prototype.eventHandler = function () {
     Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
 };
 
+UI.Menus.getDisplayedMenu = function () {
+    var cMenu = undefined;
+    for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
+        if (UI.Menus.registeredMenus[i].isMenuVisible) {
+            cMenu = UI.Menus.registeredMenus[i];
+            break;
+        }
+    }
+    return cMenu;
+};
+
+UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
+    if (currentMenu == undefined)
+    {
+        currentMenu = UI.Menus.getDisplayedMenu();
+    }
+
+    currentMenu.hideMenu();
+    if (!newMenu.isMenuVisible) {
+        newMenu.showMenu();
+    } else {
+        newMenu.hideMenu();
+    }
+};
+
 /*----------------------------------------------------------------
-CLASS: UI.Alerts
+CLASS: UI.Alert
 DESCRIPTION:
     This static class is used to show alerts/notifications inside mpv.
 USAGE:
@@ -1792,22 +2054,142 @@ USAGE:
 ----------------------------------------------------------------*/
 
 UI.Alerts = {};
-//TODO: rewrite alerts:
-// - less bloated
-// - make it work on more resolutions
+UI.Alerts.show = function (type, line) {
+/*
+    mp.observe_property("osd-height", undefined, function () {
+        if (
+            mp.get_property("osd-height") != osdHeight ||
+            mp.get_property("osd-width") != osdWidth
+        ) {
+            UI.Alert.hide();
+        }
+    });
 
-UI.Alerts.onScreen = [];
+    mp.observe_property("osd-width", undefined, function () {
+        if (
+            mp.get_property("osd-height") != osdHeight ||
+            mp.get_property("osd-width") != osdWidth
+        ) {
+            alert.settings.fadeOut = false;
+            alert.hide();
+        }
+    });
+    */
 
-UI.Alerts.Alert = function () {};
+    UI.Alert._show(line.replaceAll("@br@", " "));
+};
 
-UI.Alerts.show = function (type, line) {};
+UI.Alert = {};
+
+UI.Alert.OSD = undefined;
+UI.Alert.Timer = undefined;
+UI.Alert.startTime = undefined;
+UI.Alert.content = undefined;
+UI.Alert.isVisible = false;
+
+UI.Alert._startTimer = function() {
+    UI.Alert.Timer = setInterval(function () {
+        if (3 <= 0 || UI.Alert.startTime <= -1) {
+            return;
+        }
+        if (UI.Alert.startTime <= mp.get_time() - 3) {
+            UI.Alert._stopTimer();
+            UI.Alert._hide();
+        }
+    }, 1000);
+};
+
+UI.Alert._stopTimer = function () {
+    if (UI.Alert.Timer != undefined) {
+        clearInterval(UI.Alert.Timer);
+        UI.Alert.Timer = undefined;
+    }
+};
+
+UI.Alert._assembleContent = function (xpos,ypos) {
+    return UI.SSA.setPositionPercentage(xpos,ypos) +
+    UI.SSA.setBorder(1) +
+    UI.SSA.setSize("36") +
+    UI.SSA.setFont(Utils.commonFontName) + UI.Alert.content;
+}
+
+UI.Alert._show = function(content)
+{
+    UI.Alert.content = content;
+    UI.Alert.startTime = mp.get_time();
+
+    if (!UI.Alert.isVisible) {
+        UI.Alert.isVisible = true;
+        if (UI.Alert.OSD == undefined) {
+            UI.Alert.OSD = mp.create_osd_overlay("ass-events");
+            UI.Alert.OSD.res_y = mp.get_property("osd-height");
+            UI.Alert.OSD.res_x = mp.get_property("osd-width");
+            UI.Alert.OSD.z = 1;
+        }
+
+        if(Settings.Data.scrollAlerts)
+        {
+            var target = 110;
+            var pos = -50;
+            var interval = setInterval(function () {
+                if (pos < target)
+                {
+                    pos = pos + 0.2;
+                    UI.Alert.OSD.data = UI.Alert._assembleContent(pos,1);
+                    UI.Alert.OSD.update();
+                }
+                else
+                {
+                    clearInterval(interval);
+                    UI.Alert._hide();
+                }
+            }, 10);
+        }
+        else
+        {
+            UI.Alert.OSD.data = UI.Alert._assembleContent(33,1);
+            UI.Alert.OSD.update();
+            UI.Alert._startTimer();
+        }
+    }
+}
+
+UI.Alert._hide = function()
+{
+    UI.Alert.isVisible = false;
+    UI.Alert.startTime = undefined;
+    if (UI.Alert.OSD != undefined) {
+        mp.commandv(
+            "osd-overlay",
+            UI.Alert.OSD.id,
+            "none",
+            "",
+            0,
+            0,
+            0,
+            "no",
+            "no"
+        );
+        UI.Alert.OSD = undefined;
+    }
+}
+
 
 /*----------------------------------------------------------------
 CLASS: UI.Input
 DESCRIPTION:
     This static class is used to capture user inputs.
+    This is currently used in 3 different parts of the plugin,
+    which in my opinion is not enough the warrant making this
+    non-static.
 USAGE:
-    (TODO)
+    Call UI.Input.show(callback,prefix_description), where:
+    callback should be something like function(success, result),
+        success is a boolean, indicates whether input has been sent
+        result is the actual input string
+    prefix_description -> the text in front of the input field
+        example: "Command: "
+    Simple stuff.
 ----------------------------------------------------------------*/
 
 UI.Input = {};
@@ -1936,12 +2318,15 @@ UI.Input.keybindOverrides = [
     { key: "LEFT", id: "empv_input_left" },
     { key: "RIGHT", id: "empv_input_right" },
 
+    { key: "MBTN_LEFT", id: "empv_input_mbtn_left" },
+    { key: "MBTN_RIGHT", id: "empv_input_mbtn_right" },
     { key: "MBTN_MID", id: "empv_input_mbtn_mid" },
     { key: "WHEEL_UP", id: "empv_input_mbtn_up" },
     { key: "WHEEL_DOWN", id: "empv_input_mbtn_down" },
 
     { key: "Ctrl+a", id: "empv_input_ctrl_a" },
     { key: "Ctrl+v", id: "empv_input_ctrl_v" },
+    { key: "Ctrl+c", id: "empv_input_ctrl_c" },
 ];
 
 UI.Input.returnBufferInserted = function(insert)
@@ -1951,7 +2336,7 @@ UI.Input.returnBufferInserted = function(insert)
 
 UI.Input.handleKeyPress = function (key)
 {
-    if(key == "Ctrl+v" || key == "INS") {
+    if(key == "Ctrl+v" || key == "INS" || key == "MBTN_MID") {
         UI.Input.Buffer = UI.Input.returnBufferInserted(OS.getClipboard().replace(/\{/g,'\{').replace(/\}/g,'\}'));
     }
     else if (key == "Ctrl+a")
@@ -1969,12 +2354,12 @@ UI.Input.handleKeyPress = function (key)
     {
         UI.Input.Buffer = UI.Input.returnBufferInserted(" ");
     }
-    else if (key == "ESC")
+    else if (key == "ESC" || key == "MBTN_LEFT" || key == "Ctrl+c")
     {
         UI.Input.hide(false);
         return;
     }
-    else if (key == "ENTER" || key == "KP_ENTER")
+    else if (key == "ENTER" || key == "KP_ENTER" || key == "MBTN_RIGHT")
     {
         UI.Input.hide(true);
         return;
@@ -2015,7 +2400,7 @@ UI.Input.handleKeyPress = function (key)
             UI.Input.Position = UI.Input.Position - 1;
         }
     }
-    else if (key == "MBTN_MID" || key == "WHEEL_UP" || key == "WHEEL_DOWN")
+    else if (key == "WHEEL_UP" || key == "WHEEL_DOWN")
     {}
     else
     {
@@ -2046,9 +2431,9 @@ UI.Input.show = function (callback, prefix) {
 
     UI.Input.Prefix =
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press Enter to submit your Input. Press ESC to abort.\n" +
+        "Press Enter or right mouse button to submit your Input. Press ESC or left mouse button to abort.\n" +
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press CTRL+V to paste.\n" +
+        "Press CTRL+V or middle mouse button to paste.\n" +
         UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)
@@ -2114,7 +2499,7 @@ UI.Input.hide = function (success) {
     UI.Input.OSD = undefined;
     if(success)
     {
-        UI.Input.Memory.push(UI.Input.Buffer);
+        UI.Input.Memory.unshift(UI.Input.Buffer);
     }
     UI.Input.Callback(success,UI.Input.Buffer.slice().replace(/\\/g,''));
     UI.Input.Buffer = "";
@@ -2132,7 +2517,7 @@ UI.Input.OSDLog.show = function () {
 
     UI.Input.OSDLog.OSD = mp.create_osd_overlay("ass-events");
     UI.Input.OSDLog.OSD.res_y = mp.get_property("osd-height");
-    UI.Input.OSDLog.OSD.res_x = mp.get_property("osd-width");
+    UI.Input.OSDLog.OSD.res_x = mp.get_property("osd-width"); // TODO: 101?
     UI.Input.OSDLog.OSD.z = 1;
 
     UI.Input.OSDLog.Timer = setInterval(function () {
@@ -2141,6 +2526,7 @@ UI.Input.OSDLog.show = function () {
     }, 100);
 }
 
+UI.Input.OSDLog.blacklistedPrefixes = {"osd/libass":1, "vo/gpu/libplacebo":1};
 UI.Input.OSDLog.addToBuffer = function (msg) {
     var color = "";
     if (msg.level == "debug")
@@ -2164,11 +2550,10 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
         UI.Input.OSDLog.Buffer = UI.Input.OSDLog.Buffer.substring(0,15000)
         UI.Input.OSDLog.BufferCounter = 0;
     }
-    if (msg.prefix != "osd/libass")
+    if (UI.Input.OSDLog.blacklistedPrefixes[msg.prefix] == undefined)
     {
         var time = mp.get_property("time-pos");
         if (time == undefined) { time = "0.000000"; }
-
         UI.Input.OSDLog.Buffer = UI.SSA.setFont("Roboto") + UI.SSA.setTransparency("3f") + color + UI.SSA.setSize(16) + UI.SSA.setBorder(0) + UI.SSA.setBold(true) +
             "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + UI.SSA.setBold(false) + msg.text + "\n" + UI.Input.OSDLog.Buffer;
     }
@@ -2202,6 +2587,77 @@ UI.Input.showInteractiveCommandInput = function () {
         }
     };
     UI.Input.show(readCommand,"Command: ");
+}
+
+UI.Input.showJavascriptInput = function () {
+        var readCommand = function (success, result) {
+            if (success) {
+                try{
+                    var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
+                    var clearOSD = function(id) {
+                        mp.osd_message("");
+                        if (id == undefined){
+                            mp.msg.warn("Force-removing all overlays: you might see error messages!");
+                            for (var i = 0; i < 1000; i++)
+                            {
+                                mp.commandv(
+                                    "osd-overlay",
+                                    i,
+                                    "none",
+                                    "",
+                                    0,
+                                    0,
+                                    0,
+                                    "no",
+                                    "no"
+                                );
+                            }
+                        }
+                        else
+                        {
+                            mp.commandv(
+                                "osd-overlay",
+                                id,
+                                "none",
+                                "",
+                                0,
+                                0,
+                                0,
+                                "no",
+                                "no"
+                            );
+                        }
+                    }
+                    var cmd = function (cmd) {
+                        print(OS._call(cmd));
+                    }
+                    var help = function () {
+                        if (UI.Input.OSDLog.OSD == undefined) {
+                            UI.Input.OSDLog.show();
+                        }
+                        //UI.Input.OSDLog.hide();
+                        mp.msg.warn("help() output:\nList of helper functions:\n"+
+                        "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                        "cmd(command) -> execute shell command\n"+
+                        "clearOSD() -> force-removes ALL OSDs and messages on screen"
+                        );
+                    };
+                    eval(result);
+                    Utils.showAlert(
+                        "info",
+                        "Expression evaluated! Check log for more info."
+                    );
+                }
+                catch(e)
+                {
+                    Utils.showAlert(
+                        "error",
+                        "Invalid Expression! Error: " + e
+                    );
+                }
+            }
+        };
+        UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
 }
 
 module.exports = UI;

@@ -31,7 +31,9 @@ Browsers.DriveBrowser = {};
 Browsers.DeviceBrowser = {};
 
 Browsers.Selector.menu = undefined;
-Browsers.Selector.menuSettings = {};
+Browsers.Selector.menuSettings = {
+    customKeyEvents: [{key: "h", event: "help"}]
+};
 Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
@@ -39,6 +41,9 @@ Browsers.FileBrowser.menu = undefined;
 Browsers.FileBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
+    fadeOut: false,
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
@@ -47,6 +52,9 @@ Browsers.DriveBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
+    fadeOut: false,
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
@@ -57,179 +65,11 @@ Browsers.DeviceBrowser.menuSettings = {
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
+    fadeOut: false,
+    fadeIn: false,
+    customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
-
-Browsers.FileBrowser.fileExtensionWhitelist = [
-    //DVD/Blu-ray audio formats
-    { type: "audio", name: "AC-3 Audio", extension: ".ac3" },
-    { type: "audio", name: "AC-3 Audio", extension: ".a52" },
-    { type: "audio", name: "E-AC-3 Audio", extension: ".eac3" },
-    { type: "audio", name: "MLP Audio", extension: ".mlp" },
-    { type: "audio", name: "DTS Audio", extension: ".dts" },
-    { type: "audio", name: "DTS-HD Audio", extension: ".dts-hd" },
-    { type: "audio", name: "DTS-HD Audio", extension: ".dtshd" },
-    { type: "audio", name: "TrueHD Audio", extension: ".true-hd" },
-    { type: "audio", name: "TrueHD Audio", extension: ".thd" },
-    { type: "audio", name: "TrueHD Audio", extension: ".truehd" },
-    { type: "audio", name: "TrueHD Audio", extension: ".thd+ac3" },
-    { type: "audio", name: "True Audio", extension: ".tta" },
-
-    //Uncompressed formats
-    { type: "audio", name: "PCM Audio", extension: ".pcm" },
-    { type: "audio", name: "Wave Audio", extension: ".wav" },
-    { type: "audio", name: "AIFF Audio", extension: ".aiff" },
-    { type: "audio", name: "AIFF Audio", extension: ".aif" },
-    { type: "audio", name: "AIFF Audio", extension: ".aifc" },
-    { type: "audio", name: "AMR Audio", extension: ".amr" },
-    { type: "audio", name: "AMR-WB Audio", extension: ".awb" },
-    { type: "audio", name: "AU Audio", extension: ".au" },
-    { type: "audio", name: "AU Audio", extension: ".snd" },
-    { type: "audio", name: "Linear PCM Audio", extension: ".lpcm" },
-    { type: "video", name: "Raw YUV Video", extension: ".yuv" },
-    { type: "video", name: "YUV4MPEG2 Video", extension: ".y4m" },
-
-    //Free lossless formats
-    { type: "audio", name: "Monkey's Audio", extension: ".ape" },
-    { type: "audio", name: "WavPack Audio", extension: ".wv" },
-    { type: "audio", name: "Shorten Audio", extension: ".shn" },
-
-    //MPEG formats
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".m2ts" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".m2t" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".mts" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".mtv" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".ts" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".tsv" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".tsa" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".tts" },
-    { type: "video", name: "MPEG-2 Transport Stream", extension: ".trp" },
-    { type: "audio", name: "ADTS Audio", extension: ".adts" },
-    { type: "audio", name: "ADTS Audio", extension: ".adt" },
-    { type: "audio", name: "MPEG Audio", extension: ".mpa" },
-    { type: "audio", name: "MPEG Audio", extension: ".m1a" },
-    { type: "audio", name: "MPEG Audio", extension: ".m2a" },
-    { type: "audio", name: "MPEG Audio", extension: ".mp1" },
-    { type: "audio", name: "MPEG Audio", extension: ".mp2" },
-    { type: "audio", name: "MP3 Audio", extension: ".mp3" },
-    { type: "video", name: "MPEG Video", extension: ".mpeg" },
-    { type: "video", name: "MPEG Video", extension: ".mpg" },
-    { type: "video", name: "MPEG Video", extension: ".mpe" },
-    { type: "video", name: "MPEG Video", extension: ".mpeg2" },
-    { type: "video", name: "MPEG Video", extension: ".m1v" },
-    { type: "video", name: "MPEG Video", extension: ".m2v" },
-    { type: "video", name: "MPEG Video", extension: ".mp2v" },
-    { type: "video", name: "MPEG Video", extension: ".mpv" },
-    { type: "video", name: "MPEG Video", extension: ".mpv2" },
-    { type: "video", name: "MPEG Video", extension: ".mod" },
-    { type: "video", name: "MPEG Video", extension: ".tod" },
-    { type: "video", name: "Video Object", extension: ".vob" },
-    { type: "video", name: "Video Object", extension: ".vro" },
-    { type: "video", name: "Enhanced VOB", extension: ".evob" },
-    { type: "video", name: "Enhanced VOB", extension: ".evo" },
-    { type: "video", name: "MPEG-4 Video", extension: ".mpeg4" },
-    { type: "video", name: "MPEG-4 Video", extension: ".m4v" },
-    { type: "video", name: "MPEG-4 Video", extension: ".mp4" },
-    { type: "video", name: "MPEG-4 Video", extension: ".mp4v" },
-    { type: "video", name: "MPEG-4 Video", extension: ".mpg4" },
-    { type: "audio", name: "MPEG-4 Audio", extension: ".m4a" },
-    { type: "audio", name: "Raw AAC Audio", extension: ".aac" },
-    { type: "video", name: "Raw H.264/AVC Video", extension: ".h264" },
-    { type: "video", name: "Raw H.264/AVC Video", extension: ".avc" },
-    { type: "video", name: "Raw H.264/AVC Video", extension: ".x264" },
-    { type: "video", name: "Raw H.264/AVC Video", extension: ".264" },
-    { type: "video", name: "Raw H.265/HEVC Video", extension: ".hevc" },
-    { type: "video", name: "Raw H.265/HEVC Video", extension: ".h265" },
-    { type: "video", name: "Raw H.265/HEVC Video", extension: ".x265" },
-    { type: "video", name: "Raw H.265/HEVC Video", extension: ".265" },
-
-    //Xiph formats
-    { type: "audio", name: "FLAC Audio", extension: ".flac" },
-    { type: "audio", name: "Ogg Audio", extension: ".oga" },
-    { type: "audio", name: "Ogg Audio", extension: ".ogg" },
-    { type: "audio", name: "Opus Audio", extension: ".opus" },
-    { type: "audio", name: "Speex Audio", extension: ".spx" },
-    { type: "video", name: "Ogg Video", extension: ".ogv" },
-    { type: "video", name: "Ogg Video", extension: ".ogm" },
-    { type: "video", name: "Ogg Video", extension: ".ogx" },
-
-    //Matroska formats
-    { type: "video", name: "Matroska Video", extension: ".mkv" },
-    { type: "video", name: "Matroska 3D Video", extension: ".mk3d" },
-    { type: "audio", name: "Matroska Audio", extension: ".mka" },
-    { type: "video", name: "WebM Video", extension: ".webm" },
-    { type: "audio", name: "WebM Audio", extension: ".weba" },
-
-    //Misc formats
-    { type: "video", name: "Video Clip", extension: ".avi" },
-    { type: "video", name: "Video Clip", extension: ".vfw" },
-    { type: "video", name: "DivX Video", extension: ".divx" },
-    { type: "video", name: "3ivx Video", extension: ".3iv" },
-    { type: "video", name: "XVID Video", extension: ".xvid" },
-    { type: "video", name: "NUT Video", extension: ".nut" },
-    { type: "video", name: "FLIC Video", extension: ".flic" },
-    { type: "video", name: "FLIC Video", extension: ".fli" },
-    { type: "video", name: "FLIC Video", extension: ".flc" },
-    { type: "video", name: "Nullsoft Streaming Video", extension: ".nsv" },
-    { type: "video", name: "General Exchange Format", extension: ".gxf" },
-    { type: "video", name: "Material Exchange Format", extension: ".mxf" },
-
-    //Windows Media formats
-    { type: "audio", name: "Windows Media Audio", extension: ".wma" },
-    { type: "video", name: "Windows Media Video", extension: ".wm" },
-    { type: "video", name: "Windows Media Video", extension: ".wmv" },
-    { type: "video", name: "Windows Media Video", extension: ".asf" },
-    { type: "video", name: "Microsoft Recorded TV Show", extension: ".dvr-ms" },
-    { type: "video", name: "Microsoft Recorded TV Show", extension: ".dvr" },
-    { type: "video", name: "Windows Recorded TV Show", extension: ".wtv" },
-
-    //DV formats
-    { type: "video", name: "DV Video", extension: ".dv" },
-    { type: "video", name: "DV Video", extension: ".hdv" },
-
-    //Flash Video formats
-    { type: "video", name: "Flash Video", extension: ".flv" },
-    { type: "video", name: "Flash Video", extension: ".f4v" },
-    { type: "audio", name: "Flash Audio", extension: ".f4a" },
-
-    //QuickTime formats
-    { type: "video", name: "QuickTime Video", extension: ".qt" },
-    { type: "video", name: "QuickTime Video", extension: ".mov" },
-    { type: "video", name: "QuickTime HD Video", extension: ".hdmov" },
-
-    //Real Media formats
-    { type: "video", name: "Real Media Video", extension: ".rm" },
-    { type: "video", name: "Real Media Video", extension: ".rmvb" },
-    { type: "audio", name: "Real Media Audio", extension: ".ra" },
-    { type: "audio", name: "Real Media Audio", extension: ".ram" },
-
-    //3GPP formats
-    { type: "audio", name: "3GPP Audio", extension: ".3ga" },
-    { type: "audio", name: "3GPP Audio", extension: ".3ga2" },
-    { type: "video", name: "3GPP Video", extension: ".3gpp" },
-    { type: "video", name: "3GPP Video", extension: ".3gp" },
-    { type: "video", name: "3GPP Video", extension: ".3gp2" },
-    { type: "video", name: "3GPP Video", extension: ".3g2" },
-
-    //Video game formats
-    { type: "audio", name: "AY Audio", extension: ".ay" },
-    { type: "audio", name: "GBS Audio", extension: ".gbs" },
-    { type: "audio", name: "GYM Audio", extension: ".gym" },
-    { type: "audio", name: "HES Audio", extension: ".hes" },
-    { type: "audio", name: "KSS Audio", extension: ".kss" },
-    { type: "audio", name: "NSF Audio", extension: ".nsf" },
-    { type: "audio", name: "NSFE Audio", extension: ".nsfe" },
-    { type: "audio", name: "SAP Audio", extension: ".sap" },
-    { type: "audio", name: "SPC Audio", extension: ".spc" },
-    { type: "audio", name: "VGM Audio", extension: ".vgm" },
-    { type: "audio", name: "VGZ Audio", extension: ".vgz" },
-
-    //Playlist formats
-    { type: "audio", name: "M3U Playlist", extension: ".m3u" },
-    { type: "audio", name: "M3U Playlist", extension: ".m3u8" },
-    { type: "audio", name: "PLS Playlist", extension: ".pls" },
-    { type: "audio", name: "CUE Sheet", extension: ".cue" },
-];
 
 Browsers.Selector.menuEventHandler = function (event, item) {
     if (event == "enter") {
@@ -243,7 +83,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
         } else if (item == "device") {
             Browsers.DeviceBrowser.open(Browsers.Selector.cachedParentMenu);
         } else if (item == "url") {
-            var handleURL = function (success, input) {
+            UI.Input.show(function (success, input) {
                 if (success) {
                     if (input.includes("://")) {
                         if (input.includes("&list=")) {
@@ -258,38 +98,13 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                         Utils.showAlert("info", "Input is not a valid URL!");
                     }
                 }
-            }
-            Utils.Input.show(handleURL,"URL: ");
-            /*
-            Utils.showAlert("info", "URL Input window has opened!");
-            if (Utils.OSisWindows) {
-                var args = [
-                    "powershell",
-                    "-executionpolicy",
-                    "bypass",
-                    mp.utils
-                        .get_user_path(
-                            "~~/scripts/easympv/WindowsCompat.ps1"
-                        )
-                        .replaceAll("/", "\\"),
-                    "show-url-box",
-                ];
-            } else {
-                var args = [
-                    "sh",
-                    "-c",
-                    mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                        " show-url-box",
-                ];
-            }
-            mp.command_native_async({
-                name: "subprocess",
-                playback_only: false,
-                capture_stdout: true,
-                args: args
-            }, handleURL);
-            */
+            },"URL: ");
         }
+        return;
+    }
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#selector-menu", true);
+        return;
     }
 };
 
@@ -303,29 +118,29 @@ Browsers.Selector.open = function (parentMenu) {
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "File",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "File",
         item: "file",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Disc",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Disc",
         item: "disc",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "Device",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Device",
         item: "device",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 30) + "URL",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "URL",
         item: "url",
         color: "ffffff",
     });
 
     Browsers.Selector.menuSettings.title = "Select Content Type";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
-    Browsers.Selector.menu = new UI.Menu(
+    Browsers.Selector.menu = new UI.Menus.Menu(
         Browsers.Selector.menuSettings,
         items,
         parentMenu
@@ -334,45 +149,78 @@ Browsers.Selector.open = function (parentMenu) {
     Browsers.Selector.menu.showMenu();
 };
 
-Browsers.FileBrowser.openFileSafe = function (filename) {
+Browsers.FileBrowser.openFileSafe = function (entry) {
+    dump(entry);
+    if(entry.supported)
+    {
+        if (entry.type != "subtitle")
+        {
+            Utils.showAlert(
+                "info",
+                "Playing " +
+                    entry.type +
+                    " file: " + entry.item
+            );
+            mp.commandv(
+                "loadfile",
+                Browsers.FileBrowser.currentLocation +
+                    OS.directorySeperator +
+                    entry.item
+            );
+        }
+        else
+        {
+            Utils.showAlert(
+                "info",
+                "Loading subtitles: " + entry.item
+            );
+            mp.commandv(
+                "sub-add",
+                Browsers.FileBrowser.currentLocation +
+                    OS.directorySeperator +
+                    entry.item
+            );
+        }
+    }
+
+/*
     for (
         var i = 0;
-        i < Browsers.FileBrowser.fileExtensionWhitelist.length;
+        i < Settings.presets.fileextensions.length;
         i++
     ) {
         if (
             filename.includes(
-                Browsers.FileBrowser.fileExtensionWhitelist[i].extension
+                Settings.presets.fileextensions[i].extension
             )
         ) {
             Utils.showAlert(
                 "info",
                 "Playing " +
-                    Browsers.FileBrowser.fileExtensionWhitelist[i].name +
+                    Settings.presets.fileextensions[i].name +
                     " file: " + filename
             );
             mp.commandv(
                 "loadfile",
                 Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
+                    OS.directorySeperator +
                     filename
             );
-            Browsers.FileBrowser.menu.hideMenu();
-            Browsers.FileBrowser.menu = undefined;
             break;
         }
     }
+*/
 };
 
 Browsers.FileBrowser.getParentDirectory = function () {
     var newDir = "";
     var workDir = Browsers.FileBrowser.currentLocation;
-    if (workDir.charAt(workDir.length - 1) == Utils.directorySeperator) {
+    if (workDir.charAt(workDir.length - 1) == OS.directorySeperator) {
         workDir = workDir.substring(0, workDir.length - 1);
     }
-    var workDirTree = workDir.split(Utils.directorySeperator);
+    var workDirTree = workDir.split(OS.directorySeperator);
 
-    if (Utils.OS != "win" && workDirTree.length < 3) {
+    if (!OS.isWindows && workDirTree.length < 3) {
         workDirTree[0] = "/";
     }
 
@@ -380,12 +228,12 @@ Browsers.FileBrowser.getParentDirectory = function () {
         if (i == 0) {
             newDir = workDirTree[0];
         } else {
-            newDir = newDir + Utils.directorySeperator + workDirTree[i];
+            newDir = newDir + OS.directorySeperator + workDirTree[i];
         }
     }
 
     if (newDir.charAt(newDir.length - 1) == ":") {
-        newDir += Utils.directorySeperator;
+        newDir += OS.directorySeperator;
     }
 
     return newDir;
@@ -397,19 +245,268 @@ Browsers.FileBrowser.gotoParentDirectory = function () {
 
 Browsers.FileBrowser.changeDirectory = function (directory) {
     Browsers.FileBrowser.currentLocation = directory.replaceAll(
-        Utils.directorySeperator + Utils.directorySeperator,
-        Utils.directorySeperator
+        OS.directorySeperator + OS.directorySeperator,
+        OS.directorySeperator
     );
-    Browsers.FileBrowser.menu.hideMenu();
-    Browsers.FileBrowser.menu = undefined;
+    try {
+        Browsers.FileBrowser.menu.hideMenu();
+        Browsers.FileBrowser.menu = undefined;
+    }
+    catch(e) {} // ignore that
     Browsers.FileBrowser.open();
 };
 
-Browsers.FileBrowser.menuEventHandler = function (event, item) {
-    if (event == "enter") {
-        if (item == ".." + Utils.directorySeperator) {
+Browsers.FileBrowser.openContextMenu = function(item) {
+
+    var path = Browsers.FileBrowser.currentLocation + OS.directorySeperator + item;
+
+    if (
+        OS.isWindows &&
+        Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
+    ) {
+        var isFolder = true;
+    } else {
+        var temp = mp.utils.file_info(
+            Browsers.FileBrowser.currentLocation +
+                OS.directorySeperator +
+                item
+        );
+        if (temp != undefined) {
+            var isFolder = temp.is_dir;
+        } else {
+            var isFolder = true;
+        }
+    }
+
+    var icon = " ";
+
+    if(!isFolder){
+        for (
+            var j = 0;
+            j < Settings.presets.fileextensions.length;
+            j++
+        ) {
+            var whitelist = Settings.presets.fileextensions[j];
             if (
-                Utils.OSisWindows &&
+                item.includes(whitelist.extension)
+            ) {
+                if (whitelist.type == "video")
+                {
+                    icon = " ";
+                }
+                else if (whitelist.type == "audio")
+                {
+                    icon = " ";
+                }
+                else if (whitelist.type == "image")
+                {
+                    icon = " ";
+                }
+                else if (whitelist.type == "subtitle")
+                {
+                    icon = " ";
+                }
+                break;
+            }
+        }
+    }
+
+    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
+    var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
+
+    var items = [];
+
+    items.push({
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back@br@@br@",
+        color: "909090",
+        item: "",
+        eventHandler: function(action, menu)
+        {
+            if (action != "enter")
+            {
+                return;
+            }
+            contextMenu.hideMenu();
+            Browsers.FileBrowser.open();
+        }
+    });
+
+    if(isFolder)
+    {
+        items.push({
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Add to Favorites",
+            item: "",
+            eventHandler: function(action, menu)
+            {
+                if (action != "enter")
+                {
+                    return;
+                }
+
+                if (isFolder) {
+                    contextMenu.hideMenu();
+                    path = path.replaceAll("\/\/","\/");
+                    if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
+                    {
+                        Settings.Data["fileBrowserFavorites"].locations.push(path);
+                        //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
+                        Utils.showAlert("info","Added Folder to Favorites.");
+                        Settings.save();
+                        menu.hideMenu();
+                        Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
+                        return;
+                    }
+                    Utils.showAlert("error","Folder is already in Favorites!");
+                    return;
+                }
+            }
+        });
+    }
+
+    items.push({
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open",
+        item: "",
+        eventHandler: function(action, menu)
+        {
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+            if (action != "enter")
+            {
+                return;
+            }
+            contextMenu.hideMenu();
+            if(isFolder)
+            {
+                Browsers.FileBrowser.changeDirectory(
+                    Browsers.FileBrowser.currentLocation +
+                        OS.directorySeperator +
+                        item
+                );
+            }
+            else
+            {
+                Browsers.FileBrowser.openFileSafe(menu.getItemByName(item));
+            }
+        }
+    });
+
+    if (!isFolder || Settings.Data.allowFolderDeletion)
+    {
+        items.push({
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Remove",
+            item: "",
+            eventHandler: function(action, menu)
+            {
+                if (action != "enter")
+                {
+                    return;
+                }
+
+                if(isFolder && !Settings.Data.allowFolderDeletion)
+                {
+                    this.title = UI.SSA.setColorRed() + "Removing folders is disabled";
+                    contextMenu.redrawMenu();
+                    return;
+                }
+
+                if (deleteConfirm)
+                {
+                    var type = "file";
+                    if (isFolder) { type = "folder"; };
+
+                    if (OS.fileRemoveSystemwide(path))
+                    {
+                        Utils.showAlert(
+                            "info",
+                            "Removed " + type + ": " + item
+                        );
+                    }
+                    else
+                    {
+                        Utils.showAlert(
+                            "error",
+                            "Could not remove " + type + ": " + item
+                        );
+                    }
+                    contextMenu.hideMenu();
+                    Browsers.FileBrowser.cachedFileBrowserPosition = Browsers.FileBrowser.cachedFileBrowserPosition - 1;
+                    Browsers.FileBrowser.open();
+                } else {
+                    this.title = UI.SSA.setColorRed() + "Are you sure?";
+                    deleteConfirm = true;
+                    contextMenu.redrawMenu();
+                }
+            }
+        });
+    };
+
+    if (isFolder)
+    {
+        contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "Folder Actions";
+        contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
+    }
+
+    var deleteConfirm = false;
+
+    var contextMenu = new UI.Menus.Menu({
+        title: contextMenuTitle,
+        description: "Select what to do with this item. @br@@br@" + contextMenuDescriptionIcon + "@br@",
+        autoClose: 0,
+        fadeOut: false,
+        fadeIn: false
+    },items,
+    Browsers.FileBrowser.menu);
+    contextMenu.eventHandler = function(){};
+    contextMenu.showMenu();
+};
+
+Browsers.FileBrowser.menuEventHandler = function (event, item) {
+
+    if (event == "draw")
+    {
+        if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
+        {
+            Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+        }
+        return;
+    }
+
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
+        return;
+    }
+
+    if (event == "show") {
+        if (Browsers.FileBrowser.menu.items.length >= 5)
+        {
+            Browsers.FileBrowser.menu.selectedItemIndex = 4;
+        }
+        Browsers.FileBrowser.menu.redrawMenu();
+        return;
+    }
+
+    if (event == "right") {
+
+        if (item == ".." + OS.directorySeperator) {
+            return;
+        }
+
+        if (item == "@back@") {
+            return;
+        }
+
+        Browsers.FileBrowser.cachedFileBrowserPosition = Browsers.FileBrowser.menu.selectedItemIndex;
+        Browsers.FileBrowser.menu.hideMenu();
+        Browsers.FileBrowser.menu = undefined;
+        Browsers.FileBrowser.openContextMenu(item);
+        return;
+    }
+
+    if (event == "enter") {
+        if (item == ".." + OS.directorySeperator) {
+            Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+            if (
+                OS.isWindows &&
                 Browsers.FileBrowser.currentLocation.charAt(
                     Browsers.FileBrowser.currentLocation.length - 2
                 ) == ":"
@@ -422,7 +519,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             }
         } else {
             if (
-                Utils.OSisWindows &&
+                OS.isWindows &&
                 Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
             ) {
                 var isFolder = true;
@@ -431,7 +528,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
                 // this fixes a bug where opening a mount folder of an unmounted drive would crash everything
                 var temp = mp.utils.file_info(
                     Browsers.FileBrowser.currentLocation +
-                        Utils.directorySeperator +
+                        OS.directorySeperator +
                         item
                 );
                 if (temp != undefined) {
@@ -443,55 +540,31 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
 
             if (isFolder) {
                 if (
-                    Utils.OSisWindows &&
+                    OS.isWindows &&
                     Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
                 ) {
                     Browsers.FileBrowser.changeDirectory(item);
                 } else {
                     Browsers.FileBrowser.changeDirectory(
                         Browsers.FileBrowser.currentLocation +
-                            Utils.directorySeperator +
+                            OS.directorySeperator +
                             item
                     );
                 }
             } else {
-                Browsers.FileBrowser.openFileSafe(item);
+                item = Browsers.FileBrowser.menu.getItemByName(item);
+                if (item.supported)
+                {
+                    Browsers.FileBrowser.openFileSafe(item);
+                    Browsers.FileBrowser.menu.hideMenu();
+                    Browsers.FileBrowser.menu = undefined;
+                }
             }
         }
         return;
-    } else if (event == "right") {
-        if (
-            Utils.OSisWindows &&
-            Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
-        ) {
-            var isFolder = true;
-        } else {
-            var temp = mp.utils.file_info(
-                Browsers.FileBrowser.currentLocation +
-                    Utils.directorySeperator +
-                    item
-            );
-            if (temp != undefined) {
-                var isFolder = temp.is_dir;
-            } else {
-                var isFolder = true;
-            }
-        }
-
-        if (isFolder) {
-            if (Settings.Data["fileBrowserFavorites"].locations.indexOf(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item) == -1)
-            {
-                Settings.Data["fileBrowserFavorites"].locations.push(Browsers.FileBrowser.currentLocation + Utils.directorySeperator + item);
-                Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                Utils.showAlert("info","Added Folder \""+item+"\" added to Favorites.");
-                Settings.save();
-                return;
-            }
-            Utils.showAlert("error","Folder \""+item+"\" is already in Favorites!");
-            return;
-        }
     }
 };
+
 Browsers.FileBrowser.open = function (parentMenu) {
     if (parentMenu == undefined) {
         parentMenu = Browsers.FileBrowser.cachedParentMenu;
@@ -502,33 +575,19 @@ Browsers.FileBrowser.open = function (parentMenu) {
     var items = [];
 
     if (
-        Utils.OSisWindows &&
+        OS.isWindows &&
         Browsers.FileBrowser.currentLocation == "@DRIVESELECTOR@"
     ) {
-        // Local Drives are type 3
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-local",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
+        // local drives
+        drives = OS.getWindowsDriveInfo(3).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                if(drives[i] != "")
+                {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -538,30 +597,16 @@ Browsers.FileBrowser.open = function (parentMenu) {
             }
         }
 
-        // USB Drives are type 2
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-usb",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
+        // usb drives
+        drives = OS.getWindowsDriveInfo(2).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                if(drives[i] != "")
+                {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -571,30 +616,16 @@ Browsers.FileBrowser.open = function (parentMenu) {
             }
         }
 
-        // Network Drives are type 4
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-network",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            if (drives[0].trim() != "") {
-                drives.sort();
-                for (var i = 0; i < drives.length; i++) {
+        // network drives
+        drives = OS.getWindowsDriveInfo(4).split("|");
+        if (drives[0].trim() != "") {
+            drives.sort();
+            for (var i = 0; i < drives.length; i++) {
+                if(drives[i] != "")
+                {
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             drives[i].trim() +
                             "\\",
                         item: drives[i].trim() + "\\",
@@ -609,25 +640,25 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
-            currentLocationFolders.sort();
         } else {
             Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
             var currentLocationFolders = mp.utils.readdir(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
-            currentLocationFolders.sort();
         }
+        // Possible TODO: improve sort
+        currentLocationFolders.sort();
 
 
-        if (Utils.OS != "win" && Browsers.FileBrowser.currentLocation == "/") {
+        if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
         } else {
             items.push({
                 title:
-                    UI.SSA.insertSymbolFA(" ", 30, 30) +
+                    UI.SSA.insertSymbolFA(" ", 30, 35, Utils.commonFontName) +
                     ".." +
-                    Utils.directorySeperator,
-                item: ".." + Utils.directorySeperator,
+                    OS.directorySeperator,
+                item: ".." + OS.directorySeperator,
                 color: "909090",
             });
         }
@@ -641,13 +672,15 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                     items.push({
                         title:
-                            UI.SSA.insertSymbolFA(" ", 26, 30) +
+                            UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             title +
-                            Utils.directorySeperator,
+                            OS.directorySeperator,
                         item:
                             currentLocationFolders[i] +
-                            Utils.directorySeperator,
+                            OS.directorySeperator,
                         color: "FFFF90",
+                        type: "folder",
+                        supported: true
                     });
                 }
             } else {
@@ -658,11 +691,13 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 items.push({
                     title:
-                        UI.SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                         title +
-                        Utils.directorySeperator,
-                    item: currentLocationFolders[i] + Utils.directorySeperator,
+                        OS.directorySeperator,
+                    item: currentLocationFolders[i] + OS.directorySeperator,
                     color: "FFFF90",
+                    type: "folder",
+                    supported: true
                 });
             }
         }
@@ -672,88 +707,74 @@ Browsers.FileBrowser.open = function (parentMenu) {
         );
         currentLocationFiles.sort();
         for (var i = 0; i < currentLocationFiles.length; i++) {
-            if (currentLocationFiles[i].charAt(0) == ".") {
-                if (Settings.Data.showHiddenFiles) {
-                    var color = "909090";
+            var color = "909090";
+            var icon = " ";
+            var type = "other";
+            var supported = false;
 
-                    for (
-                        var t = 0;
-                        t < Browsers.FileBrowser.fileExtensionWhitelist.length;
-                        t++
-                    ) {
-                        if (
-                            currentLocationFiles[i].includes(
-                                Browsers.FileBrowser.fileExtensionWhitelist[t]
-                                    .extension
-                            )
-                        ) {
-                            color = "ffffff";
-                            break;
-                        }
-                    }
-
-                    var title = currentLocationFiles[i];
-                    if (title.length >= 36) {
-                        title = title.substring(0, 50) + "...";
-                    }
-
-                    items.push({
-                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
-                        item: currentLocationFiles[i],
-                        color: color,
-                    });
-                }
-            } else {
-                var color = "909090";
-
-                for (
-                    var j = 0;
-                    j < Browsers.FileBrowser.fileExtensionWhitelist.length;
-                    j++
+            for (
+                var j = 0;
+                j < Settings.presets.fileextensions.length;
+                j++
+            ) {
+                var whitelist = Settings.presets.fileextensions[j];
+                if (
+                    "." + currentLocationFiles[i].split('.').pop() == whitelist.extension
                 ) {
-                    if (
-                        currentLocationFiles[i].includes(
-                            Browsers.FileBrowser.fileExtensionWhitelist[j]
-                                .extension
-                        )
-                    ) {
-                        color = "ffffff";
-                        break;
+
+                    if (whitelist.type == "video")
+                    {
+                        icon = " ";
                     }
+                    else if (whitelist.type == "audio")
+                    {
+                        icon = " ";
+                    }
+                    else if (whitelist.type == "image")
+                    {
+                        icon = " ";
+                    }
+                    else if (whitelist.type == "subtitle")
+                    {
+                        icon = " ";
+                    }
+                    type = whitelist.type;
+                    color = "ffffff";
+                    supported = true;
+                    break;
                 }
+            }
 
-                var title = currentLocationFiles[i];
-                if (title.length >= 36) {
-                    title = title.substring(0, 50) + "...";
-                }
+            var title = currentLocationFiles[i];
+            if (title.length >= 36) {
+                title = title.substring(0, 50) + "...";
+            }
 
+            if (currentLocationFiles[i].charAt(0) != "." || Settings.Data.showHiddenFiles) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + title,
+                    title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + title,
                     item: currentLocationFiles[i],
                     color: color,
+                    type: type,
+                    supported: supported
                 });
             }
         }
     }
 
-    Browsers.FileBrowser.menuSettings.title = "File Browser";
+    Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + "File Browser";
     Browsers.FileBrowser.menuSettings.description =
-        "Select a file to open.@br@Current directory: " +
+        UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) +
         Browsers.FileBrowser.currentLocation.replaceAll(
             "@DRIVESELECTOR@",
             "Drive Selection"
-        );
+        ) + " " + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
     Browsers.FileBrowser.menuSettings.backButtonTitle =
-        UI.SSA.insertSymbolFA(
-            "",
-            32,
-            35
-        ) + UI.SSA.setFont(Utils.commonFontName) + " Back@br@";
-
+        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back to main menu@br@@us10@";
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
-            title: "[Open in File Explorer]@br@",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open in File Explorer@br@@us10@",
             color: "999999",
             eventHandler: function(event, menu)
             {
@@ -766,7 +787,20 @@ Browsers.FileBrowser.open = function (parentMenu) {
     }
 
     items.unshift({
-        title: "[Favorites]",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Refresh",
+        color: "999999",
+        eventHandler: function(event, menu)
+        {
+            if (event == "enter")
+            {
+                menu.hideMenu();
+                Browsers.FileBrowser.open();
+            }
+        }
+    });
+
+    items.unshift({
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Favorites",
         color: "999999",
         eventHandler: function(event, menu)
         {
@@ -776,16 +810,17 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++)
                 {
                     favItems.push({
-                        title: UI.SSA.insertSymbolFA(" ", 26, 30) + Settings.Data["fileBrowserFavorites"].locations[i],
+                        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.Data["fileBrowserFavorites"].locations[i],
                         item: Settings.Data["fileBrowserFavorites"].locations[i],
                         color: "FFFF90"
                     });
                 }
 
-                var favMenu = new UI.Menu({
+                var favMenu = new UI.Menus.Menu({
+                    autoClose: 0,
                     title: "File Browser",
                     description: "Use the \"right\" action to remove an entry."
-                },favItems,Browsers.FileBrowser.menu);
+                }, favItems, Browsers.FileBrowser.menu);
 
                 favMenu.eventHandler = function(event,item) {
                     if(event == "enter")
@@ -805,7 +840,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
                             favMenu.redrawMenu();
-                            Utils.showAlert("info","Favorite \""+item+"\" has been removed.")
+                            Utils.showAlert("info","Favorite has been removed.")
                         }
                         return;
                     }
@@ -817,7 +852,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     });
 
-    Browsers.FileBrowser.menu = new UI.Menu(
+    Browsers.FileBrowser.menu = new UI.Menus.Menu(
         Browsers.FileBrowser.menuSettings,
         items,
         parentMenu
@@ -825,9 +860,21 @@ Browsers.FileBrowser.open = function (parentMenu) {
     Browsers.FileBrowser.menu.eventHandler =
         Browsers.FileBrowser.menuEventHandler;
     Browsers.FileBrowser.menu.showMenu();
+    /*
+    if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
+    {
+        Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
+        Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
+        Browsers.FileBrowser.menu.redrawMenu();
+    }*/
 };
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#drive-browser", true);
+        return;
+    }
+
     if (event == "enter" && Browsers.DriveBrowser.menuMode == "list") {
         Browsers.DriveBrowser.cachedDriveName = item;
         Browsers.DriveBrowser.menuMode = "ask";
@@ -837,23 +884,23 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
         Browsers.DriveBrowser.menu.items = [];
         Browsers.DriveBrowser.menu.items.push(temp);
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "CD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "CD",
             item: "ccda",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "DVD",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "DVD",
             item: "dvd",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.items.push({
-            title: UI.SSA.insertSymbolFA(" ", 26, 30) + "BluRay",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "BluRay",
             item: "bd",
             color: "ffffff",
         });
         Browsers.DriveBrowser.menu.redrawMenu();
     } else if (event == "enter" && Browsers.DriveBrowser.menuMode == "ask") {
-        if (Utils.OSisWindows) {
+        if (OS.isWindows) {
             mp.commandv(
                 "loadfile",
                 item + "://longest/" + Browsers.DriveBrowser.cachedDriveName
@@ -892,29 +939,15 @@ Browsers.DriveBrowser.open = function (parentMenu) {
     } else {
         Browsers.DriveBrowser.cachedParentMenu = parentMenu;
     }
-    if (Utils.OSisWindows) {
-        var r = mp.command_native({
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            args: [
-                "powershell",
-                "-executionpolicy",
-                "bypass",
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                    .replaceAll("/", "\\"),
-                "get-drive-disc",
-            ],
-        });
-
-        if (r.status == "0") {
-            drives = r.stdout.split("|");
-            drives.sort();
-            for (var i = 0; i < drives.length; i++) {
+    if (OS.isWindows) {
+        drives = OS.getWindowsDriveInfo(5).split("|");
+        drives.sort();
+        for (var i = 0; i < drives.length; i++) {
+            if(drives[i] != "")
+            {
                 items.push({
                     title:
-                        UI.SSA.insertSymbolFA(" ", 26, 30) +
+                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                         drives[i].trim() +
                         "\\",
                     item: drives[i].trim() + "\\",
@@ -928,17 +961,23 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("sr")) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i],
+                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i],
                     item: deviceList[i],
                     color: "ffffff",
                 });
             }
         }
     }
+
+    Browsers.DriveBrowser.menuSettings.description = "Select a drive to open.";
+    if (items.length == 0)
+    {
+        Browsers.DriveBrowser.menuSettings.description += "@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "No disc drives found!";
+    }
+
     Browsers.DriveBrowser.menuMode = "list";
     Browsers.DriveBrowser.menuSettings.title = "Drive Browser";
-    Browsers.DriveBrowser.menuSettings.description = "Select a drive to open.";
-    Browsers.DriveBrowser.menu = new UI.Menu(
+    Browsers.DriveBrowser.menu = new UI.Menus.Menu(
         Browsers.DriveBrowser.menuSettings,
         items,
         parentMenu
@@ -949,11 +988,16 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 };
 
 Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
+    if (event == "help") {
+        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#device-browser", true);
+        return;
+    }
+
     if (event == "enter") {
         //mp.commandv("apply-profile", "low-latency");
         mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file
 
-        if (Utils.OSisWindows) {
+        if (OS.isWindows) {
             mp.commandv("loadfile", "av://dshow:video=" + item);
         } else {
             mp.commandv("loadfile", "av://v4l2:/dev/" + item);
@@ -974,7 +1018,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
     } else {
         Browsers.DeviceBrowser.cachedParentMenu = parentMenu;
     }
-    if (Utils.OSisWindows) {
+    if (OS.isWindows) {
         var r = mp.command_native({
             name: "subprocess",
             playback_only: false,
@@ -990,7 +1034,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             devices = r.stdout.split("|");
             for (var i = 0; i < devices.length - 1; i++) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(" ", 26, 30) + devices[i].trim(),
+                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + devices[i].trim(),
                     item: devices[i].trim(),
                     color: "ffffff",
                 });
@@ -1001,7 +1045,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
         deviceList.sort();
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("video")) {
-                var title = UI.SSA.insertSymbolFA(" ", 26, 30) + deviceList[i];
+                var title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i];
                 title +=
                     " - " +
                     Utils.executeCommand([
@@ -1018,8 +1062,8 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
     }
     Browsers.DeviceBrowser.menuSettings.title = "Device Browser";
     Browsers.DeviceBrowser.menuSettings.description =
-        "Select a device to open.@br@Important: If you play a file after playing a device, there might be issues.@br@ It is recommended to restart mpv first!";
-    Browsers.DeviceBrowser.menu = new UI.Menu(
+        "Select a device to open.@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "Some devices can cause mpv to crash! On top of that, you should always restart mpv after you finish watching a device!";
+    Browsers.DeviceBrowser.menu = new UI.Menus.Menu(
         Browsers.DeviceBrowser.menuSettings,
         items,
         parentMenu

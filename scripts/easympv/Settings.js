@@ -1,7 +1,7 @@
 /*
  * SETTINGS.JS (MODULE)
  *
- * Author:                    Jong
+ * Author:                     Jong
  * URL:                        https://smto.pw/mpv
  * License:                    MIT License
  */
@@ -39,11 +39,16 @@ Settings.cache = {};
 Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    showClock: false,
+    clockPosition: "top-left",
+    fadeMenus: false,
+    scrollAlerts: true,
     defaultShaderSet: "none",
     defaultColorProfile: "none",
     simpleVRR: false,
     refreshRate: 144,
     showHiddenFiles: false,
+    allowFolderDeletion: false,
     startIPCServer: false,
     useNativeNotifications: true,
     notifyAboutUpdates: true,
@@ -114,6 +119,18 @@ Settings.reload = function () {
             }
         }
     }
+
+    for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++) {
+        Settings.Data["fileBrowserFavorites"].locations[i] = Settings.Data["fileBrowserFavorites"].locations[i].replaceAll("\/\/","\/");
+    }
+
+    if(Environment.SettingsOverrides != undefined)
+    {
+        for(var key in Environment.SettingsOverrides)
+        {
+            Settings.Data[key] = Environment.SettingsOverrides[key];
+        }
+    }
 };
 
 /**
@@ -131,7 +148,7 @@ Settings.save = function () {
         defaultConfigString += "### easympv.conf ###\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
-        defaultConfigString += "# Default: none\n";
+        defaultConfigString += "# Default: unknown\n";
         defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
         defaultConfigString += "# Use a full path. Only required on Windows!\n";
         defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
@@ -139,10 +156,34 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "# The key that easympv will force its menu on.\n";
         defaultConfigString += "# Default: m\n";
-        defaultConfigString += "# Set this to \"disable\" to revert to the old behavior.\n";
-        defaultConfigString += "# In that case, you will need to add your own keybinding to input.conf:\n";
+        defaultConfigString += "# Set this to \"disable\" to disable forcing the keybind.\n";
+        defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to show a clock on screen.\n";
+        defaultConfigString += "# The clock should be pretty unobstrusive and its position can be chosen.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "showClock=false\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Where to show the clock once enabled.\n";
+        defaultConfigString += "# Choose one of the four screen corners: top-left, top-right, bottom-left, bottom-right\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: top-left\n";
+        defaultConfigString += "clockPosition=top-left\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to use fade-ins and fade-outs on menus.\n";
+        defaultConfigString += "# Having this enabled might result in a performance penalty.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "fadeMenus=true\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to have alerts move across the screen.\n";
+        defaultConfigString += "# Having this enabled might result in a performance penalty.\n";
+        defaultConfigString += "# This ultimately comes down to personal preference.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "scrollAlerts=true\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Default shader set to load at launch.\n";
         defaultConfigString += "# Default: none\n";
@@ -175,6 +216,13 @@ Settings.save = function () {
             "# Whether to show hidden files and folders in the file browser.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "showHiddenFiles=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString +=
+        "# Whether the file browser should allow you to remove folders.\n";
+        defaultConfigString +=
+        "# IMPORTANT: There is a reason this is disabled by default!\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "allowFolderDeletion=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to start the mpv IPC server on startup.\n";
@@ -285,7 +333,7 @@ Settings.save = function () {
             .split("\n");
     }
 
-    if(Utils.OSisWindows && Settings.Data["mpvLocation"] == "unknown")
+    if(OS.isWindows && Settings.Data["mpvLocation"] == "unknown")
     {
         var searchPaths = [
             "~~home\\AppData\\Local\\mpv\\",
@@ -383,33 +431,7 @@ Settings.migrate = function () {
     }
 
     // delete easympv.conf
-    var file = "easympv.conf";
-    if (Utils.OSisWindows) {
-        var args = [
-            "powershell",
-            "-executionpolicy",
-            "bypass",
-            mp.utils
-                .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                .replaceAll("/", "\\"),
-            "remove-file " + file,
-        ];
-    } else {
-        var args = [
-            "sh",
-            "-c",
-            mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                " remove-file " +
-                file,
-        ];
-    }
-    mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: false,
-        capture_stderr: false,
-        args: args,
-    });
+    OS.fileRemove("easympv.conf");
 
     Settings.Data.doMigration = false;
 
@@ -517,34 +539,7 @@ Settings.mpvConfig.reload = function () {
 };
 
 Settings.mpvConfig.reset = function () {
-    var file = "mpv.conf";
-    if (Utils.OSisWindows) {
-        var args = [
-            "powershell",
-            "-executionpolicy",
-            "bypass",
-            mp.utils
-                .get_user_path("~~/scripts/easympv/WindowsCompat.ps1")
-                .replaceAll("/", "\\"),
-            "remove-file " + file,
-        ];
-    } else {
-        var args = [
-            "sh",
-            "-c",
-            mp.utils.get_user_path("~~/scripts/easympv/UnixCompat.sh") +
-                " remove-file " +
-                file,
-        ];
-    }
-    mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: false,
-        capture_stderr: false,
-        args: args,
-    });
-
+    OS.fileRemove("mpv.conf");
     Settings.mpvConfig.save();
 };
 
@@ -727,14 +722,25 @@ Settings.presets.colorpreset = function (name, data) {
     return this;
 };
 
+Settings.presets.hints = [];
+
 Settings.presets.shadersetsUser =  [];
 Settings.presets.colorpresetsUser =  [];
 
 Settings.presets.images = [];
 
 Settings.presets.load = function () {
+
+    Settings.presets.shadersets = [];
+    Settings.presets.colorpresets = [];
+    Settings.presets.fileextensions = [];
+    Settings.presets.hints = [];
+    Settings.presets.shadersetsUser =  [];
+    Settings.presets.colorpresetsUser =  [];
+    Settings.presets.images = [];
+
     var seperator = ":";
-    if (Utils.OSisWindows) {
+    if (OS.isWindows) {
         seperator = ";";
     };
 
@@ -797,18 +803,28 @@ Settings.presets.load = function () {
                 );
             }
         }
+        if (json["fileextensions"] != undefined) {
+            for (var i = 0; i <= json["fileextensions"].length-1; i++) {
+                Settings.presets.fileextensions.push(json["fileextensions"][i]);
+            }
+        }
+        if (json["hints"] != undefined) {
+            for (var i = 0; i <= json["hints"].length-1; i++) {
+                Settings.presets.hints.push(json["hints"][i]);
+            }
+        }
         if (json["images"] != undefined) {
             for (var i = 0; i <= json["images"].length-1; i++) {
-                var file = json["images"][i].data.file;
-                json["images"][i].data.file = "~~/scripts/easympv/images/" + json["images"][i].data.file;
+                var file = json["images"][i].file;
+                json["images"][i].file = "~~/scripts/easympv/images/" + json["images"][i].file;
                 json["images"][i].name = file.substring(0,file.length-4);
-                json["images"][i].data.active = false;
-                json["images"][i].data.id = i;
-                if (json["images"][i].data.height == undefined || json["images"][i].data.width == undefined || json["images"][i].data.offset == undefined) {
-                    var x = ImageOSD.getImageInfo(json["images"][i].data.file);
-                    json["images"][i].data.height = x.h;
-                    json["images"][i].data.width = x.w;
-                    json["images"][i].data.offset = x.offset;
+                json["images"][i].active = false;
+                json["images"][i].id = i;
+                if (json["images"][i].height == undefined || json["images"][i].width == undefined || json["images"][i].offset == undefined) {
+                    var x = ImageOSD.getImageInfo(json["images"][i].file);
+                    json["images"][i].height = x.h;
+                    json["images"][i].width = x.w;
+                    json["images"][i].offset = x.offset;
                 }
             }
             Settings.presets.images = json["images"];
@@ -846,18 +862,30 @@ Settings.presets.load = function () {
             }
         }
 
+        if (jsonUser["fileextensions"] != undefined) {
+            for (var i = 0; i <= jsonUser["fileextensions"].length-1; i++) {
+                Settings.presets.fileextensions.push(jsonUser["fileextensions"][i]);
+            }
+        }
+
+        if (jsonUser["hints"] != undefined) {
+            for (var i = 0; i <= jsonUser["hints"].length-1; i++) {
+                Settings.presets.hints.push(jsonUser["hints"][i]);
+            }
+        }
+
         if (jsonUser["images"] != undefined) {
             for (var i = 0; i <= jsonUser["images"].length-1; i++) {
-                var file = jsonUser["images"][i].data.file;
-                jsonUser["images"][i].data.file = "~~/images/" + jsonUser["images"][i].data.file;
+                var file = jsonUser["images"][i].file;
+                jsonUser["images"][i].file = "~~/images/" + jsonUser["images"][i].file;
                 jsonUser["images"][i].name = file.substring(0,file.length-4);
-                jsonUser["images"][i].data.active = false;
-                jsonUser["images"][i].data.id = i;
-                if (jsonUser["images"][i].data.height == undefined || jsonUser["images"][i].data.width == undefined || jsonUser["images"][i].data.offset == undefined) {
-                    var x = ImageOSD.getImageInfo(jsonUser["images"][i].data.file);
-                    jsonUser["images"][i].data.height = x.h;
-                    jsonUser["images"][i].data.width = x.w;
-                    jsonUser["images"][i].data.offset = x.offset;
+                jsonUser["images"][i].active = false;
+                jsonUser["images"][i].id = i;
+                if (jsonUser["images"][i].height == undefined || jsonUser["images"][i].width == undefined || jsonUser["images"][i].offset == undefined) {
+                    var x = ImageOSD.getImageInfo(jsonUser["images"][i].file);
+                    jsonUser["images"][i].height = x.h;
+                    jsonUser["images"][i].width = x.w;
+                    jsonUser["images"][i].offset = x.offset;
                 }
             }
             Settings.presets.images = Settings.presets.images.concat(jsonUser["images"]);
@@ -866,9 +894,11 @@ Settings.presets.load = function () {
     else
     {
         var dummyFile = {
-            "_comment": "For more information please visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Presets",
+            "_comment": "This file is intended to be edited by the user. See https://github.com/JongWasTaken/easympv/wiki/Presets for more information.",
             "shadersets": {},
             "colorpresets": {},
+            "fileextensions": [],
+            "hints": [],
             "images": []
         };
 
@@ -886,12 +916,33 @@ Settings.presets.reload = function () {
 Settings.cache.perFileSaves = [];
 
 Settings.cache.load = function() {
+
+    var currentTime = Date.now();
+    var period = 2592000; // 30 * 24 * 60 * 60
+
+    Settings.cache.perFileSaves = [];
+
     if(
         mp.utils.file_info(mp.utils.get_user_path("~~/easympv-cache.json")) !=
         undefined
     ) {
         var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv-cache.json")));
-        Settings.cache.perFileSaves = json["perFileSaves"];
+        for(var i = 0; i < json["perFileSaves"].length; i++)
+        {
+            var key = json["perFileSaves"][i];
+            //mp.msg.warn(key.timestamp)
+            if (key.timestamp != undefined)
+            {
+                //mp.msg.warn(Number(currentTime - key.timestamp));
+                //mp.msg.warn(Number(currentTime - key.timestamp) < period);
+                if (Number(currentTime - key.timestamp) < period)
+                {
+                    Settings.cache.perFileSaves.push(key);
+                }
+            }
+
+        }
+        //Settings.cache.perFileSaves = json["perFileSaves"];
     }
     else {
         Settings.cache.save();

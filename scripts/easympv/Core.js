@@ -15,12 +15,11 @@ things like soft-restarts possible.
 
 var Core = {};
 
-
 var isFirstFile = true;
-var sofaEnabled = false;
+//var sofaEnabled = false;
 var resetOccured = false;
 var notifyAboutUpdates = false;
-
+Core.fancyCurrentVersion = "";
 var cFile;
 
 //TODO: clean up
@@ -28,7 +27,6 @@ var cFile;
 Core.Menus = {};
 
 Core.onFileLoad = function () {
-
     if (isFirstFile) {
         if (
             mp.utils.file_info(
@@ -41,7 +39,7 @@ Core.onFileLoad = function () {
                 .toString()
                 .replace(/\\/g, "/")
                 .substring(2);
-            if (Utils.OSisWindows)
+            if (OS.isWindows)
             {
                 mp.commandv(
                     "af",
@@ -75,7 +73,7 @@ Core.onFileLoad = function () {
     // cFile could be a relative path, so we need to expand it
     if (cFile != undefined) {
         if (
-            !Utils.OSisWindows &&
+            !OS.isWindows &&
             mp.utils.file_info(
                 mp.get_property("working-directory") + "/" + cFile
             ) != undefined
@@ -86,7 +84,7 @@ Core.onFileLoad = function () {
                 cFile.replaceAll("./", "");
         }
     }
-
+    //Autoload.loadedFile = cFile;
     Browsers.FileBrowser.currentLocation = cFile;
     Browsers.FileBrowser.gotoParentDirectory();
 
@@ -98,29 +96,40 @@ Core.onFileLoad = function () {
             break;
         }
     }
+
+    if (Settings.Data.showClock)
+    {
+        UI.Time.show();
+    }
 };
 
 Core.onShutdown = function () {
     if (cFile != undefined && cFile != "")
     {
         Utils.log("Saving per-file settings...","shutdown","info");
-        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name});
+        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name, timestamp: Date.now()});
         Settings.cache.save();
     }
 };
 
 var redrawMenus = function () {
-    var currentmenu = UI.getDisplayedMenu();
+    var currentmenu = UI.Menus.getDisplayedMenu();
     if (currentmenu != undefined) {
+        var temp1 = currentmenu.settings.fadeIn;
+        var temp2 = currentmenu.settings.fadeOut;
+        currentmenu.settings.fadeIn = false;
+        currentmenu.settings.fadeOut = false;
         currentmenu.hideMenu();
         currentmenu.showMenu();
+        currentmenu.settings.fadeIn = temp1;
+        currentmenu.settings.fadeOut = temp2;
     }
 };
 
 Core.doRegistrations = function () {
     var handleMenuKeypress = function () {
         Utils.log("Menu key pressed!");
-        var currentmenu = UI.getDisplayedMenu();
+        var currentmenu = UI.Menus.getDisplayedMenu();
         if (currentmenu != undefined) {
             currentmenu.hideMenu();
             return;
@@ -164,27 +173,53 @@ Core.doRegistrations = function () {
         }
         UI.Input.OSDLog.hide();
     });
-    mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
-        var readCommand = function (success, result) {
-            if (success) {
-                try{
-                    eval(result);
-                    Utils.showAlert(
-                        "info",
-                        "Expression evaluated!"
-                    );
-                }
-                catch(e)
-                {
-                    Utils.showAlert(
-                        "error",
-                        "Invalid Expression! Error: " + e
-                    );
-                }
-            }
-        };
-        UI.Input.show(readCommand,"JavaScript expression: ");
-    });
+
+    if(Settings.Data.debugMode)
+    {
+        mp.add_forced_key_binding("Ctrl+M", "empv_tests_hotkey", function() {
+            Core.Menus.TestsMenu.showMenu();
+            UI.Time.show();
+            return;
+        });
+
+        mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+            UI.Input.showJavascriptInput();
+            return;
+        });
+    }
+
+    if(OS.isSteamGamepadUI)
+    {
+        // override keys to work with gamepad
+        // THIS ASSUMES THE DEFAULT KEYBOARD+MOUSE EMULATION PRESET IN STEAM INPUT
+        // using commandv does not give user feedback, so we need to that
+
+        // left stick
+        mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mp.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
+        mp.add_forced_key_binding("s", "empv_steaminput_ldown", function() { mp.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
+        mp.add_forced_key_binding("a", "empv_steaminput_lleft", function() { mp.commandv("script_binding","chapter_prev"); });
+        mp.add_forced_key_binding("d", "empv_steaminput_lright", function() { mp.commandv("script_binding","chapter_next"); });
+
+        // dpad
+        mp.add_forced_key_binding("1", "empv_steaminput_dup", function() { mp.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("3", "empv_steaminput_ddown", function() { mp.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("4", "empv_steaminput_dleft", function() { mp.commandv("seek","5"); });
+        mp.add_forced_key_binding("2", "empv_steaminput_dright", function() { mp.commandv("seek","-5"); });
+
+        // right stick is mouse
+
+        // buttons
+        mp.add_forced_key_binding("esc", "empv_steaminput_start", function() { mp.commandv("script_binding","easympv"); });
+        mp.add_forced_key_binding("tab", "empv_steaminput_select", function() { mp.commandv("script_binding","stats/display-stats-toggle"); });
+        mp.add_forced_key_binding("space", "empv_steaminput_a", function() { mp.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("e", "empv_steaminput_b", function() { mp.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("r", "empv_steaminput_x", function() { mp.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mp.get_property("video-aspect-override")); });
+        mp.add_forced_key_binding("f", "empv_steaminput_y", function() { mp.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mp.get_property("sub-scale")).toFixed(3)); });
+        mp.add_forced_key_binding("WHEEL_UP", "empv_steaminput_rb", function() { mp.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("WHEEL_DOWN", "empv_steaminput_lb", function() { mp.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
+
+        // lt and rt are mouse buttons
+    }
 
     // Registering functions to events
     mp.register_event("file-loaded", Core.onFileLoad);
@@ -214,6 +249,29 @@ Core.doUnregistrations = function () {
     mp.remove_key_binding("empv_log_hotkey");
     mp.remove_key_binding("empv_eval_hotkey");
 
+    if(OS.isSteamGamepadUI)
+    {
+        try {
+            mp.remove_key_binding("empv_steaminput_lup");
+            mp.remove_key_binding("empv_steaminput_ldown");
+            mp.remove_key_binding("empv_steaminput_lleft");
+            mp.remove_key_binding("empv_steaminput_lright");
+            mp.remove_key_binding("empv_steaminput_dup");
+            mp.remove_key_binding("empv_steaminput_ddown");
+            mp.remove_key_binding("empv_steaminput_dleft");
+            mp.remove_key_binding("empv_steaminput_dright");
+            mp.remove_key_binding("empv_steaminput_start");
+            mp.remove_key_binding("empv_steaminput_select");
+            mp.remove_key_binding("empv_steaminput_a");
+            mp.remove_key_binding("empv_steaminput_b");
+            mp.remove_key_binding("empv_steaminput_x");
+            mp.remove_key_binding("empv_steaminput_y");
+            mp.remove_key_binding("empv_steaminput_rb");
+            mp.remove_key_binding("empv_steaminput_lb");
+        }
+        catch(x) {}
+    }
+
     mp.unregister_event(UI.Input.OSDLog.addToBuffer);
     mp.unregister_event(Core.onFileLoad);
     mp.unregister_event(Core.onShutdown);
@@ -237,25 +295,6 @@ Core.defineMenus = function () {
             a
         );
     };
-    var descriptionChapters = function (a, b) {
-        var b1;
-        b1 = UI.SSA.setColorRed();
-        if (b == "enabled") {
-            b1 = UI.SSA.setColorGreen();
-        }
-        return (
-            "(Use the Right Arrow Key to change settings.)@br@" +
-            '@br@This will autodetect Openings, Endings and Previews and then either "skip" or "slowdown" them.@br@' +
-            UI.SSA.setColorYellow() +
-            "Current Mode: " +
-            a +
-            "@br@" +
-            UI.SSA.setColorYellow() +
-            "Currently " +
-            b1 +
-            b
-        );
-    };
     var descriptionColors = function (a, b) {
         return (
             "Use the right arrow key to preview a profile.@br@Use the left arrow key to set it as default.@br@Use Enter to confirm.@br@" +
@@ -270,31 +309,21 @@ Core.defineMenus = function () {
     };
     var descriptionSettings = function (a, b) {
         return (
-            "mpv " +
-            b +
-            "@br@" +
-            "easympv " +
-            a +
-            "@br@" +
-            "ffmpeg " +
-            Utils.ffmpegVersion +
-            "@br@" +
-            "libass" +
-            Utils.libassVersion
+            "mpv " + b +
+            "@br@easympv " + a
         );
     };
 
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
         description: "",
-        descriptionColor: "ff0000",
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
     };
 
     var MainMenuItems = [
         {
-            title: "Close@br@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Close@br@@br@",
             item: "close",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -303,7 +332,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Open...",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open...@br@@us10@",
             item: "open",
             description: "Files, Discs, Devices & URLs",
             eventHandler: function(event, menu) {
@@ -314,44 +343,45 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Shaders",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Shaders",
             item: "shaders",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    //UI.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                    UI.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                    //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
                 }
             }
         },
         {
-            title: "Colors",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Colors",
             item: "colors",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
                 }
             }
         },
         {
-            title: "Chapters@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Chapters@br@@us10@",
             item: "chapters",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
                 }
             }
         },
         {
-            title: "Preferences@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Preferences",
             item: "options",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    UI.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.SettingsMenu,menu);
                 }
             }
         },
         {
-            title: "Quit mpv",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Quit mpv",
+            hasUnderscore: false,
             item: "quit",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -360,9 +390,10 @@ Core.defineMenus = function () {
                         Utils.exitMpv();
                         menu.hideMenu();
                     } else {
-                        quitTitle = this.title;
+                        quitTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Quit mpv";
                         this.title =
                             UI.SSA.setColorRed() + "Are you sure?";
+                        if (this.hasUnderscore) { this.title += "@br@@us10@"}
                         menu.redrawMenu();
                     }
                 }
@@ -370,6 +401,7 @@ Core.defineMenus = function () {
         },
     ];
 
+    /*
     // TODO: this needs to be moved to onFileLoad
     if (Number(mp.get_property("playlist-count")) > 1) {
         MainMenuItems.splice(2, 0, {
@@ -381,11 +413,15 @@ Core.defineMenus = function () {
             }
         });
     }
-
-    Core.Menus.MainMenu = new UI.Menu(MainMenuSettings, MainMenuItems, undefined);
+    */
+    Core.Menus.MainMenu = new UI.Menus.Menu(MainMenuSettings, MainMenuItems, undefined);
     var quitCounter = 0;
-    var quitTitle = Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title;
+    var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
+        if (event == "help") {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
+            return;
+        }
 /*
             if (action == "show-playlist") {
                 Core.Menus.MainMenu.hideMenu();
@@ -405,22 +441,25 @@ Core.defineMenus = function () {
                 mp.osd_message(UI.SSA.startSequence() + UI.SSA.setSize(8) + playlist, 3);
             }
 */
-        if (event == "enter") {
-            API.openForeignMenu(action);
-            return;
-        }
         if (event == "hide") {
-            Core.Menus.MainMenu.items[Core.Menus.MainMenu.items.length - 1].title = quitTitle;
+            var quitItem = Core.Menus.MainMenu.getItemByName("quit");
+            quitItem.title = quitTitle;
+            if (quitItem.hasUnderscore) { quitItem.title += "@br@@us10@"; }
             quitCounter = 0;
             return;
         }
         if (event == "show") {
+            hint = Settings.presets.hints[Math.floor(Math.random() * Settings.presets.hints.length)].replaceAll("@br@", "@br@" + UI.SSA.setColorYellow());
+            Core.Menus.MainMenu.settings.description =
+                UI.SSA.setColorYellow() +
+                UI.SSA.insertSymbolFA(" ",21,21) + hint;
+
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
                 Utils.showAlert(
                     "info",
                     "An update is available.@br@" +
-                    "Current Version: " + Settings.Data.currentVersion +
+                    "Current Version: " + Core.fancyCurrentVersion +
                     "@br@New Version: " + Settings.Data.newestVersion
                 );
             }
@@ -429,10 +468,6 @@ Core.defineMenus = function () {
                 Core.Menus.MainMenu.setDescription(UI.SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
                 Core.Menus.MainMenu.redrawMenu();
             }
-            return;
-        }
-        if (event == "help") {
-            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
             return;
         }
     };
@@ -454,7 +489,7 @@ Core.defineMenus = function () {
 
     var ShadersMenuItems = [
         {
-            title: "[Disable All Shaders]@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable All Shaders@br@@us10@",
             item: "none",
         },
         {
@@ -466,7 +501,7 @@ Core.defineMenus = function () {
             item: "Automatic Anime4K (Worse, but less demanding)",
         },
         {
-            title: "Recommended Anime4K Settings (Better, but more demanding)@br@@us10@@br@",
+            title: "Recommended Anime4K Settings (Better, but more demanding)@br@@us10@",
             item: "Automatic Anime4K (Better, but more demanding)",
         },
     ];
@@ -485,7 +520,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ShadersMenu = new UI.Menu(
+    Core.Menus.ShadersMenu = new UI.Menus.Menu(
         ShadersMenuSettings,
         ShadersMenuItems,
         Core.Menus.MainMenu
@@ -567,82 +602,178 @@ Core.defineMenus = function () {
             UI.SSA.insertSymbolFA("") +
             UI.SSA.setColorWhite() +
             "Chapters",
-        description: descriptionChapters(Chapters.mode, Chapters.status),
-        customKeyEvents: [{key: "h", event: "help"}]
+        description: "This will autodetect Openings, Endings and Previews and then either \"skip\" or \"slowdown\" them.@br@",
+        customKeyEvents: [{key: "h", event: "help"}],
     };
 
     var ChaptersMenuItems = [
         {
-            title: "[Change Mode]",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Change Mode",
             item: "tmode",
+            description: UI.SSA.setColorYellow() + "Current mode: " + Chapters.mode,
+            eventHandler: function(event, menu)
+            {
+                if (Chapters.mode == "skip") {
+                    Chapters.mode = "slowdown";
+                } else {
+                    Chapters.mode = "skip";
+                }
+                this.description = UI.SSA.setColorYellow() + "Current mode: " + Chapters.mode;
+                menu.redrawMenu();
+            }
         },
         {
-            title: "[Toggle]@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle",
             item: "tstatus",
-        },
-        {
-            title: "Confirm",
-            item: "confirm",
+            description: UI.SSA.setColorYellow() + "Currently " + Chapters.status,
+            eventHandler: function(event, menu)
+            {
+                if (Chapters.status == "disabled") {
+                    Chapters.status = "enabled";
+                } else {
+                    Chapters.status = "disabled";
+                }
+                this.description = UI.SSA.setColorYellow() + "Currently " + Chapters.status;
+                menu.redrawMenu();
+            }
         },
     ];
 
-    Core.Menus.ChaptersMenu = new UI.Menu(
+    Core.Menus.ChaptersMenu = new UI.Menus.Menu(
         ChaptersMenuSettings,
         ChaptersMenuItems,
         Core.Menus.MainMenu
     );
 
     Core.Menus.ChaptersMenu.eventHandler = function (event, action) {
-        switch (event) {
-            case "show":
-                Core.Menus.ChaptersMenu.setDescription(
-                    descriptionChapters(Chapters.mode, Chapters.status)
-                );
-                break;
-            case "enter":
-                if (action == "back") {
-                    Core.Menus.ChaptersMenu.hideMenu();
-                    if (!Core.Menus.MainMenu.isMenuActive()) {
-                        Core.Menus.MainMenu.renderMenu();
-                    } else {
-                        Core.Menus.MainMenu.hideMenu();
-                    }
-                } else if (action == "confirm") {
-                    Core.Menus.ChaptersMenu.hideMenu();
-                }
-                break;
-            case "right":
-                if (action == "tmode") {
-                    if (Chapters.mode == "skip") {
-                        Chapters.mode = "slowdown";
-                    } else {
-                        Chapters.mode = "skip";
-                    }
-                    Core.Menus.ChaptersMenu.setDescription(
-                        descriptionChapters(Chapters.mode, Chapters.status)
-                    );
-                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
-                } else if (action == "tstatus") {
-                    if (Chapters.status == "disabled") {
-                        Chapters.status = "enabled";
-                    } else {
-                        Chapters.status = "disabled";
-                    }
-                    Core.Menus.ChaptersMenu.setDescription(
-                        descriptionChapters(Chapters.mode, Chapters.status)
-                    );
-                    Core.Menus.ChaptersMenu.appendSuffixToCurrentItem();
-                }
-                break;
-            case "help":
-                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
-                break;
-            default:
-                break;
-            }
+        if (event == "help")
+        {
+            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
+        }
     };
 
+    var SettingsDevelopmentSubMenuItems = [
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Do config migration now",
+            item: "do_config_migration",
+            eventHandler: function(event, menu) {
+                if (event == "enter")
+                {
+                    menu.hideMenu();
+                    Settings.migrate();
+                    Settings.reload();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Redo First Time Setup@br@@us10@",
+            item: "do_config_migration",
+            eventHandler: function(event, menu) {
+                if (event == "enter")
+                {
+                    menu.hideMenu();
+                    Settings.Data.isFirstLaunch = true;
+                    Settings.save();
+                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Create Log File",
+            item: "create_log_file",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
+                    buffer.reverse();
+                    mp.utils.write_file(
+                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+                        buffer.join("\n")
+                    );
+                    Utils.showAlert("info", "Log exported to Desktop!");
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle On-Screen Log",
+            item: "toggle_on_screen_log",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (UI.Input.OSDLog.OSD == undefined) {
+                        UI.Input.OSDLog.show();
+                        return;
+                    }
+                    UI.Input.OSDLog.hide();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Debug Mode@br@@us10@",
+            item: "toggle_debug_mode",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    if (Settings.Data.debugMode)
+                    {
+                        Settings.Data.debugMode = false;
+                        mp.enable_messages("info");
+                        Utils.showAlert("info", "Debug mode has been disabled!");
+                    }
+                    else
+                    {
+                        Settings.Data.debugMode = true;
+                        mp.enable_messages("debug");
+                        Utils.showAlert("info", "Debug mode has been enabled!");
+                    }
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Command Input",
+            item: "command_input",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    UI.Input.showInteractiveCommandInput();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "JavaScript Input@br@@us10@",
+            item: "javascript_input",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    UI.Input.showJavascriptInput();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu@br@@us10@",
+            item: "open_tests_menu",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Core.Menus.TestsMenu.showMenu();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Restart mpv in place",
+            item: "restart_mpv",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    menu.hideMenu();
+                    Utils.restartMpv();
+                }
+            }
+        }
+    ];
+
     var SettingsMenuSettings = {
+        autoClose: 0,
         image: "settings",
         title:
             "{\\1c&H782B78&}" +
@@ -658,37 +789,40 @@ Core.defineMenus = function () {
 
     var SettingsMenuItems = [
         {
-            title: "Toggle Discord RPC@br@@us10@@br@",
-            item: "discord",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    mp.commandv("script-binding", "drpc_toggle");
-                }
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Configuration",
+            item: "configuration",
+            eventHandler: function (event, menu) {
+                // pre-create the other menu and just open it here
+                menu.hideMenu();
+                Core.Menus.SettingsConfigurationSubMenu.showMenu();
             }
         },
         {
-            title: "Check for updates",
-            item: "updater",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Updates",
+            item: "updates",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-
                     var updateConfirmation = false;
-                    var umenu = new UI.Menu(
+                    var setDescription = function()
+                    {
+                        var d = "You are on version " +
+                        UI.SSA.setColorYellow() +
+                        Core.fancyCurrentVersion;
+                        if(!OS.isGit)
+                        {
+                            d += "@br@The latest available version is " +
+                            UI.SSA.setColorYellow() +
+                            Settings.Data.newestVersion;
+                        }
+                        d += "@br@@br@" + Utils.latestUpdateData.changelog;
+                        return d;
+                    }
+                    var umenu = new UI.Menus.Menu(
                         {
                             title: "Update",
                             autoClose: "0",
-                            description:
-                                "You are on version " +
-                                UI.SSA.setColorYellow() +
-                                Settings.Data.currentVersion +
-                                "@br@" +
-                                "The latest available version is " +
-                                UI.SSA.setColorYellow() +
-                                Settings.Data.newestVersion +
-                                "@br@@br@" +
-                                Utils.latestUpdateData.changelog,
+                            description: setDescription(),
                         },
                         [],
                         Core.Menus.SettingsMenu
@@ -707,22 +841,37 @@ Core.defineMenus = function () {
                                 umenu.redrawMenu();
                                 updateConfirmation = true;
                             }
-                        } else if (event == "show" && Utils.updateAvailable) {
-                            if (umenu.items.length == 1) {
-                                umenu.items.push({
-                                    title:
-                                        "Update to version " +
-                                        UI.SSA.setColorYellow() +
-                                        Settings.Data.newestVersion,
-                                    item: "update",
-                                });
-                            }
+                        } else if (event == "show") {
+                            // there is a silly way to crash everything here, so try{} it is
+                            try {
+                                if(OS.isGit)
+                                {
+                                    if (umenu.items.length == 1) {
+                                        umenu.items.push({
+                                            title:
+                                                "Pull latest changes",
+                                            item: "update",
+                                        });
+                                    }
+                                }
+                                if (Utils.updateAvailable && !OS.isGit)
+                                {
+                                    if (umenu.items.length == 1) {
+                                        umenu.items.push({
+                                            title:
+                                                "Update to version " +
+                                                UI.SSA.setColorYellow() +
+                                                Settings.Data.newestVersion,
+                                            item: "update",
+                                        });
+                                    }
+                                }
+                            } catch(x) {}
                         }
                     };
                     if (Settings.Data.debugMode) {
                         umenu.settings.description +=
                             "@br@@br@[Debug Mode Information]@br@These files will be removed:@br@";
-
                         for (
                             var i = 0;
                             i < Utils.latestUpdateData.removeFiles.length;
@@ -749,12 +898,12 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Credits@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Credits@br@@us10@",
             item: "credits",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var cmenu = new UI.Menu(
+                    var cmenu = new UI.Menus.Menu(
                         {
                             title: "Credits",
                             autoClose: "0",
@@ -773,62 +922,34 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Edit easympv.conf",
-            item: "easympvconf",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Clock Overlay",
+            item: "toggle_clock",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Utils.openFile("easympv.conf");
+                    if (UI.Time.OSD == undefined)
+                    {
+                        UI.Time.show();
+                    } else
+                    {
+                        UI.Time.hide();
+                    }
                 }
             }
         },
         {
-            title: "Edit mpv.conf",
-            item: "mpvconf",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Toggle Information Overlay@br@@us10@",
+            item: "toggle_information",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Utils.openFile("mpv.conf");
+                    mp.commandv("script-binding","stats/display-stats-toggle");
                 }
             }
         },
         {
-            title: "Edit input.conf",
-            item: "inputconf",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Utils.openFile("input.conf");
-                }
-            }
-        },
-        {
-            title: "Reload config",
-            item: "reload",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    Settings.reload();
-                    Settings.mpvConfig.reload();
-                    Settings.inputConfig.reload();
-                    Settings.presets.reload();
-                    Utils.showAlert("info", "Configuration reloaded.");
-                }
-            }
-        },
-        {
-            title: "Restart plugin",
-            item: "restart",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
-                }
-            }
-        },
-        {
-            title: "Open config folder@br@@us10@@br@",
-            item: "config",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open config folder",
+            item: "open_config_folder",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
@@ -837,81 +958,462 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: "Create Log File",
-            item: "log.export",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Reload config",
+            item: "reload_config",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
-                    buffer.reverse();
-                    mp.utils.write_file(
-                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
-                        buffer.join("\n")
-                    );
-                    Utils.showAlert("info", "Log exported to Desktop!");
+                    UI.Image.hide("settings");
+                    Settings.mpvConfig.reload();
+                    Settings.inputConfig.reload();
+                    Settings.presets.reload();
+                    Settings.reload();
+                    Utils.showAlert("info", "Configuration reloaded.");
                 }
             }
         },
         {
-            title: "Toggle On-Screen Log",
-            item: "log.osd",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Reinitialize plugin@br@@us10@",
+            item: "reinitialize_plugin",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
+                    menu.settings.fadeOut = false;
                     menu.hideMenu();
-                    if (UI.Input.OSDLog.OSD == undefined) {
-                        UI.Input.OSDLog.show();
-                        return;
-                    }
-                    UI.Input.OSDLog.hide();
+                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
         {
-            title: "Toggle Debug Mode",
-            item: "debugmode",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Development Options",
+            item: "development_options",
+            eventHandler: function (event, menu) {
+                if (event == "enter")
+                {
                     menu.hideMenu();
-                    if (Settings.Data.debugMode)
+                    Core.Menus.SettingsDevelopmentSubMenu.showMenu();
+                }
+            }
+        }
+    ];
+
+    Core.Menus.SettingsMenu = new UI.Menus.Menu(
+        SettingsMenuSettings,
+        SettingsMenuItems,
+        Core.Menus.MainMenu
+    );
+
+    Core.Menus.SettingsDevelopmentSubMenu = new UI.Menus.Menu(
+        {
+            autoClose: 0,
+            title:
+                "{\\1c&H782B78&}" +
+                UI.SSA.insertSymbolFA("") +
+                UI.SSA.setColorWhite() +
+                "Development Options",
+            description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
+            //customKeyEvents: [{key: "h", event: "help"}]
+        },
+        SettingsDevelopmentSubMenuItems,
+        Core.Menus.SettingsMenu
+    );
+    Core.Menus.SettingsDevelopmentSubMenu.eventHandler = function(){};
+
+    var enabledText = "Currently "+ UI.SSA.setColorGreen() + "enabled" + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+    var disabledText = "Currently "+ UI.SSA.setColorRed() +"disabled" + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+
+    var SettingsConfigurationSubMenuItems = [
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Notify about new updates",
+            item: "notify_about_updates",
+            descriptionPrefix: "Whether to alert you when a new version is available.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.notifyAboutUpdates)
                     {
-                        Settings.Data.debugMode = false;
-                        mp.enable_messages("info");
-                        Utils.showAlert("info", "Debug mode has been disabled!");
+                        Settings.Data.notifyAboutUpdates = false;
+                        this.description = this.descriptionPrefix + disabledText;
                     }
                     else
                     {
-                        Settings.Data.debugMode = true;
-                        mp.enable_messages("debug");
-                        Utils.showAlert("info", "Debug mode has been enabled!");
+                        Settings.Data.notifyAboutUpdates = true;
+                        this.description = this.descriptionPrefix + enabledText;
                     }
+                    menu.redrawMenu();
                     Settings.save();
                 }
             }
         },
         {
-            title: "Input a command",
-            item: "command",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show Clock Overlay",
+            item: "show_clock",
+            descriptionPrefix: "Whether to show an unobstrusive clock on screen.@br@",
+            description: "",
             eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    menu.hideMenu();
-                    UI.Input.showInteractiveCommandInput();
+                if (event == "right") {
+                    if(Settings.Data.showClock)
+                    {
+                        Settings.Data.showClock = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                        UI.Time.hide();
+                    }
+                    else
+                    {
+                        Settings.Data.showClock = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                        UI.Time.show();
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
                 }
             }
         },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Clock overlay position on screen",
+            item: "clock_position",
+            descriptionPrefix: "Where to show the clock on screen.@br@Currently ",
+            description: "",
+            eventHandler: function(event, menu) {
+                if (event == "right") {
+                    if(Settings.Data.clockPosition == "top-left")
+                    {
+                        Settings.Data.clockPosition = "top-right";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "top-right";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "top-right")
+                    {
+                        Settings.Data.clockPosition = "bottom-left";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "bottom-left";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "bottom-left")
+                    {
+                        Settings.Data.clockPosition = "bottom-right";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "bottom-right";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                    if(Settings.Data.clockPosition == "bottom-right")
+                    {
+                        Settings.Data.clockPosition = "top-left";
+                        this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + "top-left";
+                        UI.Time.hide();
+                        if(Settings.Data.showClock)
+                        {
+                            UI.Time.show();
+                        }
+                        menu.redrawMenu();
+                        Settings.save();
+                        return;
+                    }
+                }
+            }
+        },
+        // after you return: add clockPosition entry
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Menu Fade In/Out",
+            item: "menu_fade_in_out",
+            descriptionPrefix: "Makes some menus fade in and out (possbile performance impact).@br@Leave this disabled if unsure.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.fadeMenus)
+                    {
+                        Settings.Data.fadeMenus = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.fadeMenus = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Scroll Alerts",
+            item: "scroll_alerts",
+            descriptionPrefix: "Whether to move alerts across the screen (possbile performance impact).@br@Disable if unsure.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.scrollAlerts)
+                    {
+                        Settings.Data.scrollAlerts = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.scrollAlerts = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show hidden Files in File Explorer",
+            item: "show_hidden_files",
+            descriptionPrefix: "Hidden files can be annoying, especially on Linux.@br@Enable this to show them.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.showHiddenFiles)
+                    {
+                        Settings.Data.showHiddenFiles = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.showHiddenFiles = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Allow deleting folders in File Explorer",
+            item: "allow_deleting_folders",
+            descriptionPrefix: "Whether to show the \"Remove\" option for folders.@br@IMPORTANT: You could totally delete something important by accident, so you should probably leave this disabled.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.allowFolderDeletion)
+                    {
+                        Settings.Data.allowFolderDeletion = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.allowFolderDeletion = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Use system notifications instead of on-screen messages@br@@us10@",
+            item: "use_system_notifications",
+            descriptionPrefix: "On-screen messages are quite buggy right now, so using system notifications instead might be more desirable.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.useNativeNotifications)
+                    {
+                        Settings.Data.useNativeNotifications = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.useNativeNotifications = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "IPC Server",
+            item: "ipc_server",
+            descriptionPrefix: "Automatically launches an ipc server named \"mpv\".@br@If you don't know what that is, you should probably leave this disabled.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.startIPCServer)
+                    {
+                        Settings.Data.startIPCServer = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.startIPCServer = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Save full log",
+            item: "save_full_log",
+            descriptionPrefix: "FOR TROUBLESHOOTING ONLY: You should not enable this unless you know what you are doing.@br@Having this enabled for extended periods of time will freeze or even crash mpv.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.saveFullLog)
+                    {
+                        Settings.Data.saveFullLog = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.saveFullLog = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        }
     ];
 
-    /*
+    Core.Menus.SettingsConfigurationSubMenu = new UI.Menus.Menu(
         {
-            title: "Clear watchlater data",
-            item: "clearwld",
+            autoClose: 0,
+            scrollingEnabled: true,
+            title:
+                "{\\1c&H782B78&}" +
+                UI.SSA.insertSymbolFA("") +
+                UI.SSA.setColorWhite() +
+                "Configuration Options",
+            description: "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu).@br@This menu will not close automatically."
+            //customKeyEvents: [{key: "h", event: "help"}]
         },
-    */
-
-    Core.Menus.SettingsMenu = new UI.Menu(
-        SettingsMenuSettings,
-        SettingsMenuItems,
-        Core.Menus.MainMenu
+        SettingsConfigurationSubMenuItems,
+        Core.Menus.SettingsMenu
     );
+
+    Core.Menus.SettingsConfigurationSubMenu.eventHandler = function(event, action) {
+        if (event == "show")
+        {
+            var item = undefined;
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("notify_about_updates")
+            if(Settings.Data.notifyAboutUpdates)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_clock")
+            if(Settings.Data.showClock)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("clock_position")
+            item.description = item.descriptionPrefix + UI.SSA.setColorYellow() + Settings.Data.clockPosition;
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("menu_fade_in_out");
+            if(Settings.Data.fadeMenus)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("scroll_alerts");
+            if(Settings.Data.scrollAlerts)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_hidden_files");
+            if(Settings.Data.showHiddenFiles)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("allow_deleting_folders");
+            if(Settings.Data.allowFolderDeletion)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("use_system_notifications");
+            if(Settings.Data.useNativeNotifications)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("ipc_server");
+            if(Settings.Data.startIPCServer)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("save_full_log");
+            if(Settings.Data.saveFullLog)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+        }
+        else if (event == "hide")
+        {
+            Settings.save();
+        }
+    };
 
     Core.Menus.SettingsMenu.eventHandler = function (event, action) {
             /*
@@ -953,16 +1455,6 @@ Core.defineMenus = function () {
                     );
                 }
             }
-            if (action == "clearwld") {
-                Utils.clearWL();
-                return;
-            }
-            if (action == "remote") {
-                Settings.Data.useRandomPipeName = false;
-                Utils.setIPCServer(Settings.Data.useRandomPipeName);
-                Settings.save();
-                return;
-            }
             return;
             */
         if (event == "show") {
@@ -993,7 +1485,7 @@ Core.defineMenus = function () {
 
     var ColorsMenuItems = [
         {
-            title: "[Disable All Presets]@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + "Disable all profiles@br@@us10@",
             item: "none",
         },
     ];
@@ -1012,7 +1504,7 @@ Core.defineMenus = function () {
         });
     }
 
-    Core.Menus.ColorsMenu = new UI.Menu(
+    Core.Menus.ColorsMenu = new UI.Menus.Menu(
         ColorsMenuSettings,
         ColorsMenuItems,
         Core.Menus.MainMenu
@@ -1079,6 +1571,113 @@ Core.defineMenus = function () {
                 break;
             default:
                 break;
+        }
+    };
+
+    Core.Menus.TestsMenu = new UI.Menus.Menu({
+        title: "Tests",
+        description: "This menu lets you launch tests.",
+        autoClose: 0
+    },[],undefined);
+
+    var createItemList = function()
+    {
+        var testsMenuitems = [];
+        testsMenuitems.push({
+            title: "Close@br@@us10@",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    Core.Menus.TestsMenu.hideMenu();
+                }
+            }
+        });
+
+        for (var test in Tests.list) {
+            var item = {
+                title: test,
+                item: test
+            };
+            if (Tests.list[test].description != undefined)
+            {
+                item.description = Tests.list[test].description;
+            }
+            testsMenuitems.push(item);
+        }
+
+        testsMenuitems.push({
+            title: "[RUN ALL TESTS ABOVE]",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    for (var i = 1; i < menu.items.length-2; i++)
+                    {
+                        menu._dispatchEvent("enter",menu.items[i]);
+                    }
+                }
+            }
+        });
+
+        testsMenuitems.push({
+            title: "[RESET ALL TESTS]",
+            item: "",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    createItemList();
+                    menu.redrawMenu();
+                }
+            }
+        });
+
+        Core.Menus.TestsMenu.items = testsMenuitems;
+    }
+
+    createItemList();
+
+    Core.Menus.TestsMenu.setResultForItem = function(name, result)
+    {
+        var grade = UI.SSA.setColorRed() + "[FAIL]" + UI.SSA.setColorWhite();
+
+        if (result == undefined)
+        {
+            grade = UI.SSA.setColorBlue() + "[DONE]" + UI.SSA.setColorWhite();
+        }
+        else
+        {
+            if (result)
+            {
+                grade = UI.SSA.setColorGreen() + "[PASS]" + UI.SSA.setColorWhite();
+            }
+        }
+
+        for (var i = 0; i < Core.Menus.TestsMenu.items.length; i++) {
+            if (Core.Menus.TestsMenu.items[i].title == name)
+            {
+                Core.Menus.TestsMenu.items[i].title = grade + " " + Core.Menus.TestsMenu.items[i].title;
+                Core.Menus.TestsMenu.items[i].item = "ignore";
+                break;
+            }
+        }
+    }
+
+    Core.Menus.TestsMenu.eventHandler = function(action, item) {
+        if (action == "enter")
+        {
+            if (item == "ignore")
+            {
+                return;
+            }
+            Core.Menus.TestsMenu.setDescription("Test in progress!@br@(DO NOT CLOSE THIS MENU!)");
+            Core.Menus.TestsMenu.redrawMenu();
+            Tests.run(item);
+            Core.Menus.TestsMenu.setDescription("Tests finished.");
+            Core.Menus.TestsMenu.redrawMenu();
         }
     };
 }
@@ -1158,11 +1757,27 @@ Core.startExecution = function () {
         mp.enable_messages("info");
     }
     mp.register_event("log-message", UI.Input.OSDLog.addToBuffer);
+    OS.init();
+    Core.fancyCurrentVersion = Settings.Data.currentVersion;
 
-    Utils.log("easympv " + Settings.Data.currentVersion + " starting...","startup","info");
+    if (OS.isGit)
+    {
+        if (OS.gitAvailable)
+        {
+            Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-" + OS.gitCommit;
+        }
+        else
+        {
+            Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-git";
+        }
+    }
 
-    Utils.determineOS();
-    Utils.checkInternetConnection();
+    Utils.log("easympv " + Core.fancyCurrentVersion + " starting...","startup","info");
+
+    Utils.log("Checking for updates...","startup","info");
+    setTimeout(function() {
+        Utils.getLatestUpdateData();
+    },1000);
 
     Core.doFileChecks();
 
