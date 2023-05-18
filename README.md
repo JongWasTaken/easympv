@@ -1,7 +1,6 @@
 # easympv (mpv plugin)
 
 > :warning: **Work in progress**: Master branch can be unstable or non-working!  
-Development currently happens on the `replace-compat` branch!
 
 ![](https://smto.pw/mpv/images/preview.png)
 
@@ -39,7 +38,7 @@ macOS support is experimental and not fully finished.
 #### Linux
 The automatic installer script will take care of any dependencies.  
 If you wish to install easympv manually you will need the following dependencies:
-- mpv, compiled with LuaJIT support (Not all distributions do this!)
+- mpv, if you want Discord integration to work it needs to have been compiled with LuaJIT support (Not all distributions do this!)
 - either `wget` (preferred) or `curl` (usually preinstalled)
 - `xclip` OR `wl-clipboard` (if you use Wayland)  
     When in doubt, install both!
