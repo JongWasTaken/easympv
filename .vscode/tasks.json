@@ -6,7 +6,14 @@
         {
             "label": "mpv (default)",
             "type": "shell",
-            "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no /mnt/smb/Anime/Archive",
+            "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no /mnt/smb/Anime/Archive/Yu-Gi-Oh! - The Dark Side of Dimensions.mkv",
+            "windows": {
+                "command": "cmd",
+                "args": ["/c","mpv.com","X:\\mpv-placeholder.png"],
+                "options": {
+                    "cwd": "C:\\Program Files\\mpv\\"
+                }
+            },
             "problemMatcher": [],
             "group": {
                 "kind": "build",

@@ -173,7 +173,7 @@ OS._call = function (cmd,async,callback) {
         if (mp.utils.file_info(mp.utils.get_user_path("~~/.tmp-powershell.ps1")) != undefined)
         {
             var dcommand = "Remove-Item -Path \""+ mp.utils.get_user_path("~~/.tmp-powershell.ps1") +"\" -Force";
-            var r = mp.command_native(
+            mp.command_native(
                 {
                     name: "subprocess",
                     playback_only: false,
@@ -566,10 +566,11 @@ OS.updateMpvWindows = function (path)
 {
     if(OS.isWindows)
     {
+        if (path == undefined) { path = Settings.Data.mpvLocation; }
         return OS._call("$processOptions = @{ \n"+
         "    FilePath = \"powershell.exe\" \n"+
         "    Verb = \"runAs\" \n"+
-        "    ArgumentList = \"powershell\", \"-Command {cd "+ path +" ; .\\installer\\updater.ps1}\", \"-NoExit\", \"-ExecutionPolicy bypass\" \n"+
+        "    ArgumentList = \"powershell\", \"-Command {cd \'"+ path +"\' ; .\\installer\\updater.ps1}\", \"-NoExit\", \"-ExecutionPolicy bypass\" \n"+
         "} \n"+
         "try \n"+
         "{ \n"+
@@ -610,7 +611,7 @@ OS.runScriptElevated = function (path, callback) {
         return OS._call("$processOptions = @{\n"+
         "    FilePath = \"powershell.exe\"\n"+
         "    Verb = \"runAs\"\n"+
-        "    ArgumentList = \"cmd\", \"/c\", "+ path +", \"/u\"\n"+
+        "    ArgumentList = \"cmd\", \"/c\", \"\'"+ path +"\'\", \"/u\"\n"+
         "}\n"+
         "try\n"+
         "{\n"+
