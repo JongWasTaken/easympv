@@ -72,35 +72,18 @@ OS.init = function () {
 };
 
 OS._performChecks = function () {
+    OS.checksCompleted = true;
     // Git
+    var r = undefined;
     if (OS.isWindows) {
-        var args = [
-            "powershell",
-            "-NoProfile",
-            "-Command",
-            "Get-Command git",
-        ];
+        r = OS._call("Get-Command git | foreach { $_.Source }");
     } else {
-        var args = [
-            "sh",
-            "-c",
-            "which git",
-        ];
+        r = OS._call("which git");
     }
-    var r = mp.command_native(
-        {
-            name: "subprocess",
-            playback_only: false,
-            capture_stdout: true,
-            capture_stderr: false,
-            args: args,
-        }
-    );
+
     if (mp.utils.file_info(r.stdout.trim()) != undefined) {
         OS.gitAvailable = true;
     }
-    OS.checksCompleted = true;
-
 
     if (OS.gitAvailable && OS.isGit) {
         var configdir = mp.utils.get_user_path("~~/");

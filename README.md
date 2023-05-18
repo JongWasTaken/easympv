@@ -64,14 +64,11 @@ In the future there will be some sort of setup on the first start, this is curre
 #### TODOs
 - More Windows testing: My main rig runs Arch Linux, so any Windows-specific code is usually guessed
 - macOS testing: I need to set up a macOS virtual machine again
-- Test every single function in OS.js, then merge into master
-- Rework alerts once and for all, it might be possible to have them "run" across the screen
 - Figure out upgrading from 1.x
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
 #### Ideas
 - Remove Discord integration, add a way to optionally install it after the fact (and possibly more, merge with dependency loader?)
 - Improve images, add variants up to 8k resolution and make it consistent
-- Automatic testing might be possible to a certain degree, unfortunately its not like i can just use an existing solution
 #### All TODO items need to be addressed before I can consider declaring this project stable.
 
 ## License
