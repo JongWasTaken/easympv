@@ -23,7 +23,6 @@ OS._connectionChecked = false;
 OS._isConnected = false;
 
 OS.init = function () {
-    OS.getConnectionStatus();
     if (mp.utils.getenv("OS") == "Windows_NT") {
         OS.name = "win";
         OS.isWindows = true;
@@ -68,6 +67,8 @@ OS.init = function () {
             }
         }
     }
+    OS._performChecks();
+    OS.getConnectionStatus();
 
 };
 
@@ -80,14 +81,14 @@ OS._performChecks = function () {
     } else {
         r = OS._call("which git");
     }
-
     if (mp.utils.file_info(r.stdout.trim()) != undefined) {
         OS.gitAvailable = true;
     }
-
     if (OS.gitAvailable && OS.isGit) {
         var configdir = mp.utils.get_user_path("~~/");
-        OS.gitCommit = OS._call("cd "+configdir+" && git rev-parse --abbrev-ref HEAD").stdout.trim() + "-" + OS._call("cd "+configdir+" && git rev-parse --short HEAD").stdout.trim();
+        var and = "&&";
+        if (OS.isWindows) { and = ";"; }
+        OS.gitCommit = OS._call("cd "+configdir+" "+ and +" git rev-parse --abbrev-ref HEAD").stdout.trim() + "-" + OS._call("cd "+configdir+" "+ and +" git rev-parse --short HEAD").stdout.trim();
     }
 }
 
@@ -485,11 +486,10 @@ OS.fileInfo = function (file) {
 
 // remove-file
 OS.fileRemove = function (file) {
-    if (mp.utils.file_info("~~" + OS.directorySeperator + file) == undefined)
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/") + OS.directorySeperator + file) == undefined)
     {
         return false;
     }
-
     var exitCode = 127;
     if(OS.isWindows)
     {
