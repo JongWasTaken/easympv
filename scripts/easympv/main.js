@@ -22,10 +22,6 @@ Important good-to-knows:
     libASS on Windows is more picky with font names, in case of issues:
         Open the .ttf file of your font and use the value of "Font name:" at the top.
 
-Snippets:
-    How to check for a file
-        mp.utils.file_info(mp.utils.get_user_path("~~/FOLDER/FILE")) != undefined
-
 Current dependencies:
     mpv 33+
     Windows only:
@@ -40,28 +36,18 @@ Current dependencies:
 
 TODO :
     First time configuration wizard -> A bunch of menus basically, new module would be nice
-    Advanced settings menu
-    Add h for help in menus
-    Load subtitles via File Browser
-    Combine all UI-related code into one file (UI.js)
-    Port compatscripts to OS.js
 
 IDEAS:
     Advanced settings, like the utility had before
-    On-screen-controls -> would ensure android compatibility and tablets in general
     https://github.com/rossy/mpv-repl/blob/master/repl.lua
 
 KNOWN ISSUES:
-    AUTOMATIC SHADERS DONT WORK SOMETIMES
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 
 UNNAMED LIST OF "things to test on Windows specifically":
     Utils.restartMpv
-    Settings.migrate -> find mpv path
-    Utils.Input -> Paste
     Browsers.DeviceBrowser.menuEventHandler -> low latency profile
-    literally everything in OS.js
 */
 
 // Polyfills and extensions first

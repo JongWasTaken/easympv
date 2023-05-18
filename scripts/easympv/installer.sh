@@ -33,6 +33,7 @@ YTDLP_IS_INSTALLED=0
 MPV_IS_INSTALLED=0
 GIT_IS_INSTALLED=0
 EMPV_IS_INSTALLED=0
+MPRIS_IS_INSTALLED=0
 
 INSTALL_PACKAGES_LIST=()
 INSTALL_PACKAGES=0
@@ -76,6 +77,10 @@ fi
 
 if [[ $(type -P git) != "" ]]; then
     GIT_IS_INSTALLED=1
+fi
+
+if [[ -f /etc/mpv/scripts/mpris.so ]]; then
+    MPRIS_IS_INSTALLED=1
 fi
 
 if [[ -f "$HOME/.config/mpv/scripts/easympv/main.js" ]]; then
@@ -131,6 +136,11 @@ fi
 
 if [[ $GIT_IS_INSTALLED == 0 ]]; then
     INSTALL_PACKAGES_LIST+=("git")
+    INSTALL_PACKAGES=1
+fi
+
+if [[ $MPRIS_IS_INSTALLED == 0 ]]; then
+    INSTALL_PACKAGES_LIST+=("mpv-mpris")
     INSTALL_PACKAGES=1
 fi
 

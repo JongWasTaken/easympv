@@ -1,15 +1,11 @@
-mpv by the mpv team (mpv.io)
+mpv by the mpv contributors (mpv.io)
   licensed under the GPLv2+ License
 easympv by Jong (smto.pw/mpv)
   licensed under the MIT License
 
 Scripts used:
-autoload.lua by the mpv team
+autoload, autosave, betterchapters by the mpv contributors
   licensed under the GPLv2+ License
-mpvcord by Yuto Takano
-  licensed under the MIT License
-mpv-mpris
-  licensed under the MIT License
 
 Fonts used:
 Roboto Font by Christian Robertson,
