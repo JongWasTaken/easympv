@@ -50,7 +50,7 @@ Unfinished. Use manual installation for now.
 [//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)  
 #### Linux Installer
 Paste this into a terminal:  
-`sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv/master/scripts/easympv/installer.sh)"`  
+`sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh)"`  
 This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
 Please report issues!  
 #### Manual (All platforms)
@@ -63,7 +63,6 @@ In the future there will be some sort of setup on the first start, this is curre
 #### TODOs
 - More Windows testing: My main rig runs Arch Linux, so any Windows-specific code is usually guessed
 - macOS testing: I need to set up a macOS virtual machine again
-- Figure out upgrading from 1.x
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
 #### Ideas
 - Remove Discord integration, add a way to optionally install it after the fact (and possibly more, merge with dependency loader?)

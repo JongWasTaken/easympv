@@ -486,6 +486,7 @@ OS.fileInfo = function (file) {
 
 // remove-file
 OS.fileRemove = function (file) {
+    file = file.replaceAll("/",OS.directorySeperator);
     if (mp.utils.file_info(mp.utils.get_user_path("~~/") + OS.directorySeperator + file) == undefined)
     {
         return false;

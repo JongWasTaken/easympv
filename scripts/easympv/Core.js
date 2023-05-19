@@ -1683,6 +1683,16 @@ Core.defineMenus = function () {
 }
 
 Core.doFileChecks = function () {
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/easympvUtility.exe")) != undefined) {
+        Utils.log("Task: delete old 1.x files","startup","info");
+        OS.fileRemove("script-opts/colorbox.conf");
+        OS.fileRemove("script-opts/easympv.conf");
+        OS.fileRemove("shaders/");
+        OS.fileRemove("images/");
+        OS.fileRemove("scripts/easympv.js/");
+        OS.fileRemove("easympvUtility.exe");
+    }
+
     if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
         Utils.log("Task: reset easympv.conf (file missing)","startup","info");
         Settings.migrate();
