@@ -150,7 +150,10 @@ Browsers.Selector.open = function (parentMenu) {
 };
 
 Browsers.FileBrowser.openFileSafe = function (entry) {
-    dump(entry);
+    if (entry == undefined)
+    {
+        return;
+    }
     if(entry.supported)
     {
         if (entry.type != "subtitle")
