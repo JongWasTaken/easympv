@@ -709,7 +709,7 @@ USAGE:
         "backButtonColor"       Hex string, color of the back button entry if parentMenu is set
         "displayMethod"         String, either "overlay" or "message", check the end of this text block for explanation
                                 "message" displayMethod is intended as a fallback only, it is not really maintained
-        "zIndex"                Number, on which zIndex to show this menu on, default is 999
+        "zIndex"                Number, on which zIndex to show this menu on, default is 1000 (mpv pseudo gui seems to use 999)
         "maxTitleLength"        Number, number of characters before a title gets cut off
                                 set to 0 to disable (default)
                                 ! It is recommended to cut strings manually instead of using this,
@@ -952,7 +952,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.zIndex != undefined) {
         this.settings.zIndex = settings.zIndex;
     } else {
-        this.settings.zIndex = 999;
+        this.settings.zIndex = 1000;
     }
 
     if (settings.maxTitleLength != undefined) {
