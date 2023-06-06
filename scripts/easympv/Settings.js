@@ -443,6 +443,7 @@ Settings.migrate = function () {
 /**
  * This object contains deserialized data from mpv.conf.
  * Call Settings.mpvConfig.reload() to update it.
+ * Default values should be sane and work on any device, FTW will update it on first run.
  */
 Settings.mpvConfig.Data = {
     input_default_bindings: "no",
@@ -453,23 +454,19 @@ Settings.mpvConfig.Data = {
 
     sub_scale: "1",
     vo: "gpu",
-    deband: "yes",
-    sigmoid_upscaling: "yes",
-    linear_downscaling: "yes",
-    correct_downscaling: "yes",
-    sub_ass_force_style: "Kerning", //TODO: change these to something more sane
-    demuxer_mkv_subtitle_preroll: "yes",
-    blend_subtitles: "yes",
+    hwdec: "auto-safe",
+    deband: "no",
+    sigmoid_upscaling: "no",
+    correct_downscaling: "no",
 
-    alang: "Japanese,ja,jap,jpn",
-    slang: "Full,English,eng,en,Subtitles",
+    alang: "",
+    slang: "",
 
-    scale: "spline36",
-    cscale: "spline36",
-    dscale: "mitchell",
-    tscale: "mitchell",
+    scale: "bilinear",
+    cscale: "bilinear",
+    dscale: "bilinear",
+    tscale: "oversample",
     video_sync: "audio",
-    temporal_dither: "yes",
 
     title: "${filename}",
     screenshot_directory:".",
@@ -479,8 +476,8 @@ Settings.mpvConfig.Data = {
     speed: "1.0",
     volume: "100",
 
-    ad_lavc_downmix: "no",
-    audio_channels: "stereo",
+    //ad_lavc_downmix: "yes",
+    //audio_channels: "stereo",
 };
 
 /**
@@ -547,6 +544,9 @@ Settings.mpvConfig.reset = function () {
  * Serializes Settings.mpvConfig.Data into mpv.conf.
  */
 Settings.mpvConfig.save = function () {
+    // TODO: this does NOT work right, specifically the "replace if exists" part
+    // This is basically the last thing missing for the FTW.
+
     // IF file DOES NOT exist:
     // - Generate new file with sane defaults
     // - Replace Values

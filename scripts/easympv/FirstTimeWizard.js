@@ -5,7 +5,6 @@
  * URL:            https://smto.pw/mpv
  * License:        MIT License
  *
- * This module is very WIP and basically the last puzzle piece before this project can go stable.
  */
 
 var Settings = require("./Settings");
@@ -15,19 +14,6 @@ var Utils = require("./Utils");
 var Wizard = {};
 Wizard.idsToUnblock = [];
 Wizard.Menus = {};
-
-/*
-TODO:
-
-Add options for:
-
-These depend on implementing a mpv.conf serializer/deserializer first
-- Subtitle Language: "English" or "none", maybe more?
-- Audio Language: "Japanese" or "English", maybe more?
-
-Check if input.conf exists, ask if the user prefers the mpv defaults or empv defaults, generate.
-
-*/
 
 var menuColor = "#77dd11";
 
@@ -54,26 +40,14 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
             "Thank you for trying out easympv!@br@" +
             "Since this is the first time easympv has been loaded, we will have to set a few settings.@br@" +
             "You can navigate menus like this one using the mousewheel or arrow keys and enter.@br@" +
-            "For more information visit the wiki: https://github.com/JongWasTaken/easympv/wiki/Setup",
+            "Press \"h\" while any menu is shown to get more information.",
         selectedItemColor: menuColor,
         autoClose: 0,
+        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
     [
-        {
-            title: "Open Wiki",
-            item: "wiki",
-            eventHandler: function(event, menu)
-            {
-                if (event == "enter")
-                {
-                    Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup", true)
-                    Wizard.Menus.Page1.items.splice(0,1);
-                    Wizard.Menus.Page1.redrawMenu();
-                }
-            }
-        },
         {
             title: "Continue",
             item: "continue",
@@ -90,7 +64,9 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
     undefined
 );
 
-Wizard.Menus.Page1.eventHandler = function (event, action) {};
+Wizard.Menus.Page1.eventHandler = function (event, action) {
+    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
+};
 
 Wizard.Menus.Page2Options = {
     PerformanceName: [
@@ -105,16 +81,17 @@ Wizard.Menus.Page2Options = {
     ],
     AudioLanguageNames: [ "none", "Japanese", "English", "German" ],
     AudioLanguageDescription: "@br@Set to \"none\" to use the default language specified by a video file.@br@",
-    SubLanguageNames: [ "none", "English", "German" ],
+    SubLanguageNames: [ "none", "English", "German", "Japanese" ],
     SubLanguageDescription: "@br@Set to \"none\" to not display subtitles by default.@br@"
 };
 
 Wizard.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
-        description: "(IMPORTANT: These options do not actually work yet. Please edit config files manually for now!)@br@Use the left/right arrow key to change an option.",
+        description: "Use the left/right arrow key to change an option.",
         selectedItemColor: menuColor,
         autoClose: 0,
+        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
@@ -198,14 +175,17 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
     Wizard.Menus.Page1
 );
 
-Wizard.Menus.Page2.eventHandler = function (event, action) {};
+Wizard.Menus.Page2.eventHandler = function (event, action) {
+    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
+};
 
 Wizard.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
-        description: "Placeholder: Closing this menu will set \"isFirstLaunch\" to \"false\".",
+        description: "And that is it!@br@Select \"Finish\" to apply your changes.@br@IMPORTANT: Changes are not actually applied in this commit!",
         selectedItemColor: menuColor,
         autoClose: 0,
+        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
@@ -218,14 +198,83 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                 if (event == "enter")
                 {
                     Wizard.Menus.Page3.hideMenu();
-                    //TODO: save settings
 
-                    Settings.Data["isFirstLaunch"] = false;
+                    Settings.Data.isFirstLaunch = false;
+                    Settings.save();
+                    unblock();
+                    return;
 
-                    //Wizard.Menus.Page2.items[1].data; // performance preset
-                    //Wizard.Menus.Page2.items[2].data; // audio language
-                    //Wizard.Menus.Page2.items[3].data; // sub language
+                    // below works, but there are some issues with the Settings module, so its disabled for now
+                    Settings.mpvConfig.load();
 
+                    var ppreset = Wizard.Menus.Page2Options.PerformanceName[Wizard.Menus.Page2.items[1].data];
+                    if (ppreset == "Lowest / \"Potato\"")
+                    {
+                        Settings.mpvConfig.Data.scale = "bilinear";
+                        Settings.mpvConfig.Data.cscale = "bilinear";
+                        Settings.mpvConfig.Data.dscale = "bilinear";
+                        Settings.mpvConfig.Data.tscale = "oversample";
+                        Settings.mpvConfig.Data.hwdec = "auto-safe";
+                        Settings.mpvConfig.Data.deband = "no";
+                        Settings.mpvConfig.Data.demuxer_mkv_subtitle_preroll = "no";
+                        Settings.mpvConfig.Data.sigmoid_upscaling = "no";
+                        Settings.mpvConfig.Data.correct_downscaling = "no";
+                        Settings.mpvConfig.Data.video_sync = "audio";
+                    }
+                    else if (ppreset == "Laptop / integrated GPU")
+                    {
+                        Settings.mpvConfig.Data.scale = "spline36";
+                        Settings.mpvConfig.Data.cscale = "spline36";
+                        Settings.mpvConfig.Data.dscale = "spline36";
+                        Settings.mpvConfig.Data.tscale = "linear";
+                        Settings.mpvConfig.Data.hwdec = "auto-safe";
+                        Settings.mpvConfig.Data.deband = "yes";
+                        Settings.mpvConfig.Data.demuxer_mkv_subtitle_preroll = "no";
+                        Settings.mpvConfig.Data.sigmoid_upscaling = "yes";
+                        Settings.mpvConfig.Data.correct_downscaling = "no";
+                        Settings.mpvConfig.Data.video_sync = "audio";
+                    }
+                    else if (ppreset == "Desktop / good dedicated GPU")
+                    {
+                        Settings.mpvConfig.Data.scale = "ewa_lanczossharp";
+                        Settings.mpvConfig.Data.cscale = "ewa_lanczossharp";
+                        Settings.mpvConfig.Data.dscale = "mitchell";
+                        Settings.mpvConfig.Data.tscale = "mitchell";
+                        Settings.mpvConfig.Data.hwdec = "auto-safe";
+                        Settings.mpvConfig.Data.deband = "yes";
+                        Settings.mpvConfig.Data.demuxer_mkv_subtitle_preroll = "yes";
+                        Settings.mpvConfig.Data.sigmoid_upscaling = "yes";
+                        Settings.mpvConfig.Data.correct_downscaling = "yes";
+                        Settings.mpvConfig.Data.video_sync = "display-resample";
+                    }
+
+                    var alang = Wizard.Menus.Page2Options.AudioLanguageNames[Wizard.Menus.Page2.items[2].data];
+                    if (alang == "Japanese")
+                    {
+                        Settings.mpvConfig.Data.alang = "Japanese,ja,jap,jpn,日本,日本語";
+                    } else if (alang == "German")
+                    {
+                        Settings.mpvConfig.Data.alang = "German,ger,Deutsch,deu,de";
+                    } else if (alang == "English")
+                    {
+                        Settings.mpvConfig.Data.alang = "English,eng,en";
+                    } else { Settings.mpvConfig.Data.alang= ""; }
+
+                    var slang = Wizard.Menus.Page2Options.SubLanguageNames[Wizard.Menus.Page2.items[3].data];
+                    if (slang == "Japanese")
+                    {
+                        Settings.mpvConfig.Data.slang = "Japanese,ja,jap,jpn,日本,日本語";
+                    } else if (slang == "German")
+                    {
+                        Settings.mpvConfig.Data.slang = "German,ger,Deutsch,deu,de";
+                    } else if (slang == "English")
+                    {
+                        Settings.mpvConfig.Data.slang = "Full,English,eng,en,Subtitles";
+                    } else { Settings.mpvConfig.Data.slang= ""; }
+
+                    Settings.mpvConfig.save();
+
+                    Settings.Data.isFirstLaunch = false;
                     Settings.save();
                     unblock();
                 }
@@ -235,7 +284,9 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
     Wizard.Menus.Page2
 );
 
-Wizard.Menus.Page3.eventHandler = function (event, action) {};
+Wizard.Menus.Page3.eventHandler = function (event, action) {
+    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
+};
 
 Wizard.Start = function () {
     Settings.load();

@@ -61,6 +61,7 @@ In the future there will be some sort of setup on the first start, this is curre
 
 ## TODOs and Ideas
 #### TODOs
+- First Time Setup!  I almost forgot about this...  
 - More Windows testing: My main rig runs Arch Linux, so any Windows-specific code is usually guessed
 - macOS testing: I need to set up a macOS virtual machine again
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
