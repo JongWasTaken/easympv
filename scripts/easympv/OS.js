@@ -397,9 +397,12 @@ OS.gitUpdate = function (callback) {
     if(OS.isWindows)
     {
         exitCode = OS._call("Set-Location $env:APPDATA\\mpv\\ \n"+
-        "$processOptions = @{ FilePath = \"cmd.exe\" ArgumentList = \"/k\", \"{cd $env:APPDATA\\mpv\ && git pull\" }\n"+
+        "$processOptions = @{\n"+
+        "FilePath = \"cmd.exe\"\n"+
+        "ArgumentList = \"/k\", \"cd $env:APPDATA\\mpv\ && git pull && exit %errorlevel%\"\n"+ 
+        "}\n"+
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1} \n"+
-        "exit 0",true,callback).status;
+        "exit $LASTEXITCODE",true,callback).status;
     }
     else
     {

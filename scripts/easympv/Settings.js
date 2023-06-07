@@ -149,8 +149,8 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
         defaultConfigString += "# Default: unknown\n";
-        defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\n";
-        defaultConfigString += "# Use a full path. Only required on Windows!\n";
+        defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\\\n";
+        defaultConfigString += "# Use a full path. This is only required on Windows, as on other Operating Systems it is assumed to in the $PATH.\n";
         defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
         defaultConfigString += "mpvLocation=unknown\n";
         defaultConfigString += "\n";
@@ -352,7 +352,7 @@ Settings.save = function () {
 
         if (location != undefined)
         {
-            Settings.Data["mpvLocation"] = location;
+            Settings.Data["mpvLocation"] = location + "mpv.exe";
         }
     }
 
