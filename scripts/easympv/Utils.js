@@ -10,16 +10,10 @@
 The Utils.js module
 
 This file contains all the miscellaneous functions that
-don't really fit anywhere else, such as opening/executing files,
-operations on the watch_later folder, and other "nice to have" things.
+don't really fit anywhere else.
 ----------------------------------------------------------------*/
 
-// TODO: move most of this into OS.js
-
-"use strict";
-
-var Settings = require("./Settings");
-var OS = require("./OS");
+// TODO: move some of this into OS.js
 
 /**
  * Collection of miscellaneous functions used throughout all of easympv.
@@ -130,62 +124,6 @@ Utils.mpvComparableVersion = Number(Utils.mpvVersion.substring(2));
 Utils.ffmpegVersion = mp.get_property("ffmpeg-version");
 Utils.libassVersion = mp.get_property("libass-version");
 
-/**
- * Open file relative to config root. Can also run applications.
- */
-Utils.openFile = function (file,raw) {
-    
-    if (file == undefined)
-    {
-        file = ""
-    }
-
-    if (raw == undefined) {
-        file = mp.utils.get_user_path("~~/") + "/" + file;
-        file = file.replaceAll("//", "/");
-        file = file.replaceAll('"+"', "/");
-    }
-    mp.msg.warn(file);
-    if (OS.isWindows) {
-        file = file.replaceAll("/", "\\");
-        // look at this monstrosity. why is windows the way it is?
-        OS._call("$processOptions = @{ \n"+
-        "    FilePath = \"cmd.exe\"\n"+
-        "    ArgumentList = \"/c\", \"start \`\"\`\" \`\""+file+"\`\" && exit %errorlevel%\" \n"+ // unholy amounts of escape sequences
-        "}\n"+
-        "try { Start-Process @processOptions } Catch [system.exception] {exit 1}\n"+
-        "exit $LASTEXITCODE",false,undefined);
-    } else if (OS.name == "linux") {
-        mp.commandv("run", "sh", "-c", "xdg-open " + file);
-    } else if (OS.name == "macos") {
-        mp.commandv("run", "sh", "-c", "/System/Applications/TextEdit.app/Contents/MacOS/TextEdit " + file);
-    }
-    Utils.log("Opening file: " + file,"main","info");
-};
-
-/**
- * This function executes a given command string / argument string array and returns its stdout.
- * While this is very powerful, it might not be right approach for most problems.
- * @returns {string} stdout
- */
-// TODO: replace with OS._call()
-Utils.executeCommand = function (line) {
-    if (line == undefined) {
-        line = ["echo", '"No line specified!"'];
-    }
-
-    var r = mp.command_native({
-        name: "subprocess",
-        playback_only: false,
-        capture_stdout: true,
-        args: line,
-    });
-    if (r != undefined) {
-        return r.stdout;
-    } else {
-        return "error";
-    }
-};
 
 /**
  * X.

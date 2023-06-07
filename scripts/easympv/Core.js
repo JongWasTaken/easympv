@@ -419,7 +419,7 @@ Core.defineMenus = function () {
     var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
         if (event == "help") {
-            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
+            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
             return;
         }
 /*
@@ -588,7 +588,7 @@ Core.defineMenus = function () {
                 }
                 break;
             case "help":
-                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#shaders-menu", true);
+                OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#shaders-menu", true);
                 break;
             default:
                 break;
@@ -648,7 +648,7 @@ Core.defineMenus = function () {
     Core.Menus.ChaptersMenu.eventHandler = function (event, action) {
         if (event == "help")
         {
-            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
+            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
         }
     };
 
@@ -948,7 +948,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    Utils.openFile();
+                    OS.openFile();
                 }
             }
         },
@@ -1460,7 +1460,7 @@ Core.defineMenus = function () {
             return;
         }
         if (event == "help") {
-            Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#settings-menu", true);
+            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#settings-menu", true);
             return;
         }
     };
@@ -1562,7 +1562,7 @@ Core.defineMenus = function () {
                 }
                 break;
             case "help":
-                Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#colors-menu", true);
+                OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#colors-menu", true);
                 break;
             default:
                 break;

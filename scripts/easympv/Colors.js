@@ -8,7 +8,6 @@
  * Inspired by (but not containing code from) COLORBOX.JS by VideoPlayerCode.
  */
 
-var Settings = require("./Settings");
 
 var Colors = {};
 Colors.name = "none";

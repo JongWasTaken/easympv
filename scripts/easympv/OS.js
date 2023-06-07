@@ -175,6 +175,35 @@ OS._call = function (cmd,async,callback) {
     return "";
 }
 
+OS.openFile = function(file,raw) {
+    if (file == undefined)
+    {
+        file = ""
+    }
+
+    if (raw == undefined) {
+        file = mp.utils.get_user_path("~~/") + "/" + file;
+        file = file.replaceAll("//", "/");
+        file = file.replaceAll('"+"', "/");
+    }
+    mp.msg.warn(file);
+    if (OS.isWindows) {
+        file = file.replaceAll("/", "\\");
+        // look at this monstrosity. why is windows the way it is?
+        OS._call("$processOptions = @{ \n"+
+        "    FilePath = \"cmd.exe\"\n"+
+        "    ArgumentList = \"/c\", \"start \`\"\`\" \`\""+file+"\`\" && exit %errorlevel%\" \n"+ // unholy amounts of escape sequences
+        "}\n"+
+        "try { Start-Process @processOptions } Catch [system.exception] {exit 1}\n"+
+        "exit $LASTEXITCODE",false,undefined);
+    } else if (OS.name == "linux") {
+        mp.commandv("run", "sh", "-c", "xdg-open " + file);
+    } else if (OS.name == "macos") {
+        mp.commandv("run", "sh", "-c", "/System/Applications/TextEdit.app/Contents/MacOS/TextEdit " + file);
+    }
+    Utils.log("Opening file: " + file,"main","info");
+};
+
 OS.getClipboard = function () {
     var clipboard = "";
 

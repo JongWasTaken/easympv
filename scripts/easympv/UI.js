@@ -7,7 +7,6 @@
  */
 
 var Utils = require("./Utils");
-var Settings = require("./Settings");
 
 var UI = {};
 

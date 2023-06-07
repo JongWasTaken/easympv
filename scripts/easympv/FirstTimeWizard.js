@@ -7,9 +7,7 @@
  *
  */
 
-var Settings = require("./Settings");
 var UI = require("./UI");
-var Utils = require("./Utils");
 
 var Wizard = {};
 Wizard.idsToUnblock = [];
@@ -65,7 +63,7 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
 );
 
 Wizard.Menus.Page1.eventHandler = function (event, action) {
-    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
+    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
 };
 
 Wizard.Menus.Page2Options = {
@@ -176,7 +174,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
 );
 
 Wizard.Menus.Page2.eventHandler = function (event, action) {
-    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
+    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
 };
 
 Wizard.Menus.Page3 = new UI.Menus.Menu(
@@ -199,12 +197,6 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                 {
                     Wizard.Menus.Page3.hideMenu();
 
-                    Settings.Data.isFirstLaunch = false;
-                    Settings.save();
-                    unblock();
-                    return;
-
-                    // below works, but there are some issues with the Settings module, so its disabled for now
                     Settings.mpvConfig.load();
 
                     var ppreset = Wizard.Menus.Page2Options.PerformanceName[Wizard.Menus.Page2.items[1].data];
@@ -282,7 +274,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
 );
 
 Wizard.Menus.Page3.eventHandler = function (event, action) {
-    if (event == "help") {Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
+    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
 };
 
 Wizard.Start = function () {

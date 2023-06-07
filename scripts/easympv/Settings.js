@@ -15,8 +15,6 @@ It also provides sane defaults in case configuration files
 are missing.
 ----------------------------------------------------------------*/
 
-"use strict";
-
 /**
  * This module handles serialization and deserialization of the
  * easympv.conf file located in the mpv config root directory.
@@ -480,6 +478,8 @@ Settings.mpvConfig.Data = {
     //audio_channels: "stereo",
 };
 
+Settings.mpvConfig.DataDefaults = JSON.parse(JSON.stringify(Settings.mpvConfig.Data));
+
 /**
  * Same as Settings.mpvConfig.reload().
  */
@@ -509,16 +509,10 @@ Settings.mpvConfig.reload = function () {
                 var option = temp[0].trim().replaceAll("-", "_");
                 var value = temp[1].trim().split("#")[0];
 
-                if (value == "true") {
-                    value = true;
-                }
-                if (value == "false") {
-                    value = false;
-                }
                 Settings.mpvConfig.Data[option] = value;
             } else {
                 var option = confFile[i].trim().replaceAll("-", "_");
-                var value = "@empty@";
+                var value = "yes";
                 Settings.mpvConfig.Data[option] = value;
             }
         }
@@ -537,86 +531,37 @@ Settings.mpvConfig.reload = function () {
 
 Settings.mpvConfig.reset = function () {
     OS.fileRemove("mpv.conf");
+    Settings.mpvConfig.Data = Settings.mpvConfig.DataDefaults;
+    Settings.Data.resetMpvConfig = false;
     Settings.mpvConfig.save();
+    Settings.save();
 };
 
 /**
  * Serializes Settings.mpvConfig.Data into mpv.conf.
  */
 Settings.mpvConfig.save = function () {
-    // TODO: this does NOT work right, specifically the "replace if exists" part
-    // This is basically the last thing missing for the FTW.
-
-    // IF file DOES NOT exist:
-    // - Generate new file with sane defaults
-    // - Replace Values
-
-    // IF file DOES exist:
-    // - Check if an option exists, if yes replace, else append
-    var copy = "";
     var lines = [];
 
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined
-    ) {
-        var defaultConfigString = "";
-        defaultConfigString += "### mpv.conf ###\n";
-        defaultConfigString += "# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &\n";
-        defaultConfigString += "# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference\n\n";
-        defaultConfigString += "# Check https://github.com/JongWasTaken/easympv/wiki/Setup#default-settings\n";
-        defaultConfigString += "# for more information about the default settings.\n";
-        lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
-    } else {
-        lines = mp.utils
-            .read_file(mp.utils.get_user_path("~~/mpv.conf"))
-            .replaceAll("\r\n", "\n")
-            .split("\n");
-    }
+    lines.push("### mpv.conf ###");
+    lines.push("# See https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#list-of-input-commands &");
+    lines.push("# https://github.com/mpv-player/mpv/blob/master/DOCS/man/input.rst#property-list for reference");
+    lines.push("# Check https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings");
+    lines.push("# for more information about the default settings.");
 
-    for (var i = 0; i <= lines.length - 1; i++) {
-        var option = "";
-        var value = "";
-        var string = "";
-        if (lines[i].includes("=")) {
-            option = lines[i].split("=")[0];
-        } else {
-            option = lines[i];
-        }
-
-        if (Settings.mpvConfig.Data[option] != undefined) {
-            value = Settings.mpvConfig.Data[option];
-            option = option.replaceAll("_", "-");
-            if (value == "@empty@") {
-                string = option;
-            } else {
-                string = option + "=" + value;
-            }
-        } else {
-            string = lines[i];
-        }
-        copy = copy + string + "\n";
-    }
-
-    for (var item in Settings.mpvConfig.Data) {
-        if (!copy.includes(item)) {
-            var val = Settings.mpvConfig.Data[item];
-            item = item.replaceAll("_", "-");
-            if (val == "@empty@") {
-                copy = copy + item + "\n";
-            } else {
-                copy = copy + item + "=" + val + "\n";
-            }
+    for (var key in Settings.mpvConfig.Data)
+    {
+        if (key.trim() != "")
+        {
+            lines.push(key.replaceAll("_", "-") + "=" + Settings.mpvConfig.Data[key]);
         }
     }
 
-    copy = copy.replace(new RegExp("\\n$"), "");
+    //copy = copy.replace(new RegExp("\\n$"), "");
     mp.utils.write_file(
         "file://" + mp.utils.get_user_path("~~/mpv.conf"),
-        copy
+        lines.join("\n")
     );
-
-    Settings.Data.resetMpvConfig = false;
-    Settings.save();
 };
 
 /////////////////////////////////////////// input.conf

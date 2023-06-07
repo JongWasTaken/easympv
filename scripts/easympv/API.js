@@ -6,16 +6,12 @@
  * License:                 MIT License
  */
 
-"use strict";
-
 /**
  * This module provides an API to be used by other plugins.
  * Documentation is available at https://github.com/JongWasTaken/easympv/wiki/API.
  */
 var API = {};
 
-var UI = require("./UI");
-var Utils = require("./Utils");
 
 API.foreignMenus = {};
 

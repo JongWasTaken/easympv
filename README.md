@@ -4,10 +4,9 @@
 
 ![](https://smto.pw/mpv/images/preview.png)
 
-
 Extends base mpv with more features and makes it a bit more user-friendly.  
 Currently supports Windows, macOS and Linux.  
-macOS support is experimental and not fully finished.
+macOS support is experimental and not fully finished, as I lack a device to test on.  
 
 ## Features
 - Menus with custom Fonts, optionally controllable using only the mouse
@@ -33,12 +32,12 @@ macOS support is experimental and not fully finished.
 
 #### macOS
 - mpv, installed using brew: `brew install mpv`  
-**Other versions of mpv will not work, as they are not compiled with LuaJIT support!**
+> :exclamation: **Why?**: This version of mpv has been compiled with LuaJIT support, which is needed for some of the more advanced plugins like [mpvcord](https://github.com/yutotakano/mpvcord). easympv by itself does not need it, so if you have no need for plugins like mpvcord, any other up-to-date mpv distribution will probably work.  
 
 #### Linux
 The automatic installer script will take care of any dependencies.  
-If you wish to install easympv manually you will need the following dependencies:
-- mpv, if you want Discord integration to work it needs to have been compiled with LuaJIT support (Not all distributions do this!)
+If you wish to install easympv manually you will (at least) need the following dependencies:
+- mpv, if you want plugins like [mpvcord](https://github.com/yutotakano/mpvcord) to work it needs to have been compiled with LuaJIT support (Not all distributions do this!)
 - either `wget` (preferred) or `curl` (usually preinstalled)
 - `xclip` OR `wl-clipboard` (if you use Wayland)  
     When in doubt, install both!
@@ -51,22 +50,20 @@ Unfinished. Use manual installation for now.
 #### Linux Installer
 Paste this into a terminal:  
 `sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh)"`  
+> :warning: Running random commands from the internet can be dangerous, you should always check what exactly you are running. Read the source [here](https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh).  
+
 This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
 Please report issues!  
 #### Manual (All platforms)
 Download the master branch and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD).  
-Launch mpv once to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`).  
-Adjust those to your liking, then launch it again.  
-In the future there will be some sort of setup on the first start, this is currently unfinished.  
+Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
 ## TODOs and Ideas
 #### TODOs
-- First Time Setup!  I almost forgot about this...  
-- More Windows testing: My main rig runs Arch Linux, so any Windows-specific code is usually guessed
 - macOS testing: I need to set up a macOS virtual machine again
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
 #### Ideas
-- Remove Discord integration, add a way to optionally install it after the fact (and possibly more, merge with dependency loader?)
+- Add a way to optionally install Discord integration after the fact (and possibly more, merge with dependency loader?)
 - Improve images, add variants up to 8k resolution and make it consistent
 #### All TODO items need to be addressed before I can consider declaring this project stable.
 

@@ -18,9 +18,6 @@ var Shaders = {};
 Shaders.name = "none";
 Shaders.manualSelection = false;
 
-//var Utils = require("./Utils");
-//var Settings = require("./Settings");
-
 /**
  * Applies shaderset.
  * @param {string} shader name of a shaderset in Shaders.json

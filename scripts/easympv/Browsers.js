@@ -16,9 +16,6 @@ There is a lot of spaghetti here, read at your own risk.
 Comments are also missing.
 ----------------------------------------------------------------*/
 
-var UI = require("./UI");
-var Utils = require("./Utils");
-var Settings = require("./Settings");
 
 /**
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
@@ -103,7 +100,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
         return;
     }
     if (event == "help") {
-        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#selector-menu", true);
+        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#selector-menu", true);
         return;
     }
 };
@@ -475,7 +472,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
     }
 
     if (event == "help") {
-        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
+        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
         return;
     }
 
@@ -783,7 +780,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             {
                 if (event == "enter")
                 {
-                    Utils.openFile(Browsers.FileBrowser.currentLocation,true);
+                    OS.openFile(Browsers.FileBrowser.currentLocation,true);
                 }
             }
         });
@@ -874,7 +871,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {
     if (event == "help") {
-        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#drive-browser", true);
+        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#drive-browser", true);
         return;
     }
 
@@ -992,7 +989,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 
 Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
     if (event == "help") {
-        Utils.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#device-browser", true);
+        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#device-browser", true);
         return;
     }
 
@@ -1051,10 +1048,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
                 var title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i];
                 title +=
                     " - " +
-                    Utils.executeCommand([
-                        "cat",
-                        "/sys/class/video4linux/" + deviceList[i] + "/name",
-                    ]).split(": ")[0];
+                    OS._call("cat /sys/class/video4linux/" + deviceList[i] + "/name",false,undefined).stdout.split(": ")[0];
                 items.push({
                     title: title,
                     item: deviceList[i],
