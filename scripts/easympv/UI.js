@@ -2511,8 +2511,7 @@ UI.Input.hide = function (success) {
 }
 
 UI.Input.OSDLog = {};
-UI.Input.OSDLog.Buffer = "";
-UI.Input.OSDLog.BufferCounter = 0;
+UI.Input.OSDLog.Buffer = [];
 UI.Input.OSDLog.show = function () {
 
     UI.Input.OSDLog.OSD = mp.create_osd_overlay("ass-events");
@@ -2521,12 +2520,22 @@ UI.Input.OSDLog.show = function () {
     UI.Input.OSDLog.OSD.z = 1;
 
     UI.Input.OSDLog.Timer = setInterval(function () {
-        UI.Input.OSDLog.OSD.data = UI.Input.OSDLog.Buffer;
+        var data = "";
+        var temp = UI.Input.OSDLog.Buffer.slice(-50); // only show last 50 entries, might reduce this further for perf
+
+        for (var i = 0; i < temp.length; i++)
+        {
+            data +=  UI.SSA.setFont("Roboto") + UI.SSA.setTransparency("3f") + temp[i].color + UI.SSA.setSize(16) + UI.SSA.setBorder(0) + UI.SSA.setBold(true) +
+            "[" + temp[i].time + "] [" + temp[i].prefix + "] " + temp[i].text;
+        }
+
+        UI.Input.OSDLog.OSD.data = data;
+        data = undefined;
+        temp = undefined;
         UI.Input.OSDLog.OSD.update();
-    }, 100);
+    }, 200);
 }
 
-UI.Input.OSDLog.blacklistedPrefixes = {"osd/libass":1, "vo/gpu/libplacebo":1};
 UI.Input.OSDLog.addToBuffer = function (msg) {
     var color = "";
     if (msg.level == "debug")
@@ -2545,20 +2554,31 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
     {
         color = UI.SSA.setColorRed();
     }
-    if (UI.Input.OSDLog.BufferCounter > 150 && !Settings.Data.saveFullLog)
+
+    if (UI.Input.OSDLog.Buffer.length > 4000 && !Settings.Data.saveFullLog) // might reduce further in the future, lets see how this runs for now
     {
-        UI.Input.OSDLog.Buffer = UI.Input.OSDLog.Buffer.substring(0,15000)
-        UI.Input.OSDLog.BufferCounter = 0;
+        UI.Input.OSDLog.Buffer.splice(1000,2000,{prefix: "easympv", level: "warn", time: "invalid", color: UI.SSA.setColorYellow(), text: "!!! 2000 lines have been removed here to reduce memory usage !!!\n"});
     }
-    if (UI.Input.OSDLog.blacklistedPrefixes[msg.prefix] == undefined)
-    {
-        var time = mp.get_property("time-pos");
-        if (time == undefined) { time = "0.000000"; }
-        UI.Input.OSDLog.Buffer = UI.SSA.setFont("Roboto") + UI.SSA.setTransparency("3f") + color + UI.SSA.setSize(16) + UI.SSA.setBorder(0) + UI.SSA.setBold(true) +
-            "[" + time.slice(0,5) + "] [" + msg.prefix + "] " + UI.SSA.setBold(false) + msg.text + "\n" + UI.Input.OSDLog.Buffer;
-    }
-    UI.Input.OSDLog.BufferCounter++;
+
+    UI.Input.OSDLog.Buffer.push({prefix: msg.prefix, level: msg.level, time: Date.now(), color: color, text: msg.text});
 };
+
+UI.Input.OSDLog.writeLogToFile = function ()
+{
+    var data = "";
+    for (var i = 0; i < UI.Input.OSDLog.Buffer.length; i++)
+    {
+        data += "[" + UI.Input.OSDLog.Buffer[i].time + "] [" + UI.Input.OSDLog.Buffer[i].prefix + "] " + UI.Input.OSDLog.Buffer[i].text;
+    }
+
+    mp.utils.write_file(
+        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+        data
+    );
+
+    data = undefined;
+    return;
+}
 
 UI.Input.OSDLog.hide = function () {
     clearInterval(UI.Input.OSDLog.Timer);

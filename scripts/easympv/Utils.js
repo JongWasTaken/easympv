@@ -151,10 +151,10 @@ Utils.openFile = function (file,raw) {
         // look at this monstrosity. why is windows the way it is?
         OS._call("$processOptions = @{ \n"+
         "    FilePath = \"cmd.exe\"\n"+
-        "    ArgumentList = \"/c\", \"start \`\"\`\" \`\""+file+"\`\" && exit %errorlevel%\" \n"+
+        "    ArgumentList = \"/c\", \"start \`\"\`\" \`\""+file+"\`\" && exit %errorlevel%\" \n"+ // unholy amounts of escape sequences
         "}\n"+
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1}\n"+
-        "exit $LASTEXITCODE",false,undefined)
+        "exit $LASTEXITCODE",false,undefined);
     } else if (OS.name == "linux") {
         mp.commandv("run", "sh", "-c", "xdg-open " + file);
     } else if (OS.name == "macos") {

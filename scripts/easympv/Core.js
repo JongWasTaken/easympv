@@ -684,12 +684,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    var buffer = UI.Input.OSDLog.Buffer.replace(/\{(.+?)\}/g,'').split("\n\n");
-                    buffer.reverse();
-                    mp.utils.write_file(
-                        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
-                        buffer.join("\n")
-                    );
+                    UI.Input.OSDLog.writeLogToFile();
                     Utils.showAlert("info", "Log exported to Desktop!");
                 }
             }
