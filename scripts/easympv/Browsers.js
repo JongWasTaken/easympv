@@ -818,7 +818,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 var favMenu = new UI.Menus.Menu({
                     autoClose: 0,
-                    title: "File Browser",
+                    title: UI.SSA.insertSymbolFA(" ") + "Favorites",
                     description: "Use the \"right\" action to remove an entry."
                 }, favItems, Browsers.FileBrowser.menu);
 
