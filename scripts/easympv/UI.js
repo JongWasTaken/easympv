@@ -7,6 +7,7 @@
  */
 
 var Utils = require("./Utils");
+var Settings = require("./Settings");
 
 var UI = {};
 
@@ -113,6 +114,13 @@ UI.SSA.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
     if (fontNameAfter == undefined) {
         fontNameAfter = "Roboto";
     }
+
+    if (Settings.Data.compatibilityMode)
+    {
+        size = Math.floor(size / 3);
+        defaultSize = Math.floor(defaultSize / 3);
+    }
+
 
     if (size != undefined && defaultSize != undefined) {
         return (
@@ -764,6 +772,7 @@ USAGE:
     The main benefit is that all other messages will appear below the menu,
     making it "unbreakable". It will also scale with the window size (1080p is 100%).
     This can be changed with MenuSystem.displayMethod (default is "overlay", change to "message" for old way).
+    "message" is unmaintained and is probably broken at this point.
 
     The definition of UI.Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
@@ -911,23 +920,29 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.displayMethod != undefined) {
         this.settings.displayMethod = settings.displayMethod;
     } else {
-        if (Utils.mpvComparableVersion <= 32) {
-            Utils.log(
-                "Your mpv version is too old for overlays. Expect issues!","menusystem","error"
-            );
+
+        if (Settings.Data.compatibilityMode) {
             this.settings.displayMethod = "message";
-        } else {
-            this.settings.displayMethod = "overlay";
+        }
+        else
+        {
+            if (Utils.mpvComparableVersion <= 32) {
+                Utils.log(
+                    "!!! Your mpv version is too old for overlays. You must update mpv to use easympv. !!!","menusystem","error"
+                );
+                this.settings.displayMethod = "message";
+            } else {
+                this.settings.displayMethod = "overlay";
+            }
         }
     }
 
     if (settings.fontSize != undefined) {
         this.settings.fontSize = settings.fontSize;
     } else {
+        this.settings.fontSize = 35;
         if (this.settings.displayMethod == "message") {
-            this.settings.fontSize = 11;
-        } else if (this.settings.displayMethod == "overlay") {
-            this.settings.fontSize = 35;
+            this.settings.fontSize = Math.floor(this.settings.fontSize / 3);
         }
     }
 
@@ -942,8 +957,8 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     } else {
         this.settings.itemPrefix = UI.SSA.insertSymbolFA(
             " ",
-            this.settings.fontSize - 2,
-            this.settings.fontSize,
+            26,
+            35,
             this.settings.fontName
         );
     } // "➤ "
@@ -965,8 +980,8 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     } else {
         this.settings.itemSuffix = UI.SSA.insertSymbolFA(
             " ",
-            this.settings.fontSize - 2,
-            this.settings.fontSize
+            26,
+            35
         );
     } // ✓
 
@@ -1157,6 +1172,16 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
                 id: "menu_key_mbtn_mid",
                 action: "enter",
             },
+            {
+                key: "PGUP",
+                id: "menu_key_page_up",
+                action: "top",
+            },
+            {
+                key: "PGDWN",
+                id: "menu_key_page_down",
+                action: "bottom",
+            }
         ];
     }
 
@@ -1234,7 +1259,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
         -  Automatic scaling is busted
             (there might be some universal offset to fix it)
         -  Sizes do not translate 1:1
-            (default font size has to be 35 intead of 11 to look similar to "overlay" displayMethod)
+            (default font size has to be 35 instead of 11 to look similar to "overlay" displayMethod)
         -  Will fight over display space (basically like Z-fighting)
         -  Deprecated, not maintained
 
@@ -1773,6 +1798,16 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
             this._constructMenuCache();
             this._drawMenu();
             this.eventLocked = false;
+        } else if (action == "top") {
+            this.selectedItemIndex = 0;
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
+        } else if (action == "bottom") {
+            this.selectedItemIndex = this.items.length - 1;
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
         } else {
             var item = this.items[this.selectedItemIndex];
             if (item.item == "@back@" && action == "enter") {
@@ -1781,13 +1816,6 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
                 this.eventLocked = false;
             } else {
                 this._dispatchEvent(action, item);
-                // i dont remember why i wrote the code below, it wasted like a whole day because i forgot about it
-                /*
-                if (action != "enter") {
-                    this._constructMenuCache();
-                    this._drawMenu();
-                    this.eventLocked = false;
-                }*/
                 this.eventLocked = false;
             }
         }

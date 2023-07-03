@@ -50,6 +50,7 @@ Settings.Data = {
     startIPCServer: false,
     useNativeNotifications: true,
     notifyAboutUpdates: true,
+    compatibilityMode: false,
     debugMode: false,
     saveFullLog: false,
     fileBrowserFavorites: { locations: [] },
@@ -244,6 +245,12 @@ Settings.save = function () {
         defaultConfigString += "# Whether to show alerts when out-of-date.\n";
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "notifyAboutUpdates=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Enabling this will force the legacy display method for menus.\n";
+        defaultConfigString += "# Things WILL break if this is enabled!\n";
+        defaultConfigString += "# Only enable this if you are stuck on a mpv version lower or equal to 32, otherwise leave it disabled.\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "compatibilityMode=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# This will make the log more detailed along with other changes.\n";
