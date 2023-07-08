@@ -57,7 +57,7 @@ Core.onFileLoad = function () {
             }
             sofaEnabled = true;
         }
-        Shaders.apply(Settings.Data.defaultShaderSet);
+        Video.Shaders.apply(Settings.Data.defaultShaderSet);
         isFirstFile = false;
     }
 
@@ -90,8 +90,8 @@ Core.onFileLoad = function () {
 
     for (var i = 0; i < Settings.cache.perFileSaves.length; i++) {
         if (Settings.cache.perFileSaves[i].file == cFile){
-            Shaders.apply(Settings.cache.perFileSaves[i].shaderset)
-            Colors.apply(Settings.cache.perFileSaves[i].colorpreset);
+            Video.Shaders.apply(Settings.cache.perFileSaves[i].shaderset)
+            Video.Colors.apply(Settings.cache.perFileSaves[i].colorpreset);
             Settings.cache.perFileSaves.splice(i, 1);
             break;
         }
@@ -107,7 +107,7 @@ Core.onShutdown = function () {
     if (cFile != undefined && cFile != "")
     {
         Utils.log("Saving per-file settings...","shutdown","info");
-        Settings.cache.perFileSaves.push({file: cFile, shaderset: Shaders.name, colorpreset: Colors.name, timestamp: Date.now()});
+        Settings.cache.perFileSaves.push({file: cFile, shaderset: Video.Shaders.name, colorpreset: Video.Colors.name, timestamp: Date.now()});
         Settings.cache.save();
     }
 };
@@ -136,27 +136,6 @@ Core.doRegistrations = function () {
         }
         Core.Menus.MainMenu.showMenu();
     };
-
-    var checkVRR = function (){
-        var double = "";
-        if (Number(mp.get_property("container-fps")) < (Settings.Data.refreshRate / 2) && mp.get_property("speed") == 1) {
-            double = String(Number(mp.get_property("container-fps")) * 2);
-            if (double < 48) { double = double * 2};
-            mp.set_property("override-display-fps",double)
-            mp.commandv(
-                "vf",
-                "set",
-                "fps=fps=" + double
-            );
-        } else {
-            mp.set_property("override-display-fps",Settings.Data.refreshRate);
-            mp.commandv(
-                "vf",
-                "set",
-                "fps=fps=" + String(mp.get_property("container-fps"))
-            );
-        }
-    }
 
     mp.add_key_binding(null, "easympv", handleMenuKeypress);
     if (Settings.Data.forcedMenuKey != "disabled")
@@ -235,7 +214,7 @@ Core.doRegistrations = function () {
 
     if(Settings.Data.simpleVRR)
     {
-        mp.observe_property("speed",undefined,checkVRR);
+        mp.observe_property("speed",undefined,Video.FPS.checkVRR);
     }
 
     // Registering an observer to redraw Menus on window size change
@@ -479,7 +458,7 @@ Core.defineMenus = function () {
             UI.SSA.setColorWhite() +
             "Shaders",
         description: descriptionShaders(
-            Shaders.name,
+            Video.Shaders.name,
             Settings.Data.defaultShaderSet
         ),
         image: "shaders",
@@ -531,16 +510,16 @@ Core.defineMenus = function () {
         switch (event) {
             case "show":
                 Core.Menus.ShadersMenu.setDescription(
-                    descriptionShaders(Shaders.name, Settings.Data.defaultShaderSet)
+                    descriptionShaders(Video.Shaders.name, Settings.Data.defaultShaderSet)
                 );
                 break;
             case "enter":
                 Core.Menus.ShadersMenu.hideMenu();
                 if (action != "@back@") {
-                    Shaders.apply(action);
+                    Video.Shaders.apply(action);
                     Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
-                            Shaders.name,
+                            Video.Shaders.name,
                             Settings.Data.defaultShaderSet
                         )
                     );
@@ -553,17 +532,17 @@ Core.defineMenus = function () {
                         Utils.showAlert(
                             "info",
                             "Shader has been enabled:@br@" +
-                            UI.SSA.setColorYellow() + Shaders.name
+                            UI.SSA.setColorYellow() + Video.Shaders.name
                         );
                     }
                 }
                 break;
             case "right":
                 if (action != "@back@" && action != "none") {
-                    Shaders.apply(action);
+                    Video.Shaders.apply(action);
                     Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
-                            Shaders.name,
+                            Video.Shaders.name,
                             Settings.Data.defaultShaderSet
                         )
                     );
@@ -581,7 +560,7 @@ Core.defineMenus = function () {
                     );
                     Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
-                            Shaders.name,
+                            Video.Shaders.name,
                             Settings.Data.defaultShaderSet
                         )
                     );
@@ -1471,7 +1450,7 @@ Core.defineMenus = function () {
             UI.SSA.insertSymbolFA("") +
             "{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
         description: descriptionColors(
-            Colors.name,
+            Video.Colors.name,
             Settings.Data.defaultColorProfile
         ),
         scrollingEnabled: true,
@@ -1510,14 +1489,14 @@ Core.defineMenus = function () {
             case "show":
                 Core.Menus.ColorsMenu.setDescription(
                     descriptionColors(
-                        Colors.name,
+                        Video.Colors.name,
                         Settings.Data.defaultColorProfile
                     )
                 );
                 break;
             case "enter":
                 Core.Menus.ColorsMenu.hideMenu();
-                Colors.apply(action);
+                Video.Colors.apply(action);
                 if (action == "none") {
                     Utils.showAlert(
                         "info",
@@ -1527,17 +1506,17 @@ Core.defineMenus = function () {
                     Utils.showAlert(
                         "info",
                         "Color profile has been enabled:@br@" +
-                        UI.SSA.setColorYellow() + Colors.name
+                        UI.SSA.setColorYellow() + Video.Colors.name
                     );
                 }
 
                 break;
             case "right":
                 if (action != "@back@") {
-                    Colors.apply(action);
+                    Video.Colors.apply(action);
                     Core.Menus.ColorsMenu.setDescription(
                         descriptionColors(
-                            Colors.name,
+                            Video.Colors.name,
                             Settings.Data.defaultColorProfile
                         )
                     );
@@ -1549,7 +1528,7 @@ Core.defineMenus = function () {
                     Settings.Data.defaultColorProfile = action;
                     Core.Menus.ColorsMenu.setDescription(
                         descriptionColors(
-                            Colors.name,
+                            Video.Colors.name,
                             Settings.Data.defaultColorProfile
                         )
                     );
@@ -1812,8 +1791,8 @@ Core.startExecution = function () {
     Core.defineMenus();
     Core.doRegistrations();
 
-    Colors.name = Settings.Data.defaultColorProfile;
-    Colors.apply(Settings.Data.defaultColorProfile);
+    Video.Colors.name = Settings.Data.defaultColorProfile;
+    Video.Colors.apply(Settings.Data.defaultColorProfile);
 }
 
 module.exports = Core;

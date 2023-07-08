@@ -2,7 +2,7 @@
  * EASYMPV (main.js)
  *
  * Author:              Jong
- * URL:                 https://smto.pw/mpv
+ * URL:                 https://github.com/JongWasTaken/easympv
  * License:             MIT License
  */
 
@@ -104,9 +104,9 @@ var Wizard = require("./FirstTimeWizard");
 var UI = require("./UI");
 var OS = require("./OS");
 var Settings = require("./Settings");
-var Shaders = require("./Shaders");
 var Utils = require("./Utils");
 var Tests = require("./Tests");
+var Video = require("./Video");
 
 var Environment = {};
 Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");

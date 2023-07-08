@@ -2,7 +2,7 @@
  * FIRSTTIMEWIZARD.JS (MODULE),
  *
  * Author:         Jong
- * URL:            https://smto.pw/mpv
+ * URL:            https://github.com/JongWasTaken/easympv
  * License:        MIT License
  *
  */
