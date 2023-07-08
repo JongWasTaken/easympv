@@ -98,7 +98,6 @@ Math.percentage = function (partialValue, totalValue) {
 var API = require("./API");
 var Browsers = require("./Browsers");
 var Chapters = require("./Chapters");
-var Colors = require("./Colors");
 var Core = require("./Core");
 var Wizard = require("./FirstTimeWizard");
 var UI = require("./UI");
