@@ -41,6 +41,11 @@ UI.SSA.setSize = function (fontSize) {
     return "{\\fs" + fontSize + "}";
 };
 
+UI.SSA.setAllignment = function (type) {
+    // based on number pad (eg. 1 is bottom-left, 5 is dead center, 9 is top-right)
+    return "{\\an" + type + "}";
+};
+
 UI.SSA.setScale = function (scalePercent) {
     return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
 };
@@ -65,11 +70,110 @@ UI.SSA.setPosition = function (x, y) {
     return s;
 };
 
-UI.SSA.setPositionPercentage = function (x, y) {
-    x = Number(mp.get_property("osd-width")) * (x / 100)
-    y = Number(mp.get_property("osd-height")) * (y / 100)
-    return UI.SSA.setPosition(x,y);
+UI.SSA.setPositionAbsolutePercentage = function (x, y, origin) {
+    if (origin == undefined)
+    {
+        origin = "top-left";
+    }
+
+    var width = Number(mp.get_property("osd-width"));
+    var height = Number(mp.get_property("osd-height"));
+
+    if (origin == "top-left")
+    {
+        x = width * (x / 100);
+        y = height * (y / 100);
+        return UI.SSA.setPosition(x,y);
+    }
+    if (origin == "top-right")
+    {
+        x = width - (width * (x / 100));
+        y = height * (y / 100);
+        return UI.SSA.setPosition(x,y);
+    }
+    if (origin == "bottom-left")
+    {
+        x = width * (x / 100);
+        y = height - (height * (y / 100));
+        return UI.SSA.setPosition(x,y);
+    }
+    if (origin == "bottom-right")
+    {
+        x = width - (width * (x / 100));
+        y = height - (height * (y / 100));
+        return UI.SSA.setPosition(x,y);
+    }
 };
+
+UI.SSA.setPositionScreenCorner = function(corner, offset)
+{
+    if (corner == undefined)
+    {
+        corner = "top-left";
+    }
+
+    var width = Number(mp.get_property("osd-width"));
+    var height = Number(mp.get_property("osd-height"));
+
+    if ((width / 16) > (height / 9))
+    {
+        height = (width / 16) * 9;
+    }
+    else
+    {
+        width = (height / 9) * 16;
+    }
+
+    var x = offset;
+    var y = offset;
+
+    if (corner == "top-left")
+    {
+        x = width * (x / 100);
+        y = height * (y / 100);
+        return UI.SSA.setPosition(x,y);
+    }
+    if (corner == "top-right")
+    {
+        x = width - (width * (x / 100));
+        y = height * (y / 100);
+        return UI.SSA.setPosition(x,y);
+    }
+    if (corner == "bottom-left")
+    {
+        x = width * (x / 100);
+        y = height - (height * (y / 100));
+        return UI.SSA.setPosition(x,y);
+    }
+    if (corner == "bottom-right")
+    {
+        x = width - (width * (x / 100));
+        y = height - (height * (y / 100));
+        return UI.SSA.setPosition(x,y);
+    }
+
+}
+
+UI.SSA.findIdealScale = function ()
+{
+    var width = Number(mp.get_property("osd-width"));
+    var height = Number(mp.get_property("osd-height"));
+
+    var scaleFactor = 0;
+
+    if (width > height)
+    {
+        height = (width / 16) * 9;
+        scaleFactor = Math.floor(height / 10.8);
+    }
+    else
+    {
+        width = (height / 9) * 16;
+        scaleFactor = Math.floor(width / 19.2);
+    }
+
+    return scaleFactor;
+}
 
 UI.SSA.move = function (x, y) {
     var s = "{\\p1} ";
@@ -549,6 +653,7 @@ UI.Time.OSD = undefined;
 UI.Time.Timer = undefined;
 UI.Time.xLocation = 1;
 UI.Time.yLocation = 1;
+UI.Time.Allignment = 4;
 
 UI.Time.observer = function()
 {
@@ -559,18 +664,16 @@ UI.Time.observer = function()
 UI.Time.assembleContent = function()
 {
     var content = "";
-    content += UI.SSA.setScale(100) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
-    content += UI.SSA.setPositionPercentage(UI.Time.xLocation,UI.Time.yLocation);
+    content += UI.SSA.setScale(UI.SSA.findIdealScale()) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
+    content += UI.SSA.setPositionAbsolutePercentage(UI.Time.xLocation, UI.Time.yLocation, Settings.Data.clockPosition);
+    //content += UI.SSA.setPositionScreenCorner(Settings.Data.clockPosition,UI.Time.xLocation);
+    content += UI.SSA.setAllignment(UI.Time.Allignment);
     content += UI.SSA.insertSymbolFA(" ", 20, 32, Utils.commonFontName);
     content += Utils.getCurrentTime();
     return content;
 }
 
 UI.Time._startTimer = function() {
-    //var x = this;
-    //if (UI.Time.Timer != undefined) {
-    //    clearInterval(UI.Time.Timer);
-    //}
     UI.Time.Timer = setInterval(function () {
         UI.Time.OSD.data = UI.Time.assembleContent();
         UI.Time.OSD.update();
@@ -603,28 +706,27 @@ UI.Time._show = function()
 {
     if (Settings.Data.clockPosition == "bottom-right")
     {
-        UI.Time.xLocation = 96;
-        UI.Time.yLocation = 97;
+        UI.Time.xLocation = 6;
+        UI.Time.yLocation = 1;
+        UI.Time.Allignment = 4;
     }
     else if (Settings.Data.clockPosition == "bottom-left")
     {
-        UI.Time.xLocation = 1;
-        UI.Time.yLocation = 97;
+        UI.Time.xLocation = 6;
+        UI.Time.yLocation = 1.5;
+        UI.Time.Allignment = 6;
     }
     else if (Settings.Data.clockPosition == "top-right")
     {
-        UI.Time.xLocation = 96;
-        UI.Time.yLocation = 1;
+        UI.Time.xLocation = 6;
+        UI.Time.yLocation = 1.5;
+        UI.Time.Allignment = 4
     }
     else // top-left
     {
-        UI.Time.xLocation = 1;
-        UI.Time.yLocation = 1;
-    }
-
-    if (Number(mp.get_property("osd-width") < 1921) && (Settings.Data.clockPosition == "top-right" || Settings.Data.clockPosition == "bottom-right"))
-    {
-        UI.Time.xLocation = UI.Time.xLocation - 2;
+        UI.Time.xLocation = 6;
+        UI.Time.yLocation = 1.5;
+        UI.Time.Allignment = 6;
     }
 
     // create overlay
@@ -1460,7 +1562,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
              - Description Text Lines might overlap on low window resolutions.
                 -> Not really a concern
          */
-        var scaleFactor = Math.floor(mp.get_property("osd-height") / 10.8); // scale percentage, 10.8 for 1080p
+        var scaleFactor = UI.SSA.findIdealScale();
         var transparency = this.settings.transparency;
         var scale = UI.SSA.setScale(scaleFactor);
         var border =
@@ -2134,7 +2236,7 @@ UI.Alert._stopTimer = function () {
 };
 
 UI.Alert._assembleContent = function (xpos,ypos) {
-    return UI.SSA.setPositionPercentage(xpos,ypos) +
+    return UI.SSA.setPositionAbsolutePercentage(xpos,ypos) +
     UI.SSA.setBorder(1) +
     UI.SSA.setSize("36") +
     UI.SSA.setFont(Utils.commonFontName) + UI.Alert.content;
