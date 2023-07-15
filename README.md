@@ -65,6 +65,7 @@ Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) a
 #### Ideas
 - Add a way to optionally install Discord integration after the fact (and possibly more, merge with dependency loader?)
 - Improve images, add variants up to 8k resolution and make it consistent
+- Consolidate Shaders and Colors into Video menu, also add toggle for FPS override and deinterlacing 
 #### All TODO items need to be addressed before I can consider declaring this project stable.
 
 ## License

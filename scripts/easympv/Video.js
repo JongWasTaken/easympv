@@ -18,17 +18,43 @@ var Video = {};
 Video.FPS = {};
 Video.FPS.setFixedFPS = function(fps)
 {
-    if (fps == undefined)
+    if (fps != undefined)
     {
-        fps  = "";
+        mp.commandv(
+            "vf",
+            "set",
+            "@empvfps:fps=fps=" + fps
+        );
+    }
+    else
+    {
+        mp.commandv(
+            "vf",
+            "remove",
+            "@empvfps"
+        );
     }
 
-    mp.commandv(
-        "vf",
-        "set",
-        "fps=fps=" + fps
-    );
 }
+
+Video.FPS.getFixedFPS = function()
+{
+    var output = "native";
+    var filters = mp.get_property_native("vf");
+    if (filters.length != 0)
+    {
+        for (var i = 0; i < filters.length; i++)
+        {
+            if (filters[i].name == "fps")
+            {
+                output = filters[i].params.fps;
+                break;
+            }
+        }
+    }
+    return output;
+}
+
 Video.FPS.checkVRR = function ()
 {
     var double = "";

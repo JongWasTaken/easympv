@@ -713,19 +713,19 @@ UI.Time._show = function()
     else if (Settings.Data.clockPosition == "bottom-left")
     {
         UI.Time.xLocation = 6;
-        UI.Time.yLocation = 1.5;
+        UI.Time.yLocation = 1;
         UI.Time.Allignment = 6;
     }
     else if (Settings.Data.clockPosition == "top-right")
     {
         UI.Time.xLocation = 6;
-        UI.Time.yLocation = 1.5;
+        UI.Time.yLocation = 3;
         UI.Time.Allignment = 4
     }
     else // top-left
     {
         UI.Time.xLocation = 6;
-        UI.Time.yLocation = 1.5;
+        UI.Time.yLocation = 3;
         UI.Time.Allignment = 6;
     }
 
