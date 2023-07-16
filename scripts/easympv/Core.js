@@ -322,12 +322,12 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Video",
-            item: "video",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playback Settings",
+            item: "playback",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                    UI.Menus.switchCurrentMenu(Core.Menus.VideoMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.PlaybackMenu,menu);
                 }
             }
         },
@@ -462,10 +462,11 @@ Core.defineMenus = function () {
         }
     };
 
-    Core.Menus.VideoMenu = new UI.Menus.Menu(
+    Core.Menus.PlaybackMenu = new UI.Menus.Menu(
         {
-            title: UI.SSA.insertSymbolFA("") + " Video Settings",
-            description: "This menu contains everything related to video presentation."
+            title: UI.SSA.insertSymbolFA("") + " Playback Settings",
+            description: "This menu lets you modify playback settings.",
+            autoClose: 8
         },
         [
             {
@@ -545,13 +546,13 @@ Core.defineMenus = function () {
                         Video.FPS.setFixedFPS();
                     }
 
-                    this.description = "Current value: " + UI.SSA.setColorGreen() + this.data_values[this.data_selection];
+                    this.description = "Current value: " + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + " FPS";
 
                     menu.redrawMenu();
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Forced Aspect Ratio",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Forced Aspect Ratio@br@@us10@",
                 item: "aspectratio",
                 data_selection: 0,
                 data_keys: [
@@ -561,7 +562,7 @@ Core.defineMenus = function () {
                     "-1", "1.7777", "1.3333", "1.8500", "2.9000", "1.5000", "1.0000"
                 ],
                 eventHandler: function(event, menu) {
-                    this.description = "Changes will be applied once this menu has been closed.@br@";
+                    this.description = "Aspect Ratio will be applied once this menu has been closed.@br@";
                     if (event == "left")
                     {
                         if (this.data_selection != 0)
@@ -583,18 +584,140 @@ Core.defineMenus = function () {
 
                     menu.redrawMenu();
                 }
+            },
+            {
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Subtitle Size",
+                item: "subtitlesize",
+                data_selection: 0,
+                data_values: [
+                    "0.5", "0.6", "0.7", "0.8", "0.9", "1.0", "1.1", "1.2", "1.3", "1.4", "1.5"
+                ],
+                eventHandler: function(event, menu) {
+                    this.description = "";
+                    if (event == "left")
+                    {
+                        if (this.data_selection != 0)
+                        {
+                            this.data_selection = this.data_selection - 1;
+                        }
+                        else {this.data_selection = this.data_values.length-1;}
+                    }
+                    else if (event == "right" || event == "enter")
+                    {
+                        if (this.data_selection < this.data_values.length-1)
+                        {
+                            this.data_selection = this.data_selection + 1;
+                        }
+                        else {this.data_selection = 0;}
+                    }
+
+                    this.description += "Current value: " + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + "x";
+                    mp.set_property("sub-scale", this.data_values[this.data_selection]);
+                    menu.redrawMenu();
+                }
+            },
+            {
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Subtitle Delay@br@@us10@",
+                item: "subtitledelay",
+                eventHandler: function(event, menu) {
+                    if (event == "left")
+                    {
+                        mp.commandv("add","sub-delay","-0.1");
+                    }
+                    else if (event == "right" || event == "enter")
+                    {
+                        mp.commandv("add","sub-delay","+0.1");
+                    }
+
+                    var delay = mp.get_property("sub-delay");
+                    if (delay.charAt(0) == "-")
+                    {
+                        this.description = "Current value: " + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
+                    }
+                    else
+                    {
+                        this.description = "Current value: " + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
+                    }
+                    menu.redrawMenu();
+                }
+            },
+            {
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Audio Volume",
+                item: "audiovolume",
+                eventHandler: function(event, menu) {
+                    this.description = "";
+                    var volume = Number(mp.get_property("volume"));
+                    if (event == "left")
+                    {
+                        if (volume != 0)
+                        {
+                            volume = volume - 1;
+                        }
+                        else {volume = 100;}
+                    }
+                    else if (event == "right" || event == "enter")
+                    {
+                        if (volume < 100)
+                        {
+                            volume = volume + 1;
+                        }
+                        else {volume = 0;}
+                    }
+
+                    this.description += "Current value: " + UI.SSA.setColorGreen() + volume  + "%";
+                    mp.set_property("volume", volume);
+                    menu.redrawMenu();
+                }
+            },
+            {
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playback Speed",
+                item: "speed",
+                eventHandler: function(event, menu) {
+                    this.description = "";
+                    var speed = Number(mp.get_property("speed").trim().slice(0,3));
+
+
+                    if (event == "left")
+                    {
+                        if (speed != 0.1)
+                        {
+                            speed = speed - 0.1;
+                        }
+                        else {speed = 4.0;}
+                    }
+                    else if (event == "right" || event == "enter")
+                    {
+                        if (speed < 4.0)
+                        {
+                            speed = speed + 0.1;
+                        }
+                        else {speed = 0.1;}
+                    }
+
+                    speed = String((Math.round(speed * 100) / 100)).replaceAll("\\.","").slice(0,2);
+                    if (speed.length == 1) {speed = speed + "0"};
+                    if (speed.length == 2) { speed = speed.slice(0,1) + "." + speed.slice(1,2)};
+
+                    this.description += "Current value: " + UI.SSA.setColorGreen() + speed  + "x";
+                    mp.set_property("speed", speed);
+                    menu.redrawMenu();
+                }
             }
         ],
         Core.Menus.MainMenu
     );
 
-    Core.Menus.VideoMenu.eventHandler = function(event, action)
+    Core.Menus.PlaybackMenu.eventHandler = function(event, action)
     {
         if (event == "show")
         {
-            var item_deinterlace = Core.Menus.VideoMenu.getItemByName("deinterlace");
-            var item_fps = Core.Menus.VideoMenu.getItemByName("fps");
-            var item_aspectratio = Core.Menus.VideoMenu.getItemByName("aspectratio");
+            var item_deinterlace = Core.Menus.PlaybackMenu.getItemByName("deinterlace");
+            var item_fps = Core.Menus.PlaybackMenu.getItemByName("fps");
+            var item_aspectratio = Core.Menus.PlaybackMenu.getItemByName("aspectratio");
+            var item_subtitlesize = Core.Menus.PlaybackMenu.getItemByName("subtitlesize");
+            var item_volume = Core.Menus.PlaybackMenu.getItemByName("audiovolume");
+            var item_speed = Core.Menus.PlaybackMenu.getItemByName("speed");
+            var item_subtitledelay = Core.Menus.PlaybackMenu.getItemByName("subtitledelay");
 
             item_deinterlace.description = "Only enable this if you actually know what it does.@br@"
             if (mp.get_property("deinterlace") == "yes")
@@ -611,17 +734,33 @@ Core.defineMenus = function () {
             var aspect = mp.get_property("video-aspect-override").trim().slice(0,6);
             item_aspectratio.data_selection = item_aspectratio.data_values.indexOf(aspect);
 
+            item_subtitlesize.data_selection = item_subtitlesize.data_values.indexOf(mp.get_property("sub-scale").trim().slice(0,3));
+
             if (item_fps.data_selection == -1) {item_fps.data_selection = 0;}
             if (item_aspectratio.data_selection == -1) {item_aspectratio.data_selection = 0;}
+            if (item_subtitlesize.data_selection == -1) {item_subtitlesize.data_selection = 5;}
 
-            item_fps.description = "Current value: " + UI.SSA.setColorGreen() + item_fps.data_values[item_fps.data_selection];
-            item_aspectratio.description = "Changes will be applied once this menu has been closed.@br@";
+            item_fps.description = "Current value: " + UI.SSA.setColorGreen() + item_fps.data_values[item_fps.data_selection] + " FPS";
+            item_subtitlesize.description = "Current value: " + UI.SSA.setColorGreen() + item_subtitlesize.data_values[item_subtitlesize.data_selection]  + "x";
+            item_aspectratio.description = "Aspect Ratio will be applied once this menu has been closed.@br@";
             item_aspectratio.description += "Current value: " + UI.SSA.setColorGreen() + item_aspectratio.data_keys[item_aspectratio.data_selection];
+            item_volume.description = "Current value: " + UI.SSA.setColorGreen() + Math.floor(Number(mp.get_property("volume"))) + "%";
+            item_speed.description = "Current value: " + UI.SSA.setColorGreen() + mp.get_property("speed").slice(0,3) + "x";
+
+            var delay = mp.get_property("sub-delay");
+            if (delay.charAt(0) == "-")
+            {
+                item_subtitledelay.description = "Current value: " + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
+            }
+            else
+            {
+                item_subtitledelay.description = "Current value: " + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
+            }
 
         }
         else if (event == "hide")
         {
-            var item_aspectratio = Core.Menus.VideoMenu.getItemByName("aspectratio");
+            var item_aspectratio = Core.Menus.PlaybackMenu.getItemByName("aspectratio");
             mp.set_property("video-aspect-override",item_aspectratio.data_values[item_aspectratio.data_selection]);
         }
     }
@@ -677,7 +816,7 @@ Core.defineMenus = function () {
     Core.Menus.ShadersMenu = new UI.Menus.Menu(
         ShadersMenuSettings,
         ShadersMenuItems,
-        Core.Menus.VideoMenu
+        Core.Menus.PlaybackMenu
     );
 
     Core.Menus.ShadersMenu.eventHandler = function (event, action) {
@@ -1656,7 +1795,7 @@ Core.defineMenus = function () {
     Core.Menus.ColorsMenu = new UI.Menus.Menu(
         ColorsMenuSettings,
         ColorsMenuItems,
-        Core.Menus.VideoMenu
+        Core.Menus.PlaybackMenu
     );
 
     Core.Menus.ColorsMenu.eventHandler = function (event, action) {
