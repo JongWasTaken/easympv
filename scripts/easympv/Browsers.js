@@ -648,6 +648,9 @@ Browsers.FileBrowser.open = function (parentMenu) {
             );
         }
         // Possible TODO: improve sort
+        //currentLocationFolders.sort(function(a,b) {
+        //    return Utils.naturalCompare(a.name, b.name)
+        //});
         currentLocationFolders.sort();
 
 

@@ -84,7 +84,6 @@ Core.onFileLoad = function () {
                 cFile.replaceAll("./", "");
         }
     }
-    //Autoload.loadedFile = cFile;
     Browsers.FileBrowser.currentLocation = cFile;
     Browsers.FileBrowser.gotoParentDirectory();
 
@@ -101,6 +100,9 @@ Core.onFileLoad = function () {
     {
         UI.Time.show();
     }
+
+    Autoload.loadedFile = cFile;
+    Autoload.loadFolder();
 };
 
 Core.onShutdown = function () {
@@ -326,31 +328,19 @@ Core.defineMenus = function () {
             item: "playback",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaybackMenu,menu);
                 }
             }
         },
-        /*
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Shaders",
-            item: "shaders",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playlist",
+            item: "playlist",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
-                    //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
-                    UI.Menus.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
+                    UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
                 }
             }
         },
-        {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Colors",
-            item: "colors",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    UI.Menus.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
-                }
-            }
-        },*/
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Chapters@br@@us10@",
             item: "chapters",
@@ -475,7 +465,6 @@ Core.defineMenus = function () {
                 description: "Real-time sharpening and other effects.",
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
-                        //UI.Menus.switchCurrentMenu(scope.Menus.ShadersMenu,menu);
                         UI.Menus.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
                     }
                 }
@@ -762,6 +751,142 @@ Core.defineMenus = function () {
         {
             var item_aspectratio = Core.Menus.PlaybackMenu.getItemByName("aspectratio");
             mp.set_property("video-aspect-override",item_aspectratio.data_values[item_aspectratio.data_selection]);
+        }
+    }
+
+    var playlistMenuDescription = "Jump to a playlist entry or modify them by using the \"right\" action."
+
+    Core.Menus.PlaylistMenu = new UI.Menus.Menu(
+        {
+            title: UI.SSA.insertSymbolFA("") + " Playlist",
+            description: playlistMenuDescription,
+            scrollingEnabled: true,
+            customKeyEvents: [{key: "h", event: "help"}]
+        },
+        [],
+        Core.Menus.MainMenu
+    );
+
+    Core.Menus.PlaylistMenu.mode = "select";
+    Core.Menus.PlaylistMenu.itemCache = 0;
+
+    playlistContextMenuItems = [
+        {
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Move to...",
+            item: "move",
+            eventHandler: function (action, menu)
+            {
+                if (action == "enter")
+                {
+                    Core.Menus.PlaylistMenu.mode = "move";
+                    Core.Menus.PlaylistMenu.settings.description = "Selected item:@br@" + Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].title + "@br@@br@Where should this item be moved to?";
+                    UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Remove",
+            item: "delete",
+            eventHandler: function (action, menu)
+            {
+                if (action == "enter")
+                {
+                    Autoload.removeAt(Core.Menus.PlaylistMenu.itemCache);
+                    Autoload.buildPlaylist();
+                    UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
+                }
+            }
+        }
+    ];
+
+    var playlistContextMenu = new UI.Menus.Menu(
+        {
+            title: "Item Actions",
+            description: "Select what to do with this playlist item."
+        },
+        playlistContextMenuItems,
+        Core.Menus.PlaylistMenu
+    )
+
+    playlistContextMenu.eventHandler = function(event,action)
+    {
+        if (event == "show")
+        {
+            if (Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].playing)
+            {
+                var backButton = playlistContextMenu.items[0];
+                playlistContextMenu.items = [];
+                playlistContextMenu.items.push(backButton);
+                playlistContextMenu.settings.description = "This item cannot be modified!";
+            }
+        }
+        if (event == "hide")
+        {
+            if (Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].playing)
+            {
+                playlistContextMenu.items = playlistContextMenuItems;
+                playlistContextMenu.settings.description = "Select what to do with this playlist item.";
+            }
+        }
+    }
+
+    Core.Menus.PlaylistMenu.eventHandler = function (event, action)
+    {
+        if (event == "show")
+        {
+            Autoload.refresh();
+            var backButton = this.items[0];
+            this.items = [];
+            this.items.push(backButton);
+            for (var i = 0; i < Autoload.playlist.length; i++)
+            {
+                this.items.push(
+                    {
+                        title: UI.SSA.insertSymbolFA(Autoload.playlist[i].icon, 26, 30) + Autoload.playlist[i].filename,
+                        item: i,
+                        eventHandler: function (action, menu)
+                        {
+                            if (action == "enter")
+                            {
+                                if (menu.mode == "select")
+                                {
+                                    if (Autoload.playlist[this.item].playing)
+                                    {
+                                        return;
+                                    }
+
+                                    mp.commandv("playlist-play-index",this.item)
+                                    menu.hideMenu();
+                                    return;
+                                }
+
+                                if (menu.mode == "move")
+                                {
+                                    Autoload.moveTo(menu.itemCache,this.item);
+                                    Core.Menus.PlaylistMenu.mode = "select";
+                                    Core.Menus.PlaylistMenu.settings.description = playlistMenuDescription;
+                                    UI.Menus.switchCurrentMenu(menu, menu);
+                                    Autoload.buildPlaylist();
+                                    return;
+                                }
+                                return;
+                            }
+                            if (action == "right" && menu.mode == "select")
+                            {
+                                menu.itemCache = this.item;
+                                UI.Menus.switchCurrentMenu(playlistContextMenu, menu);
+                            }
+                        }
+                    }
+                );
+            }
+            return;
+        }
+        if (event == "hide")
+        {
+            Core.Menus.PlaylistMenu.mode = "select";
+            Core.Menus.PlaylistMenu.settings.description = playlistMenuDescription;
+            //Core.Menus.PlaylistMenu.eventHandler("show", undefined);
         }
     }
 

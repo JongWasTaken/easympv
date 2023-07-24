@@ -95,6 +95,7 @@ Math.percentage = function (partialValue, totalValue) {
     return Math.round((100 * partialValue) / totalValue);
 };
 
+var Autoload = require("./Autoload");
 var API = require("./API");
 var Browsers = require("./Browsers");
 var Chapters = require("./Chapters");

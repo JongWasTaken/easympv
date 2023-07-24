@@ -6,18 +6,22 @@
  * License:                 MIT License
  */
 
-// this is so WIP thats its not even being loaded yet
-
 var Autoload = {};
 
 Autoload.loadedFile = "";
 Autoload.location = "";
+Autoload.previousLocation = "";
+Autoload.enabled = true;
+Autoload.playlist = [];
+Autoload.maxPlaylistSize = 10000;
 
-Autoload.load = function() {
-    var playlist = [];
+Autoload.loadFolder = function(force) {
+    if (!Autoload.enabled)
+    {
+        return;
+    }
 
     // get current dir contents
-
     Autoload.location = "";
     var workDir = Autoload.loadedFile;
     if (workDir.charAt(workDir.length - 1) == OS.directorySeperator) {
@@ -41,13 +45,31 @@ Autoload.load = function() {
         Autoload.location += OS.directorySeperator;
     }
 
-    var currentDirectory = mp.utils.readdir(Autoload.location, "files");
-    currentDirectory.sort();
+    // check against previous location, only rebuild playlist on folder change
+    if (!force)
+    {
+        if (Autoload.location == Autoload.previousLocation)
+        {
+            return;
+        }
+        Autoload.previousLocation = Autoload.location;
+    }
 
+
+    var currentDirectory = mp.utils.readdir(Autoload.location, "files");
+
+    // possible TODO: implement better sorting algorithm than the default array.sort()
+    //currentDirectory.sort(function(a,b) {
+    //    return Utils.naturalCompare(a.name, b.name)
+    //});
+
+    currentDirectory.sort();
+    Autoload.playlist = [];
     // check extension and type foreach, add to list if good
-    var currentlyPlaying = 0;
+    var isPlaying = false;
     for (var i = 0; i < currentDirectory.length; i++) {
         var icon = " ";
+        var type = "none";
         for (
             var j = 0;
             j < Settings.presets.fileextensions.length;
@@ -61,56 +83,159 @@ Autoload.load = function() {
                 if (whitelist.type == "video")
                 {
                     icon = " ";
+                    type = "video";
                 }
                 else if (whitelist.type == "audio")
                 {
                     icon = " ";
+                    type = "audio";
                 }
                 else if (whitelist.type == "photo")
                 {
                     icon = " ";
+                    type = "photo";
                 }
 
-                playlist.push({
-                    title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
-                    path: Autoload.location + OS.directorySeperator + currentDirectory[i]
-                });
-                
                 if(Autoload.loadedFile == Autoload.location + OS.directorySeperator + currentDirectory[i])
                 {
-                    currentlyPlaying = i;
+                    isPlaying = true;
+                    icon = " ";
                 }
+                else { isPlaying = false; }
+
+                Autoload.playlist.push({
+                    title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
+                    icon: icon,
+                    type: type,
+                    filename: currentDirectory[i],
+                    path: Autoload.location + OS.directorySeperator + currentDirectory[i],
+                    playing: isPlaying
+                });
 
                 break;
             }
+
+            if (Autoload.playlist.length == Autoload.maxPlaylistSize)
+            {
+                Utils.log("Hit playlist size limit, stopping!","Autoload","warn")
+                break;
+            }
+
         }
     }
-    mp.msg.warn(currentlyPlaying);
 
-    // set list as playlist
-    mp.commandv("playlist-clear"); // removes all entries expect currently playing
-    var prepend = function(path)
-    {
-        var pos = mp.get_property_number("playlist-count") - 1;
-        mp.commandv("loadfile", path, "append")
-        mp.commandv("playlist-move",pos,0);
-    }
+    Autoload.buildPlaylist();
 
-    for (var n = 0; n < playlist.length; n++)
+};
+
+Autoload.refresh = function()
+{
+    for (var i = 0; i < Autoload.playlist.length; i++)
     {
-        if (n < currentlyPlaying)
+        if (Autoload.playlist[i].path == Autoload.loadedFile)
         {
-            prepend(playlist[n].path);
-        }
-        else if (n == currentlyPlaying)
-        {
-            // do nothing
+            Autoload.playlist[i].playing = true;
+            Autoload.playlist[i].icon = " ";
         }
         else
         {
-            mp.commandv("loadfile", playlist[n].path, "append")
+            Autoload.playlist[i].playing = false;
+            if (Autoload.playlist[i].type == "video")
+            {
+                Autoload.playlist[i].icon = " ";
+            }
+            else if (Autoload.playlist[i].type == "audio")
+            {
+                Autoload.playlist[i].icon = " ";
+            }
+            else if (Autoload.playlist[i].type == "photo")
+            {
+                Autoload.playlist[i].icon = " ";
+            }
         }
     }
-};
+}
+
+Autoload.removeAt = function(index)
+{
+    if (Autoload.playlist[index].playing)
+    {
+        return false;
+    }
+
+    Autoload.playlist.splice(index,1);
+    return true;
+}
+
+Autoload.moveTo = function (index, target)
+{
+    if (Autoload.playlist[index].playing)
+    {
+        return false;
+    }
+
+    if (Autoload.playlist[target] == undefined || Autoload.playlist.length-1 == target)
+    {
+        Autoload.playlist.push(Autoload.playlist.splice(index,1)[0]);
+    }
+    else
+    {
+        Autoload.playlist.splice(target,0,Autoload.playlist.splice(index,1)[0]);
+    }
+
+    return true;
+}
+
+Autoload.buildPlaylist = function ()
+{
+    mp.commandv("playlist-clear"); // removes all entries except currently playing
+    var prepend = function(path)
+    {
+        // to future me: DO NOT TOUCH THIS FUNCTION
+        var pos = mp.get_property_number("playlist-count");
+        mp.commandv("loadfile", path, "append")
+        mp.commandv("playlist-move", pos, 0);
+    }
+
+    var toPrepend = [];
+    var toAppend = [];
+
+    var foundCurrent = false;
+    var skip = false;
+    for (var n = 0; n < Autoload.playlist.length; n++)
+    {
+        if (Autoload.playlist[n].playing)
+        {
+            foundCurrent = true;
+            skip = true;
+        }
+
+        if (!skip)
+        {
+            if (foundCurrent)
+            {
+                toAppend.push(Autoload.playlist[n].path);
+            }
+            else
+            {
+                toPrepend.push(Autoload.playlist[n].path);
+            }
+        }
+
+        skip = false;
+    }
+
+    toPrepend.reverse();
+    for (var k = 0; k < toPrepend.length; k++)
+    {
+        prepend(toPrepend[k]);
+    }
+
+    for (var l = 0; l < toAppend.length; l++)
+    {
+        mp.commandv("loadfile", toAppend[l], "append");
+    }
+
+}
 
 module.exports = Autoload;
