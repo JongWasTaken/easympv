@@ -58,6 +58,12 @@ Autoload.loadFolder = function(force) {
 
     var currentDirectory = mp.utils.readdir(Autoload.location, "files");
 
+    if (currentDirectory == undefined) // non-file playlist
+    {
+        Autoload._reversePopulate();
+        return;
+    }
+
     // possible TODO: implement better sorting algorithm than the default array.sort()
     //currentDirectory.sort(function(a,b) {
     //    return Utils.naturalCompare(a.name, b.name)
@@ -104,7 +110,7 @@ Autoload.loadFolder = function(force) {
                 else { isPlaying = false; }
 
                 Autoload.playlist.push({
-                    title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
+                    //title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
                     icon: icon,
                     type: type,
                     filename: currentDirectory[i],
@@ -152,7 +158,40 @@ Autoload.refresh = function()
             {
                 Autoload.playlist[i].icon = " ";
             }
+            else if (Autoload.playlist[i].type == "web")
+            {
+                Autoload.playlist[i].icon = " ";
+            }
         }
+    }
+}
+
+Autoload._reversePopulate = function ()
+{
+    Autoload.playlist = [];
+    var playlist = JSON.parse(mp.get_property("playlist"));
+    //dump(playlist);
+    var isPlaying = false;
+    var icon = " ";
+    for (var i = 0; i < playlist.length; i++)
+    {
+        if (playlist[i].playing != undefined)
+        {
+            if (playlist[i].playing)
+            {
+                icon = " "
+                isPlaying = true;
+            } else { isPlaying = false; icon = " ";}
+        } else { isPlaying = false; icon = " ";}
+        Autoload.playlist.push(
+            {
+                icon: icon,
+                type: "web",
+                filename: playlist[i].title,
+                path: playlist[i].filename,
+                playing: isPlaying
+            }
+        )
     }
 }
 
