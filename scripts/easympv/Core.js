@@ -101,8 +101,11 @@ Core.onFileLoad = function () {
         UI.Time.show();
     }
 
-    Autoload.loadedFile = cFile;
-    Autoload.loadFolder();
+    if (Autoload.enabled)
+    {
+        Autoload.loadedFile = cFile;
+        Autoload.loadFolder();
+    }
 };
 
 Core.onShutdown = function () {
@@ -333,15 +336,6 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playlist",
-            item: "playlist",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
-                }
-            }
-        },
-        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Chapters@br@@us10@",
             item: "chapters",
             eventHandler: function(event, menu) {
@@ -380,6 +374,21 @@ Core.defineMenus = function () {
             }
         },
     ];
+
+    if (Autoload.enabled)
+    {
+        MainMenuItems.splice(3,0,
+            {
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playlist",
+                item: "playlist",
+                eventHandler: function(event, menu) {
+                    if (event == "enter") {
+                        UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
+                    }
+                }
+            }
+        );
+    }
 
     /*
     // TODO: this needs to be moved to onFileLoad
@@ -791,7 +800,21 @@ Core.defineMenus = function () {
             {
                 if (action == "enter")
                 {
-                    Autoload.removeAt(Core.Menus.PlaylistMenu.itemCache);
+                    var status = Autoload.removeAt(Core.Menus.PlaylistMenu.itemCache);
+                    if (status)
+                    {
+                        Utils.showAlert(
+                            "info",
+                            "Removed playlist item!"
+                        );
+                    }
+                    else
+                    {
+                        Utils.showAlert(
+                            "error",
+                            "Could not remove playlist item!"
+                        );
+                    }
                     Autoload.buildPlaylist();
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
                 }
@@ -862,7 +885,22 @@ Core.defineMenus = function () {
 
                                 if (menu.mode == "move")
                                 {
-                                    Autoload.moveTo(menu.itemCache,this.item);
+                                    var status = Autoload.moveTo(menu.itemCache,this.item);
+                                    if (status)
+                                    {
+                                        Utils.showAlert(
+                                            "info",
+                                            "Moved playlist item!"
+                                        );
+                                    }
+                                    else
+                                    {
+                                        Utils.showAlert(
+                                            "error",
+                                            "Could not move playlist item!"
+                                        );
+                                    }
+
                                     Core.Menus.PlaylistMenu.mode = "select";
                                     Core.Menus.PlaylistMenu.settings.description = playlistMenuDescription;
                                     UI.Menus.switchCurrentMenu(menu, menu);
@@ -2158,6 +2196,12 @@ Core.doFileChecks = function () {
         Settings.mpvConfig.reload();
         Settings.inputConfig.reload();
     };
+
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autoload.lua")) != undefined)
+    {
+        Autoload.enabled = false;
+        Utils.log("Autoload.lua has been detected! Please remove/disable this file in order to use easympv's build-in playlist manager!","startup","warn");
+    }
 }
 
 /**
