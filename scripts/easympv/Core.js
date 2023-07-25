@@ -556,7 +556,7 @@ Core.defineMenus = function () {
                 ],
                 eventHandler: function(event, menu) {
 
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         if (this.data_selection != 0)
                         {
@@ -564,7 +564,7 @@ Core.defineMenus = function () {
                         }
                         else {this.data_selection = this.data_values.length-1;}
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         if (this.data_selection < this.data_values.length-1)
                         {
@@ -599,7 +599,7 @@ Core.defineMenus = function () {
                 ],
                 eventHandler: function(event, menu) {
                     this.description = "Aspect Ratio will be applied once this menu has been closed.@br@";
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         if (this.data_selection != 0)
                         {
@@ -607,7 +607,7 @@ Core.defineMenus = function () {
                         }
                         else {this.data_selection = this.data_values.length-1;}
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         if (this.data_selection < this.data_values.length-1)
                         {
@@ -630,7 +630,7 @@ Core.defineMenus = function () {
                 ],
                 eventHandler: function(event, menu) {
                     this.description = "";
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         if (this.data_selection != 0)
                         {
@@ -638,7 +638,7 @@ Core.defineMenus = function () {
                         }
                         else {this.data_selection = this.data_values.length-1;}
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         if (this.data_selection < this.data_values.length-1)
                         {
@@ -656,11 +656,11 @@ Core.defineMenus = function () {
                 title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Subtitle Delay@br@@us10@",
                 item: "subtitledelay",
                 eventHandler: function(event, menu) {
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         mp.commandv("add","sub-delay","-0.1");
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         mp.commandv("add","sub-delay","+0.1");
                     }
@@ -683,7 +683,7 @@ Core.defineMenus = function () {
                 eventHandler: function(event, menu) {
                     this.description = "";
                     var volume = Number(mp.get_property("volume"));
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         if (volume != 0)
                         {
@@ -691,7 +691,7 @@ Core.defineMenus = function () {
                         }
                         else {volume = 100;}
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         if (volume < 100)
                         {
@@ -713,7 +713,7 @@ Core.defineMenus = function () {
                     var speed = Number(mp.get_property("speed").trim().slice(0,3));
 
 
-                    if (event == "left")
+                    if (event == "left" || event == "enter")
                     {
                         if (speed != 0.1)
                         {
@@ -721,7 +721,7 @@ Core.defineMenus = function () {
                         }
                         else {speed = 4.0;}
                     }
-                    else if (event == "right" || event == "enter")
+                    else if (event == "right")
                     {
                         if (speed < 4.0)
                         {
@@ -826,7 +826,7 @@ Core.defineMenus = function () {
                 if (action == "enter")
                 {
                     Core.Menus.PlaylistMenu.mode = "move";
-                    Core.Menus.PlaylistMenu.settings.description = "Selected item:@br@" + Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].title + "@br@@br@Where should this item be moved to?";
+                    Core.Menus.PlaylistMenu.settings.description = "Selected item:@br@" + UI.SSA.setBold(true) + Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].filename + UI.SSA.setBold(false) + "@br@@br@Where should this item be moved to?";
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
                 }
             }
