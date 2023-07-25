@@ -26,6 +26,8 @@ var cFile;
 
 Core.Menus = {};
 
+Core.enableSaveTimer = true;
+
 Core.setSaveTimer = function()
 {
     Core.saveTimer = setInterval(function(){
@@ -232,8 +234,12 @@ Core.doRegistrations = function () {
     mp.register_event("shutdown", Core.onShutdown);
     mp.register_script_message("json",API.handleIncomingJSON);
 
-    mp.observe_property("pause", "bool", Core.pauseSaveTimer);
-    Core.setSaveTimer();
+    if (Core.enableSaveTimer)
+    {
+        mp.observe_property("pause", "bool", Core.pauseSaveTimer);
+        Core.setSaveTimer();
+    }
+
     // Registering an observer to check for chapter changes (Chapters.js)
     mp.observe_property(
         "chapter-metadata/by-key/title",
@@ -288,10 +294,13 @@ Core.doUnregistrations = function () {
     mp.unobserve_property(Chapters.handler);
     mp.unobserve_property(redrawMenus);
 
-    try{
-        clearInterval(Core.saveTimer);
-    } catch(e) {}
-    Core.saveTimer = undefined;
+    if (Core.enableSaveTimer)
+    {
+        try{
+            clearInterval(Core.saveTimer);
+        } catch(e) {}
+        Core.saveTimer = undefined;
+    }
 }
 
 Core.defineMenus = function () {
@@ -2229,7 +2238,13 @@ Core.doFileChecks = function () {
     if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autoload.lua")) != undefined)
     {
         Autoload.enabled = false;
-        Utils.log("Autoload.lua has been detected! Please remove/disable this file in order to use easympv's build-in playlist manager!","startup","warn");
+        Utils.log("Autoload.lua has been detected! Please remove/disable that script in order to use easympv's build-in playlist manager!","startup","warn");
+    }
+
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autosave.lua")) != undefined)
+    {
+        Core.enableSaveTimer = false;
+        Utils.log("Autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in auto saving feature!","startup","warn");
     }
 }
 
