@@ -4,7 +4,7 @@ easympv by Jong (smto.pw/mpv)
   licensed under the MIT License
 
 Scripts used:
-autoload, autosave, betterchapters by the mpv contributors
+betterchapters by the mpv contributors
   licensed under the GPLv2+ License
 
 Fonts used:
@@ -28,5 +28,8 @@ FSRCNNX
   licensed under the GPLv3+ License
 nnedi13
   licensed under the LGPLv3+ License
+CRT, adapted from crt-easymode
+  taken from https://www.reddit.com/r/mpv/comments/qet39q/is_it_possible_to_make_mpv_look_like_an_old_crt/hhvlo6g/
+  licensed under the GPL License
 
 Inspired by VideoPlayerCode's scripts.

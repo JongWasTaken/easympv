@@ -2238,13 +2238,13 @@ Core.doFileChecks = function () {
     if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autoload.lua")) != undefined)
     {
         Autoload.enabled = false;
-        Utils.log("Autoload.lua has been detected! Please remove/disable that script in order to use easympv's build-in playlist manager!","startup","warn");
+        Utils.log("autoload.lua has been detected! Please remove/disable that script in order to use easympv's build-in playlist manager!","startup","warn");
     }
 
     if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autosave.lua")) != undefined)
     {
         Core.enableSaveTimer = false;
-        Utils.log("Autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in auto saving feature!","startup","warn");
+        Utils.log("autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in automatic saving feature!","startup","warn");
     }
 }
 
