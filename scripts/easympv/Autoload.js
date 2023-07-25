@@ -162,6 +162,10 @@ Autoload.refresh = function()
             {
                 Autoload.playlist[i].icon = " ";
             }
+            else if (Autoload.playlist[i].type == "unknown")
+            {
+                Autoload.playlist[i].icon = "? ";
+            }
         }
     }
 }
@@ -171,28 +175,62 @@ Autoload._reversePopulate = function ()
     Autoload.playlist = [];
     var playlist = JSON.parse(mp.get_property("playlist"));
     //dump(playlist);
-    var isPlaying = false;
-    var icon = " ";
-    for (var i = 0; i < playlist.length; i++)
+    if (playlist.length == 0)
     {
-        if (playlist[i].playing != undefined)
-        {
-            if (playlist[i].playing)
-            {
-                icon = " "
-                isPlaying = true;
-            } else { isPlaying = false; icon = " ";}
-        } else { isPlaying = false; icon = " ";}
-        Autoload.playlist.push(
-            {
-                icon: icon,
-                type: "web",
-                filename: playlist[i].title,
-                path: playlist[i].filename,
-                playing: isPlaying
-            }
-        )
+        return;
     }
+
+    if (playlist[0].filename.slice(0,4) == "http")
+    {
+        var isPlaying = false;
+        var icon = " ";
+        for (var i = 0; i < playlist.length; i++)
+        {
+            if (playlist[i].playing != undefined)
+            {
+                if (playlist[i].playing)
+                {
+                    icon = " "
+                    isPlaying = true;
+                } else { isPlaying = false; icon = " ";}
+            } else { isPlaying = false; icon = " ";}
+            Autoload.playlist.push(
+                {
+                    icon: icon,
+                    type: "web",
+                    filename: playlist[i].title,
+                    path: playlist[i].filename,
+                    playing: isPlaying
+                }
+            )
+        }
+    }
+    else
+    {
+        var isPlaying = false;
+        var icon = "? ";
+        for (var i = 0; i < playlist.length; i++)
+        {
+            if (playlist[i].playing != undefined)
+            {
+                if (playlist[i].playing)
+                {
+                    icon = " "
+                    isPlaying = true;
+                } else { isPlaying = false; icon = " ";}
+            } else { isPlaying = false; icon = " ";}
+            Autoload.playlist.push(
+                {
+                    icon: icon,
+                    type: "unknown",
+                    filename: playlist[i].title,
+                    path: playlist[i].filename,
+                    playing: isPlaying
+                }
+            )
+        }
+    }
+
 }
 
 Autoload.removeAt = function(index)
