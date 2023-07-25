@@ -62,11 +62,10 @@ Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) a
 #### TODOs
 - macOS testing: I need to set up a macOS virtual machine again
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
-- Make Autoload.js work with non-file playlists
 #### Ideas
 - Add a way to optionally install Discord integration after the fact (and possibly more, merge with dependency loader?)
 - Improve images, add variants up to 8k resolution and make it consistent
-- Consolidate Shaders and Colors into Video menu, also add toggle for FPS override and deinterlacing 
+- Overhaul menu definition to make code more readable?
 #### All TODO items need to be addressed before I can consider declaring this project stable.
 
 ## License
