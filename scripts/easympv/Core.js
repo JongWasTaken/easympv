@@ -26,6 +26,28 @@ var cFile;
 
 Core.Menus = {};
 
+Core.setSaveTimer = function()
+{
+    Core.saveTimer = setInterval(function(){
+        mp.command("write-watch-later-config");
+    }, 30000);
+}
+
+Core.pauseSaveTimer = function(_,pause) {
+    if (pause)
+    {
+        clearInterval(Core.saveTimer);
+        Core.saveTimer = undefined;
+    }
+    else
+    {
+        if (Core.saveTimer == undefined)
+        {
+            Core.setSaveTimer();
+        }
+    }
+};
+
 Core.onFileLoad = function () {
     if (isFirstFile) {
         if (
@@ -210,6 +232,8 @@ Core.doRegistrations = function () {
     mp.register_event("shutdown", Core.onShutdown);
     mp.register_script_message("json",API.handleIncomingJSON);
 
+    mp.observe_property("pause", "bool", Core.pauseSaveTimer);
+    Core.setSaveTimer();
     // Registering an observer to check for chapter changes (Chapters.js)
     mp.observe_property(
         "chapter-metadata/by-key/title",
@@ -263,6 +287,11 @@ Core.doUnregistrations = function () {
 
     mp.unobserve_property(Chapters.handler);
     mp.unobserve_property(redrawMenus);
+
+    try{
+        clearInterval(Core.saveTimer);
+    } catch(e) {}
+    Core.saveTimer = undefined;
 }
 
 Core.defineMenus = function () {
