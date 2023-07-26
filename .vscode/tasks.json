@@ -22,6 +22,7 @@
             },
             "options": {
                 "env": {
+                    "RADV_PERFTEST": "video_decode",
                     "EASYMPV_ARGS": "options=debugMode:true,showHiddenFiles:true,useNativeNotifications:false;debug=true",
                 }
             }

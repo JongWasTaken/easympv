@@ -12,7 +12,6 @@ The Core.js module
 This module used to be main.js, but it was split to make
 things like soft-restarts possible.
 ----------------------------------------------------------------*/
-
 var Core = {};
 
 var isFirstFile = true;
