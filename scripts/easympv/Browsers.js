@@ -135,7 +135,7 @@ Browsers.Selector.open = function (parentMenu) {
         color: "ffffff",
     });
 
-    Browsers.Selector.menuSettings.title = "Select Content Type";
+    Browsers.Selector.menuSettings.title = UI.SSA.insertSymbolFA("?") + " Select Content Type";
     Browsers.Selector.menuSettings.description = "What do you want to open?";
     Browsers.Selector.menu = new UI.Menus.Menu(
         Browsers.Selector.menuSettings,
@@ -979,7 +979,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
     }
 
     Browsers.DriveBrowser.menuMode = "list";
-    Browsers.DriveBrowser.menuSettings.title = "Drive Browser";
+    Browsers.DriveBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + "Drive Browser";
     Browsers.DriveBrowser.menu = new UI.Menus.Menu(
         Browsers.DriveBrowser.menuSettings,
         items,
@@ -1060,7 +1060,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             }
         }
     }
-    Browsers.DeviceBrowser.menuSettings.title = "Device Browser";
+    Browsers.DeviceBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + " Device Browser";
     Browsers.DeviceBrowser.menuSettings.description =
         "Select a device to open.@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "Some devices can cause mpv to crash! On top of that, you should always restart mpv after you finish watching a device!";
     Browsers.DeviceBrowser.menu = new UI.Menus.Menu(

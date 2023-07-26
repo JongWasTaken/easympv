@@ -37,6 +37,7 @@ Settings.cache = {};
 Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    showHints: true,
     showClock: false,
     clockPosition: "top-left",
     fadeMenus: false,
@@ -158,6 +159,11 @@ Settings.save = function () {
         defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to show hints on the main menu.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "# It looks quite empty without them.\n";
+        defaultConfigString += "showHints=true\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to show a clock on screen.\n";
         defaultConfigString += "# The clock should be pretty unobstrusive and its position can be chosen.\n";

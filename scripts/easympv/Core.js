@@ -377,7 +377,7 @@ Core.defineMenus = function () {
     };
 
     var MainMenuSettings = {
-        title: UI.SSA.insertSymbolFA("") + "{\\1c&H782B78&}easy{\\1c&Hffffff&}mpv",
+        title: UI.SSA.insertSymbolFA("") + " easympv",
         description: "",
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
@@ -457,7 +457,7 @@ Core.defineMenus = function () {
     {
         MainMenuItems.splice(3,0,
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playlist",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Playlist Management",
                 item: "playlist",
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
@@ -516,11 +516,17 @@ Core.defineMenus = function () {
             return;
         }
         if (event == "show") {
-            hint = Settings.presets.hints[Math.floor(Math.random() * Settings.presets.hints.length)].replaceAll("@br@", "@br@" + UI.SSA.setColorYellow());
-            Core.Menus.MainMenu.settings.description =
-                UI.SSA.setColorYellow() +
-                UI.SSA.insertSymbolFA(" ",21,21) + hint;
-
+            if (Settings.Data.showHints)
+            {
+                hint = Settings.presets.hints[Math.floor(Math.random() * Settings.presets.hints.length)].replaceAll("@br@", "@br@" + UI.SSA.setColorYellow());
+                Core.Menus.MainMenu.settings.description =
+                    UI.SSA.setColorYellow() +
+                    UI.SSA.insertSymbolFA(" ",21,21) + hint;
+            }
+            else
+            {
+                Core.Menus.MainMenu.settings.description = "@br@";
+            }
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
                 Utils.showAlert(
@@ -557,7 +563,7 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Colors@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Colors@br@@us10@",
                 item: "colors",
                 description: "Change image brightness and more.",
                 eventHandler: function(event, menu) {
@@ -845,7 +851,7 @@ Core.defineMenus = function () {
 
     Core.Menus.PlaylistMenu = new UI.Menus.Menu(
         {
-            title: UI.SSA.insertSymbolFA("") + " Playlist",
+            title: UI.SSA.insertSymbolFA("") + " Playlist Management",
             description: playlistMenuDescription,
             scrollingEnabled: true,
             customKeyEvents: [{key: "h", event: "help"}]
@@ -1007,16 +1013,12 @@ Core.defineMenus = function () {
     }
 
     var ShadersMenuSettings = {
-        title:
-            "{\\1c&H782B78&}" +
-            UI.SSA.insertSymbolFA("") +
-            UI.SSA.setColorWhite() +
-            "Shaders",
+        title: UI.SSA.insertSymbolFA("") + " Shaders",
         description: descriptionShaders(
             Video.Shaders.name,
             Settings.Data.defaultShaderSet
         ),
-        image: "shaders",
+        // image: "shaders",
         scrollingEnabled: true,
         customKeyEvents: [{key: "h", event: "help"}]
     };
@@ -1130,12 +1132,8 @@ Core.defineMenus = function () {
     };
 
     var ChaptersMenuSettings = {
-        image: "chapters",
-        title:
-            "{\\1c&H782B78&}" +
-            UI.SSA.insertSymbolFA("") +
-            UI.SSA.setColorWhite() +
-            "Chapters",
+        // image: "chapters",
+        title: UI.SSA.insertSymbolFA("") + " Chapters",
         description: "This will autodetect Openings, Endings and Previews and then either \"skip\" or \"slowdown\" them.@br@",
         customKeyEvents: [{key: "h", event: "help"}],
     };
@@ -1303,12 +1301,8 @@ Core.defineMenus = function () {
 
     var SettingsMenuSettings = {
         autoClose: 0,
-        image: "settings",
-        title:
-            "{\\1c&H782B78&}" +
-            UI.SSA.insertSymbolFA("") +
-            UI.SSA.setColorWhite() +
-            "Settings",
+        // image: "settings",
+        title: UI.SSA.insertSymbolFA("") + " Settings",
         description: descriptionSettings(
             Utils.displayVersion,
             Utils.displayVersionMpv
@@ -1349,7 +1343,7 @@ Core.defineMenus = function () {
                     }
                     var umenu = new UI.Menus.Menu(
                         {
-                            title: "Update",
+                            title: UI.SSA.insertSymbolFA("") + " Updates",
                             autoClose: "0",
                             description: setDescription(),
                         },
@@ -1434,7 +1428,7 @@ Core.defineMenus = function () {
                     menu.hideMenu();
                     var cmenu = new UI.Menus.Menu(
                         {
-                            title: "Credits",
+                            title: UI.SSA.insertSymbolFA("") + " Credits",
                             autoClose: "0",
                             description: Utils.getCredits().replaceAll("\n", "@br@"),
                         },
@@ -1534,11 +1528,7 @@ Core.defineMenus = function () {
     Core.Menus.SettingsDevelopmentSubMenu = new UI.Menus.Menu(
         {
             autoClose: 0,
-            title:
-                "{\\1c&H782B78&}" +
-                UI.SSA.insertSymbolFA("") +
-                UI.SSA.setColorWhite() +
-                "Development Options",
+            title: UI.SSA.insertSymbolFA("") + " Development Options",
             description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
             //customKeyEvents: [{key: "h", event: "help"}]
         },
@@ -1567,6 +1557,29 @@ Core.defineMenus = function () {
                     else
                     {
                         Settings.Data.notifyAboutUpdates = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Show hints on main menu",
+            item: "show_hints",
+            descriptionPrefix: "Whether to show hints on the main menu. It looks quite empty without them.@br@",
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.showHints)
+                    {
+                        Settings.Data.showHints = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.showHints = true;
                         this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
@@ -1756,7 +1769,7 @@ Core.defineMenus = function () {
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Use system notifications instead of on-screen messages@br@@us10@",
             item: "use_system_notifications",
-            descriptionPrefix: "On-screen messages are quite buggy right now, so using system notifications instead might be more desirable.@br@",
+            descriptionPrefix: "On-screen messages can be quite resource inefficient, so using system notifications instead might be more desirable.@br@",
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1828,11 +1841,7 @@ Core.defineMenus = function () {
         {
             autoClose: 0,
             scrollingEnabled: true,
-            title:
-                "{\\1c&H782B78&}" +
-                UI.SSA.insertSymbolFA("") +
-                UI.SSA.setColorWhite() +
-                "Configuration Options",
+            title: UI.SSA.insertSymbolFA("") + " Configuration Options",
             description: "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu).@br@This menu will not close automatically."
             //customKeyEvents: [{key: "h", event: "help"}]
         },
@@ -1847,6 +1856,16 @@ Core.defineMenus = function () {
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("notify_about_updates")
             if(Settings.Data.notifyAboutUpdates)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_hints")
+            if(Settings.Data.showHints)
             {
                 item.description = item.descriptionPrefix + enabledText;
             }
@@ -2000,10 +2019,9 @@ Core.defineMenus = function () {
     };
 
     var ColorsMenuSettings = {
-        image: "colors",
+        // image: "colors",
         title:
-            UI.SSA.insertSymbolFA("") +
-            "{\\1c&H375AFC&}C{\\1c&H46AEFF&}o{\\1c&H17E8FF&}l{\\1c&H70BF47&}o{\\1c&HFFD948&}r{\\1c&HE6A673&}s",
+            UI.SSA.insertSymbolFA("") + " Colors",
         description: descriptionColors(
             Video.Colors.name,
             Settings.Data.defaultColorProfile
@@ -2104,7 +2122,7 @@ Core.defineMenus = function () {
     };
 
     Core.Menus.TestsMenu = new UI.Menus.Menu({
-        title: "Tests",
+        title: UI.SSA.insertSymbolFA("") + " Tests",
         description: "This menu lets you launch tests.",
         autoClose: 0
     },[],undefined);
