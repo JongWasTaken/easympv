@@ -52,7 +52,7 @@ If you wish to install easympv manually you will (at least) need the following d
 - mpv (duh)
     - If you want plugins like [mpvcord](https://github.com/yutotakano/mpvcord) to work, it needs to have been compiled with LuaJIT support (Not all distributions do this!)
 - either `wget` (preferred) or `curl` (usually preinstalled)
-    - This is only needed for the updater, easympv will not "phone home" or anything like that
+    - This is only needed for the updater, easympv will only send requests to GitHub!
 - `xclip` OR `wl-clipboard` (if you use Wayland)
     - When in doubt, install both!
 

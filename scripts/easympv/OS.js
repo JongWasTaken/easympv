@@ -2,7 +2,7 @@
  * OS.JS (MODULE)
  *
  * Author:                  Jong
- * URL:                     http://smto.pw/mpv
+ * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 
@@ -10,6 +10,7 @@
 
 var OS = {};
 
+OS.repoName = "easympv-installer"; // change to easympv once stable
 OS.checksCompleted = false;
 OS.gitAvailable = false;
 OS.isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
@@ -314,10 +315,10 @@ OS._checkConnectionAsync = function (callback) {
 
     if (OS.isWindows)
     {
-        return OS._call("Test-Connection smto.pw -Quiet -Count 1",true,callback);
+        return OS._call("Test-Connection github.com -Quiet -Count 1",true,callback);
     }
 
-    return OS._call("curl --head https://smto.pw >/dev/null 2>&1",true,callback);
+    return OS._call("curl --head https://github.com >/dev/null 2>&1",true,callback);
 }
 
 OS.getConnectionStatus = function () {
@@ -349,25 +350,12 @@ OS.versionGetLatestAsync = function (callback) {
     if (OS.isWindows)
     {
         return OS._call("$webclient = New-Object System.Net.WebClient\n"+
-        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/latest.json\")\n"+
+        "$latest = $webclient.DownloadString(\"https://github.com/JongWasTaken/"+OS.repoName+"/releases/latest/download/release.json\")\n"+
         "Write-Output $latest.Trim()\n"+
         "exit 0",true,callback);
     }
 
-    return OS._call("curl -s https://smto.pw/mpv/hosted/latest.json",true,callback);
-}
-
-// get-version-latest-mpv
-OS.versionGetLatestmpvAsync = function (callback) {
-    if (OS.isWindows)
-    {
-        return OS._call("$webclient = New-Object System.Net.WebClient\n"+
-        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/mpvLatestVersion\")\n"+
-        "Write-Output $latest.Trim()\n"+
-        "exit 0",true,callback);
-    }
-
-    return OS._call("curl -s https://smto.pw/mpv/hosted/mpvLatestVersion",true,callback);
+    return OS._call("curl -LJs https://github.com/JongWasTaken/"+OS.repoName+"/releases/latest/download/release.json",true,callback);
 }
 
 // git-update

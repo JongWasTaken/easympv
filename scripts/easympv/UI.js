@@ -2,7 +2,7 @@
  * UI.JS (MODULE)
  *
  * Author:                  Jong
- * URL:                     http://smto.pw/mpv
+ * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 

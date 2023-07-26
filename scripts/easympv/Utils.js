@@ -2,7 +2,7 @@
  * UTILS.JS (MODULE)
  *
  * Author:                  Jong
- * URL:                     http://smto.pw/mpv
+ * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 
@@ -97,6 +97,9 @@ Utils.getLatestUpdateData = function () {
                 }
                 if(Utils.latestUpdateData.version == undefined) {
                     Utils.latestUpdateData.version = "0.0.0";
+                }
+                if(Utils.latestUpdateData.testedAgainst == undefined) {
+                    Utils.latestUpdateData.testedAgainst = "0.36.0";
                 }
                 if(Utils.latestUpdateData.changelog == undefined) {
                     Utils.latestUpdateData.changelog = "There was an issue while getting this data. Please restart mpv to retry!";
@@ -228,13 +231,10 @@ Utils.showSystemMessagebox = function (text, async) {
  * Fetches newest mpv version number.
  */
 Utils.getLatestMpvVersion = function () {
-    if(!OS.getConnectionStatus())
+    if(Utils.latestUpdateData.testedAgainst != undefined)
     {
-        return;
+        Utils.mpvLatestVersion = Utils.latestUpdateData.testedAgainst;
     }
-    OS.versionGetLatestmpvAsync(function (success, result, error) {
-        Utils.mpvLatestVersion = result.stdout.trim();
-    });
 };
 
 /**
