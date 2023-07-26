@@ -4,8 +4,7 @@ easympv by Jong (smto.pw/mpv)
   licensed under the MIT License
 
 Scripts used:
-betterchapters by the mpv contributors
-  licensed under the GPLv2+ License
+none
 
 Fonts used:
 Roboto Font by Christian Robertson,
