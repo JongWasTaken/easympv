@@ -57,7 +57,6 @@ Settings.Data = {
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
-    downloadDependencies: false,
     resetMpvConfig: false,
     resetInputConfig: false,
     isFirstLaunch: true,
@@ -298,13 +297,6 @@ Settings.save = function () {
             "# Usually false, unless you just updated, in which case it will be true.\n";
         defaultConfigString += "# This is modified automatically!\n";
         defaultConfigString += "doMigration=x\n";
-        defaultConfigString += "\n";
-        defaultConfigString +=
-            "# Whether to download dependencies on the next startup.\n";
-        defaultConfigString +=
-            "# Usually false. You may set this to true if you changed your operating system.\n";
-        defaultConfigString += "# This is modified automatically!\n";
-        defaultConfigString += "downloadDependencies=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to reset the mpv.conf file to default values on the next startup.\n";

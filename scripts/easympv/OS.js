@@ -344,56 +344,6 @@ OS.getConnectionStatus = function () {
     return false;
 }
 
-// get-dependencies
-OS.dependencyGetList = function () {
-    if (OS.isWindows)
-    {
-        return OS._call("$webclient = New-Object System.Net.WebClient\n"+
-        "$latest = $webclient.DownloadString(\"https://smto.pw/mpv/hosted/dependencies.json\")\n"+
-        "Write-Output $latest.Trim()").stdout.trim();
-    }
-
-    return OS._call("curl -s https://smto.pw/mpv/hosted/dependencies.json").stdout.trim();
-}
-
-// download-dependency
-OS.dependencyDownload = function (url, target) {
-    var exitCode = 127;
-    if(OS.isWindows)
-    {
-        exitCode = OS._call("$webclient = New-Object System.Net.WebClient \n"+
-        "try { $webclient.DownloadFile(\""+url+"\",\""+target+"\") } Catch [system.exception] {exit 1} \n"+
-        "exit 0").status;
-    }
-    else
-    {
-        exitCode = OS._call("curl -s "+url+" -o \"$HOME/.config/mpv/"+target+"\"").status;
-    }
-    return exitCode == 0 ? true: false;
-}
-
-// dependency-postinstall
-OS.dependencyPostInstall = function () {
-    if(OS.name == "macos")
-    {
-        if (mp.utils.file_info("/usr/local/lib/libdiscord_game_sdk.dylib") == undefined)
-        {
-            var msg = OS._call("osascript -e 'tell application \"System Events\" to display dialog \"For Discord integration to work, GameSDK needs to be installed on your system. This requires your password. Press OK to continue.\"'").stdout.trim();
-            if (msg.includes("OK"))
-            {
-                OS._call("osascript -e 'do shell script \"mkdir -p /usr/local/lib/ && mv ~/.config/mpv/scripts/mpvcord/discord_game_sdk.dylib /usr/local/lib/libdiscord_game_sdk.dylib\" with administrator privileges'");
-                if(mp.utils.file_info("/usr/local/lib/libdiscord_game_sdk.dylib") != undefined)
-                {
-                    OS._call("osascript -e 'tell application \"System Events\" to display dialog \"Installation finished. Discord integration will work after restarting mpv.\"'");
-                    return true;
-                }
-                else return false;
-            } else return false;
-        }
-    }
-    return false;
-}
-
 // get-version-latest
 OS.versionGetLatestAsync = function (callback) {
     if (OS.isWindows)

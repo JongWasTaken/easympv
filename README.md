@@ -76,9 +76,9 @@ Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) a
 #### TODOs
 - macOS testing: I need to set up a macOS virtual machine again
 - Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
-- Get rid of the stupid dependency loader and clean up `Utils.js`
+- Clean up `Utils.js`
 #### Ideas
-- Add a way to optionally install Discord integration after the fact (and possibly more, merge with dependency loader?)
+- Add a way to optionally install Discord integration after the fact
 - Improve images, add variants up to 8k resolution and make it consistent
 - Overhaul menu definition to make code more readable?
     - The idea I have for this would also make third-party menu integration possible

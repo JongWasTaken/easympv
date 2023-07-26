@@ -91,9 +91,6 @@ Utils.getLatestUpdateData = function () {
                     Utils.mpvLatestVersion
                 );
                 Utils.setDisplayVersion();
-                if (Settings.Data.downloadDependencies) {
-                    Utils.downloadDependencies();
-                }
             } catch (dummy) {
                 if(Utils.latestUpdateData == undefined) {
                     Utils.latestUpdateData = {};
@@ -474,57 +471,6 @@ Utils.updateMpv = function () {
     }
     return;
 };
-
-Utils.downloadDependencies = function () {
-    var dependencies = undefined;
-    var installList = undefined;
-
-    dependencies = JSON.parse(OS.dependencyGetList());
-
-    if (dependencies == undefined) return;
-
-    if (OS.isWindows) {
-        installList = dependencies.windows;
-    }
-    if (OS.name == "linux" || OS.name == "unix") {
-        installList = dependencies.linux;
-    }
-    if (OS.name == "macos") {
-        installList = dependencies.macos;
-    }
-
-    for (var i = 0; i < dependencies.windows.length; i++) {
-        if (OS.isWindows) {
-            OS.removeFileSystemwide(dependencies.windows[i].location.replaceAll("@mpvdir@",Settings.Data.mpvLocation));
-        } else {
-            if (!dependencies.windows[i].location.includes("@mpvdir@")) {
-                OS.removeFile(dependencies.linux[i].location);
-            }
-        }
-    }
-
-    for (var i = 0; i < dependencies.linux.length; i++) {
-        OS.removeFile(dependencies.linux[i].location);
-    }
-
-    for (var i = 0; i < dependencies.macos.length; i++) {
-        OS.removeFile(dependencies.macos[i].location);
-    }
-
-    for (var i = 0; i < installList.length; i++) {
-        if (OS.isWindows) {
-            OS.dependencyDownload(installList[i].url,installList[i].location.replaceAll("@mpvdir@",Settings.Data.mpvLocation));
-        } else {
-            OS.dependencyDownload(installList[i].url,installList[i].location);
-        }
-    }
-
-    Settings.Data.downloadDependencies = false;
-    Settings.save();
-
-    OS.dependencyPostInstall();
-};
-
 
 /**
  * Compares two version strings.
