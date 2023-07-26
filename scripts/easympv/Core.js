@@ -26,6 +26,7 @@ var cFile;
 Core.Menus = {};
 
 Core.enableSaveTimer = true;
+Core.enableChapterSeeking = true;
 
 Core.setSaveTimer = function()
 {
@@ -165,10 +166,43 @@ Core.doRegistrations = function () {
         Core.Menus.MainMenu.showMenu();
     };
 
+    var handleChapterSeek = function(direction)
+    {
+        var chapters = mp.get_property("chapters");
+        if (chapters == undefined) {chapters = 0;}
+        else {chapters = Number(chapters);}
+        var chapter = mp.get_property("chapter");
+        if (chapter == undefined) {chapter = 0;}
+        else {chapter = Number(chapter);}
+        if ((chapter + direction) < 0)
+        {
+            mp.command("playlist_prev")
+            mp.commandv("script-message", "osc-playlist")
+        }
+        else if ((chapter + direction) >= chapters)
+        {
+            mp.command("playlist_next")
+            mp.commandv("script-message", "osc-playlist")
+        }
+        else
+        {
+            mp.commandv("add", "chapter", direction)
+            mp.commandv("script-message", "osc-chapterlist")
+        }
+    }
+
     mp.add_key_binding(null, "easympv", handleMenuKeypress);
     if (Settings.Data.forcedMenuKey != "disabled")
     {
         mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
+    }
+
+    if (Core.enableChapterSeeking)
+    {
+        mp.add_key_binding(null, "chapter_next", function() {handleChapterSeek(1);});
+        mp.add_key_binding(null, "chapter_prev", function() {handleChapterSeek(-1);});
+        mp.add_key_binding(null, "empv_chapter_next", function() {handleChapterSeek(1);});
+        mp.add_key_binding(null, "empv_chapter_prev", function() {handleChapterSeek(-1);});
     }
 
     mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", UI.Input.showInteractiveCommandInput);
@@ -261,6 +295,13 @@ Core.doUnregistrations = function () {
     mp.remove_key_binding("empv_command_hotkey");
     mp.remove_key_binding("empv_log_hotkey");
     mp.remove_key_binding("empv_eval_hotkey");
+    if (Core.enableChapterSeeking)
+    {
+        mp.remove_key_binding("empv_chapter_next");
+        mp.remove_key_binding("empv_chapter_prev");
+        mp.remove_key_binding("chapter_next");
+        mp.remove_key_binding("chapter_prev");
+    }
 
     if(OS.isSteamGamepadUI)
     {
@@ -2244,6 +2285,12 @@ Core.doFileChecks = function () {
     {
         Core.enableSaveTimer = false;
         Utils.log("autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in automatic saving feature!","startup","warn");
+    }
+
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/betterchapters.lua")) != undefined)
+    {
+        Core.enableChapterSeeking = false;
+        Utils.log("betterchapters.lua has been detected! Please remove/disable that script in order to use easympv's build-in chapter seeking feature!","startup","warn");
     }
 }
 
