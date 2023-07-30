@@ -1549,7 +1549,7 @@ Core.defineMenus = function () {
                                             {
                                                 OS.unregisterMpv();
                                                 mp.utils.write_file("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
-                                                Utils.showAlert("Please wait, uninstall in progress.");
+                                                Utils.showAlert("warn", "Please wait, uninstall in progress.");
                                                 setTimeout(function(){
                                                     mp.commandv("run",mp.utils.get_user_path("~~/uninstaller.exe"));
                                                     mp.commandv("quit-watch-later");
