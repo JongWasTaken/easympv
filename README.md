@@ -60,7 +60,7 @@ If you wish to install easympv manually you will (at least) need the following d
 #### Windows Installer
 Unfinished. Use manual installation for now.  
 
-[//]: # (This sentence will be here once this is finished: Download the latest version from https://smto.pw/mpv/?#downloads.)  
+[//]: # (This sentence will be here once this is finished: Download the latest version from https://github.com/JongWasTaken/easympv-installer/releases/latest.)  
 #### Linux Installer
 Paste this into a terminal:  
 `sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh)"`  
@@ -75,10 +75,7 @@ Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) a
 ## TODOs and Ideas
 #### TODOs
 - macOS testing: I need to set up a macOS virtual machine again
-- Write a simple installer for Windows folks (probably .NET again, maybe ill try out NSIS or something like that)
-- Clean up `Utils.js`
 #### Ideas
-- Add a way to optionally install Discord integration after the fact
 - Improve images, add variants up to 8k resolution and make it consistent
 - Overhaul menu definition to make code more readable?
     - The idea I have for this would also make third-party menu integration possible
