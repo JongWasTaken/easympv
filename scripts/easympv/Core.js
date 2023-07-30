@@ -1553,7 +1553,7 @@ Core.defineMenus = function () {
                                                 setTimeout(function(){
                                                     mp.commandv("run",mp.utils.get_user_path("~~/uninstaller.exe"));
                                                     mp.commandv("quit-watch-later");
-                                                },10000);
+                                                },15000);
                                                 Utils.blockQuitButtons();
 
                                                 menu.hideMenu();
