@@ -336,28 +336,7 @@ Settings.save = function () {
             .split("\n");
     }
 
-    if(OS.isWindows && Settings.Data["mpvLocation"] == "unknown")
-    {
-        var searchPaths = [
-            "~~home\\AppData\\Local\\mpv\\",
-            "C:\\Program Files\\mpv\\",
-            "~~desktop\\mpv\\"
-        ];
-        var location = undefined;
-
-        for(var s = 0; s < searchPaths.length; s++)
-        {
-            if(mp.utils.file_info(mp.utils.get_user_path(searchPaths[s] + "mpv.exe")) != undefined){
-                location = searchPaths[s];
-                break;
-            }
-        }
-
-        if (location != undefined)
-        {
-            Settings.Data["mpvLocation"] = location + "mpv.exe";
-        }
-    }
+    Settings.findMpvWindows();
 
     for (var i = 0; i <= lines.length - 1; i++) {
         if (lines[i].includes("=")) {
@@ -381,6 +360,40 @@ Settings.save = function () {
         this.DataCopy
     );
 };
+
+Settings.findMpvWindows = function () {
+
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/INSTALLER_DATA_LOCATION")) != undefined)
+    {
+        var loc = mp.utils.read_file(mp.utils.get_user_path("~~/INSTALLER_DATA_LOCATION")).trim();
+        Settings.Data.mpvLocation = loc;
+        OS.fileRemove("INSTALLER_DATA_LOCATION");
+        return;
+    }
+
+    if(OS.isWindows && Settings.Data.mpvLocation == "unknown")
+    {
+        var searchPaths = [
+            mp.utils.getenv("LOCALAPPDATA") + "\\mpv\\",
+            mp.utils.getenv("PROGRAMFILES") + "\\mpv\\",
+            mp.utils.getenv("userprofile") + "\\Desktop\\mpv\\"
+        ];
+        var location = undefined;
+
+        for(var s = 0; s < searchPaths.length; s++)
+        {
+            if(mp.utils.file_info(mp.utils.get_user_path(searchPaths[s] + "mpv.exe")) != undefined){
+                location = searchPaths[s];
+                break;
+            }
+        }
+
+        if (location != undefined)
+        {
+            Settings.Data.mpvLocation = location;
+        }
+    }
+}
 
 Settings.migrate = function () {
     var copy = {};

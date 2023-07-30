@@ -2311,11 +2311,11 @@ Core.doFileChecks = function () {
         Utils.log("betterchapters.lua has been detected! Please remove/disable that script in order to use easympv's build-in chapter seeking feature!","startup","warn");
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/USED_INSTALLER")) != undefined) {
+    if (mp.utils.file_info(mp.utils.get_user_path("~~/INSTALLER_DATA_REGISTER")) != undefined) {
         if (OS.isWindows)
         {
             Utils.log("User installed using installer, registering mpv...","startup","info");
-            OS.fileRemove("USED_INSTALLER");
+            OS.fileRemove("INSTALLER_DATA_REGISTER");
             OS.registerMpv();
         }
     }

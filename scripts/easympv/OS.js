@@ -6,8 +6,6 @@
  * License:                 MIT License
  */
 
-// Most functions here are not in use yet!
-
 var OS = {};
 
 OS.repoName = "easympv-installer"; // change to easympv once stable
