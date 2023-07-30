@@ -1507,7 +1507,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Development Options",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Development Options@br@@us10@",
             item: "development_options",
             eventHandler: function (event, menu) {
                 if (event == "enter")
@@ -1518,6 +1518,68 @@ Core.defineMenus = function () {
             }
         }
     ];
+
+    if (OS.isWindows)
+    {
+        if (mp.utils.file_info(mp.utils.get_user_path("~~/uninstaller.exe")) != undefined) {
+            SettingsMenuItems.push({
+                title: UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Uninstall mpv...",
+                item: "uninstall",
+                eventHandler: function (event, menu) {
+                    if (event == "enter")
+                    {
+                        menu.hideMenu();
+                        // TODO: uninstaller menu here
+                        var uninstMenu = new UI.Menus.Menu(
+                            {
+                                title: UI.SSA.insertSymbolFA(" ") + "Uninstall mpv",
+                                description: "After selecting \"Confirm\", a powershell window will open which will unregister mpv.@br@After that, the uninstaller will take care of any remaining files.",
+                                autoClose: 0
+                            },
+                            [
+                                {
+                                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Confirm",
+                                    item: "confirm",
+                                    state: false,
+                                    eventHandler: function (event, menu)
+                                    {
+                                        if (event == "enter")
+                                        {
+                                            if (this.state)
+                                            {
+                                                OS.unregisterMpv();
+                                                mp.utils.write_file("~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
+                                                mp.commandv("run","~~/uninstaller.exe");
+                                                mp.commandv("quit-watch-later");
+                                            }
+                                            else
+                                            {
+                                                this.state = true;
+                                                this.title = UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Are you sure?";
+                                                menu.redrawMenu();
+                                            }
+                                        }
+                                    }
+                                }
+                            ],
+                            Core.Menus.SettingsMenu
+                        );
+                        uninstMenu.eventHandler = function(event, action) {
+                            if (event == "show")
+                            {
+                                var item = uninstMenu.getItemByName("confirm");
+                                item.title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Confirm";
+                                item.state = false;
+                                uninstMenu.redrawMenu();
+                            }
+                        };
+                        uninstMenu.showMenu();
+                    }
+                }
+            });
+        }
+
+    }
 
     Core.Menus.SettingsMenu = new UI.Menus.Menu(
         SettingsMenuSettings,
