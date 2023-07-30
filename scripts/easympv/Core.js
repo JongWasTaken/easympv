@@ -1548,9 +1548,15 @@ Core.defineMenus = function () {
                                             if (this.state)
                                             {
                                                 OS.unregisterMpv();
-                                                mp.utils.write_file("~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
-                                                mp.commandv("run","~~/uninstaller.exe");
-                                                mp.commandv("quit-watch-later");
+                                                mp.utils.write_file("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
+                                                Utils.showAlert("Please wait, uninstall in progress.");
+                                                setTimeout(function(){
+                                                    mp.commandv("run",mp.utils.get_user_path("~~/uninstaller.exe"));
+                                                    mp.commandv("quit-watch-later");
+                                                },10000);
+                                                Utils.blockQuitButtons();
+
+                                                menu.hideMenu();
                                             }
                                             else
                                             {
