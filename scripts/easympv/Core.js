@@ -1268,7 +1268,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "JavaScript Input@br@@us10@",
+            title: UI.SSA.setSize(26) + UI.SSA.setFont("Font Awesome 6 Free Brands") + " " + UI.SSA.setSize(35) + UI.SSA.setFont(Utils.commonFontName) + "JavaScript Input@br@@us10@",
             item: "javascript_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1278,7 +1278,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Open Tests Menu@br@@us10@",
             item: "open_tests_menu",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
