@@ -1,4 +1,7 @@
 {
+    "_author": "Jong",
+    "comment": "Offizielle deutsche Übersetzung.",
+
     "Global.disabled": "aus",
     "Global.enabled": "an",
     "Global.back.title": "Zurück",
@@ -78,7 +81,7 @@
     "Playlist.modemenu.description.suffix": "@br@@br@Wo soll dieser Eintrag hinbewegt werden?",
 
     "Playlistcontext.menu.title": "Eintrag Aktionen",
-    "Playlistcontext.menu.description": "Was soll mit diesem Eintrag geschähen?",
+    "Playlistcontext.menu.description": "Was soll mit diesem Eintrag geschehen?",
     "Playlistcontext.menu.description.invalid": "Dieser Eintrag kann nicht editiert werden!",
     "Playlistcontext.moveto.title": "Bewegen...",
     "Playlistcontext.remove.title": "Entfernen",
@@ -119,7 +122,7 @@
 
     "Context.menu.title": "Datei Aktionen",
     "Context.menu.title.folder": "Ordner Aktionen",
-    "Context.menu.description": "Was soll mit diesem Eintrag geschähen?@br@@br@",
+    "Context.menu.description": "Was soll mit diesem Eintrag geschehen?@br@@br@",
     "Context.favorites.title": "Zu Favoriten hinzufügen",
     "Context.open.title": "Öffnen",
     "Context.remove.title": "Entfernen",

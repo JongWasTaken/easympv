@@ -11,6 +11,7 @@ macOS support is experimental and not fully finished, as I lack a device to test
 
 ## Features
 - Menus with custom Fonts, optionally everything is controllable using only the mouse, useful for home theater use!
+    - Currently available in english and german!
 - Integrated File Browser, Disc/Device Selector, URL Input
     - Save folders to Favorites
     - Load subtitles during playback

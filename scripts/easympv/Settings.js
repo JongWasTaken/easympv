@@ -153,8 +153,9 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "# Language of easympv.\n";
         defaultConfigString += "# Default: en\n";
-        defaultConfigString += "# See all possible languages in the \"locale\" folder of the easympv directory.\n";
-        defaultConfigString += "language=unknown\n";
+        defaultConfigString += "# Possible values: \"en\" for english, \"de\" for german\n";
+        defaultConfigString += "# See all available languages in the \"locale\" folder of the easympv directory.\n";
+        defaultConfigString += "language=en\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
         defaultConfigString += "# Default: unknown\n";
