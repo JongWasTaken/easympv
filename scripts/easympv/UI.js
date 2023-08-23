@@ -2560,9 +2560,9 @@ UI.Input.show = function (callback, prefix) {
 
     UI.Input.Prefix =
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press Enter or right mouse button to submit your Input. Press ESC or left mouse button to abort.\n" +
+        Settings.locale["Input.first"] +
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        "Press CTRL+V or middle mouse button to paste.\n" +
+        Settings.locale["Input.second"] +
         UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)

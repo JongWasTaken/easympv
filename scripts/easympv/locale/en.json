@@ -85,7 +85,7 @@
     "Playlistcontext.moveto.title": "Move to...",
     "Playlistcontext.remove.title": "Remove",
 
-    "Chapters.menu.title": "Playlist Management",
+    "Chapters.menu.title": "Chapters",
     "Chapters.menu.description": "This will autodetect Openings, Endings and Previews and then either \"skip\" or \"slowdown\" them.@br@",
     "Chapters.mode.title": "Change mode",
     "Chapters.toggle.title": "Toggle",
@@ -111,16 +111,11 @@
     "Selector.menu.device": "Device",
     "Selector.menu.url": "URL",
 
-    "Selector.file.title": "File",
-    "Selector.disc.title": "Disc",
-    "Selector.device.title": "Device",
-    "Selector.url.title": "URL",
-
     "Browser.menu.title": "File Browser",
     "Browser.driveselector.title": "Drive Selection",
     "Browser.menu.description": "Select a file to open.",
     "Browser.back.title": "Back to main menu",
-    "Browser.favorites.title": "Favorties",
+    "Browser.favorites.title": "Favorites",
     "Browser.refresh.title": "Refresh",
     "Browser.openinexplorer.title": "Open in File Explorer",
 
@@ -230,5 +225,8 @@
     "FTW.audiolanguage.title": "Default Audio Language",
     "FTW.sublanguage.title": "Default Subtitle Language",
     "FTW.continue.title": "Continue",
-    "FTW.finish.title": "Finish"
+    "FTW.finish.title": "Finish",
+
+    "Input.first": "Press Enter or right mouse button to submit your Input. Press ESC or left mouse button to abort.\n",
+    "Input.second": "Press CTRL+V or middle mouse button to paste.\n"
 }
