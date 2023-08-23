@@ -8,6 +8,8 @@
  */
 
 var UI = require("./UI");
+var Settings = require("./Settings");
+Settings.presets.reload();
 
 var Wizard = {};
 Wizard.idsToUnblock = [];
@@ -28,17 +30,13 @@ var unblock = function () {
 };
 
 var title = function (n1,n2) {
-    return "easympv Initial Setup - Page " + n1 + "/" + n2;
+    return Settings.locale["FTW.menu.title"] + n1 + "/" + n2;
 }
 
 Wizard.Menus.Page1 = new UI.Menus.Menu(
     {
         title: "",
-        description:
-            "Thank you for trying out easympv!@br@" +
-            "Since this is the first time easympv has been loaded, we will have to set a few settings.@br@" +
-            "You can navigate menus like this one using the mousewheel or arrow keys and enter.@br@" +
-            "Press \"h\" while any menu is shown to get more information.",
+        description: Settings.locale["FTW.page1.description"],
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -47,7 +45,7 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
     },
     [
         {
-            title: "Continue",
+            title: Settings.locale["FTW.continue.title"],
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -68,25 +66,25 @@ Wizard.Menus.Page1.eventHandler = function (event, action) {
 
 Wizard.Menus.Page2Options = {
     PerformanceName: [
-        "Lowest / \"Potato\"",
-        "Laptop / integrated GPU",
-        "Desktop / good dedicated GPU"
+        Settings.locale["FTW.performance.first.title"],
+        Settings.locale["FTW.performance.second.title"],
+        Settings.locale["FTW.performance.third.title"]
     ],
     PerformanceDescription: [
-        "@br@Choose this if your PC is old.@br@At this point you should probably use your phone instead.@br@",
-        "@br@Choose this preset if you have no dedicated GPU, or you are not sure.@br@@br@",
-        "@br@Choose this preset if your PC can play videogames well.@br@@br@"
+        Settings.locale["FTW.performance.first.description"],
+        Settings.locale["FTW.performance.second.description"],
+        Settings.locale["FTW.performance.third.description"]
     ],
     AudioLanguageNames: [ "none", "Japanese", "English", "German" ],
-    AudioLanguageDescription: "@br@Set to \"none\" to use the default language specified by a video file.@br@",
+    AudioLanguageDescription: Settings.locale["FTW.audiolanguage.description"],
     SubLanguageNames: [ "none", "English", "German", "Japanese" ],
-    SubLanguageDescription: "@br@Set to \"none\" to not display subtitles by default.@br@"
+    SubLanguageDescription: Settings.locale["FTW.sublanguage.description"]
 };
 
 Wizard.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
-        description: "Use the left/right arrow key to change an option.",
+        description: Settings.locale["FTW.page2.description"],
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -95,7 +93,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
     },
     [
         {
-            title: "Performance Preset@us10@@br@",
+            title: Settings.locale["FTW.performance.title"] + "@us10@@br@",
             item: "toggle-performance",
             description: Wizard.Menus.Page2Options.PerformanceName[1] + Wizard.Menus.Page2Options.PerformanceDescription[1],
             data: 1,
@@ -116,7 +114,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: "Default Audio Language",
+            title: Settings.locale["FTW.audiolanguage.title"],
             item: "toggle-audio-language",
             description: Wizard.Menus.Page2Options.AudioLanguageNames[1] + Wizard.Menus.Page2Options.AudioLanguageDescription,
             data: 1,
@@ -137,7 +135,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: "Default Subtitle Language@us10@@br@",
+            title: Settings.locale["FTW.sublanguage.title"] + "@us10@@br@",
             item: "toggle-sub-language",
             description: Wizard.Menus.Page2Options.SubLanguageNames[1] + Wizard.Menus.Page2Options.SubLanguageDescription,
             data: 1,
@@ -158,7 +156,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: "Continue",
+            title: Settings.locale["FTW.continue.title"],
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -180,7 +178,7 @@ Wizard.Menus.Page2.eventHandler = function (event, action) {
 Wizard.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
-        description: "And that is it!@br@Select \"Finish\" to apply your changes.@br@IMPORTANT: Changes are not actually applied in this commit!",
+        description: Settings.locale["FTW.page3.description"],
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -189,7 +187,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
     },
     [
         {
-            title: "Finish",
+            title: Settings.locale["FTW.finish.title"],
             item: "finish",
             eventHandler: function(event, menu)
             {
@@ -200,7 +198,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                     Settings.mpvConfig.load();
 
                     var ppreset = Wizard.Menus.Page2Options.PerformanceName[Wizard.Menus.Page2.items[1].data];
-                    if (ppreset == "Lowest / \"Potato\"")
+                    if (ppreset == Settings.locale["FTW.performance.first.title"])
                     {
                         Settings.mpvConfig.Data.scale = "bilinear";
                         Settings.mpvConfig.Data.cscale = "bilinear";
@@ -212,7 +210,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == "Laptop / integrated GPU")
+                    else if (ppreset == Settings.locale["FTW.performance.second.title"])
                     {
                         Settings.mpvConfig.Data.scale = "spline36";
                         Settings.mpvConfig.Data.cscale = "spline36";
@@ -224,7 +222,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == "Desktop / good dedicated GPU")
+                    else if (ppreset == Settings.locale["FTW.performance.third.title"])
                     {
                         Settings.mpvConfig.Data.scale = "ewa_lanczossharp";
                         Settings.mpvConfig.Data.cscale = "ewa_lanczossharp";

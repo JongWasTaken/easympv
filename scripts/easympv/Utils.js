@@ -244,8 +244,7 @@ Utils.exitMpv = function () {
     if (Utils.updateInProgress) {
         Utils.showAlert(
             "warning",
-            "An update is in progress. " +
-            "You cannot close mpv now!"
+            Settings.locale["Alerts.updateinprogress"]
         );
     } else {
         mp.commandv("quit-watch-later");
@@ -316,8 +315,7 @@ Utils.doUpdateStage2 = function () // extract
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            "Update has failed. " +
-            "Download error!"
+            Settings.locale["Alerts.updatefailed"]
         );
         return;
     }
@@ -342,8 +340,7 @@ Utils.doUpdateStage3 = function () // delete package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            "Update has failed. " +
-            "Extraction error!"
+            Settings.locale["Alerts.updatefailed.extracterror"]
         );
         return;
     }
@@ -363,8 +360,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            "Update has failed. " +
-            "Deletion error!"
+            Settings.locale["Alerts.updatefailed.deleteerror"]
         );
         return;
     }
@@ -408,16 +404,14 @@ Utils.doUpdateStage5 = function () {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "info",
-            "Finished updating! " +
-            "Restart mpv to see changes."
+            Settings.locale["Alerts.updatefinished"]
         );
         Utils.updateAvailable = false;
     } else {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            "Update has failed. " +
-            "Apply error!"
+            Settings.locale["Alerts.updatefailed.applyerror"]
         );
         return;
     }
@@ -457,17 +451,16 @@ Utils.updateMpv = function () {
             if (Utils.updateAvailableMpv) {
                 OS.updateMpvWindows(Settings.Data.mpvLocation);
             } else {
-                Utils.showAlert("info", "mpv is up to date.");
+                Utils.showAlert("info", Settings.locale["Alerts.uptodate"]);
             }
         } else {
             Utils.showAlert(
                 "error",
-                "mpv location is unknown. " +
-                "Please update easympv.conf!"
+                Settings.locale["Alerts.locationunknown"]
             );
         }
     } else {
-        Utils.showAlert("error", "Only supported on Windows.");
+        Utils.showAlert("error", Settings.locale["Alerts.onlyonwindows"]);
     }
     return;
 };

@@ -15,6 +15,8 @@ It also provides sane defaults in case configuration files
 are missing.
 ----------------------------------------------------------------*/
 
+var OS = require("./OS")
+
 /**
  * This module handles serialization and deserialization of the
  * easympv.conf file located in the mpv config root directory.
@@ -28,6 +30,8 @@ Settings.inputConfig = {};
 Settings.presets = {};
 Settings.cache = {};
 
+Settings.locale = {}
+
 /////////////////////////////////////////// easympv.conf
 
 /**
@@ -35,6 +39,7 @@ Settings.cache = {};
  * Call Settings.reload() to update it.
  */
 Settings.Data = {
+    language: "en",
     mpvLocation: "unknown",
     forcedMenuKey: "m",
     showHints: true,
@@ -145,6 +150,11 @@ Settings.save = function () {
     ) {
         var defaultConfigString = "";
         defaultConfigString += "### easympv.conf ###\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Language of easympv.\n";
+        defaultConfigString += "# Default: en\n";
+        defaultConfigString += "# See all possible languages in the \"locale\" folder of the easympv directory.\n";
+        defaultConfigString += "language=unknown\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
         defaultConfigString += "# Default: unknown\n";
@@ -693,6 +703,11 @@ Settings.presets.colorpresetsUser =  [];
 Settings.presets.images = [];
 
 Settings.presets.load = function () {
+
+    if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")) != undefined)
+    {
+        Settings.locale = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
+    }
 
     Settings.presets.shadersets = [];
     Settings.presets.colorpresets = [];

@@ -58,13 +58,13 @@ If you wish to install easympv manually you will (at least) need the following d
 
 ### Install
 #### Windows Installer
-Unfinished. Use manual installation for now.  
+Unfinished. Installing manually is recommended for now.  
+If you feel adventurous, you can download the installer from [here](https://github.com/JongWasTaken/easympv-installer/releases/latest).  
 
-[//]: # (This sentence will be here once this is finished: Download the latest version from https://github.com/JongWasTaken/easympv-installer/releases/latest.)  
 #### Linux Installer
 Paste this into a terminal:  
 `sh -c "$(curl https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh)"`  
-> :warning: Running random commands from the internet can be dangerous, you should always check what exactly you are running. Read the source [here](https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh).  
+> :warning: Running random commands from the internet can be dangerous, you should always check what exactly you are running. Read the source [here](https://raw.githubusercontent.com/JongWasTaken/easympv-installer/master/installer.sh) (i suck at bash scripting, sorry).  
 
 This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
 Please report issues!  
@@ -72,14 +72,20 @@ Please report issues!
 Download the latest release (or the master branch) and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD/everywhere else).  
 Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
-## TODOs and Ideas
-#### TODOs
-- macOS testing: I need to set up a macOS virtual machine again
-#### Ideas
-- Improve images, add variants up to 8k resolution and make it consistent
+## Known Issues
+### Autoload.js
+- The internal playlist will sometimes clear itself, and i have no idea why
+- Jumping to a playlist entry in the playlist menu will rarely crash mpv
+### UI.js
+- Clock positioning can be weird on non-standard resolutions
+### Utils.js
+- Git update will lock up mpv in some cases
+### Misc
+- macOS code path has not been tested in a while and will probably break
+
+## Ideas
 - Overhaul menu definition to make code more readable?
     - The idea I have for this would also make third-party menu integration possible
-#### All TODO items need to be addressed before I can consider declaring this project stable.
 
 ## License
 All easympv code and assets (all JavaScript files and images in `scripts/easympv/images/`) are licensed under the MIT License.  

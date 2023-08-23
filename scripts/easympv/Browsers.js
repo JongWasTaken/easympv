@@ -7,6 +7,7 @@
  *
  */
 
+
 /*----------------------------------------------------------------
 The Browsers.js module
 
@@ -88,11 +89,11 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                         } else {
                             mp.commandv("loadfile", input);
                         }
-                        Utils.showAlert("info", "URL is being loaded!");
+                        Utils.showAlert("info", Settings.locale["Alerts.url.loaded"]);
                     }
                     else
                     {
-                        Utils.showAlert("info", "Input is not a valid URL!");
+                        Utils.showAlert("info", Settings.locale["Alerts.url.invalid"]);
                     }
                 }
             },"URL: ");
@@ -115,28 +116,28 @@ Browsers.Selector.open = function (parentMenu) {
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "File",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Selector.menu.file"],
         item: "file",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Disc",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Selector.menu.disc"],
         item: "disc",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Device",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Selector.menu.device"],
         item: "device",
         color: "ffffff",
     });
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "URL",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Selector.menu.url"],
         item: "url",
         color: "ffffff",
     });
 
-    Browsers.Selector.menuSettings.title = UI.SSA.insertSymbolFA("?") + " Select Content Type";
-    Browsers.Selector.menuSettings.description = "What do you want to open?";
+    Browsers.Selector.menuSettings.title = UI.SSA.insertSymbolFA("?") + " " + Settings.locale["Selector.menu.title"];
+    Browsers.Selector.menuSettings.description = Settings.locale["Selector.menu.description"];
     Browsers.Selector.menu = new UI.Menus.Menu(
         Browsers.Selector.menuSettings,
         items,
@@ -157,7 +158,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
         {
             Utils.showAlert(
                 "info",
-                "Playing " +
+                Settings.locale["Alerts.browser.playing"] +
                     entry.type +
                     " file: " + entry.item
             );
@@ -172,7 +173,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
         {
             Utils.showAlert(
                 "info",
-                "Loading subtitles: " + entry.item
+                Settings.locale["Alerts.browser.loadsubs"] + entry.item
             );
             mp.commandv(
                 "sub-add",
@@ -311,13 +312,13 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         }
     }
 
-    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "File Actions";
+    var contextMenuTitle = UI.SSA.insertSymbolFA(" ") + Settings.locale["Context.menu.title"];
     var contextMenuDescriptionIcon =  UI.SSA.setColor("ffffff") + UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
 
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back@br@@br@",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Global.back.title"] + "@br@@br@",
         color: "909090",
         item: "",
         eventHandler: function(action, menu)
@@ -334,7 +335,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if(isFolder)
     {
         items.push({
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Add to Favorites",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Context.favorites.title"],
             item: "",
             eventHandler: function(action, menu)
             {
@@ -350,13 +351,13 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     {
                         Settings.Data["fileBrowserFavorites"].locations.push(path);
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                        Utils.showAlert("info","Added Folder to Favorites.");
+                        Utils.showAlert("info",Settings.locale["Alerts.favorites.added"]);
                         Settings.save();
                         menu.hideMenu();
                         Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
                         return;
                     }
-                    Utils.showAlert("error","Folder is already in Favorites!");
+                    Utils.showAlert("error",Settings.locale["Alerts.favorites.added.error"]);
                     return;
                 }
             }
@@ -364,7 +365,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     }
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Context.open.title"],
         item: "",
         eventHandler: function(action, menu)
         {
@@ -392,7 +393,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     if (!isFolder || Settings.Data.allowFolderDeletion)
     {
         items.push({
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Remove",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Context.remove.title"],
             item: "",
             eventHandler: function(action, menu)
             {
@@ -403,7 +404,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
                 if(isFolder && !Settings.Data.allowFolderDeletion)
                 {
-                    this.title = UI.SSA.setColorRed() + "Removing folders is disabled";
+                    this.title = UI.SSA.setColorRed() + Settings.locale["Context.remove.disabled"];
                     contextMenu.redrawMenu();
                     return;
                 }
@@ -417,14 +418,14 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     {
                         Utils.showAlert(
                             "info",
-                            "Removed " + type + ": " + item
+                            Settings.locale["Alerts.browser.fileremoved"] + type + ": " + item
                         );
                     }
                     else
                     {
                         Utils.showAlert(
                             "error",
-                            "Could not remove " + type + ": " + item
+                            Settings.locale["Alerts.browser.fileremoved.error"] + type + ": " + item
                         );
                     }
                     contextMenu.hideMenu();
@@ -441,7 +442,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
     if (isFolder)
     {
-        contextMenuTitle = UI.SSA.insertSymbolFA(" ") + "Folder Actions";
+        contextMenuTitle = UI.SSA.insertSymbolFA(" ") + Settings.locale["Context.menu.title.folder"];
         contextMenuDescriptionIcon =  UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) + item + UI.SSA.setBold(false);
     }
 
@@ -449,7 +450,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
     var contextMenu = new UI.Menus.Menu({
         title: contextMenuTitle,
-        description: "Select what to do with this item. @br@@br@" + contextMenuDescriptionIcon + "@br@",
+        description: Settings.locale["Context.menu.description"] + contextMenuDescriptionIcon + "@br@",
         autoClose: 0,
         fadeOut: false,
         fadeIn: false
@@ -765,19 +766,19 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     }
 
-    Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + "File Browser";
+    Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + Settings.locale["Browser.menu.title"];
     Browsers.FileBrowser.menuSettings.description =
         UI.SSA.setColor("FFFF90") + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + UI.SSA.setBold(true) +
         Browsers.FileBrowser.currentLocation.replaceAll(
             "@DRIVESELECTOR@",
-            "Drive Selection"
-        ) + " " + UI.SSA.setBold(false) + "@br@@br@Select a file to open.";
+            Settings.locale["Browser.driveselector.title"]
+        ) + " " + UI.SSA.setBold(false) + "@br@@br@" + Settings.locale["Browser.menu.description"];
     Browsers.FileBrowser.menuSettings.backButtonTitle =
-        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + "Back to main menu@br@@us10@";
+        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Browser.back.title"] +"@br@@us10@";
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Open in File Explorer@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Browser.openinexplorer.title"] +"@br@@us10@",
             color: "999999",
             eventHandler: function(event, menu)
             {
@@ -790,7 +791,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
     }
 
     items.unshift({
-        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Refresh",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Browser.refresh.title"],
         color: "999999",
         eventHandler: function(event, menu)
         {
@@ -803,7 +804,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
     });
 
     items.unshift({
-        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + "Favorites",
+        title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.locale["Browser.favorites.title"],
         color: "999999",
         eventHandler: function(event, menu)
         {
@@ -821,8 +822,8 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 var favMenu = new UI.Menus.Menu({
                     autoClose: 0,
-                    title: UI.SSA.insertSymbolFA(" ") + "Favorites",
-                    description: "Use the \"right\" action to remove an entry."
+                    title: UI.SSA.insertSymbolFA(" ") + Settings.locale["Favorites.menu.title"],
+                    description: Settings.locale["Favorites.menu.description"]
                 }, favItems, Browsers.FileBrowser.menu);
 
                 favMenu.eventHandler = function(event,item) {
@@ -843,7 +844,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
                             favMenu.redrawMenu();
-                            Utils.showAlert("info","Favorite has been removed.")
+                            Utils.showAlert("info",Settings.locale["Alerts.favorites.removed"])
                         }
                         return;
                     }
@@ -881,8 +882,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
     if (event == "enter" && Browsers.DriveBrowser.menuMode == "list") {
         Browsers.DriveBrowser.cachedDriveName = item;
         Browsers.DriveBrowser.menuMode = "ask";
-        Browsers.DriveBrowser.menu.settings.description =
-            "What type of disc are you trying to play?";
+        Browsers.DriveBrowser.menu.settings.description = Settings.locale["Drivebrowser.menu.description.disctype"];
         var temp = Browsers.DriveBrowser.menu.items[0];
         Browsers.DriveBrowser.menu.items = [];
         Browsers.DriveBrowser.menu.items.push(temp);
@@ -910,7 +910,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
             );
             Utils.showAlert(
                 "info",
-                "Opening disc drive " +
+                Settings.locale["Alerts.discdrive.open"] +
                     Browsers.DriveBrowser.cachedDriveName +
                     "..."
             );
@@ -923,7 +923,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
             );
             Utils.showAlert(
                 "info",
-                "Opening disc drive " +
+                Settings.locale["Alerts.discdrive.open"] +
                     Browsers.DriveBrowser.cachedDriveName +
                     "..."
             );
@@ -972,14 +972,14 @@ Browsers.DriveBrowser.open = function (parentMenu) {
         }
     }
 
-    Browsers.DriveBrowser.menuSettings.description = "Select a drive to open.";
+    Browsers.DriveBrowser.menuSettings.description = Settings.locale["Drivebrowser.menu.description"];
     if (items.length == 0)
     {
-        Browsers.DriveBrowser.menuSettings.description += "@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "No disc drives found!";
+        Browsers.DriveBrowser.menuSettings.description += "@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + Settings.locale["Drivebrowser.menu.description.nodrives"];
     }
 
     Browsers.DriveBrowser.menuMode = "list";
-    Browsers.DriveBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + "Drive Browser";
+    Browsers.DriveBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + Settings.locale["Drivebrowser.menu.title"];
     Browsers.DriveBrowser.menu = new UI.Menus.Menu(
         Browsers.DriveBrowser.menuSettings,
         items,
@@ -1007,7 +1007,7 @@ Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
         }
         Utils.showAlert(
             "info",
-            "Opening device " + item
+            Settings.locale["Alerts.device.open"] + item
         );
         Browsers.DeviceBrowser.menu.hideMenu();
         Browsers.DeviceBrowser.menu = undefined;
@@ -1060,9 +1060,9 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             }
         }
     }
-    Browsers.DeviceBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + " Device Browser";
+    Browsers.DeviceBrowser.menuSettings.title = UI.SSA.insertSymbolFA("") + " " + Settings.locale["Devicebrowser.menu.title"];
     Browsers.DeviceBrowser.menuSettings.description =
-        "Select a device to open.@br@" + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + "Some devices can cause mpv to crash! On top of that, you should always restart mpv after you finish watching a device!";
+        Settings.locale["Devicebrowser.menu.description"] + UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ",20,20) + Settings.locale["Devicebrowser.menu.description.suffix"];
     Browsers.DeviceBrowser.menu = new UI.Menus.Menu(
         Browsers.DeviceBrowser.menuSettings,
         items,
