@@ -208,10 +208,10 @@
     "Config.allowfolderdeletion.description": "Ob Ordner im Browser entfernbar sind.@br@WICHTIG: Man könnte sehr einfach wichtige Dateien löschen, weshalb diese Option standartmäßig ausgeschaltet ist.@br@",
     "Config.systemnotifications.title": "Systembenachrichtigungen benutzten",
     "Config.systemnotifications.description": "Die eingebauten Benachrichtigungen können Leistungsinteniv sein, weshalb manche vielleicht lieber Systembenachrichtigungen verwenden möchten.@br@",
-    "Config.ipcserver.title": "IPC Server",
-    "Config.ipcserver.description": "Startet automatisch einen IPC Server namens \"mpv\".@br@Wenn du nicht weißt was das ist, solltest du diese Option lieber ausschalten.@br@",
+    "Config.ipcserver.title": "IPC/Named Pipe",
+    "Config.ipcserver.description": "Startet automatisch einen IPC Server/Named Pipe namens \"mpv\" (\"/tmp/mpv\" unter Linux).@br@Wenn du nicht weißt was das ist, solltest du diese Option lieber ausschalten.@br@",
     "Config.savefulllog.title": "Vollen Log speichern",
-    "Config.savefulllog.description": "NUR FÜR FEHLERSUCHE: Diese Option sollte nur aktiviert werden wenn wirklich nötig.@br@mpv wird riesige Mengen an Arbeitsspeicher verbrauchen und nach längerer Zeit soger Abstürzen.@br@",
+    "Config.savefulllog.description": "NUR FÜR FEHLERSUCHE: Diese Option sollte nur aktiviert werden wenn wirklich nötig.@br@mpv wird riesige Mengen an Arbeitsspeicher verbrauchen und nach längerer Zeit sogar Abstürzen.@br@",
 
     "Tests.menu.title": "Tests",
     "Tests.menu.description": "In diesem Menü kann man Tests durchführen.",

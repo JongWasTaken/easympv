@@ -208,8 +208,8 @@
     "Config.allowfolderdeletion.description": "Whether to show the \"Remove\" option for folders.@br@IMPORTANT: You could totally delete something important by accident, so you should probably leave this disabled.@br@",
     "Config.systemnotifications.title": "Use system notifications instead of on-screen messages",
     "Config.systemnotifications.description": "On-screen messages can be quite resource inefficient, so using system notifications instead might be more desirable.@br@",
-    "Config.ipcserver.title": "IPC Server",
-    "Config.ipcserver.description": "Automatically launches an ipc server named \"mpv\".@br@If you don't know what that is, you should probably leave this disabled.@br@",
+    "Config.ipcserver.title": "IPC Server/Named Pipe",
+    "Config.ipcserver.description": "Automatically launches an ipc server/named pipe named \"mpv\"(\"/tmp/mpv\" on Linux).@br@If you don't know what that is, you should probably leave this disabled.@br@",
     "Config.savefulllog.title": "Save full log",
     "Config.savefulllog.description": "FOR TROUBLESHOOTING ONLY: You should not enable this unless you know what you are doing.@br@Having this enabled for extended periods of time will freeze or even crash mpv.@br@",
 
