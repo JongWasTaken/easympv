@@ -95,7 +95,7 @@ These languages are currently implemented:
 - English
 - German
   
-If you want to tranlate it into another language, simply grab [`en.json`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/locale/en.json) from the `scripts/easympv/locales/` directory.  
+If you want to translate it into another language, simply grab [`en.json`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/locale/en.json) from the `scripts/easympv/locales/` directory.  
 Keep in mind:  
 - Preserve any trailing spaces!
 - `@br@` designates line breaks.
