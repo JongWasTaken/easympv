@@ -87,6 +87,19 @@ Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) a
 ## Ideas
 - Overhaul menu definition to make code more readable?
     - The idea I have for this would also make third-party menu integration possible
+    - This will be a lot of work, so i might not actually go through with it
+
+## Localization
+easympv now supports different languages!  
+These languages are currently implemented:  
+- English
+- German
+  
+If you want to tranlate it into another language, simply grab [`en.json`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/locale/en.json) from the `scripts/easympv/locales/` directory.  
+Keep in mind:  
+- Preserve any trailing spaces!
+- `@br@` designates line breaks.
+- Change the file name to the correct language identifier (`de` for `German` as an example).
 
 ## License
 All easympv code and assets (all JavaScript files and images in `scripts/easympv/images/`) are licensed under the MIT License.  
