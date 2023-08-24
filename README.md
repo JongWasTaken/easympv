@@ -95,11 +95,7 @@ These languages are currently implemented:
 - English
 - German
   
-If you want to translate it into another language, simply grab [`en.json`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/locale/en.json) from the `scripts/easympv/locales/` directory.  
-Keep in mind:  
-- Preserve any trailing spaces!
-- `@br@` designates line breaks.
-- Change the file name to the correct language identifier (`de` for `German` as an example).
+See the [wiki page](https://github.com/JongWasTaken/easympv/wiki/Localization) for more information.
 
 ## License
 All easympv code and assets (all JavaScript files and images in `scripts/easympv/images/`) are licensed under the MIT License.  
