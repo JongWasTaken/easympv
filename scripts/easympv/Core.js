@@ -1607,6 +1607,31 @@ Core.defineMenus = function () {
 
     var SettingsConfigurationSubMenuItems = [
         {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Config.language.title"],
+            item: "language",
+            list: [],
+            index: 0,
+            descriptionPrefix: Settings.locale["Config.language.description"],
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if (this.index < this.list.length-1)
+                    {
+                        this.index = this.index + 1
+                    }
+                    else
+                    {
+                        this.index = 0
+                    }
+                    Settings.Data.language = this.list[this.index].id;
+                    this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + this.list[this.index].name + "@br@"+ UI.SSA.setColorYellow() + "\"" + this.list[this.index].description + "\"@br@By " + UI.SSA.setColorYellow() + this.list[this.index].author;
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Config.notifyupdates.title"],
             item: "notify_about_updates",
             descriptionPrefix: Settings.locale["Config.notifyupdates.description"],
@@ -1918,6 +1943,36 @@ Core.defineMenus = function () {
         if (event == "show")
         {
             var item = undefined;
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("language")
+            var locales = mp.utils.readdir(
+                mp.utils.get_user_path("~~/scripts/easympv/locale/"),
+                "files"
+            );
+            locales.sort();
+            var json = {};
+            var id = "";
+            for (var i = 0; i < locales.length; i++)
+            {
+                json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/") + locales[i]));
+                item.list.push(
+                    {
+                        id: locales[i].split(".")[0],
+                        name: json["name"],
+                        author: json["author"],
+                        description: json["description"]
+                    }
+                )
+            }
+            for(var index = 0; index < item.list.length; index++)
+            {
+                if (Settings.Data.language == item.list[index].id)
+                {
+                    break;
+                }
+            }
+            item.description = item.descriptionPrefix + UI.SSA.setColorYellow() + item.list[index].name + "@br@"+ UI.SSA.setColorYellow() + "\"" + item.list[index].description + "\"@br@By " + UI.SSA.setColorYellow() + item.list[index].author;
+            item.index = index;
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("notify_about_updates")
             if(Settings.Data.notifyAboutUpdates)

@@ -1,6 +1,14 @@
 {
-    "_author": "Jong",
-    "comment": "Offizielle deutsche Übersetzung.",
+    "name": "German/Deutsch",
+    "author": "Jong",
+    "description": "Offizielle deutsche Übersetzung.",
+
+    "hints": [
+        "Drücke \"I\" beim Abspielen um technische Details und Statistiken anzuzeigen.@br@Während diese sichtbar sind, können die Zahlentasten genutzt werden um die Seite zu wechseln.",
+        "Der \"CRT + Denoise & Sharpen\" Shader kann ältere Medien stark verbessern.@br@",
+        "Die \"Worse, but less demanding\" Versionen von den Anime4K Shadern sind normalerweise ausreichend.@br@",
+        "Grüße an VideoPlayerCode!@br@"
+    ],
 
     "Global.disabled": "aus",
     "Global.enabled": "an",
@@ -47,14 +55,14 @@
     "Main.close.title": "Schließen",
     "Main.open.title": "Öffnen...",
     "Main.open.description": "Dateien, Discs, Geräte & URLs",
-    "Main.playback.title": "Wiedergabe Einstellungen",
+    "Main.playback.title": "Wiedergabeoptionen",
     "Main.playlist.title": "Playlist Management",
     "Main.chapters.title": "Kapitel",
     "Main.preferences.title": "Einstellungen",
     "Main.quit.title": "mpv schließen",
     "Main.quitconfirm.title": "Bist du dir sicher?",
 
-    "Playback.menu.title": "Wiedergabe Einstellungen",
+    "Playback.menu.title": "Wiedergabeoptionen",
     "Playback.menu.description": "In diesem Menü kannst du Einstellungen zur Wiedergabe finden.",
     "Playback.shaders.title": "Shaders",
     "Playback.shaders.description": "Echtzeit-Schärfung und andere Effekte.",
@@ -180,6 +188,8 @@
     "Config.menu.title": "Konfigurationsoptionen",
     "Config.menu.description": "Benutze die \"rechts\" Aktion um eine Option zu ändern.@br@Du kannst die Konfigurationsdatei auch direkt editieren.@br@Für manche dieser Optionen muss mpv eventuell neugestartet werden.@br@Dieses Menü wird sich nicht selbst schließen.",
     "Config.item.description.suffix": "Derzeit ",
+    "Config.language.title": "Sprache",
+    "Config.language.description": "Die UI Sprache. (Benötigt Plugin Neustart oder mpv Neustart)@br@Derzeit ",
     "Config.notifyupdates.title": "Über neue Versionen informieren",
     "Config.notifyupdates.description": "Ob eine Benachrichtigung gezeigt werden soll, wenn eine neue Version verfügbar ist.@br@",
     "Config.showhints.title": "Zeige Tipps im Hauptmenü",

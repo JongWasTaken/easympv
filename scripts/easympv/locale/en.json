@@ -1,6 +1,14 @@
 {
-    "_author": "Jong",
-    "comment": "Official english translation.",
+    "name": "English",
+    "author": "Jong",
+    "description": "Official english translation.",
+
+    "hints": [
+        "Press \"I\" during playback to display various statistics.@br@While shown, press the number keys to switch through different pages.",
+        "The \"CRT + Denoise & Sharpen\" shader can make older content look less jagged and blurry.@br@",
+        "The \"Worse, but less demanding\" versions of Anime4K shaders are usually more than sufficient.@br@",
+        "Shoutouts to VideoPlayerCode!@br@"
+    ],
 
     "Global.disabled": "disabled",
     "Global.enabled": "enabled",
@@ -180,6 +188,8 @@
     "Config.menu.title": "Configuration Options",
     "Config.menu.description": "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu).@br@This menu will not close automatically.",
     "Config.item.description.suffix": "Currently ",
+    "Config.language.title": "Language",
+    "Config.language.description": "The language the UI is presented in. (requires restart or reinitialization)@br@Currently ",
     "Config.notifyupdates.title": "Notify about new updates",
     "Config.notifyupdates.description": "Whether to alert you when a new version is available.@br@",
     "Config.showhints.title": "Show hints on main menu",

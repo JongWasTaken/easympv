@@ -713,7 +713,7 @@ Settings.presets.load = function () {
     Settings.presets.shadersets = [];
     Settings.presets.colorpresets = [];
     Settings.presets.fileextensions = [];
-    Settings.presets.hints = [];
+    Settings.presets.hints = Settings.locale["hints"];
     Settings.presets.shadersetsUser =  [];
     Settings.presets.colorpresetsUser =  [];
     Settings.presets.images = [];
@@ -787,11 +787,13 @@ Settings.presets.load = function () {
                 Settings.presets.fileextensions.push(json["fileextensions"][i]);
             }
         }
+        /*
         if (json["hints"] != undefined) {
             for (var i = 0; i <= json["hints"].length-1; i++) {
                 Settings.presets.hints.push(json["hints"][i]);
             }
         }
+        */
         if (json["images"] != undefined) {
             for (var i = 0; i <= json["images"].length-1; i++) {
                 var file = json["images"][i].file;
@@ -847,12 +849,13 @@ Settings.presets.load = function () {
             }
         }
 
+        /*
         if (jsonUser["hints"] != undefined) {
             for (var i = 0; i <= jsonUser["hints"].length-1; i++) {
                 Settings.presets.hints.push(jsonUser["hints"][i]);
             }
         }
-
+        */
         if (jsonUser["images"] != undefined) {
             for (var i = 0; i <= jsonUser["images"].length-1; i++) {
                 var file = jsonUser["images"][i].file;
@@ -877,7 +880,6 @@ Settings.presets.load = function () {
             "shadersets": {},
             "colorpresets": {},
             "fileextensions": [],
-            "hints": [],
             "images": []
         };
 

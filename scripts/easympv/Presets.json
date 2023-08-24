@@ -297,12 +297,6 @@
         { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ssa" },
         { "type": "subtitle", "name": "Text Subtitles", "extension": ".srt" }
     ],
-    "hints": [
-        "Press \"I\" during playback to display various statistics.@br@While shown, press the number keys to switch through different pages.",
-        "The \"CRT + Denoise & Sharpen\" shader can make older content look less jagged and blurry.@br@",
-        "The \"Worse, but less demanding\" versions of Anime4K shaders are usually more than sufficient.@br@",
-        "Shoutouts to VideoPlayerCode!@br@"
-    ],
     "images": [
         {
             "file": "4warning.bmp",
