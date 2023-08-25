@@ -30,13 +30,13 @@ var unblock = function () {
 };
 
 var title = function (n1,n2) {
-    return Settings.locale["FTW.menu.title"] + n1 + "/" + n2;
+    return Settings.getLocalizedString("FTW.menu.title") + n1 + "/" + n2;
 }
 
 Wizard.Menus.Page1 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.locale["FTW.page1.description"],
+        description: Settings.getLocalizedString("FTW.page1.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -45,7 +45,7 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.locale["FTW.continue.title"],
+            title: Settings.getLocalizedString("FTW.continue.title"),
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -66,25 +66,25 @@ Wizard.Menus.Page1.eventHandler = function (event, action) {
 
 Wizard.Menus.Page2Options = {
     PerformanceName: [
-        Settings.locale["FTW.performance.first.title"],
-        Settings.locale["FTW.performance.second.title"],
-        Settings.locale["FTW.performance.third.title"]
+        Settings.getLocalizedString("FTW.performance.first.title"),
+        Settings.getLocalizedString("FTW.performance.second.title"),
+        Settings.getLocalizedString("FTW.performance.third.title")
     ],
     PerformanceDescription: [
-        Settings.locale["FTW.performance.first.description"],
-        Settings.locale["FTW.performance.second.description"],
-        Settings.locale["FTW.performance.third.description"]
+        Settings.getLocalizedString("FTW.performance.first.description"),
+        Settings.getLocalizedString("FTW.performance.second.description"),
+        Settings.getLocalizedString("FTW.performance.third.description")
     ],
     AudioLanguageNames: [ "none", "Japanese", "English", "German" ],
-    AudioLanguageDescription: Settings.locale["FTW.audiolanguage.description"],
+    AudioLanguageDescription: Settings.getLocalizedString("FTW.audiolanguage.description"),
     SubLanguageNames: [ "none", "English", "German", "Japanese" ],
-    SubLanguageDescription: Settings.locale["FTW.sublanguage.description"]
+    SubLanguageDescription: Settings.getLocalizedString("FTW.sublanguage.description")
 };
 
 Wizard.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.locale["FTW.page2.description"],
+        description: Settings.getLocalizedString("FTW.page2.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -93,7 +93,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.locale["FTW.performance.title"] + "@us10@@br@",
+            title: Settings.getLocalizedString("FTW.performance.title") + "@us10@@br@",
             item: "toggle-performance",
             description: Wizard.Menus.Page2Options.PerformanceName[1] + Wizard.Menus.Page2Options.PerformanceDescription[1],
             data: 1,
@@ -114,7 +114,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.locale["FTW.audiolanguage.title"],
+            title: Settings.getLocalizedString("FTW.audiolanguage.title"),
             item: "toggle-audio-language",
             description: Wizard.Menus.Page2Options.AudioLanguageNames[1] + Wizard.Menus.Page2Options.AudioLanguageDescription,
             data: 1,
@@ -135,7 +135,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.locale["FTW.sublanguage.title"] + "@us10@@br@",
+            title: Settings.getLocalizedString("FTW.sublanguage.title") + "@us10@@br@",
             item: "toggle-sub-language",
             description: Wizard.Menus.Page2Options.SubLanguageNames[1] + Wizard.Menus.Page2Options.SubLanguageDescription,
             data: 1,
@@ -156,7 +156,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.locale["FTW.continue.title"],
+            title: Settings.getLocalizedString("FTW.continue.title"),
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -178,7 +178,7 @@ Wizard.Menus.Page2.eventHandler = function (event, action) {
 Wizard.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.locale["FTW.page3.description"],
+        description: Settings.getLocalizedString("FTW.page3.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -187,7 +187,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.locale["FTW.finish.title"],
+            title: Settings.getLocalizedString("FTW.finish.title"),
             item: "finish",
             eventHandler: function(event, menu)
             {
@@ -198,7 +198,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                     Settings.mpvConfig.load();
 
                     var ppreset = Wizard.Menus.Page2Options.PerformanceName[Wizard.Menus.Page2.items[1].data];
-                    if (ppreset == Settings.locale["FTW.performance.first.title"])
+                    if (ppreset == Settings.getLocalizedString("FTW.performance.first.title"))
                     {
                         Settings.mpvConfig.Data.scale = "bilinear";
                         Settings.mpvConfig.Data.cscale = "bilinear";
@@ -210,7 +210,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == Settings.locale["FTW.performance.second.title"])
+                    else if (ppreset == Settings.getLocalizedString("FTW.performance.second.title"))
                     {
                         Settings.mpvConfig.Data.scale = "spline36";
                         Settings.mpvConfig.Data.cscale = "spline36";
@@ -222,7 +222,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == Settings.locale["FTW.performance.third.title"])
+                    else if (ppreset == Settings.getLocalizedString("FTW.performance.third.title"))
                     {
                         Settings.mpvConfig.Data.scale = "ewa_lanczossharp";
                         Settings.mpvConfig.Data.cscale = "ewa_lanczossharp";

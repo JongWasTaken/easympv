@@ -186,8 +186,9 @@
     "Development.restart.title": "Restart mpv in place",
 
     "Config.menu.title": "Configuration Options",
-    "Config.menu.description": "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@You might have to restart mpv or reinitialize the plugin for some of these changes to take effect (See previous menu).@br@This menu will not close automatically.",
+    "Config.menu.description": "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@This menu will not close automatically and cannot be closed using the hotkey.",
     "Config.item.description.suffix": "Currently ",
+    "Config.item.back.title": "Save & Reload",
     "Config.language.title": "Language",
     "Config.language.description": "The language the UI is presented in. (requires restart or reinitialization)@br@Currently ",
     "Config.notifyupdates.title": "Notify about new updates",

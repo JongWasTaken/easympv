@@ -774,7 +774,7 @@ UI.Time._hide = function()
 }
 
 /*----------------------------------------------------------------
-CLASS: UI.Menu
+CLASS: UI.Menus
 DESCRIPTION:
     This class implements a menu system similar to VideoPlayerCode's SelectionMenu.js.
     I decided to create my own implementation instead of using SelectionMenu.js because
@@ -1002,7 +1002,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.locale["Global.back.title"] + "@br@@us10@";
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Global.back.title") + "@br@@us10@";
         /*
         UI.SSA.insertSymbolFA(
             "",
@@ -2149,6 +2149,8 @@ UI.Menus.Menu.prototype.eventHandler = function () {
     Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
 };
 
+UI.Menus.menuKeyDisabled = false;
+
 UI.Menus.getDisplayedMenu = function () {
     var cMenu = undefined;
     for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
@@ -2560,9 +2562,9 @@ UI.Input.show = function (callback, prefix) {
 
     UI.Input.Prefix =
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        Settings.locale["Input.first"] +
+        Settings.getLocalizedString("Input.first") +
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        Settings.locale["Input.second"] +
+        Settings.getLocalizedString("Input.second") +
         UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)

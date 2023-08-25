@@ -244,7 +244,7 @@ Utils.exitMpv = function () {
     if (Utils.updateInProgress) {
         Utils.showAlert(
             "warning",
-            Settings.locale["Alerts.updateinprogress"]
+            Settings.getLocalizedString("Alerts.updateinprogress")
         );
     } else {
         mp.commandv("quit-watch-later");
@@ -315,7 +315,7 @@ Utils.doUpdateStage2 = function () // extract
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.locale["Alerts.updatefailed"]
+            Settings.getLocalizedString("Alerts.updatefailed")
         );
         return;
     }
@@ -340,7 +340,7 @@ Utils.doUpdateStage3 = function () // delete package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.locale["Alerts.updatefailed.extracterror"]
+            Settings.getLocalizedString("Alerts.updatefailed.extracterror")
         );
         return;
     }
@@ -360,7 +360,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.locale["Alerts.updatefailed.deleteerror"]
+            Settings.getLocalizedString("Alerts.updatefailed.deleteerror")
         );
         return;
     }
@@ -404,14 +404,14 @@ Utils.doUpdateStage5 = function () {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "info",
-            Settings.locale["Alerts.updatefinished"]
+            Settings.getLocalizedString("Alerts.updatefinished")
         );
         Utils.updateAvailable = false;
     } else {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.locale["Alerts.updatefailed.applyerror"]
+            Settings.getLocalizedString("Alerts.updatefailed.applyerror")
         );
         return;
     }
@@ -451,16 +451,16 @@ Utils.updateMpv = function () {
             if (Utils.updateAvailableMpv) {
                 OS.updateMpvWindows(Settings.Data.mpvLocation);
             } else {
-                Utils.showAlert("info", Settings.locale["Alerts.uptodate"]);
+                Utils.showAlert("info", Settings.getLocalizedString("Alerts.uptodate"));
             }
         } else {
             Utils.showAlert(
                 "error",
-                Settings.locale["Alerts.locationunknown"]
+                Settings.getLocalizedString("Alerts.locationunknown")
             );
         }
     } else {
-        Utils.showAlert("error", Settings.locale["Alerts.onlyonwindows"]);
+        Utils.showAlert("error", Settings.getLocalizedString("Alerts.onlyonwindows"));
     }
     return;
 };

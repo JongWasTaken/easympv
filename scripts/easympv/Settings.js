@@ -30,7 +30,7 @@ Settings.inputConfig = {};
 Settings.presets = {};
 Settings.cache = {};
 
-Settings.locale = {}
+Settings.locale = {};
 
 /////////////////////////////////////////// easympv.conf
 
@@ -707,13 +707,22 @@ Settings.presets.load = function () {
 
     if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")) != undefined)
     {
+        mp.msg.warn("[Settings] Selected language could not be loaded! Falling back to localization keys...");
         Settings.locale = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
+    }
+    else
+    {
+        Settings.locale = {};
     }
 
     Settings.presets.shadersets = [];
     Settings.presets.colorpresets = [];
     Settings.presets.fileextensions = [];
-    Settings.presets.hints = Settings.locale["hints"];
+    Settings.presets.hints = ["This is a dummy hint, your localization file does not provide any hints!"];
+    if (Settings.locale["hints"] != undefined)
+    {
+        Settings.presets.hints = Settings.locale["hints"];
+    }
     Settings.presets.shadersetsUser =  [];
     Settings.presets.colorpresetsUser =  [];
     Settings.presets.images = [];
@@ -892,6 +901,21 @@ Settings.presets.load = function () {
 
 Settings.presets.reload = function () {
     Settings.presets.load();
+}
+
+Settings.getLocalizedString = function(identifier)
+{
+    /*
+    if (Array.isArray(identifier))
+    {
+        identifier = identifier[0];
+    }
+    */
+    if (Settings.locale[identifier] == undefined)
+    {
+        return identifier;
+    }
+    return Settings.locale[identifier];
 }
 
 Settings.cache.perFileSaves = [];
