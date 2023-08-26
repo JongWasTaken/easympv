@@ -38,6 +38,7 @@ macOS support is experimental and not fully finished, as I lack a device to test
     - This might get replaced with a better solution down the line
 #### and a lot more!
 ## Installation
+Please read the "Known Issues" section below before installing this.  
 ### Prerequisites
 #### Windows
 - Windows 8 or higher (Windows 7 might work if you update Powershell and .NET Framework to v4.5+)
@@ -74,15 +75,20 @@ Download the latest release (or the master branch) and put all files into `%appd
 Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
 ## Known Issues
+### Syncplay Incompatibility
+- SyncPlay's chat integration messes with the OSD for some reason, which makes menus appear out of bounds.
+    - Workaround: Disable chat integration, use the SyncPlay window instead!
+    - I am currently unaware of a solution to this, as i have no clue what is causing it.
 ### Autoload.js
-- The internal playlist will sometimes clear itself, and i have no idea why
-- Jumping to a playlist entry in the playlist menu will rarely crash mpv
+- The internal playlist will sometimes clear itself, the cause is currently unknown.
+- Jumping to a playlist entry in the playlist menu will rarely crash mpv.
+    - This is probably some kind of file path name issue.
 ### UI.js
 - Clock positioning can be weird on non-standard resolutions
 ### Utils.js
 - Git update will lock up mpv in some cases
 ### Misc
-- macOS code path has not been tested in a while and will probably break
+- macOS code paths have not been tested in a while and are probably broken
 
 ## Ideas
 - Overhaul menu definition to make code more readable?

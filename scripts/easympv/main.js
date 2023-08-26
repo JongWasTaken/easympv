@@ -34,20 +34,9 @@ Current dependencies:
         either wget or curl
         xclip OR wl-clipboard (if you use Wayland; when in doubt, install both!)
 
-TODO :
-    First time configuration wizard -> A bunch of menus basically, new module would be nice
-
-IDEAS:
-    Advanced settings, like the utility had before
-    https://github.com/rossy/mpv-repl/blob/master/repl.lua
-
 KNOWN ISSUES:
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
-
-UNNAMED LIST OF "things to test on Windows specifically":
-    Utils.restartMpv
-    Browsers.DeviceBrowser.menuEventHandler -> low latency profile
 */
 
 // Polyfills and extensions first
