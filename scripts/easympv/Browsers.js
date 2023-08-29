@@ -792,6 +792,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
 
                 var favMenu = new UI.Menus.Menu({
                     autoClose: 0,
+                    scrollingEnabled: true,
                     title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("Favorites.menu.title"),
                     description: Settings.getLocalizedString("Favorites.menu.description")
                 }, favItems, Browsers.FileBrowser.menu);
