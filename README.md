@@ -2,8 +2,7 @@
 
 > :warning: **Work in progress**: Master branch can be unstable!  
 
-![](https://smto.pw/mpv/images/preview.png)  
-(Image is outdated, menus look fancier now!)  
+![](https://smto.pw/mpv/images/empv-preview2.png)  
 
 Extends base mpv with more features and makes it a bit more user-friendly.  
 Currently supports Windows, macOS and Linux.  
