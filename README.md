@@ -3,6 +3,11 @@
 > :warning: **Work in progress**: Master branch can be unstable!  
 
 ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/main.png)  
+|Some|Images|
+| :-: | :-: |
+| ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/browser.png) | ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) |
+| ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/shaders.png) | ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/settings.png) |
+  
 [More images](https://github.com/JongWasTaken/easympv-installer/tree/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images)  
   
 Extends base mpv with more features and makes it a bit more user-friendly.  
