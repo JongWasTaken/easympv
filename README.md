@@ -2,8 +2,14 @@
 
 > :warning: **Work in progress**: Master branch can be unstable!  
 
-![](https://smto.pw/mpv/images/empv-preview2.png)  
-
+![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/main.png)  
+|Some|Images|
+| :-: | :-: |
+| ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/browser.png) | ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) |
+| ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/shaders.png) | ![](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/settings.png) |
+  
+[More images](https://github.com/JongWasTaken/easympv-installer/tree/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images)  
+  
 Extends base mpv with more features and makes it a bit more user-friendly.  
 Currently supports Windows, macOS and Linux.  
 macOS support is experimental and not fully finished, as I lack a device to test on.  
@@ -11,31 +17,31 @@ macOS support is experimental and not fully finished, as I lack a device to test
 ## Features
 - Menus with custom Fonts, optionally everything is controllable using only the mouse, useful for home theater use!
     - Different languages are supported! See the bottom of this page for more information.
-- Integrated File Browser, Disc/Device Selector, URL Input
+- Integrated [File Browser](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/browser.png), Disc/Device Selector, [URL Input](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/url.png)
     - Save folders to Favorites
     - Load subtitles during playback
     - Remove files from within mpv
-- Automated applying of shadersets, such as Anime4K, FSRCNNX, CRT and more ([all are included!](https://github.com/JongWasTaken/easympv/tree/master/scripts/easympv/shaders))
+- [Automated applying of shadersets](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/shaders.png), such as Anime4K, FSRCNNX, CRT and more ([all are included!](https://github.com/JongWasTaken/easympv/tree/master/scripts/easympv/shaders))
     - Custom shaders can be [added by the user](https://github.com/JongWasTaken/easympv/wiki/Presets)
 - Automated applying of color profiles
     - Custom color profiles can be [added by the user](https://github.com/JongWasTaken/easympv/wiki/Presets)
 - Automatic skipping of certain chapters (such as Openings/Endings)
-- Quick toggles for properties you don't have to touch often, such as `fps` or `aspect-ratio`, saving keybinds!
+- [Quick toggles](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) for properties you don't have to touch often, such as `fps` or `aspect-ratio`, saving keybinds!
 - A more advanced reimplementation of `autoload.lua`, providing interactive playlist management 
     - Please disable `autoload.lua` if you use it, otherwise this functionality will be disabled at runtime!
 - A reimplementation of `autosave.lua`
     - Please disable `autosave.lua` if you use it, otherwise this functionality will be disabled at runtime!
-- Automatic Updates/Git pulling
+- [Automatic Updates/Git pulling](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/update.png)
 - Overlays, such as:
     - A simple digital clock, the screen corner position can be customized
         - It could be cut off at weird window sizes, I hope to fix this soon...
-    - On-screen log, so you don't have to launch mpv from a terminal to read it (`CTRL+ALT+~`)
+    - [On-screen log](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/log.png), so you don't have to launch mpv from a terminal to read it (`CTRL+ALT+~`)
     - Command input for mpv commands (`CTRL+~`)
     - A JavaScript console for easier debugging (`CTRL+Shift+~`)
         - All of these can also be summoned from the `Developer Options` (`Preferences -> Developer Options`)
 - A simple [API](https://github.com/JongWasTaken/easympv/wiki/API) to create and remove menus from other plugins
     - This might get replaced with a better solution down the line
-#### and a lot more!
+#### [and a lot more!](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/settings.png)
 ## Installation
 Please be aware of the [Known Issues](#known-issues) before installing this.  
 ### Prerequisites
