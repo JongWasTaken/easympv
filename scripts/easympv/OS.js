@@ -471,6 +471,48 @@ OS.fileRemove = function (file) {
     return exitCode == 0 ? true: false;
 }
 
+OS.fileTrashSystemwide = function (path) {
+    if (mp.utils.file_info(path) == undefined)
+    {
+        return false;
+    }
+
+    if(OS.isWindows)
+    {
+        // powershell is weird with brackets
+        path = path.replaceAll("\\\\","\\");
+        path = path.replaceAll("\\[","\`\`\[");
+        path = path.replaceAll("\\]","\`\`\]");
+        return OS._call("Add-Type -AssemblyName Microsoft.VisualBasic\n"+
+        "function Remove-Item-ToRecycleBin($Path) {\n"+
+        "$item = Get-Item -Path $Path -ErrorAction SilentlyContinue\n"+
+        "if ($item -eq $null)\n"+
+        "{\n"+
+        "    Write-Error(\"'{0}' not found\" -f $Path)\n"+
+        "}\n"+
+        "else\n"+
+        "{\n"+
+        "    $fullpath=$item.FullName\n"+
+        "    Write-Verbose (\"Moving '{0}' to the Recycle Bin\" -f $fullpath)\n"+
+        "    if (Test-Path -Path $fullpath -PathType Container)\n"+
+        "     {\n"+
+        "         [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteDirectory($fullpath,'OnlyErrorDialogs','SendToRecycleBin')\n"+
+        "     }\n"+
+        "    else\n"+
+        "     {\n"+
+        "         [Microsoft.VisualBasic.FileIO.FileSystem]::DeleteFile($fullpath,'OnlyErrorDialogs','SendToRecycleBin')\n"+
+        "    }\n"+
+        "}\n"+
+        "}\n"+
+        "Remove-Item-ToRecycleBin(\""+path+"\")\n").status == 0 ? true: false;
+    }
+    else
+    {
+        return OS._call("trash \"" + path + "\"").status == 0 ? true: false;
+    }
+}
+
+
 OS.fileRemoveSystemwide = function (path) {
     if (mp.utils.file_info(path) == undefined)
     {

@@ -51,6 +51,32 @@ Core.pauseSaveTimer = function(_,pause) {
 };
 
 Core.onFileLoad = function () {
+    // mpv does not provide a reliable way to get the current filename, so we (ab)use playlists
+    // (stream-open-filename does not work with relative paths and URLs!)
+    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
+        if (mp.get_property("playlist/" + i + "/current") == "yes") {
+            cFile = mp.get_property("playlist/" + i + "/filename");
+            break;
+        }
+    }
+
+    // cFile could be a relative path, so we need to expand it
+    if (cFile != undefined) {
+        if (
+            !OS.isWindows &&
+            mp.utils.file_info(
+                mp.get_property("working-directory") + "/" + cFile
+            ) != undefined
+        ) {
+            cFile =
+                mp.get_property("working-directory") +
+                "/" +
+                cFile.replaceAll("./", "");
+        }
+    }
+    Browsers.FileBrowser.currentLocation = cFile;
+    Browsers.FileBrowser.gotoParentDirectory();
+
     if (isFirstFile) {
         if (
             mp.utils.file_info(
@@ -83,33 +109,16 @@ Core.onFileLoad = function () {
         }
         Video.Shaders.apply(Settings.Data.defaultShaderSet);
         isFirstFile = false;
-    }
-
-    // mpv does not provide a reliable way to get the current filename, so we (ab)use playlists
-    // (stream-open-filename does not work with relative paths and URLs!)
-    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-        if (mp.get_property("playlist/" + i + "/current") == "yes") {
-            cFile = mp.get_property("playlist/" + i + "/filename");
-            break;
+        //TODO: check playlist size
+        if (Autoload.enabled)
+        {
+            //Autoload.buildPlaylist();
+            Autoload.loadedFile = cFile;
+            Autoload.loadFolder();
         }
     }
 
-    // cFile could be a relative path, so we need to expand it
-    if (cFile != undefined) {
-        if (
-            !OS.isWindows &&
-            mp.utils.file_info(
-                mp.get_property("working-directory") + "/" + cFile
-            ) != undefined
-        ) {
-            cFile =
-                mp.get_property("working-directory") +
-                "/" +
-                cFile.replaceAll("./", "");
-        }
-    }
-    Browsers.FileBrowser.currentLocation = cFile;
-    Browsers.FileBrowser.gotoParentDirectory();
+
 
     for (var i = 0; i < Settings.cache.perFileSaves.length; i++) {
         if (Settings.cache.perFileSaves[i].file == cFile){
@@ -125,7 +134,7 @@ Core.onFileLoad = function () {
         UI.Time.show();
     }
 
-    if (Autoload.enabled)
+    if (!isFirstFile && Autoload.enabled)
     {
         Autoload.loadedFile = cFile;
         Autoload.loadFolder();
@@ -1619,6 +1628,7 @@ Core.defineMenus = function () {
                 {
                     Settings.save();
                     menu.hideMenu();
+                    Utils.log("Restarting plugin to apply changes...","settings","info");
                     mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
@@ -1953,7 +1963,7 @@ Core.defineMenus = function () {
             //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsConfigurationSubMenuItems,
-        undefined //Core.Menus.SettingsMenu
+        undefined
     );
 
     Core.Menus.SettingsConfigurationSubMenu.eventHandler = function(event, action) {

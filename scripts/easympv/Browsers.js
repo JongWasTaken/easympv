@@ -7,7 +7,6 @@
  *
  */
 
-
 /*----------------------------------------------------------------
 The Browsers.js module
 
@@ -22,6 +21,51 @@ Comments are also missing.
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
  */
 var Browsers = {};
+
+Browsers.modifyTitle = function (title)
+{
+    if(Settings.Data.shortFileNames)
+    {
+        var regex = /\([^()]*\)/g;
+        title = title.replace(regex,"");
+
+        regex = /\[.*?\]/g;
+        title = title.replace(regex,"");
+
+        regex = /_/g;
+        title = title.replace(regex, " ");
+
+        title = title.trim();
+
+        if (title.substring(0,1) != ".")
+        {
+            var dot = title.split(".");
+            if ((dot.length-1) != 0)
+            {
+                var ext = "";
+                for (
+                    var i = 0;
+                    i < Settings.presets.fileextensions.length;
+                    i++
+                ) {
+                    ext = Settings.presets.fileextensions[i].extension.substring(1);
+                    if (dot[dot.length-1].includes(ext))
+                    {
+                        dot.pop();
+                        title = dot.join(".").trim();
+                        title = title + " (" + ext + ")";
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    //if (title.length >= 36) {
+    //    title = title.substring(0, 50) + "...";
+    //}
+    return title;
+}
 
 Browsers.Selector = {};
 Browsers.FileBrowser = {};
@@ -384,7 +428,16 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     var type = "file";
                     if (isFolder) { type = "folder"; };
 
-                    if (OS.fileRemoveSystemwide(path))
+                    var removeFile = function(path)
+                    {
+                        if (Settings.Data.useTrash)
+                        {
+                            return OS.fileTrashSystemwide(path);
+                        }
+                        return OS.fileRemoveSystemwide(path);
+                    }
+
+                    if (removeFile(path))
                     {
                         Utils.showAlert(
                             "info",
@@ -607,23 +660,41 @@ Browsers.FileBrowser.open = function (parentMenu) {
         }
     } else {
         if (mp.utils.file_info(Browsers.FileBrowser.currentLocation) != undefined) {
-            var currentLocationFolders = mp.utils.readdir(
+            var currentLocationContents = mp.utils.readdir(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
         } else {
             Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
-            var currentLocationFolders = mp.utils.readdir(
+            var currentLocationContents = mp.utils.readdir(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
         }
-        // Possible TODO: improve sort
-        //currentLocationFolders.sort(function(a,b) {
-        //    return Utils.naturalCompare(a.name, b.name)
-        //});
-        currentLocationFolders.sort();
 
+        var currentLocationFolders = [];
+        currentLocationContents.sort();
+
+        for (var i = 0; i < currentLocationContents.length; i++) {
+
+            currentLocationFolders.push(
+                {
+                    name: currentLocationContents[i],
+                    location: currentLocationContents[i]
+                }
+            );
+            /*
+            currentLocationFolders.push(
+                {
+                    name: Browsers.modifyTitle(currentLocationContents[i]),
+                    location: currentLocationContents[i]
+                }
+            );
+            */
+        }
+        currentLocationFolders.sort(function(a, b) {
+            return a.name.localeCompare(b.name);
+        });
 
         if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
         } else {
@@ -637,20 +708,15 @@ Browsers.FileBrowser.open = function (parentMenu) {
             });
         }
         for (var i = 0; i < currentLocationFolders.length; i++) {
-            if (currentLocationFolders[i].charAt(0) == ".") {
+            if (currentLocationFolders[i].location.charAt(0) == ".") {
                 if (Settings.Data.showHiddenFiles) {
-                    var title = currentLocationFolders[i];
-                    if (title.length >= 32) {
-                        title = title.substring(0, 50) + "...";
-                    }
-
                     items.push({
                         title:
                             UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                            title +
+                            currentLocationFolders[i].name +
                             OS.directorySeperator,
                         item:
-                            currentLocationFolders[i] +
+                            currentLocationFolders[i].location +
                             OS.directorySeperator,
                         color: "FFFF90",
                         type: "folder",
@@ -658,28 +724,40 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     });
                 }
             } else {
-                var title = currentLocationFolders[i];
-                if (title.length >= 32) {
-                    title = title.substring(0, 50) + "...";
-                }
-
                 items.push({
                     title:
                         UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        title +
+                        currentLocationFolders[i].name +
                         OS.directorySeperator,
-                    item: currentLocationFolders[i] + OS.directorySeperator,
+                    item: currentLocationFolders[i].location + OS.directorySeperator,
                     color: "FFFF90",
                     type: "folder",
                     supported: true
                 });
             }
         }
-        var currentLocationFiles = mp.utils.readdir(
+        var currentLocationContents = mp.utils.readdir(
             Browsers.FileBrowser.currentLocation,
             "files"
         );
-        currentLocationFiles.sort();
+
+        var currentLocationFiles = [];
+        currentLocationContents.sort();
+
+        for (var i = 0; i < currentLocationContents.length; i++) {
+
+            currentLocationFiles.push(
+                {
+                    name: Browsers.modifyTitle(currentLocationContents[i]),
+                    location: currentLocationContents[i]
+                }
+            );
+        
+        }
+        currentLocationFiles.sort(function(a, b) {
+            return a.name.localeCompare(b.name);
+        });
+
         for (var i = 0; i < currentLocationFiles.length; i++) {
             var color = "909090";
             var icon = " ";
@@ -693,7 +771,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             ) {
                 var whitelist = Settings.presets.fileextensions[j];
                 if (
-                    "." + currentLocationFiles[i].split('.').pop() == whitelist.extension
+                    "." + currentLocationFiles[i].location.split('.').pop() == whitelist.extension
                 ) {
 
                     if (whitelist.type == "video")
@@ -719,15 +797,10 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 }
             }
 
-            var title = currentLocationFiles[i];
-            if (title.length >= 36) {
-                title = title.substring(0, 50) + "...";
-            }
-
-            if (currentLocationFiles[i].charAt(0) != "." || Settings.Data.showHiddenFiles) {
+            if (currentLocationFiles[i].location.charAt(0) != "." || Settings.Data.showHiddenFiles) {
                 items.push({
-                    title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + title,
-                    item: currentLocationFiles[i],
+                    title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + currentLocationFiles[i].name,
+                    item: currentLocationFiles[i].location,
                     color: color,
                     type: type,
                     supported: supported

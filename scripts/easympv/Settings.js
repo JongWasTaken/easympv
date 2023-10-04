@@ -39,20 +39,28 @@ Settings.locale = {};
  * Call Settings.reload() to update it.
  */
 Settings.Data = {
+    // General
     language: "en",
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    // Visual
     showHints: true,
     showClock: false,
     clockPosition: "top-left",
     fadeMenus: false,
     scrollAlerts: true,
+    // Sets
     defaultShaderSet: "none",
     defaultColorProfile: "none",
+    // VRR
     simpleVRR: false,
     refreshRate: 144,
+    // File Browser
+    shortFileNames: true,
     showHiddenFiles: false,
+    useTrash: true,
     allowFolderDeletion: false,
+    // Misc
     startIPCServer: false,
     useNativeNotifications: true,
     notifyAboutUpdates: true,
@@ -60,6 +68,7 @@ Settings.Data = {
     debugMode: false,
     saveFullLog: false,
     fileBrowserFavorites: { locations: [] },
+    // Versioning
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
@@ -151,6 +160,8 @@ Settings.save = function () {
         var defaultConfigString = "";
         defaultConfigString += "### easympv.conf ###\n";
         defaultConfigString += "\n";
+        defaultConfigString += "## GENERAL\n";
+        defaultConfigString += "\n";
         defaultConfigString += "# Language of easympv.\n";
         defaultConfigString += "# Default: en\n";
         defaultConfigString += "# Possible values: \"en\" for english, \"de\" for german\n";
@@ -170,6 +181,9 @@ Settings.save = function () {
         defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## VISUALS\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to show hints on the main menu.\n";
         defaultConfigString += "# Default: true\n";
@@ -200,6 +214,9 @@ Settings.save = function () {
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "scrollAlerts=true\n";
         defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## SETS\n";
+        defaultConfigString += "\n";
         defaultConfigString += "# Default shader set to load at launch.\n";
         defaultConfigString += "# Default: none\n";
         defaultConfigString +=
@@ -211,6 +228,9 @@ Settings.save = function () {
         defaultConfigString +=
             "# Use the full name of a profile as it appears in the colors menu!\n";
         defaultConfigString += "defaultColorProfile=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## VRR\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Enables use of G-Sync/FreeSync in mpv.\n";
         defaultConfigString += "# If enabled, mpv will first check your video files FPS. If this value is below half of your refresh rate,\n";
@@ -227,10 +247,27 @@ Settings.save = function () {
         defaultConfigString += "# Default: 144\n";
         defaultConfigString += "refreshRate=x\n";
         defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## FILE BROWSER\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Whether to strip file names to improve readability.\n";
+        defaultConfigString += "#\n";
+        defaultConfigString += "# Example: Lets say you have a file like this:\n";
+        defaultConfigString += "#     [SomeGroup] Awesome TV Show - 07 (1080p) [719C821A].mkv\n";
+        defaultConfigString += "# Enabling this option will make it show up like this instead:\n";
+        defaultConfigString += "#     Awesome TV Show - 07 (mkv)\n";
+        defaultConfigString += "#\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "shortFileNames=x\n";
+        defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to show hidden files and folders in the file browser.\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "showHiddenFiles=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# If enabled, files will be trashed instead of permanently deleted.\n";
+        defaultConfigString += "# Default: true\n";
+        defaultConfigString += "useTrash=x\n";
         defaultConfigString += "\n";
         defaultConfigString +=
         "# Whether the file browser should allow you to remove folders.\n";
@@ -238,6 +275,9 @@ Settings.save = function () {
         "# IMPORTANT: There is a reason this is disabled by default!\n";
         defaultConfigString += "# Default: false\n";
         defaultConfigString += "allowFolderDeletion=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## MISC\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# Whether to start the mpv IPC server on startup.\n";
@@ -291,6 +331,9 @@ Settings.save = function () {
             "# This should be a valid JSON array. Default: {\"locations\":[]}\n";
         defaultConfigString += "fileBrowserFavorites=x\n";
         defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## VERSIONING AND TROUBLESHOOTING\n";
+        defaultConfigString += "\n";
         defaultConfigString +=
             "# The currently installed version of easympv.\n";
         defaultConfigString +=
@@ -334,7 +377,7 @@ Settings.save = function () {
         defaultConfigString +=
             "# Usually false, unless you just installed easympv.\n";
         defaultConfigString += "# Some updates might enable this too.\n";
-        defaultConfigString += "# ! THIS WILL DISCARD YOUR CONFIGURATION !\n";
+        defaultConfigString += "# ! THIS WILL RESET PARTS OF YOUR CONFIGURATION !\n";
         defaultConfigString +=
             "# This is modified automatically and should not be changed!\n";
         defaultConfigString += "isFirstLaunch=x\n";
@@ -704,14 +747,12 @@ Settings.presets.colorpresetsUser =  [];
 Settings.presets.images = [];
 
 Settings.presets.load = function () {
-
-    if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")) != undefined)
-    {
-        mp.msg.warn("[Settings] Selected language could not be loaded! Falling back to localization keys...");
+    try {
+        mp.msg.info("[settings] Loading language: " + Settings.Data.language);
         Settings.locale = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
     }
-    else
-    {
+    catch (_) {
+        mp.msg.warn("[settings] Selected language could not be loaded! Falling back to localization keys...");
         Settings.locale = {};
     }
 

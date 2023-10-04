@@ -19,16 +19,27 @@ USAGE:
     N/A
 ----------------------------------------------------------------*/
 
+/** Provides common SSA tags. */
 UI.SSA = {};
 
+/** Starts a SSA sequence.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.startSequence = function () {
     return mp.get_property_osd("osd-ass-cc/0");
 };
 
+/** Stops a SSA sequence.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.endSequence = function () {
     return mp.get_property_osd("osd-ass-cc/1");
 };
 
+/** Sets or unsets SSA bold tag.
+ * @param {boolean} bold - Whether bold should be enabled or disabled
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setBold = function (bold) {
     if (bold)
     {
@@ -37,23 +48,43 @@ UI.SSA.setBold = function (bold) {
     return "\{\\b0}";
 }
 
+/** Sets SSA font size tag.
+ * @param {number} fontSize - Desired font size
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setSize = function (fontSize) {
     return "{\\fs" + fontSize + "}";
 };
 
+/** Sets SSA text allignment tag.
+ * @param {number} type - Desired allignment: Number on the numbad (e.g. 1 is bottom-left, 9 is top-right)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setAllignment = function (type) {
     // based on number pad (eg. 1 is bottom-left, 5 is dead center, 9 is top-right)
     return "{\\an" + type + "}";
 };
 
+/** Sets SSA text scale tag.
+ * @param {number} scalePercent - Desired scale as percentage
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setScale = function (scalePercent) {
     return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
 };
 
+/** Sets SSA text transparancy tag from HEX value.
+ * @param {string} transparencyHex - Desired scale as HEX value (without #)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setTransparency = function (transparencyHex) {
     return "{\\alpha&H" + transparencyHex + "&}";
 };
 
+/** Sets SSA text transparancy tag from percentage.
+ * @param {number} transparencyPercentage - Desired scale as percentage
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setTransparencyPercentage = function (transparencyPercentage) {
     var transparencyHex = Math.floor(
         (transparencyPercentage / 100) * 255
@@ -61,15 +92,30 @@ UI.SSA.setTransparencyPercentage = function (transparencyPercentage) {
     return "{\\alpha&H" + transparencyHex + "&}";
 };
 
+/** Encapsulates given SSA draw commands.
+ * @param {string} commands - SSA draw commands
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.drawRaw = function (commands) {
     return "{\\p1}" + commands + "{\\p0}";
 };
 
+/** Sets SSA text position. 0,0 corresponds to top-left.
+ * @param {number} x - Desired x position
+ * @param {number} y - Desired y position
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setPosition = function (x, y) {
     var s = "{\\pos(" + x + "," + y + ")}";
     return s;
 };
 
+/** Sets SSA text position by percentage of screen size. 0% ,0% corresponds to top-left.
+ * @param {number} x - Desired x position percentage
+ * @param {number} y - Desired y position percentage
+ * @param {string} origin - Desired origin screen corner (e.g. top-left)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setPositionAbsolutePercentage = function (x, y, origin) {
     if (origin == undefined)
     {
@@ -105,6 +151,11 @@ UI.SSA.setPositionAbsolutePercentage = function (x, y, origin) {
     }
 };
 
+/** Sets SSA text position to offset from screen edges.
+ * @param {string} corner - Desired origin screen corner (e.g. top-left)
+ * @param {number} offset - Desired offset from screen edge
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setPositionScreenCorner = function(corner, offset)
 {
     if (corner == undefined)
@@ -154,6 +205,9 @@ UI.SSA.setPositionScreenCorner = function(corner, offset)
 
 }
 
+/** Computes ideal scale for current window resolution, where 100% corresponds to 1080p.
+ * @returns {number} scale percentage
+*/
 UI.SSA.findIdealScale = function ()
 {
     var width = Number(mp.get_property("osd-width"));
@@ -175,12 +229,24 @@ UI.SSA.findIdealScale = function ()
     return scaleFactor;
 }
 
+/** Returns SSA move draw command.
+ * @param {number} x - Desired x position
+ * @param {number} y - Desired y position
+ * @returns {string} SSA move draw command
+*/
 UI.SSA.move = function (x, y) {
     var s = "{\\p1} ";
     s += "m " + x + " " + y + "{\\p0}";
     return s;
 };
 
+/** Returns SSA rectangle draw command.
+ * @param {number} x1 - First Rectangle corner position
+ * @param {number} x2 - Second Rectangle corner position
+ * @param {number} y1 - Third Rectangle corner position
+ * @param {number} y2 - Fourth Rectangle corner position
+ * @returns {string} SSA draw command
+*/
 UI.SSA.drawRectangle = function (x1, y1, x2, y2) {
     var s = "{\\p1} ";
     s += "m " + x1 + " " + y1 + " ";
@@ -190,6 +256,13 @@ UI.SSA.drawRectangle = function (x1, y1, x2, y2) {
     return s;
 };
 
+/** Returns SSA line draw command.
+ * @param {number} x1 - Line start x coordinate
+ * @param {number} y1 - Line start y coordinate
+ * @param {number} x2 - Line end x coordinate
+ * @param {number} y2 - Line end y coordinate
+ * @returns {string} SSA draw command
+*/
 UI.SSA.drawLine = function (x1, y1, x2, y2) {
     var s = "{\\p1} ";
     s += "m " + x1 + " " + y1 + " ";
@@ -197,20 +270,36 @@ UI.SSA.drawLine = function (x1, y1, x2, y2) {
     return s;
 };
 
+/** Sets SSA text font tag.
+ * @param {string} font - Font name
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setFont = function (font) {
     return "{\\fn" + font + "}";
 };
 
-UI.SSA.setBorder = function (border) {
-    return "{\\bord" + border + "}";
+/** Sets SSA text border tag.
+ * @param {number} size - Border size
+ * @returns {string} SSA tag sequence
+*/
+UI.SSA.setBorder = function (size) {
+    return "{\\bord" + size + "}";
 };
 
+/** Sets SSA text shadow tag.
+ * @param {number} depth - Shadow depth
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setShadow = function (depth) {
     return "{\\shad" + depth + "}";
 };
 
 /** Inserts given Font Awesome symbol with given size, then sets font back to Roboto.
- * @returns {string} SSA string
+ * @param {string} symbol - Font Awesome unicode symbol
+ * @param {number} size - Desired size for the symbol
+ * @param {number} defaultSize - Size to return to after symbol insertion
+ * @param {string} fontNameAfter - Font name to return to after symbol insertion
+ * @returns {string} SSA tag sequence
  * */
 UI.SSA.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
     var font = "Font Awesome 6 Free Solid";
@@ -241,6 +330,10 @@ UI.SSA.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
     }
 };
 
+/** Sets SSA text primary color tag.
+ * @param {number} hex - Web hex color (without #)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColor = function (hex) {
     return (
         "{\\1c&H" +
@@ -251,6 +344,10 @@ UI.SSA.setColor = function (hex) {
     );
 };
 
+/** Sets SSA text secondary color tag.
+ * @param {number} hex - Web hex color (without #)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setSecondaryColor = function (hex) {
     return (
         "{\\2c&H" +
@@ -261,6 +358,10 @@ UI.SSA.setSecondaryColor = function (hex) {
     );
 };
 
+/** Sets SSA text border color tag.
+ * @param {number} hex - Web hex color (without #)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setBorderColor = function (hex) {
     return (
         "{\\3c&H" +
@@ -271,6 +372,10 @@ UI.SSA.setBorderColor = function (hex) {
     );
 };
 
+/** Sets SSA text shadow color tag.
+ * @param {number} hex - Web hex color (without #)
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setShadowColor = function (hex) {
     return (
         "{\\4c&H" +
@@ -281,38 +386,65 @@ UI.SSA.setShadowColor = function (hex) {
     );
 };
 
+/** Resets SSA tags to default settings.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.reset = function () {
     return "{\\r}";
 };
 
+/** Convenience method to set primary color to white.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorWhite = function () {
     return UI.SSA.setColor("FFFFFF");
 };
 
+/** Convenience method to set primary color to gray.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorGray = function () {
     return UI.SSA.setColor("909090");
 };
 
+/** Convenience method to set primary color to yellow.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorYellow = function () {
     return UI.SSA.setColor("FFFF90");
 };
 
+/** Convenience method to set primary color to green.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorGreen = function () {
     return UI.SSA.setColor("33ff33");
 };
 
+/** Convenience method to set primary color to dark red.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorDarkRed = function () {
     return UI.SSA.setColor("EB4034");
 };
 
+/** Convenience method to set primary color to red.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorRed = function () {
     return UI.SSA.setColor("FF3300");
 };
 
+/** Convenience method to set primary color to black.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorBlack = function () {
     return UI.SSA.setColor("000000");
 };
 
+/** Convenience method to set primary color to blue.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.setColorBlue = function () {
     return UI.SSA.setColor("0096FF");
 };
@@ -326,7 +458,9 @@ UI.SSA.setColorBlue = function () {
  */
 UI.SSA.Images = {};
 
-/** Blue round info symbol. */
+/** Blue round info symbol.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.Images.info = function () {
     var symbol = "";
     symbol +=
@@ -337,7 +471,9 @@ UI.SSA.Images.info = function () {
     return symbol + UI.SSA.reset();
 };
 
-/** Yellow triangular warning symbol. */
+/** Yellow triangular warning symbol.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.Images.warning = function () {
     var symbol = "";
     symbol +=
@@ -358,7 +494,9 @@ UI.SSA.Images.warning = function () {
     return symbol + UI.SSA.reset();
 };
 
-/** Red round error symbol. */
+/** Red round error symbol.
+ * @returns {string} SSA tag sequence
+*/
 UI.SSA.Images.error = function () {
     var symbol = "";
     symbol +=
@@ -385,13 +523,17 @@ USAGE:
 ----------------------------------------------------------------*/
 
 /**
+ * Provides helpers for displaying BMP images.
+ */
+UI.Image = {};
+
+/**
  * Uses system provided tools to get image metadata.
  * Falls back to parsing .info files, otherwise assumes default values.
  * Defaults: H 60px x W 200px.
+ * @param {string} file - File path
+ * @returns {object} Object, with properties: h,w,offset
  */
-
-UI.Image = {};
-
 UI.Image.getImageInfo = function (file) {
     file = mp.utils.get_user_path(file);
     var h, w, offset;
@@ -467,17 +609,19 @@ UI.Image.__getFilebyName = function (name) {
 /**
  * Represents an image.
  * You probably want to call OSD.addImage() instead.
+ * @constructor
  */
 UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
-    this.id = id;
-    this.file = mp.utils.get_user_path("~~/scripts/easympv/images/") + file;
-    this.width = width;
-    this.height = height;
-    this.x = x;
-    this.y = y;
-    this.offset = offset;
-    this.active = active;
-    return this;
+    return {
+        id: id,
+        file: mp.utils.get_user_path("~~/scripts/easympv/images/") + file,
+        width: width,
+        height: height,
+        x: x,
+        y: y,
+        offset: offset,
+        active: active
+    };
 };
 
 /**
@@ -509,6 +653,7 @@ UI.Image.addImage = function (name, file) {
  */
 
 /**
+ * Check if image is currently being displayed.
  * @param {string} name internal name of image
  * @return {Boolean} true if image is currently on screen
  */
@@ -517,6 +662,10 @@ UI.Image.status = function (name) {
     return image.active;
 };
 
+/**
+ * Get the required scale for current window size.
+ * @return {String} "", "2" or "4"
+ */
 UI.Image.getScale = function () {
     var scale = "";
     var height = mp.get_property("osd-height");
@@ -535,9 +684,10 @@ UI.Image.getScale = function () {
 };
 
 /**
- * Draws image to screen at specified coordinates.
- * x = 0, y = 0 is the top left corner!
- * @param {string} name internal name of image
+ * Draws image to screen at specified coordinates. 0,0 corresponds to top-left.
+ * @param {string} name - internal name of image
+ * @param {string} x - x Position
+ * @param {string} y - y Position
  */
 UI.Image.show = function (name, x, y) {
     if (name != undefined && x != undefined && y != undefined) {
@@ -565,9 +715,10 @@ UI.Image.show = function (name, x, y) {
 };
 
 /**
- * Either draws or hides image, depending on its current state.
- * x = 0, y = 0 is the top left corner!
- * @param {string} name internal name of image
+ * Draws or hides image to/from screen at specified coordinates. 0,0 corresponds to top-left.
+ * @param {string} name - internal name of image
+ * @param {string} x - x Position
+ * @param {string} y - y Position
  */
 UI.Image.toggle = function (name, x, y) {
     var scale = "";
@@ -647,7 +798,9 @@ UI.Image.hideAll = function () {
     }
 };
 
+/** Handles drawing the clock. */
 UI.Time = {};
+
 
 UI.Time.OSD = undefined;
 UI.Time.Timer = undefined;
@@ -878,10 +1031,24 @@ USAGE:
 
     The definition of UI.Menus.Menu.prototype._constructMenuCache has even more information.
 ----------------------------------------------------------------*/
+
+/**
+ * This implements a menu system similar to VideoPlayerCode's SelectionMenu.js.
+ * I decided to create my own implementation instead of using SelectionMenu.js because
+ * it was not offering enough customization options.
+ * This implementation puts customization first and should be easy to modifiy to suit your needs.
+ */
 UI.Menus = {};
 
+/** List of registered menus. */
 UI.Menus.registeredMenus = [];
 
+/** Create an instance of this class to create a menu.
+ * @param {object} settings - Initial settings for this menu. See source code for possible options.
+ * @param {Array} items - List of inital items. Each item should be an object, see source code for structure.
+ * @param {object} parentMenu - If this menu is accessed via another menu, pass the parent menu here to automatically add a back button.
+ * @returns {object} - Instance of UI.Menus.Menu
+ */
 UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings == undefined) {
         settings = {};
@@ -1338,19 +1505,31 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     UI.Menus.registeredMenus.push(this);
 };
 
+/** Convenience method to set associated image.
+ * @param {string} name - Name of image
+ */
 UI.Menus.Menu.prototype.setImage = function (name) {
     this.settings.image = name;
 };
 
+/** Convenience method to set menu description.
+ * @param {string} text - New description text
+ */
 UI.Menus.Menu.prototype.setDescription = function (text) {
     this.settings.description = text;
 };
 
+/** Convenience method to redraw the menu.
+ * This is useful to update values.
+ */
 UI.Menus.Menu.prototype.redrawMenu = function () {
     this._constructMenuCache();
     this._drawMenu();
 };
 
+/** Updates the menus SSA string using current settings.
+ * You should probably call redrawMenu instead.
+ */
 UI.Menus.Menu.prototype._constructMenuCache = function () {
     /*
         Differences between displayMethods
@@ -1812,6 +1991,9 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
     }
 };
 
+/** Internal method used to automatically close the menu after a set time period.
+ * Do not call this method directly!
+ */
 UI.Menus.Menu.prototype._handleAutoClose = function () {
     if (this.settings.autoClose <= 0 || this.autoCloseStart <= -1) {
         return;
@@ -1821,26 +2003,37 @@ UI.Menus.Menu.prototype._handleAutoClose = function () {
     }
 };
 
+/** Convenience method to fire an event.
+ * @param {string} name - Name of the event to fire
+ */
 UI.Menus.Menu.prototype.fireEvent = function (name) {
     this._keyPressHandler(name);
 };
 
+/** Convenience method to add the set suffix to the currently selected item.
+ */
 UI.Menus.Menu.prototype.appendSuffixToCurrentItem = function () {
     this.suffixCacheIndex = this.selectedItemIndex;
     this._constructMenuCache();
     this._drawMenu();
 };
 
+/** Convenience method to remove a previously set suffix for the currently selected item.
+ */
 UI.Menus.Menu.prototype.removeSuffix = function () {
     this.suffixCacheIndex = -1;
     //this._constructMenuCache();
     //this._drawMenu();
 };
 
+/** Convenience method to return currently selected item.
+ * @returns {object} - Object of currently selected item
+ */
 UI.Menus.Menu.prototype.getSelectedItem = function () {
     return this.items[this.selectedItemIndex];
 };
 
+/** Internal method to claim keybinds for menu movement. */
 UI.Menus.Menu.prototype._overrideKeybinds = function () {
     var tempFunction = function (x, action, key) {
         return function () {
@@ -1860,6 +2053,7 @@ UI.Menus.Menu.prototype._overrideKeybinds = function () {
     }
 };
 
+/** Internal method to return keybinds for menu movement. */
 UI.Menus.Menu.prototype._revertKeybinds = function () {
     for (var i = 0; i < this.settings.keybindOverrides.length; i++) {
         var currentKey = this.settings.keybindOverrides[i];
@@ -1868,8 +2062,10 @@ UI.Menus.Menu.prototype._revertKeybinds = function () {
     }
 };
 
+/** Whether the double-scroll workaround is enabled. */
 UI.Menus.Menu.prototype.scrollWorkaroundState = false;
 
+/** Internal method to handle keypresses. */
 UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
     if (this.settings.doubleScrollWorkaround)
     {
@@ -1924,6 +2120,7 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
     }
 };
 
+/** Internal method to intialize the overlay the menu will use. */
 UI.Menus.Menu.prototype._initOSD = function () {
     if (this.settings.displayMethod == "overlay") {
         if (this.OSD == undefined) {
@@ -1938,6 +2135,9 @@ UI.Menus.Menu.prototype._initOSD = function () {
     }
 };
 
+/** Internal method to draw the cached menu text to the screen.
+ * To redraw the menu, call redrawMenu instead.
+*/
 UI.Menus.Menu.prototype._drawMenu = function () {
     if (this.settings.displayMethod == "message") {
         mp.osd_message(this.cachedMenuText, 1000);
@@ -1952,6 +2152,7 @@ UI.Menus.Menu.prototype._drawMenu = function () {
     }
 };
 
+/** Internal method to start the timer for automatically hiding the menu. */
 UI.Menus.Menu.prototype._startTimer = function () {
     if (this.settings.displayMethod == "message") {
         var x = this;
@@ -1974,6 +2175,7 @@ UI.Menus.Menu.prototype._startTimer = function () {
     }
 };
 
+/** Internal method to stop the timer for automatically hiding the menu.*/
 UI.Menus.Menu.prototype._stopTimer = function () {
     if (this.menuInterval != undefined) {
         clearInterval(this.menuInterval);
@@ -1981,6 +2183,7 @@ UI.Menus.Menu.prototype._stopTimer = function () {
     }
 };
 
+/** Internal method to fade the menu in.*/
 UI.Menus.Menu.prototype._fadeIn = function () {
     var x = this;
     this.settings.transparency = 100;
@@ -1996,7 +2199,7 @@ UI.Menus.Menu.prototype._fadeIn = function () {
     this.fadeInInterval.start;
 };
 
-
+/** Internal method to fade the menu out.*/
 UI.Menus.Menu.prototype._fadeOut = function () {
     var x = this;
     this.fadeOutInterval = setInterval(function () {
@@ -2028,14 +2231,22 @@ UI.Menus.Menu.prototype._fadeOut = function () {
     this.fadeOutInterval.start;
 };
 
+/** Convenience method to get an item by its name. 
+ * @param {string} name - Name of the item
+ * @returns {object} desired item, if found (otherwise undefined)
+*/
 UI.Menus.Menu.prototype.getItemByName = function (name) {
     for(var i = 0; i < this.items.length; i++)
     {
         if (this.items[i].item == name)
         return this.items[i];
     }
+    return undefined;
 }
 
+/** Method to show the menu on screen.
+ * This will call all the required prerequisite functions.
+*/
 UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
         this.allowDrawImage = false;
@@ -2064,6 +2275,10 @@ UI.Menus.Menu.prototype.showMenu = function () {
         }
     }
 };
+
+/** Method to hide the menu on screen.
+ * This will call all the required prerequisite functions.
+*/
 UI.Menus.Menu.prototype.hideMenu = function () {
     this._dispatchEvent("hide");
     if (this.settings.displayMethod == "message") {
@@ -2110,6 +2325,7 @@ UI.Menus.Menu.prototype.hideMenu = function () {
     }
 };
 
+/** Convenience method to toggle the menu on screen.*/
 UI.Menus.Menu.prototype.toggleMenu = function () {
     if (!this.isMenuVisible) {
         this.showMenu();
@@ -2118,6 +2334,10 @@ UI.Menus.Menu.prototype.toggleMenu = function () {
     }
 };
 
+/** Internal method to dispatch an event.
+ * @param {string} event - Event to be dispatched
+ * @param {object} item - Selected item
+*/
 UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
     if (item == undefined)
     {
@@ -2145,12 +2365,20 @@ UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
     this.eventHandler(event, item.item);
 }
 
-UI.Menus.Menu.prototype.eventHandler = function () {
+/** This method should be overwritten with your own implementation.
+ * @param {string} event - Name of the event that got dispatched
+ * @param {string} action - Name of the action that dispatched the event 
+*/
+UI.Menus.Menu.prototype.eventHandler = function (event, action) {
     Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
 };
 
+/** If enabled, the menu key will not work to close the currently active menu. */
 UI.Menus.menuKeyDisabled = false;
 
+/** Convenience method to get the currently displayed menu.
+ * @returns {object} - Displayed menu, otherwise undefined
+ */
 UI.Menus.getDisplayedMenu = function () {
     var cMenu = undefined;
     for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
@@ -2162,6 +2390,10 @@ UI.Menus.getDisplayedMenu = function () {
     return cMenu;
 };
 
+/** Convenience method to switch out the currently displayed menu with a new one.
+ * @param {object} newMenu - Menu to be displayed
+ * @param {object} currentMenu - Current menu. Will call getDisplayedMenu if undefined
+ */
 UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
     if (currentMenu == undefined)
     {
