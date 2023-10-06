@@ -1,17 +1,15 @@
 /*
- * CORE.JS (MODULE)
+ * CORE.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 
-/*----------------------------------------------------------------
-The Core.js module
-
-This module used to be main.js, but it was split to make
-things like soft-restarts possible.
-----------------------------------------------------------------*/
+/**
+ * This module used to be main.js, but it was split to make
+ * things like soft-restarts possible.
+ */
 var Core = {};
 
 var isFirstFile = true;
@@ -1218,7 +1216,9 @@ Core.defineMenus = function () {
                     menu.hideMenu();
                     Settings.Data.isFirstLaunch = true;
                     Settings.save();
-                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    Core.doUnregistrations();
+                    Core.startExecution();
+                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -1513,7 +1513,9 @@ Core.defineMenus = function () {
                 if (event == "enter") {
                     menu.settings.fadeOut = false;
                     menu.hideMenu();
-                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    Core.doUnregistrations();
+                    Core.startExecution();
+                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -1629,7 +1631,9 @@ Core.defineMenus = function () {
                     Settings.save();
                     menu.hideMenu();
                     Utils.log("Restarting plugin to apply changes...","settings","info");
-                    mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    Core.doUnregistrations();
+                    Core.startExecution();
+                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -2528,12 +2532,12 @@ Core.startExecution = function () {
     }
 
     Utils.log("Reading files","startup","info");
-    Settings.presets.reload();
+    //Settings.presets.reload(); // already gets called in FTW
     Settings.cache.reload();
 
     if (Settings.Data.isFirstLaunch) {
         Utils.log("startupTask: start Wizard","startup","info");
-        Wizard.Start();
+        Setup.Start();
     }
 
     if (Environment.BrowserWorkDir != undefined) {
@@ -2551,5 +2555,3 @@ Core.startExecution = function () {
     Video.Colors.name = Settings.Data.defaultColorProfile;
     Video.Colors.apply(Settings.Data.defaultColorProfile);
 }
-
-module.exports = Core;

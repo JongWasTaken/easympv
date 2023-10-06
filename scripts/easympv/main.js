@@ -34,6 +34,10 @@ Current dependencies:
         either wget or curl
         xclip OR wl-clipboard (if you use Wayland; when in doubt, install both!)
 
+TODOs:
+    - playlist menu should have cursor on "currently playing" when opened
+    - rebuild playlist if empty onFileLoad
+
 KNOWN ISSUES:
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
@@ -42,22 +46,12 @@ KNOWN ISSUES:
 // Polyfills and extensions first
 eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Polyfills.js")));
 
-var Autoload = require("./Autoload");
-var API = require("./API");
-var Browsers = require("./Browsers");
-var Chapters = require("./Chapters");
-var Core = require("./Core");
-var Wizard = require("./FirstTimeWizard");
-var UI = require("./UI");
-var OS = require("./OS");
-var Settings = require("./Settings");
-var Utils = require("./Utils");
-var Tests = require("./Tests");
-var Video = require("./Video");
-
+/**
+ * We start with parsing of the EASYMPV_ARGS environment variable, for future use.
+ * Example: EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming" mpv <file>
+ */
 var Environment = {};
 Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");
-// example: EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming"
 if(Environment.Arguments != undefined)
 {
     Environment.Arguments = Environment.Arguments.split(";");
@@ -86,7 +80,7 @@ if(Environment.Arguments != undefined)
                 {
                     value = value.split(",");
                     Environment.SettingsOverrides = {};
-                    mp.msg.warn("Settings Override:");
+                    mp.msg.warn("Environment variable overrides the following settings:");
                     for (var j = 0; j < value.length; j++)
                     {
                         var temp2 = value[j].split(":");
@@ -103,28 +97,53 @@ if(Environment.Arguments != undefined)
                             }
 
                             Environment.SettingsOverrides[temp2[0]] = val;
-                            mp.msg.warn(temp2[0] + " = " + val);
+                            mp.msg.warn(temp2[0] + " -> " + val);
                         }
                     }
                 }
             }
         }
         catch (e) {
-            mp.msg.warn("[easympv] Invalid EASYMPV_ARGS environment variable!");
+            mp.msg.warn("[easympv] Error occured while processing EASYMPV_ARGS environment variable!");
             mp.msg.warn("Error description: " + e);
         }
     }
 }
 
-var errorCounter = 0;
+/**
+ * Why use eval() instead of import()?
+ * This used to be a bunch of import() statements, and the files had module.exports at the bottom.
+ * While this did work, it wasn't quite the correct way of using CommonJS modules, as our files aren't really modules,
+ * but rather pseudo-"classes" that exist mostly for code-readability reasons.
+ * I found that using eval() instead of import() actually decreases start-up times, while also resolving some issues around
+ * modules accessing other modules.
+ * The only downside to this approach is that we need to make sure files are eval()'d in the correct order, otherwise we crash.
+ */
 
-mp.register_script_message("__internal",function(msg) {
-    if(msg == "restart")
-    {
-        Core.doUnregistrations();
-        Core.startExecution();
-    }
-});
+if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/minified.js")) != undefined)
+{
+    mp.msg.warn("[easympv] Running minified code!");
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/minified.js")));
+}
+else
+{
+    // These are used by other files, the order is important.
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Settings.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/OS.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/UI.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Utils.js")));
+    // Everything else
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Autoload.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/API.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Browsers.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Chapters.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Core.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Setup.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Tests.js")));
+    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Video.js")));
+}
+
+var errorCounter = 0;
 
 if (Environment.isDebug) {
     Core.startExecution();
@@ -136,7 +155,7 @@ else
     }
     catch (e) {
         errorCounter++;
-        mp.msg.error("Encountered "+errorCounter+" issue(s) during startup!");
+        mp.msg.error("Encountered " + errorCounter + " issue(s) during startup!");
         mp.msg.error("Last issue description: " + e);
     }
 }

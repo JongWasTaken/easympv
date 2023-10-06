@@ -1,5 +1,5 @@
 /*
- * TESTS.JS (MODULE)
+ * TESTS.JS (PART OF EASYMPV)
  *
  * Author:                     Jong
  * URL:                        https://github.com/JongWasTaken/easympv
@@ -264,5 +264,3 @@ Tests.list = {
     "OS: get windows drive info": { "target": Test_OS_GetWindowsDriveInfo, "description": "(Only runs on Windows)" },
     "UI: show alert": { "target": Test_UI_ShowAlert, "description": "(Check for yourself)" },
 };
-
-module.exports = Tests;

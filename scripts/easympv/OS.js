@@ -1,11 +1,14 @@
 /*
- * OS.JS (MODULE)
+ * OS.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 
+/**
+ * Provides OS interactivity, such as file operations, clipboard access and more.
+ */
 var OS = {};
 
 OS.repoName = "easympv-installer"; // change to easympv once stable
@@ -675,5 +678,3 @@ OS.unregisterMpv = function () {
     }
     return;
 };
-
-module.exports = OS;

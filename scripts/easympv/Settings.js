@@ -1,24 +1,13 @@
 /*
- * SETTINGS.JS (MODULE)
+ * SETTINGS.JS (PART OF EASYMPV)
  *
  * Author:                     Jong
  * URL:                        https://github.com/JongWasTaken/easympv
  * License:                    MIT License
  */
 
-/*----------------------------------------------------------------
-The Settings.js module
-
-This file handles serialization and deserialization of the
-easympv.conf file located in the mpv config root directory.
-It also provides sane defaults in case configuration files
-are missing.
-----------------------------------------------------------------*/
-
-var OS = require("./OS")
-
 /**
- * This module handles serialization and deserialization of the
+ * This file handles serialization and deserialization of the
  * easympv.conf file located in the mpv config root directory.
  * It also provides sane defaults in case configuration files
  * are missing.
@@ -62,7 +51,7 @@ Settings.Data = {
     allowFolderDeletion: false,
     // Misc
     startIPCServer: false,
-    useNativeNotifications: true,
+    useNativeNotifications: false,
     notifyAboutUpdates: true,
     compatibilityMode: false,
     debugMode: false,
@@ -295,7 +284,7 @@ Settings.save = function () {
         defaultConfigString +=
             "# If false, notifications will be shown inside the mpv window.\n";
         defaultConfigString +=
-            "# Default: true.\n";
+            "# Default: false\n";
         defaultConfigString += "useNativeNotifications=x\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to show alerts when out-of-date.\n";
@@ -1009,5 +998,3 @@ Settings.cache.save = function() {
         JSON.stringify(temp,null,4)
     );
 }
-
-module.exports = Settings;

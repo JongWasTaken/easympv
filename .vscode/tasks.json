@@ -59,6 +59,21 @@
             }
         },
         {
+            "label": "mpv (minify)",
+            "type": "shell",
+            "command": "cd ~/.config/mpv/scripts/easympv/ && rm ./minified.js && /usr/bin/uglifyjs Settings.js OS.js UI.js Utils.js Autoload.js API.js Browsers.js Chapters.js Core.js Setup.js Tests.js Video.js --ie -o ./minified.js && /usr/bin/mpv /mnt/smb/Anime/Archive/Yu-Gi-Oh*.mkv",
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "options": {
+                "env": {
+                    "EASYMPV_ARGS": "options=showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming",
+                }
+            }
+        },
+        {
             "label": "mpv (testing snapshot)",
             "type": "shell",
             "command": "/usr/bin/mpv --script-opts=osc-windowcontrols=no --config-dir=\"snapshots/testing\" \"/mnt/smb/Anime/Incoming\"",

@@ -1,5 +1,5 @@
 /*
- * CHAPTERS.JS (MODULE)
+ * CHAPTERS.JS (PART OF EASYMPV)
  *
  * Author:         Jong
  * URL:            https://github.com/JongWasTaken/easympv
@@ -90,5 +90,3 @@ Chapters.handler = function () {
         }
     }
 };
-
-module.exports = Chapters;

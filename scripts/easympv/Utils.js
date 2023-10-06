@@ -1,17 +1,10 @@
 /*
- * UTILS.JS (MODULE)
+ * UTILS.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
-
-/*----------------------------------------------------------------
-The Utils.js module
-
-This file contains all the miscellaneous functions that
-don't really fit anywhere else.
-----------------------------------------------------------------*/
 
 // TODO: move some of this into OS.js
 
@@ -580,5 +573,3 @@ Utils.getCurrentTime = function()
     time = hour + ":" + temp[1];
     return time;
 }
-
-module.exports = Utils;

@@ -1,3 +1,11 @@
+/*
+ * POLYFILLS.JS (PART OF EASYMPV)
+ *
+ * Author:                  Jong
+ * URL:                     https://github.com/JongWasTaken/easympv
+ * License:                 MIT License
+ */
+
 String.prototype.includes = function (search, start) {
     if (typeof start !== "number") {
         start = 0;

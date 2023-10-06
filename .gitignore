@@ -21,3 +21,7 @@ testFile1.txt
 extractedPackage/*
 package.zip
 snapshots/*
+scripts/easympv/min/
+scripts/easympv/min/*
+minified.js
+scripts/easympv/shaders/bfi.vpy

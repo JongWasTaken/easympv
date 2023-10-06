@@ -1,5 +1,5 @@
 /*
- * FIRSTTIMEWIZARD.JS (MODULE),
+ * SETUP.JS (PART OF EASYMPV),
  *
  * Author:         Jong
  * URL:            https://github.com/JongWasTaken/easympv
@@ -7,25 +7,23 @@
  *
  */
 
-var UI = require("./UI");
-var Settings = require("./Settings");
 Settings.presets.reload();
 
-var Wizard = {};
-Wizard.idsToUnblock = [];
-Wizard.Menus = {};
+var Setup = {};
+Setup.idsToUnblock = [];
+Setup.Menus = {};
 
 var menuColor = "#77dd11";
 
 // temp
 var unblock = function () {
-    if (Wizard.idsToUnblock.length == 0) {
+    if (Setup.idsToUnblock.length == 0) {
         return;
     }
 
     // Unblock quit keys
-    for (i = 0; i < Wizard.idsToUnblock.length; i++) {
-        mp.remove_key_binding(Wizard.idsToUnblock[i]);
+    for (i = 0; i < Setup.idsToUnblock.length; i++) {
+        mp.remove_key_binding(Setup.idsToUnblock[i]);
     }
 };
 
@@ -33,7 +31,7 @@ var title = function (n1,n2) {
     return Settings.getLocalizedString("FTW.menu.title") + n1 + "/" + n2;
 }
 
-Wizard.Menus.Page1 = new UI.Menus.Menu(
+Setup.Menus.Page1 = new UI.Menus.Menu(
     {
         title: "",
         description: Settings.getLocalizedString("FTW.page1.description"),
@@ -51,8 +49,8 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
             {
                 if (event == "enter")
                 {
-                    Wizard.Menus.Page1.hideMenu();
-                    Wizard.Menus.Page2.showMenu();
+                    Setup.Menus.Page1.hideMenu();
+                    Setup.Menus.Page2.showMenu();
                 }
             }
         },
@@ -60,11 +58,12 @@ Wizard.Menus.Page1 = new UI.Menus.Menu(
     undefined
 );
 
-Wizard.Menus.Page1.eventHandler = function (event, action) {
+Setup.Menus.Page1.eventHandler = function (event, action) {
+    if (event == "show") { return;}
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
 };
 
-Wizard.Menus.Page2Options = {
+Setup.Menus.Page2Options = {
     PerformanceName: [
         Settings.getLocalizedString("FTW.performance.first.title"),
         Settings.getLocalizedString("FTW.performance.second.title"),
@@ -81,7 +80,7 @@ Wizard.Menus.Page2Options = {
     SubLanguageDescription: Settings.getLocalizedString("FTW.sublanguage.description")
 };
 
-Wizard.Menus.Page2 = new UI.Menus.Menu(
+Setup.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
         description: Settings.getLocalizedString("FTW.page2.description"),
@@ -95,7 +94,7 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
         {
             title: Settings.getLocalizedString("FTW.performance.title") + "@us10@@br@",
             item: "toggle-performance",
-            description: Wizard.Menus.Page2Options.PerformanceName[1] + Wizard.Menus.Page2Options.PerformanceDescription[1],
+            description: Setup.Menus.Page2Options.PerformanceName[1] + Setup.Menus.Page2Options.PerformanceDescription[1],
             data: 1,
             eventHandler: function(event,menu)
             {
@@ -104,19 +103,19 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
                 {
                     this.data = this.data - 1;
                 }
-                if (event == "right" && this.data != Wizard.Menus.Page2Options.PerformanceName.length-1)
+                if (event == "right" && this.data != Setup.Menus.Page2Options.PerformanceName.length-1)
                 {
                     this.data = this.data + 1;
                 }
-                this.description = Wizard.Menus.Page2Options.PerformanceName[this.data];
-                this.description += Wizard.Menus.Page2Options.PerformanceDescription[this.data];
-                Wizard.Menus.Page2.redrawMenu();
+                this.description = Setup.Menus.Page2Options.PerformanceName[this.data];
+                this.description += Setup.Menus.Page2Options.PerformanceDescription[this.data];
+                Setup.Menus.Page2.redrawMenu();
             }
         },
         {
             title: Settings.getLocalizedString("FTW.audiolanguage.title"),
             item: "toggle-audio-language",
-            description: Wizard.Menus.Page2Options.AudioLanguageNames[1] + Wizard.Menus.Page2Options.AudioLanguageDescription,
+            description: Setup.Menus.Page2Options.AudioLanguageNames[1] + Setup.Menus.Page2Options.AudioLanguageDescription,
             data: 1,
             eventHandler: function(event,menu)
             {
@@ -125,19 +124,19 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
                 {
                     this.data = this.data - 1;
                 }
-                if (event == "right" && this.data != Wizard.Menus.Page2Options.AudioLanguageNames.length-1)
+                if (event == "right" && this.data != Setup.Menus.Page2Options.AudioLanguageNames.length-1)
                 {
                     this.data = this.data + 1;
                 }
-                this.description = Wizard.Menus.Page2Options.AudioLanguageNames[this.data];
-                this.description += Wizard.Menus.Page2Options.AudioLanguageDescription;
-                Wizard.Menus.Page2.redrawMenu();
+                this.description = Setup.Menus.Page2Options.AudioLanguageNames[this.data];
+                this.description += Setup.Menus.Page2Options.AudioLanguageDescription;
+                Setup.Menus.Page2.redrawMenu();
             }
         },
         {
             title: Settings.getLocalizedString("FTW.sublanguage.title") + "@us10@@br@",
             item: "toggle-sub-language",
-            description: Wizard.Menus.Page2Options.SubLanguageNames[1] + Wizard.Menus.Page2Options.SubLanguageDescription,
+            description: Setup.Menus.Page2Options.SubLanguageNames[1] + Setup.Menus.Page2Options.SubLanguageDescription,
             data: 1,
             eventHandler: function(event,menu)
             {
@@ -146,13 +145,13 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
                 {
                     this.data = this.data - 1;
                 }
-                if (event == "right" && this.data != Wizard.Menus.Page2Options.SubLanguageNames.length-1)
+                if (event == "right" && this.data != Setup.Menus.Page2Options.SubLanguageNames.length-1)
                 {
                     this.data = this.data + 1;
                 }
-                this.description = Wizard.Menus.Page2Options.SubLanguageNames[this.data];
-                this.description += Wizard.Menus.Page2Options.SubLanguageDescription;
-                Wizard.Menus.Page2.redrawMenu();
+                this.description = Setup.Menus.Page2Options.SubLanguageNames[this.data];
+                this.description += Setup.Menus.Page2Options.SubLanguageDescription;
+                Setup.Menus.Page2.redrawMenu();
             }
         },
         {
@@ -162,20 +161,20 @@ Wizard.Menus.Page2 = new UI.Menus.Menu(
             {
                 if (event == "enter")
                 {
-                    Wizard.Menus.Page2.hideMenu();
-                    Wizard.Menus.Page3.showMenu();
+                    Setup.Menus.Page2.hideMenu();
+                    Setup.Menus.Page3.showMenu();
                 }
             }
         },
     ],
-    Wizard.Menus.Page1
+    Setup.Menus.Page1
 );
 
-Wizard.Menus.Page2.eventHandler = function (event, action) {
+Setup.Menus.Page2.eventHandler = function (event, action) {
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
 };
 
-Wizard.Menus.Page3 = new UI.Menus.Menu(
+Setup.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
         description: Settings.getLocalizedString("FTW.page3.description"),
@@ -193,11 +192,11 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
             {
                 if (event == "enter")
                 {
-                    Wizard.Menus.Page3.hideMenu();
+                    Setup.Menus.Page3.hideMenu();
 
                     Settings.mpvConfig.load();
 
-                    var ppreset = Wizard.Menus.Page2Options.PerformanceName[Wizard.Menus.Page2.items[1].data];
+                    var ppreset = Setup.Menus.Page2Options.PerformanceName[Setup.Menus.Page2.items[1].data];
                     if (ppreset == Settings.getLocalizedString("FTW.performance.first.title"))
                     {
                         Settings.mpvConfig.Data.scale = "bilinear";
@@ -235,7 +234,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.video_sync = "display-resample";
                     }
 
-                    var alang = Wizard.Menus.Page2Options.AudioLanguageNames[Wizard.Menus.Page2.items[2].data];
+                    var alang = Setup.Menus.Page2Options.AudioLanguageNames[Setup.Menus.Page2.items[2].data];
                     if (alang == "Japanese")
                     {
                         Settings.mpvConfig.Data.alang = "Japanese,ja,jap,jpn,日本,日本語";
@@ -247,7 +246,7 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.alang = "English,eng,en";
                     } else { Settings.mpvConfig.Data.alang= ""; }
 
-                    var slang = Wizard.Menus.Page2Options.SubLanguageNames[Wizard.Menus.Page2.items[3].data];
+                    var slang = Setup.Menus.Page2Options.SubLanguageNames[Setup.Menus.Page2.items[3].data];
                     if (slang == "Japanese")
                     {
                         Settings.mpvConfig.Data.slang = "Japanese,ja,jap,jpn,日本,日本語";
@@ -268,23 +267,23 @@ Wizard.Menus.Page3 = new UI.Menus.Menu(
             }
         },
     ],
-    Wizard.Menus.Page2
+    Setup.Menus.Page2
 );
 
-Wizard.Menus.Page3.eventHandler = function (event, action) {
+Setup.Menus.Page3.eventHandler = function (event, action) {
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
 };
 
-Wizard.Start = function () {
+Setup.Start = function () {
     Settings.load();
-    var pageTotal = Object.keys(Wizard.Menus).length-1;
-    Wizard.Menus.Page1.settings.title = title(1,pageTotal);
-    Wizard.Menus.Page2.settings.title = title(2,pageTotal);
-    Wizard.Menus.Page3.settings.title = title(3,pageTotal);
+    var pageTotal = Object.keys(Setup.Menus).length-1;
+    Setup.Menus.Page1.settings.title = title(1,pageTotal);
+    Setup.Menus.Page2.settings.title = title(2,pageTotal);
+    Setup.Menus.Page3.settings.title = title(3,pageTotal);
     // disable all menus keys
     var bindings = JSON.parse(mp.get_property("input-bindings"));
     var keysToBlock = [];
-    Wizard.idsToUnblock = [];
+    Setup.idsToUnblock = [];
     for (i = 0; i < bindings.length; i++) {
         if (bindings[i].cmd.includes("script_binding easympv")) {
             keysToBlock.push(bindings[i]);
@@ -296,11 +295,8 @@ Wizard.Start = function () {
             "prevent_menu_" + i,
             function () {}
         );
-        Wizard.idsToUnblock.push("prevent_menu_" + i);
+        Setup.idsToUnblock.push("prevent_menu_" + i);
     }
     // open page1
-    Wizard.Menus.Page1.showMenu();
+    Setup.Menus.Page1.showMenu();
 };
-
-module.exports = Wizard;
-

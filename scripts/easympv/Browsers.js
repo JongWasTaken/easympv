@@ -1,5 +1,5 @@
 /*
- * BROWSERS.JS (MODULE)
+ * BROWSERS.JS (PART OF EASYMPV)
  *
  * Author:              Jong
  * URL:                 https://github.com/JongWasTaken/easympv
@@ -8,14 +8,11 @@
  */
 
 /*----------------------------------------------------------------
-The Browsers.js module
-
 This file contains premade menus that act as browsers for
 files, disc drives and devices.
 There is a lot of spaghetti here, read at your own risk.
 Comments are also missing.
 ----------------------------------------------------------------*/
-
 
 /**
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
@@ -128,6 +125,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
             UI.Input.show(function (success, input) {
                 if (success) {
                     if (input.includes("://")) {
+                        mp.command("write-watch-later-config");
                         if (input.includes("&list=")) {
                             mp.commandv("loadlist", input);
                         } else {
@@ -200,6 +198,7 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
     {
         if (entry.type != "subtitle")
         {
+            mp.command("write-watch-later-config");
             Utils.showAlert(
                 "info",
                 Settings.getLocalizedString("Alerts.browser.playing") + entry.item
@@ -947,6 +946,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
         });
         Browsers.DriveBrowser.menu.redrawMenu();
     } else if (event == "enter" && Browsers.DriveBrowser.menuMode == "ask") {
+        mp.command("write-watch-later-config");
         if (OS.isWindows) {
             mp.commandv(
                 "loadfile",
@@ -1116,5 +1116,3 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
         Browsers.DeviceBrowser.menuEventHandler;
     Browsers.DeviceBrowser.menu.showMenu();
 };
-
-module.exports = Browsers;

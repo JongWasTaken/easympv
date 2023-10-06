@@ -1,18 +1,15 @@
 /*
- * VIDEO.JS (MODULE)
+ * VIDEO.JS (PART OF EASYMPV)
  *
  * Author:         Jong
  * URL:            https://github.com/JongWasTaken/easympv
  * License:        MIT License
  */
 
-/*----------------------------------------------------------------
-The Video.js module
-
-This file handles everything related to presentation, such as FPS,
-or keeping track of shaders.
-----------------------------------------------------------------*/
-
+/**
+ * This file handles everything related to presentation, such as FPS,
+ * or keeping track of shaders.
+ */
 var Video = {};
 
 Video.FPS = {};
@@ -194,5 +191,3 @@ Video.Colors.apply = function (name) {
     }
     Video.Colors.name = name;
 };
-
-module.exports = Video;

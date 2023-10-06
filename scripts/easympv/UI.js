@@ -1,23 +1,12 @@
 /*
- * UI.JS (MODULE)
+ * UI.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
 
-var Utils = require("./Utils");
-var Settings = require("./Settings");
-
 var UI = {};
-
-/*----------------------------------------------------------------
-CLASS: UI.SSA
-DESCRIPTION:
-    This static class provides helpers for SubStationAlpha tags.
-USAGE:
-    N/A
-----------------------------------------------------------------*/
 
 /** Provides common SSA tags. */
 UI.SSA = {};
@@ -3042,5 +3031,3 @@ UI.Input.showJavascriptInput = function () {
         };
         UI.Input.show(readCommand,"JavaScript expression (use help() for more info): ");
 }
-
-module.exports = UI;

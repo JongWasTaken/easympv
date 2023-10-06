@@ -1,5 +1,5 @@
 /*
- * API.JS (MODULE)
+ * API.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
@@ -160,5 +160,3 @@ API.sendJSON = function(target,data) {
         return;
     mp.commandv("script-message-to", target, "easympv-response", data);
 }
-
-module.exports = API;

@@ -1,5 +1,5 @@
 /*
- * AUTOLOAD.JS (MODULE)
+ * AUTOLOAD.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
@@ -314,5 +314,3 @@ Autoload.buildPlaylist = function ()
     }
 
 }
-
-module.exports = Autoload;
