@@ -33,6 +33,7 @@ Settings.Data = {
     mpvLocation: "unknown",
     forcedMenuKey: "m",
     // Visual
+    selectorColor: "ba0f8d",
     showHints: true,
     showClock: false,
     clockPosition: "top-left",
@@ -173,6 +174,11 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "\n";
         defaultConfigString += "## VISUALS\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# Color of the selector in menus.\n";
+        defaultConfigString += "# Default: 66ff66 for green, ba0f8d for purple\n";
+        defaultConfigString += "# Use a RGB Hex value, but omit the hash sign.\n";
+        defaultConfigString += "selectorColor=FFFFFF\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to show hints on the main menu.\n";
         defaultConfigString += "# Default: true\n";
@@ -935,17 +941,12 @@ Settings.presets.reload = function () {
 
 Settings.getLocalizedString = function(identifier)
 {
-    /*
-    if (Array.isArray(identifier))
-    {
-        identifier = identifier[0];
-    }
-    */
-    if (Settings.locale[identifier] == undefined)
+    var lstr = Settings.locale[identifier];
+    if (lstr == undefined)
     {
         return identifier;
     }
-    return Settings.locale[identifier];
+    return lstr;
 }
 
 Settings.cache.perFileSaves = [];

@@ -209,6 +209,10 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
                     OS.directorySeperator +
                     entry.item
             );
+            if (Autoload.enabled)
+            {
+                Autoload.loadFolder(true);
+            }
         }
         else
         {

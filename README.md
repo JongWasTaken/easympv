@@ -27,7 +27,8 @@ macOS support is experimental and not fully finished, as I lack a device to test
     - Custom color profiles can be [added by the user](https://github.com/JongWasTaken/easympv/wiki/Presets)
 - Automatic skipping of certain chapters (such as Openings/Endings)
 - [Quick toggles](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) for properties you don't have to touch often, such as `fps` or `aspect-ratio`, saving keybinds!
-- A more advanced reimplementation of `autoload.lua`, providing interactive playlist management 
+- A more advanced reimplementation of `autoload.lua`, providing interactive playlist management
+    - This is currently very half-baked and will often break, see [Known Issues](#known-issues).
     - Please disable `autoload.lua` if you use it, otherwise this functionality will be disabled at runtime!
 - A reimplementation of `autosave.lua`
     - Please disable `autosave.lua` if you use it, otherwise this functionality will be disabled at runtime!
@@ -80,25 +81,29 @@ Download the latest release (or the master branch) and put all files into `%appd
 Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
 ## Known Issues
-### Syncplay Incompatibility
-- SyncPlay's chat integration messes with the OSD for some reason, which makes menus appear out of bounds.
-    - Workaround: Disable chat integration, and use the SyncPlay window instead.
-    - I am currently unaware of a solution to this, as i have no idea as to what is causing it.
 ### Autoload.js
-- The internal playlist will sometimes clear itself, the cause is currently unknown.
+- The generated mpv playlist will sometimes clear itself.
+- The generated mpv playlist will sometimes not be in the correct order.
 - Jumping to a playlist entry in the playlist menu will rarely crash mpv.
     - This is probably some kind of file path name issue.
+
+Because of these issues, it is currently recommended to use [`autoload.lua`](https://github.com/mpv-player/mpv/blob/master/TOOLS/lua/autoload.lua) alongside easympv.  
+The Autoload module will be disabled automatically.
 ### UI.js
-- Clock positioning can be weird on non-standard resolutions
+- Clock positioning can look incorrect on non-standard resolutions.
 ### Utils.js
-- Git update will lock up mpv in some cases
+- Git update will currently lock up mpv in most cases.
 ### Misc
-- macOS code paths have not been tested in a while and are probably broken
+- macOS code paths have not been tested in a while and will probably cause issues or crashes.
+### Syncplay Incompatibility
+- SyncPlay's chat integration somehow offsets the OSD, which makes menus appear out of bounds.
+    - Workaround: Disable chat integration, and use the SyncPlay window instead.
+    - I am currently unaware of a solution to this.
 
 ## Ideas
 - Overhaul menu definition to make code more readable?
-    - The idea I have for this would also make third-party menu integration possible
-    - This will be a lot of work, so i might not actually go through with it
+    - This would also make third-party menu integration possible.
+    - This would result in a lot of work, so this idea might be scrapped.
 
 ## Localization
 easympv now supports different languages!  

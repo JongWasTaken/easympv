@@ -7,6 +7,7 @@
  *
  */
 
+Settings.load();
 Settings.presets.reload();
 
 var Setup = {};

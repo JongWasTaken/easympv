@@ -43,6 +43,8 @@ KNOWN ISSUES:
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 */
 
+var startTime = Date.now();
+
 // Polyfills and extensions first
 eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Polyfills.js")));
 
@@ -120,7 +122,7 @@ if(Environment.Arguments != undefined)
  * The only downside to this approach is that we need to make sure files are eval()'d in the correct order, otherwise we crash.
  */
 
-if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/minified.js")) != undefined)
+if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/minified.js")) != undefined && !Environment.isDebug)
 {
     mp.msg.warn("[easympv] Running minified code!");
     eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/minified.js")));

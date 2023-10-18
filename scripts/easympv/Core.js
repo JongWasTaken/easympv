@@ -955,6 +955,23 @@ Core.defineMenus = function () {
             var backButton = this.items[0];
             this.items = [];
             this.items.push(backButton);
+
+            // TODO: remove this later
+            this.items.push(
+                {
+                    title: "REBUILD MPV PLAYLIST (workaround, will be removed)@br@@us10@",
+                    item: "rebuild",
+                    eventHandler: function (action, menu)
+                    {
+                        if (action == "enter")
+                        {
+                            Autoload.buildPlaylist();
+                            menu.hideMenu();
+                        }
+                    }
+                }
+            );
+            //
             for (var i = 0; i < Autoload.playlist.length; i++)
             {
                 this.items.push(
@@ -1619,7 +1636,7 @@ Core.defineMenus = function () {
 
     var enabledText = Settings.getLocalizedString("Config.item.description.suffix") + UI.SSA.setColorGreen() + Settings.getLocalizedString("Global.enabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var disabledText = Settings.getLocalizedString("Config.item.description.suffix") + UI.SSA.setColorRed() + Settings.getLocalizedString("Global.disabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
-
+    var languageChanged = false;
     var SettingsConfigurationSubMenuItems = [
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.item.back.title") + "@br@@us10@@br@",
@@ -1630,9 +1647,16 @@ Core.defineMenus = function () {
                 {
                     Settings.save();
                     menu.hideMenu();
-                    Utils.log("Restarting plugin to apply changes...","settings","info");
-                    Core.doUnregistrations();
-                    Core.startExecution();
+                    if (languageChanged)
+                    {
+                        Utils.restartMpv();
+                    }
+                    else
+                    {
+                        Utils.log("Restarting plugin to apply changes...","settings","info");
+                        Core.doUnregistrations();
+                        Core.startExecution();
+                    }
                     //mp.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
@@ -1659,6 +1683,7 @@ Core.defineMenus = function () {
                     this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + this.list[this.index].name + "@br@"+ UI.SSA.setColorYellow() + "\"" + this.list[this.index].description + "\"@br@By " + UI.SSA.setColorYellow() + this.list[this.index].author;
                     menu.redrawMenu();
                     Settings.save();
+                    languageChanged = true;
                 }
             }
         },
@@ -1680,6 +1705,45 @@ Core.defineMenus = function () {
                         Settings.Data.notifyAboutUpdates = true;
                         this.description = this.descriptionPrefix + enabledText;
                     }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA("✏ ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.selectorcolor.title"),
+            item: "selector_color",
+            list: [
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.custom"), "color": ""},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.green"), "color": "66ff66"},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.purple"), "color": "bb108d"},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.red"), "color": "eb4034"},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.yellow"), "color": "ffff33"},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.blue"), "color": "00ccff"},
+                {"title": Settings.getLocalizedString("Config.selectorcolor.color.pink"), "color": "ff77ff"}
+            ],
+            index: 0,
+            descriptionPrefix: Settings.getLocalizedString("Config.selectorcolor.description"),
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if (this.index == this.list.length-1)
+                    {
+                        this.index = 0;
+                    }
+                    else
+                    {
+                        this.index = this.index + 1;
+                    }
+
+                    this.description = this.descriptionPrefix + UI.SSA.setColorYellow() + this.list[this.index].title;
+
+                    if (this.list[this.index].color != "")
+                    {
+                        Settings.Data.selectorColor = this.list[this.index].color;
+                    }
+
                     menu.redrawMenu();
                     Settings.save();
                 }
@@ -1794,7 +1858,6 @@ Core.defineMenus = function () {
                 }
             }
         },
-        // after you return: add clockPosition entry
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.fademenu.title"),
             item: "menu_fade_in_out",
@@ -1842,6 +1905,29 @@ Core.defineMenus = function () {
             }
         },
         {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.shortfilenames.title"),
+            item: "short_file_names",
+            descriptionPrefix: Settings.getLocalizedString("Config.shortfilenames.description"),
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.shortFileNames)
+                    {
+                        Settings.Data.shortFileNames = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.shortFileNames = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.showhiddenfiles.title"),
             item: "show_hidden_files",
             descriptionPrefix: Settings.getLocalizedString("Config.showhiddenfiles.description"),
@@ -1857,6 +1943,29 @@ Core.defineMenus = function () {
                     else
                     {
                         Settings.Data.showHiddenFiles = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.usetrash.title"),
+            item: "use_trash",
+            descriptionPrefix: Settings.getLocalizedString("Config.usetrash.description"),
+            description: "",
+            eventHandler: function (event, menu) {
+                if (event == "right")
+                {
+                    if(Settings.Data.useTrash)
+                    {
+                        Settings.Data.useTrash = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                    }
+                    else
+                    {
+                        Settings.Data.useTrash = true;
                         this.description = this.descriptionPrefix + enabledText;
                     }
                     menu.redrawMenu();
@@ -2024,6 +2133,17 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("selector_color")
+            for (var cindex = 0; cindex < item.list.length;  cindex++)
+            {
+                if (Settings.Data.selectorColor == item.list[cindex].color)
+                {
+                    item.index = cindex;
+                    break;
+                }
+            }
+            item.description = item.descriptionPrefix + UI.SSA.setColorYellow() + item.list[item.index].title;
+
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_hints")
             if(Settings.Data.showHints)
             {
@@ -2067,6 +2187,16 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("short_file_names");
+            if(Settings.Data.shortFileNames)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_hidden_files");
             if(Settings.Data.showHiddenFiles)
             {
@@ -2076,6 +2206,17 @@ Core.defineMenus = function () {
             {
                 item.description = item.descriptionPrefix + disabledText;
             }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("use_trash");
+            if(Settings.Data.useTrash)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("allow_deleting_folders");
             if(Settings.Data.allowFolderDeletion)
@@ -2486,7 +2627,6 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
-    Settings.load();
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
 
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2532,11 +2672,11 @@ Core.startExecution = function () {
     }
 
     Utils.log("Reading files","startup","info");
-    //Settings.presets.reload(); // already gets called in FTW
+    //Settings.presets.reload(); // already gets called in Setup
     Settings.cache.reload();
 
     if (Settings.Data.isFirstLaunch) {
-        Utils.log("startupTask: start Wizard","startup","info");
+        Utils.log("Task: initial setup","startup","info");
         Setup.Start();
     }
 
@@ -2554,4 +2694,6 @@ Core.startExecution = function () {
 
     Video.Colors.name = Settings.Data.defaultColorProfile;
     Video.Colors.apply(Settings.Data.defaultColorProfile);
+
+    Utils.log("Finished loading after " + (Date.now() - startTime) + "ms!","startup","info");
 }

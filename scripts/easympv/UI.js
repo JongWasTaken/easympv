@@ -1102,8 +1102,9 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.selectedItemColor != undefined) {
         this.settings.selectedItemColor = settings.selectedItemColor;
     } else {
-        this.settings.selectedItemColor = "ba0f8d"; //"740A58";
-    } //"EB4034"
+        this.settings.selectedItemColor = Settings.Data.selectorColor; 
+        // #66ff66, previously: "#ba0f8d" , "#740A58", "#EB4034"
+    }
 
     if (settings.scrollingEnabled != undefined) {
         this.settings.scrollingEnabled = settings.scrollingEnabled;
