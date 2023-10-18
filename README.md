@@ -17,37 +17,40 @@ macOS support is experimental and not fully finished, as I lack a device to test
 ## Features
 - Menus with custom Fonts, optionally everything is controllable using only the mouse, useful for home theater use!
     - Different languages are supported! See the bottom of this page for more information.
+    - The color of the selector is customizable
 - Integrated [File Browser](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/browser.png), Disc/Device Selector, [URL Input](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/url.png)
     - Save folders to Favorites
     - Load subtitles during playback
     - Remove files from within mpv
-- [Automated applying of shadersets](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/shaders.png), such as Anime4K, FSRCNNX, CRT and more ([all are included!](https://github.com/JongWasTaken/easympv/tree/master/scripts/easympv/shaders))
+- [Automated applying of shadersets](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/shaders.png), such as Anime4K, FSRCNNX, CRT and more ([these are included](https://github.com/JongWasTaken/easympv/tree/master/scripts/easympv/shaders))
     - Custom shaders can be [added by the user](https://github.com/JongWasTaken/easympv/wiki/Presets)
 - Automated applying of color profiles
     - Custom color profiles can be [added by the user](https://github.com/JongWasTaken/easympv/wiki/Presets)
 - Automatic skipping of certain chapters (such as Openings/Endings)
-- [Quick toggles](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) for properties you don't have to touch often, such as `fps` or `aspect-ratio`, saving keybinds!
+- [Quick toggles](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/playback.png) for properties you don't have to touch often, such as `fps` or `aspect-ratio`, saving precious keybinds!
 - A more advanced reimplementation of `autoload.lua`, providing interactive playlist management
     - This is currently very half-baked and will often break, see [Known Issues](#known-issues).
     - Please disable `autoload.lua` if you use it, otherwise this functionality will be disabled at runtime!
 - A reimplementation of `autosave.lua`
     - Please disable `autosave.lua` if you use it, otherwise this functionality will be disabled at runtime!
-- [Automatic Updates/Git pulling](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/update.png)
+- [Automatic Updates & Git Pulling](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/update.png)
+    - Git Pulling may lock up mpv in some cases, see [Known Issues](#known-issues).
 - Overlays, such as:
-    - A simple digital clock, the screen corner position can be customized
-        - It could be cut off at weird window sizes, I hope to fix this soon...
+    - A simple digital clock (screen corner position can be customized)
+        - It could be cut off at weird window sizes, see [Known Issues](#known-issues).
     - [On-screen log](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/log.png), so you don't have to launch mpv from a terminal to read it (`CTRL+ALT+~`)
     - Command input for mpv commands (`CTRL+~`)
     - A JavaScript console for easier debugging (`CTRL+Shift+~`)
-        - All of these can also be summoned from the `Developer Options` (`Preferences -> Developer Options`)
+        - All of these can also be toggled from the `Developer Options` (`Preferences -> Developer Options`)
 - A simple [API](https://github.com/JongWasTaken/easympv/wiki/API) to create and remove menus from other plugins
-    - This might get replaced with a better solution down the line
+    - This might get replaced with a better solution down the line.
 #### [and a lot more!](https://github.com/JongWasTaken/easympv-installer/blob/d71bf546c9d12859bc383ab21f0114ae7fdb47c2/images/settings.png)
 ## Installation
 Please be aware of the [Known Issues](#known-issues) before installing this.  
 ### Prerequisites
 #### Windows
-- Windows 8 or higher (Windows 7 might work if you update Powershell and .NET Framework to v4.5+)
+- Windows 8 or higher 
+    - Windows 7 might work if you update Powershell and .NET Framework to v4.5+
 - mpv, the newest version from [here](https://sourceforge.net/projects/mpv-player-windows/files/64bit/)
 
 #### macOS
@@ -60,7 +63,7 @@ If you wish to install easympv manually you will (at least) need the following d
 - mpv (duh)
     - If you want plugins like [mpvcord](https://github.com/yutotakano/mpvcord) to work, it needs to have been compiled with LuaJIT support (Not all distributions do this!)
 - either `wget` (preferred) or `curl` (usually preinstalled)
-    - This is only needed for the updater, easympv will only send requests to GitHub!
+    - This is only needed for the updater, easympv will only ever send requests to GitHub!
 - `xclip` OR `wl-clipboard` (if you use Wayland)
     - When in doubt, install both!
 
@@ -68,6 +71,7 @@ If you wish to install easympv manually you will (at least) need the following d
 #### Windows Installer
 Unfinished. Installing manually is recommended for now.  
 If you feel adventurous, you can download the installer from [here](https://github.com/JongWasTaken/easympv-installer/releases/latest).  
+In case you choose this route, make sure to select the Git version in the installer, otherwise you will forever be stuck on that version.
 
 #### Linux Installer
 Paste this into a terminal:  
@@ -77,7 +81,7 @@ Paste this into a terminal:
 This script should work on Arch and Debian/Ubuntu, though it has not been fully tested yet.  
 Please report issues!  
 #### Manual (All platforms)
-Download the latest release (or the master branch) and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (macOS/Linux/BSD/everywhere else).  
+Download the latest release (or the master branch) and put all files into `%appdata%\mpv` (Windows) or `~/.config/mpv` (everywhere else).  
 Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
 ## Known Issues
