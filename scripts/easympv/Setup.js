@@ -6,7 +6,6 @@
  * License:        MIT License
  *
  */
-
 Settings.load();
 Settings.presets.reload();
 
@@ -15,7 +14,6 @@ Setup.idsToUnblock = [];
 Setup.Menus = {};
 
 var menuColor = "#77dd11";
-
 // temp
 var unblock = function () {
     if (Setup.idsToUnblock.length == 0) {
@@ -29,13 +27,12 @@ var unblock = function () {
 };
 
 var title = function (n1,n2) {
-    return Settings.getLocalizedString("FTW.menu.title") + n1 + "/" + n2;
+    return Settings.getLocalizedString("ftw.menu.title") + n1 + "/" + n2;
 }
-
 Setup.Menus.Page1 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.getLocalizedString("FTW.page1.description"),
+        description: Settings.getLocalizedString("ftw.page1.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -44,7 +41,7 @@ Setup.Menus.Page1 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.getLocalizedString("FTW.continue.title"),
+            title: Settings.getLocalizedString("ftw.continue.title"),
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -58,7 +55,6 @@ Setup.Menus.Page1 = new UI.Menus.Menu(
     ],
     undefined
 );
-
 Setup.Menus.Page1.eventHandler = function (event, action) {
     if (event == "show") { return;}
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
@@ -66,25 +62,25 @@ Setup.Menus.Page1.eventHandler = function (event, action) {
 
 Setup.Menus.Page2Options = {
     PerformanceName: [
-        Settings.getLocalizedString("FTW.performance.first.title"),
-        Settings.getLocalizedString("FTW.performance.second.title"),
-        Settings.getLocalizedString("FTW.performance.third.title")
+        Settings.getLocalizedString("ftw.performance.first.title"),
+        Settings.getLocalizedString("ftw.performance.second.title"),
+        Settings.getLocalizedString("ftw.performance.third.title")
     ],
     PerformanceDescription: [
-        Settings.getLocalizedString("FTW.performance.first.description"),
-        Settings.getLocalizedString("FTW.performance.second.description"),
-        Settings.getLocalizedString("FTW.performance.third.description")
+        Settings.getLocalizedString("ftw.performance.first.description"),
+        Settings.getLocalizedString("ftw.performance.second.description"),
+        Settings.getLocalizedString("ftw.performance.third.description")
     ],
     AudioLanguageNames: [ "none", "Japanese", "English", "German" ],
-    AudioLanguageDescription: Settings.getLocalizedString("FTW.audiolanguage.description"),
+    AudioLanguageDescription: Settings.getLocalizedString("ftw.audiolanguage.description"),
     SubLanguageNames: [ "none", "English", "German", "Japanese" ],
-    SubLanguageDescription: Settings.getLocalizedString("FTW.sublanguage.description")
+    SubLanguageDescription: Settings.getLocalizedString("ftw.sublanguage.description")
 };
 
 Setup.Menus.Page2 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.getLocalizedString("FTW.page2.description"),
+        description: Settings.getLocalizedString("ftw.page2.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -93,7 +89,7 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.getLocalizedString("FTW.performance.title") + "@us10@@br@",
+            title: Settings.getLocalizedString("ftw.performance.title") + "@us10@@br@",
             item: "toggle-performance",
             description: Setup.Menus.Page2Options.PerformanceName[1] + Setup.Menus.Page2Options.PerformanceDescription[1],
             data: 1,
@@ -114,7 +110,7 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.getLocalizedString("FTW.audiolanguage.title"),
+            title: Settings.getLocalizedString("ftw.audiolanguage.title"),
             item: "toggle-audio-language",
             description: Setup.Menus.Page2Options.AudioLanguageNames[1] + Setup.Menus.Page2Options.AudioLanguageDescription,
             data: 1,
@@ -135,7 +131,7 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.getLocalizedString("FTW.sublanguage.title") + "@us10@@br@",
+            title: Settings.getLocalizedString("ftw.sublanguage.title") + "@us10@@br@",
             item: "toggle-sub-language",
             description: Setup.Menus.Page2Options.SubLanguageNames[1] + Setup.Menus.Page2Options.SubLanguageDescription,
             data: 1,
@@ -156,7 +152,7 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
             }
         },
         {
-            title: Settings.getLocalizedString("FTW.continue.title"),
+            title: Settings.getLocalizedString("ftw.continue.title"),
             item: "continue",
             eventHandler: function(event, menu)
             {
@@ -170,7 +166,6 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
     ],
     Setup.Menus.Page1
 );
-
 Setup.Menus.Page2.eventHandler = function (event, action) {
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
 };
@@ -178,7 +173,7 @@ Setup.Menus.Page2.eventHandler = function (event, action) {
 Setup.Menus.Page3 = new UI.Menus.Menu(
     {
         title: "",
-        description: Settings.getLocalizedString("FTW.page3.description"),
+        description: Settings.getLocalizedString("ftw.page3.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
         customKeyEvents: [{key: "h", event: "help"}],
@@ -187,7 +182,7 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
     },
     [
         {
-            title: Settings.getLocalizedString("FTW.finish.title"),
+            title: Settings.getLocalizedString("ftw.finish.title"),
             item: "finish",
             eventHandler: function(event, menu)
             {
@@ -198,7 +193,7 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
                     Settings.mpvConfig.load();
 
                     var ppreset = Setup.Menus.Page2Options.PerformanceName[Setup.Menus.Page2.items[1].data];
-                    if (ppreset == Settings.getLocalizedString("FTW.performance.first.title"))
+                    if (ppreset == Settings.getLocalizedString("ftw.performance.first.title"))
                     {
                         Settings.mpvConfig.Data.scale = "bilinear";
                         Settings.mpvConfig.Data.cscale = "bilinear";
@@ -210,7 +205,7 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == Settings.getLocalizedString("FTW.performance.second.title"))
+                    else if (ppreset == Settings.getLocalizedString("ftw.performance.second.title"))
                     {
                         Settings.mpvConfig.Data.scale = "spline36";
                         Settings.mpvConfig.Data.cscale = "spline36";
@@ -222,7 +217,7 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
                         Settings.mpvConfig.Data.correct_downscaling = "no";
                         Settings.mpvConfig.Data.video_sync = "audio";
                     }
-                    else if (ppreset == Settings.getLocalizedString("FTW.performance.third.title"))
+                    else if (ppreset == Settings.getLocalizedString("ftw.performance.third.title"))
                     {
                         Settings.mpvConfig.Data.scale = "ewa_lanczossharp";
                         Settings.mpvConfig.Data.cscale = "ewa_lanczossharp";
@@ -270,7 +265,6 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
     ],
     Setup.Menus.Page2
 );
-
 Setup.Menus.Page3.eventHandler = function (event, action) {
     if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
 };
@@ -282,7 +276,7 @@ Setup.Start = function () {
     Setup.Menus.Page2.settings.title = title(2,pageTotal);
     Setup.Menus.Page3.settings.title = title(3,pageTotal);
     // disable all menus keys
-    var bindings = JSON.parse(mp.get_property("input-bindings"));
+    var bindings = JSON.parse(mpx.get_property("input-bindings"));
     var keysToBlock = [];
     Setup.idsToUnblock = [];
     for (i = 0; i < bindings.length; i++) {

@@ -32,6 +32,7 @@ Settings.Data = {
     language: "en",
     mpvLocation: "unknown",
     forcedMenuKey: "m",
+    daylightSavingTime: false,
     // Visual
     selectorColor: "ba0f8d",
     showHints: true,
@@ -172,13 +173,24 @@ Settings.save = function () {
         defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
         defaultConfigString += "\n";
+        defaultConfigString += "# Whether to add an hour to the current time, to compensate for daylight saving time.\n";
+        defaultConfigString += "# Default: false\n";
+        defaultConfigString += "daylightSavingTime=false\n";
+        defaultConfigString += "\n";
         defaultConfigString += "\n";
         defaultConfigString += "## VISUALS\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Color of the selector in menus.\n";
-        defaultConfigString += "# Default: 66ff66 for green, ba0f8d for purple\n";
+        defaultConfigString += "# These are the hardcoded values available in the config menu:\n";
+        defaultConfigString += "# green: 66ff66\n";
+        defaultConfigString += "# purple: bb108d\n";
+        defaultConfigString += "# red: eb4034\n";
+        defaultConfigString += "# yellow: ffff33\n";
+        defaultConfigString += "# blue: 00ccff\n";
+        defaultConfigString += "# pink: ff77ff\n";
+        defaultConfigString += "# Default: 66ff66 (green)\n";
         defaultConfigString += "# Use a RGB Hex value, but omit the hash sign.\n";
-        defaultConfigString += "selectorColor=FFFFFF\n";
+        defaultConfigString += "selectorColor=66ff66\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to show hints on the main menu.\n";
         defaultConfigString += "# Default: true\n";

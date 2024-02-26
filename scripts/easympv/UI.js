@@ -5,7 +5,6 @@
  * URL:                     https://github.com/JongWasTaken/easympv
  * License:                 MIT License
  */
-
 var UI = {};
 
 /** Provides common SSA tags. */
@@ -1036,7 +1035,7 @@ UI.Menus.registeredMenus = [];
  * @param {object} settings - Initial settings for this menu. See source code for possible options.
  * @param {Array} items - List of inital items. Each item should be an object, see source code for structure.
  * @param {object} parentMenu - If this menu is accessed via another menu, pass the parent menu here to automatically add a back button.
- * @returns {object} - Instance of UI.Menus.Menu
+ * @returns {object} Instance of UI.Menus.Menu
  */
 UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings == undefined) {
@@ -1102,7 +1101,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.selectedItemColor != undefined) {
         this.settings.selectedItemColor = settings.selectedItemColor;
     } else {
-        this.settings.selectedItemColor = Settings.Data.selectorColor; 
+        this.settings.selectedItemColor = Settings.Data.selectorColor;
         // #66ff66, previously: "#ba0f8d" , "#740A58", "#EB4034"
     }
 
@@ -1159,7 +1158,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Global.back.title") + "@br@@us10@";
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("global.back.title") + "@br@@us10@";
         /*
         UI.SSA.insertSymbolFA(
             "",
@@ -1443,7 +1442,6 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
             }
         ];
     }
-
     if (settings.customKeyEvents != undefined) {
         this.settings.customKeyEvents = settings.customKeyEvents;
         for(var i = 0; i < this.settings.customKeyEvents.length; i++)
@@ -1491,7 +1489,6 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     this.suffixCacheIndex = -1;
     this.autoCloseStart = -1;
     this.eventLocked = false;
-
     UI.Menus.registeredMenus.push(this);
 };
 
@@ -2360,7 +2357,7 @@ UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
  * @param {string} action - Name of the action that dispatched the event 
 */
 UI.Menus.Menu.prototype.eventHandler = function (event, action) {
-    Utils.log("Menu \"" + this.settings.title + "\" has no event handler!","menusystem","warn");
+    mp.msg.warn("[UI] Menu \"" + this.settings.title + "\" has no event handler!");
 };
 
 /** If enabled, the menu key will not work to close the currently active menu. */
@@ -2397,6 +2394,18 @@ UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
         newMenu.hideMenu();
     }
 };
+
+UI.Menus.getMenuById = function(name) {
+    var menu = undefined;
+    for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
+        if (UI.Menus.registeredMenus[i].settings.menuId == name)
+        {
+            menu = UI.Menus.registeredMenus[i];
+            break;
+        }
+    }
+    return menu;
+}
 
 /*----------------------------------------------------------------
 CLASS: UI.Alert
@@ -2784,9 +2793,9 @@ UI.Input.show = function (callback, prefix) {
 
     UI.Input.Prefix =
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        Settings.getLocalizedString("Input.first") +
+        Settings.getLocalizedString("input.first") +
         UI.SSA.setSize("24") + UI.Input.TextSettings +
-        Settings.getLocalizedString("Input.second") +
+        Settings.getLocalizedString("input.second") +
         UI.SSA.setSize("32") + UI.Input.TextSettings;
 
     if(UI.Input.isShown)

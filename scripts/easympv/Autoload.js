@@ -82,56 +82,51 @@ Autoload.loadFolder = function(force) {
             j++
         ) {
             var whitelist = Settings.presets.fileextensions[j];
-            if (
-                currentDirectory[i].includes(whitelist.extension)
-            ) {
-
-                if (whitelist.type == "video")
-                {
-                    icon = " ";
-                    type = "video";
-                }
-                else if (whitelist.type == "audio")
-                {
-                    icon = " ";
-                    type = "audio";
-                }
-                else if (whitelist.type == "photo")
-                {
-                    icon = " ";
-                    type = "photo";
-                }
-
-                if(Autoload.loadedFile == Autoload.location + OS.directorySeperator + currentDirectory[i])
-                {
-                    isPlaying = true;
-                    icon = " ";
-                }
-                else { isPlaying = false; }
-
-                Autoload.playlist.push({
-                    //title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
-                    icon: icon,
-                    type: type,
-                    filename: currentDirectory[i],
-                    path: Autoload.location + OS.directorySeperator + currentDirectory[i],
-                    playing: isPlaying
-                });
-
-                break;
-            }
-
-            if (Autoload.playlist.length == Autoload.maxPlaylistSize)
+            if (whitelist.extension != ".ssa" && whitelist.extension != ".ass" && whitelist.extension != ".srt" && whitelist.extension != ".mks")
             {
-                Utils.log("Hit playlist size limit, stopping!","Autoload","warn")
-                break;
+                if (
+                    currentDirectory[i].includes(whitelist.extension)
+                ) {
+                    if (whitelist.type == "video")
+                    {
+                        icon = " ";
+                        type = "video";
+                    }
+                    else if (whitelist.type == "audio")
+                    {
+                        icon = " ";
+                        type = "audio";
+                    }
+                    else if (whitelist.type == "photo")
+                    {
+                        icon = " ";
+                        type = "photo";
+                    }
+                    if(Autoload.loadedFile == Autoload.location + OS.directorySeperator + currentDirectory[i])
+                    {
+                        isPlaying = true;
+                        icon = " ";
+                    }
+                    else { isPlaying = false; }
+                    Autoload.playlist.push({
+                        //title: UI.SSA.insertSymbolFA(icon, 26, 30) + currentDirectory[i],
+                        icon: icon,
+                        type: type,
+                        filename: currentDirectory[i],
+                        path: Autoload.location + OS.directorySeperator + currentDirectory[i],
+                        playing: isPlaying
+                    });
+                    break;
+                }
+                if (Autoload.playlist.length == Autoload.maxPlaylistSize)
+                {
+                    Utils.log("Hit playlist size limit, stopping!","Autoload","warn")
+                    break;
+                }
             }
-
         }
     }
-
     Autoload.buildPlaylist();
-
 };
 
 Autoload.refresh = function()

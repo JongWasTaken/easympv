@@ -293,6 +293,7 @@
         { "type": "image", "name": "WebP Image", "extension": ".webp" },
         { "type": "image", "name": "GIF Image", "extension": ".gif" },
 
+        { "type": "subtitle", "name": "Matroska Subtitles", "extension": ".mks" },
         { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ass" },
         { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ssa" },
         { "type": "subtitle", "name": "Text Subtitles", "extension": ".srt" }
