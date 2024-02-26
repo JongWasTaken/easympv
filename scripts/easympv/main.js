@@ -82,7 +82,7 @@ if(Environment.Arguments != undefined)
                 {
                     value = value.split(",");
                     Environment.SettingsOverrides = {};
-                    mp.msg.warn("Environment variable overrides the following settings:");
+                    mp.msg.info("Environment variable overrides the following settings:");
                     for (var j = 0; j < value.length; j++)
                     {
                         var temp2 = value[j].split(":");
@@ -99,16 +99,47 @@ if(Environment.Arguments != undefined)
                             }
 
                             Environment.SettingsOverrides[temp2[0]] = val;
-                            mp.msg.warn(temp2[0] + " -> " + val);
+                            mp.msg.info(temp2[0] + " -> " + val);
                         }
                     }
                 }
             }
         }
         catch (e) {
-            mp.msg.warn("[easympv] Error occured while processing EASYMPV_ARGS environment variable!");
-            mp.msg.warn("Error description: " + e);
+            mp.msg.error("Error occured while processing EASYMPV_ARGS environment variable!");
+            mp.msg.error("Error description: " + e);
         }
+    }
+}
+
+var Extensions = [];
+var extensionCode = "";
+if (true == false && mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
+{
+    var extensions = mpv.getDirectoryContents(mpv.getUserPath("~~/scripts/easympv/extensions/"), "files");
+    if (extensions.length != 0)
+    {
+        var extText = "";
+        var extMeta = {};
+        for (var j = 0; j < extensions.length; j++)
+        {
+            extText = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/extensions/" + extensions[j]));
+            try {
+                extMeta = JSON.parse(extText.substring(2,extText.indexOf('\n')+1).trim());
+                extMeta.code = extText.substring(extText.indexOf('\n')+1);
+                Extensions.push(extMeta);
+                mp.msg.info("Found extension \"" + extensions[j] + "\"!\n");
+            }
+            catch(e)
+            {
+                mp.msg.error("Invalid metadata for extension \"" + extensions[j] + "\":\n" + e.toString());
+                mp.msg.error("This extension will not be loaded!");
+            }
+        }
+    }
+
+    for (var k = 0; k < Extensions.length; k++) {
+        extensionCode += Extensions[k].code + "\n";
     }
 }
 
@@ -121,31 +152,20 @@ if(Environment.Arguments != undefined)
  * modules accessing other modules.
  * The only downside to this approach is that we need to make sure files are eval()'d in the correct order, otherwise we crash.
  */
-
+//Environment.isDebug = false;
 if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/minified.js")) != undefined && !Environment.isDebug)
 {
-    mp.msg.warn("[easympv] Running minified code!");
+    mp.msg.info("Running on minified code!");
     eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/minified.js")));
 }
 else
 {
-    // These are used by other files, the order is important.
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Settings.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/OS.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/UI.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Utils.js")));
-    // Everything else
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Autoload.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/API.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Browsers.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Chapters.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Core.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Setup.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Tests.js")));
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Video.js")));
+    var loadOrder = ["Settings.js", "OS.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "Chapters.js", "Core.js", "Setup.js", "Tests.js", "Video.js"];
+    var code = "";
+    for (var i = 0; i < loadOrder.length; i++)
+    { code += mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/" + loadOrder[i])) + "\n\n"; }
+    eval(code);
 }
-
-var errorCounter = 0;
 
 if (Environment.isDebug) {
     Core.startExecution();
@@ -156,8 +176,7 @@ else
         Core.startExecution();
     }
     catch (e) {
-        errorCounter++;
-        mp.msg.error("Encountered " + errorCounter + " issue(s) during startup!");
-        mp.msg.error("Last issue description: " + e);
+        mp.msg.error("Encountered issue(s) during startup!");
+        mp.msg.error("Issue description: " + e);
     }
 }

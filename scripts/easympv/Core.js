@@ -6,10 +6,7 @@
  * License:                 MIT License
  */
 
-/**
- * This module used to be main.js, but it was split to make
- * things like soft-restarts possible.
- */
+
 var Core = {};
 
 var isFirstFile = true;
@@ -357,24 +354,24 @@ Core.doUnregistrations = function () {
 Core.defineMenus = function () {
     var descriptionShaders = function (a, b) {
         return (
-            Settings.getLocalizedString("Shaders.menu.description") +
-            Settings.getLocalizedString("Shaders.menu.description.default") +
+            Settings.getLocalizedString("shaders.menu.description") +
+            Settings.getLocalizedString("shaders.menu.description.default") +
             UI.SSA.setColorYellow() +
             b +
             "@br@" +
-            Settings.getLocalizedString("Shaders.menu.description.enabled") +
+            Settings.getLocalizedString("shaders.menu.description.enabled") +
             UI.SSA.setColorYellow() +
             a
         );
     };
     var descriptionColors = function (a, b) {
         return (
-            Settings.getLocalizedString("Colors.menu.description") +
-            Settings.getLocalizedString("Colors.menu.description.default") +
+            Settings.getLocalizedString("colors.menu.description") +
+            Settings.getLocalizedString("colors.menu.description.default") +
             UI.SSA.setColorYellow() +
             b +
             "@br@" +
-            Settings.getLocalizedString("Colors.menu.description.enabled") +
+            Settings.getLocalizedString("colors.menu.description.enabled") +
             UI.SSA.setColorYellow() +
             a
         );
@@ -395,7 +392,7 @@ Core.defineMenus = function () {
 
     var MainMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.close.title") +"@br@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.close.title") +"@br@@br@",
             item: "close",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -404,9 +401,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.open.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.open.title") + "@br@@us10@",
             item: "open",
-            description: Settings.getLocalizedString("Main.open.description"),
+            description: Settings.getLocalizedString("main.open.description"),
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
@@ -415,7 +412,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.playback.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.playback.title"),
             item: "playback",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -424,7 +421,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.chapters.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.chapters.title") +"@br@@us10@",
             item: "chapters",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -433,7 +430,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.preferences.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.preferences.title"),
             item: "options",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -442,7 +439,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.quit.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.quit.title"),
             hasUnderscore: false,
             item: "quit",
             eventHandler: function(event, menu) {
@@ -452,9 +449,9 @@ Core.defineMenus = function () {
                         Utils.exitMpv();
                         menu.hideMenu();
                     } else {
-                        quitTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.quit.title");
+                        quitTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.quit.title");
                         this.title =
-                            UI.SSA.setColorRed() + Settings.getLocalizedString("Main.quitconfirm.title");
+                            UI.SSA.setColorRed() + Settings.getLocalizedString("main.quitconfirm.title");
                         if (this.hasUnderscore) { this.title += "@br@@us10@"}
                         menu.redrawMenu();
                     }
@@ -467,7 +464,7 @@ Core.defineMenus = function () {
     {
         MainMenuItems.splice(3,0,
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Main.playlist.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.playlist.title"),
                 item: "playlist",
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
@@ -541,15 +538,10 @@ Core.defineMenus = function () {
                 notifyAboutUpdates = false;
                 Utils.showAlert(
                     "info",
-                    Settings.getLocalizedString("Alerts.updateavailable") +
+                    Settings.getLocalizedString("alerts.updateavailable") +
                     Core.fancyCurrentVersion +
-                    Settings.getLocalizedString("Alerts.updateavailable.newversion") + Settings.Data.newestVersion
+                    Settings.getLocalizedString("alerts.updateavailable.newversion") + Settings.Data.newestVersion
                 );
-            }
-            if (errorCounter != 0)
-            {
-                Core.Menus.MainMenu.setDescription(UI.SSA.setColorRed() + "Encountered "+errorCounter+" issue(s) during runtime!@br@Consider submitting a bug report!")
-                Core.Menus.MainMenu.redrawMenu();
             }
             return;
         }
@@ -557,15 +549,16 @@ Core.defineMenus = function () {
 
     Core.Menus.PlaybackMenu = new UI.Menus.Menu(
         {
-            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Playback.menu.title"),
-            description: Settings.getLocalizedString("Playback.menu.description"),
+            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("playback.menu.title"),
+            menuId: "main",
+            description: Settings.getLocalizedString("playback.menu.description"),
             autoClose: 8
         },
         [
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.shaders.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.shaders.title"),
                 item: "shaders",
-                description: Settings.getLocalizedString("Playback.shaders.description"),
+                description: Settings.getLocalizedString("playback.shaders.description"),
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
                         UI.Menus.switchCurrentMenu(Core.Menus.ShadersMenu,menu);
@@ -573,9 +566,9 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.colors.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.colors.title") +"@br@@us10@",
                 item: "colors",
-                description: Settings.getLocalizedString("Playback.colors.description"),
+                description: Settings.getLocalizedString("playback.colors.description"),
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
                         UI.Menus.switchCurrentMenu(Core.Menus.ColorsMenu,menu);
@@ -583,20 +576,20 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.deinterlacing.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.deinterlacing.title"),
                 item: "deinterlace",
                 eventHandler: function(event, menu) {
                     if (event == "left" || event == "right" || event == "enter")
                     {
-                        this.description = Settings.getLocalizedString("Playback.deinterlacing.description")
+                        this.description = Settings.getLocalizedString("playback.deinterlacing.description")
                         if (mp.get_property("deinterlace") == "yes")
                         {
-                            this.description += UI.SSA.setColorRed() + Settings.getLocalizedString("Global.disabled");
+                            this.description += UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled");
                             mp.set_property("deinterlace", "no");
                         }
                         else
                         {
-                            this.description += UI.SSA.setColorGreen() +Settings.getLocalizedString("Global.enabled");
+                            this.description += UI.SSA.setColorGreen() +Settings.getLocalizedString("global.enabled");
                             mp.set_property("deinterlace", "yes");
                         }
                         menu.redrawMenu();
@@ -604,7 +597,7 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.framerate.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.framerate.title"),
                 item: "fps",
                 data_selection: 0,
                 data_values: [
@@ -638,13 +631,13 @@ Core.defineMenus = function () {
                         Video.FPS.setFixedFPS();
                     }
 
-                    this.description = Settings.getLocalizedString("Playback.framerate.description") + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + " FPS";
+                    this.description = Settings.getLocalizedString("playback.framerate.description") + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + " FPS";
 
                     menu.redrawMenu();
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.aspectratio.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.aspectratio.title") +"@br@@us10@",
                 item: "aspectratio",
                 data_selection: 0,
                 data_keys: [
@@ -654,7 +647,7 @@ Core.defineMenus = function () {
                     "-1", "1.7777", "1.3333", "1.8500", "2.9000", "1.5000", "1.0000"
                 ],
                 eventHandler: function(event, menu) {
-                    this.description = Settings.getLocalizedString("Playback.aspectratio.description");
+                    this.description = Settings.getLocalizedString("playback.aspectratio.description");
                     if (event == "left" || event == "enter")
                     {
                         if (this.data_selection != 0)
@@ -678,7 +671,7 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.subtitlesize.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.subtitlesize.title"),
                 item: "subtitlesize",
                 data_selection: 0,
                 data_values: [
@@ -703,13 +696,13 @@ Core.defineMenus = function () {
                         else {this.data_selection = 0;}
                     }
 
-                    this.description += Settings.getLocalizedString("Playback.subtitlesize.description") + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + "x";
+                    this.description += Settings.getLocalizedString("playback.subtitlesize.description") + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + "x";
                     mp.set_property("sub-scale", this.data_values[this.data_selection]);
                     menu.redrawMenu();
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.subtitledelay.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.subtitledelay.title") +"@br@@us10@",
                 item: "subtitledelay",
                 eventHandler: function(event, menu) {
                     if (event == "left" || event == "enter")
@@ -724,17 +717,17 @@ Core.defineMenus = function () {
                     var delay = mp.get_property("sub-delay");
                     if (delay.charAt(0) == "-")
                     {
-                        this.description = Settings.getLocalizedString("Playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
+                        this.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
                     }
                     else
                     {
-                        this.description = Settings.getLocalizedString("Playback.subtitledelay.description") + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
+                        this.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
                     }
                     menu.redrawMenu();
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.volume.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.volume.title"),
                 item: "audiovolume",
                 eventHandler: function(event, menu) {
                     this.description = "";
@@ -756,13 +749,13 @@ Core.defineMenus = function () {
                         else {volume = 0;}
                     }
 
-                    this.description += Settings.getLocalizedString("Playback.volume.description") + UI.SSA.setColorGreen() + volume  + "%";
+                    this.description += Settings.getLocalizedString("playback.volume.description") + UI.SSA.setColorGreen() + volume  + "%";
                     mp.set_property("volume", volume);
                     menu.redrawMenu();
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Playback.speed.title"),
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.speed.title"),
                 item: "speed",
                 eventHandler: function(event, menu) {
                     this.description = "";
@@ -790,7 +783,7 @@ Core.defineMenus = function () {
                     if (speed.length == 1) {speed = speed + "0"};
                     if (speed.length == 2) { speed = speed.slice(0,1) + "." + speed.slice(1,2)};
 
-                    this.description += Settings.getLocalizedString("Playback.speed.description") + UI.SSA.setColorGreen() + speed  + "x";
+                    this.description += Settings.getLocalizedString("playback.speed.description") + UI.SSA.setColorGreen() + speed  + "x";
                     mp.set_property("speed", speed);
                     menu.redrawMenu();
                 }
@@ -811,14 +804,14 @@ Core.defineMenus = function () {
             var item_speed = Core.Menus.PlaybackMenu.getItemByName("speed");
             var item_subtitledelay = Core.Menus.PlaybackMenu.getItemByName("subtitledelay");
 
-            item_deinterlace.description = Settings.getLocalizedString("Playback.deinterlacing.description")
+            item_deinterlace.description = Settings.getLocalizedString("playback.deinterlacing.description")
             if (mp.get_property("deinterlace") == "yes")
             {
-                item_deinterlace.description += UI.SSA.setColorGreen() + Settings.getLocalizedString("Global.enabled");
+                item_deinterlace.description += UI.SSA.setColorGreen() + Settings.getLocalizedString("global.enabled");
             }
             else
             {
-                item_deinterlace.description += UI.SSA.setColorRed() + Settings.getLocalizedString("Global.disabled");
+                item_deinterlace.description += UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled");
             }
 
             item_fps.data_selection = item_fps.data_values.indexOf(Video.FPS.getFixedFPS().trim());
@@ -832,21 +825,21 @@ Core.defineMenus = function () {
             if (item_aspectratio.data_selection == -1) {item_aspectratio.data_selection = 0;}
             if (item_subtitlesize.data_selection == -1) {item_subtitlesize.data_selection = 5;}
 
-            item_fps.description = Settings.getLocalizedString("Playback.framerate.description") + UI.SSA.setColorGreen() + item_fps.data_values[item_fps.data_selection] + " FPS";
-            item_subtitlesize.description = Settings.getLocalizedString("Playback.subtitlesize.description") + UI.SSA.setColorGreen() + item_subtitlesize.data_values[item_subtitlesize.data_selection]  + "x";
-            item_aspectratio.description = Settings.getLocalizedString("Playback.aspectratio.description");
+            item_fps.description = Settings.getLocalizedString("playback.framerate.description") + UI.SSA.setColorGreen() + item_fps.data_values[item_fps.data_selection] + " FPS";
+            item_subtitlesize.description = Settings.getLocalizedString("playback.subtitlesize.description") + UI.SSA.setColorGreen() + item_subtitlesize.data_values[item_subtitlesize.data_selection]  + "x";
+            item_aspectratio.description = Settings.getLocalizedString("playback.aspectratio.description");
             item_aspectratio.description += UI.SSA.setColorGreen() + item_aspectratio.data_keys[item_aspectratio.data_selection];
-            item_volume.description = Settings.getLocalizedString("Playback.volume.description") + UI.SSA.setColorGreen() + Math.floor(Number(mp.get_property("volume"))) + "%";
-            item_speed.description = Settings.getLocalizedString("Playback.speed.description") + UI.SSA.setColorGreen() + mp.get_property("speed").slice(0,3) + "x";
+            item_volume.description = Settings.getLocalizedString("playback.volume.description") + UI.SSA.setColorGreen() + Math.floor(Number(mp.get_property("volume"))) + "%";
+            item_speed.description = Settings.getLocalizedString("playback.speed.description") + UI.SSA.setColorGreen() + mp.get_property("speed").slice(0,3) + "x";
 
             var delay = mp.get_property("sub-delay");
             if (delay.charAt(0) == "-")
             {
-                item_subtitledelay.description = Settings.getLocalizedString("Playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
+                item_subtitledelay.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
             }
             else
             {
-                item_subtitledelay.description = Settings.getLocalizedString("Playback.subtitledelay.description") + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
+                item_subtitledelay.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + "+" + delay.slice(0,3) + "s";
             }
 
         }
@@ -857,11 +850,11 @@ Core.defineMenus = function () {
         }
     }
 
-    var playlistMenuDescription = Settings.getLocalizedString("Playlist.menu.description")
+    var playlistMenuDescription = Settings.getLocalizedString("playlist.menu.description")
 
     Core.Menus.PlaylistMenu = new UI.Menus.Menu(
         {
-            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Playlist.menu.title"),
+            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("playlist.menu.title"),
             description: playlistMenuDescription,
             scrollingEnabled: true,
             customKeyEvents: [{key: "h", event: "help"}]
@@ -875,20 +868,20 @@ Core.defineMenus = function () {
 
     playlistContextMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("Playlistcontext.moveto.title"),
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("playlistcontext.moveto.title"),
             item: "move",
             eventHandler: function (action, menu)
             {
                 if (action == "enter")
                 {
                     Core.Menus.PlaylistMenu.mode = "move";
-                    Core.Menus.PlaylistMenu.settings.description = Settings.getLocalizedString("Playlist.modemenu.description") + UI.SSA.setBold(true) + Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].filename + UI.SSA.setBold(false) + Settings.getLocalizedString("Playlist.modemenu.description.suffix");
+                    Core.Menus.PlaylistMenu.settings.description = Settings.getLocalizedString("playlist.modemenu.description") + UI.SSA.setBold(true) + Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].filename + UI.SSA.setBold(false) + Settings.getLocalizedString("playlist.modemenu.description.suffix");
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("Playlistcontext.remove.title"),
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("playlistcontext.remove.title"),
             item: "delete",
             eventHandler: function (action, menu)
             {
@@ -899,14 +892,14 @@ Core.defineMenus = function () {
                     {
                         Utils.showAlert(
                             "info",
-                            Settings.getLocalizedString("Alerts.playlist.itemremoved")
+                            Settings.getLocalizedString("alerts.playlist.itemremoved")
                         );
                     }
                     else
                     {
                         Utils.showAlert(
                             "error",
-                            Settings.getLocalizedString("Alerts.playlist.itemremovederror")
+                            Settings.getLocalizedString("alerts.playlist.itemremovederror")
                         );
                     }
                     Autoload.buildPlaylist();
@@ -918,8 +911,8 @@ Core.defineMenus = function () {
 
     var playlistContextMenu = new UI.Menus.Menu(
         {
-            title: Settings.getLocalizedString("Playlistcontext.menu.title"),
-            description: Settings.getLocalizedString("Playlistcontext.menu.description"),
+            title: Settings.getLocalizedString("playlistcontext.menu.title"),
+            description: Settings.getLocalizedString("playlistcontext.menu.description"),
         },
         playlistContextMenuItems,
         Core.Menus.PlaylistMenu
@@ -934,7 +927,7 @@ Core.defineMenus = function () {
                 var backButton = playlistContextMenu.items[0];
                 playlistContextMenu.items = [];
                 playlistContextMenu.items.push(backButton);
-                playlistContextMenu.settings.description = Settings.getLocalizedString("Playlistcontext.menu.description.invalid");
+                playlistContextMenu.settings.description = Settings.getLocalizedString("playlistcontext.menu.description.invalid");
             }
         }
         if (event == "hide")
@@ -942,7 +935,7 @@ Core.defineMenus = function () {
             if (Autoload.playlist[Core.Menus.PlaylistMenu.itemCache].playing)
             {
                 playlistContextMenu.items = playlistContextMenuItems;
-                playlistContextMenu.settings.description = Settings.getLocalizedString("Playlistcontext.menu.description");
+                playlistContextMenu.settings.description = Settings.getLocalizedString("playlistcontext.menu.description");
             }
         }
     }
@@ -1001,14 +994,14 @@ Core.defineMenus = function () {
                                     {
                                         Utils.showAlert(
                                             "info",
-                                            Settings.getLocalizedString("Alerts.playlist.itemmoved")
+                                            Settings.getLocalizedString("alerts.playlist.itemmoved")
                                         );
                                     }
                                     else
                                     {
                                         Utils.showAlert(
                                             "error",
-                                            Settings.getLocalizedString("Alerts.playlist.itemmovederror")
+                                            Settings.getLocalizedString("alerts.playlist.itemmovederror")
                                         );
                                     }
 
@@ -1040,7 +1033,7 @@ Core.defineMenus = function () {
     }
 
     var ShadersMenuSettings = {
-        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Shaders.menu.title"),
+        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("shaders.menu.title"),
         description: descriptionShaders(
             Video.Shaders.name,
             Settings.Data.defaultShaderSet
@@ -1052,7 +1045,7 @@ Core.defineMenus = function () {
 
     var ShadersMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("Shaders.disable.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("shaders.disable.title") + "@br@@us10@",
             item: "none",
         },
         {
@@ -1110,12 +1103,12 @@ Core.defineMenus = function () {
                     if (action == "none") {
                         Utils.showAlert(
                             "info",
-                            Settings.getLocalizedString("Alerts.shaders.disabled")
+                            Settings.getLocalizedString("alerts.shaders.disabled")
                         );
                     } else {
                         Utils.showAlert(
                             "info",
-                            Settings.getLocalizedString("Alerts.shaders.enabled") +
+                            Settings.getLocalizedString("alerts.shaders.enabled") +
                             UI.SSA.setColorYellow() + Video.Shaders.name
                         );
                     }
@@ -1139,7 +1132,7 @@ Core.defineMenus = function () {
                     Settings.save();
                     Utils.showAlert(
                         "info",
-                        Settings.getLocalizedString("Alerts.shaderchanged") +
+                        Settings.getLocalizedString("alerts.shaderchanged") +
                         Settings.Data.defaultShaderSet
                     );
                     Core.Menus.ShadersMenu.setDescription(
@@ -1160,16 +1153,16 @@ Core.defineMenus = function () {
 
     var ChaptersMenuSettings = {
         // image: "chapters",
-        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Chapters.menu.title"),
-        description: Settings.getLocalizedString("Chapters.menu.description"),
+        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("chapters.menu.title"),
+        description: Settings.getLocalizedString("chapters.menu.description"),
         customKeyEvents: [{key: "h", event: "help"}],
     };
 
     var ChaptersMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Chapters.mode.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.mode.title"),
             item: "tmode",
-            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("Chapters.currentmode") + Chapters.mode,
+            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + Chapters.mode,
             eventHandler: function(event, menu)
             {
                 if (Chapters.mode == "skip") {
@@ -1177,22 +1170,22 @@ Core.defineMenus = function () {
                 } else {
                     Chapters.mode = "skip";
                 }
-                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("Chapters.currentmode") + Chapters.mode;
+                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + Chapters.mode;
                 menu.redrawMenu();
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Chapters.toggle.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.toggle.title"),
             item: "tstatus",
-            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("Chapters.status") + Chapters.status,
+            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + Chapters.status,
             eventHandler: function(event, menu)
             {
                 if (Chapters.status == "disabled") {
-                    Chapters.status = Settings.getLocalizedString("Global.enabled");
+                    Chapters.status = Settings.getLocalizedString("global.enabled");
                 } else {
-                    Chapters.status = Settings.getLocalizedString("Global.disabled");
+                    Chapters.status = Settings.getLocalizedString("global.disabled");
                 }
-                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("Chapters.status") + Chapters.status;
+                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + Chapters.status;
                 menu.redrawMenu();
             }
         },
@@ -1213,7 +1206,7 @@ Core.defineMenus = function () {
 
     var SettingsDevelopmentSubMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.migrate.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.migrate.title"),
             item: "do_config_migration",
             eventHandler: function(event, menu) {
                 if (event == "enter")
@@ -1225,7 +1218,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.firsttime.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.firsttime.title") +"@br@@us10@",
             item: "do_config_migration",
             eventHandler: function(event, menu) {
                 if (event == "enter")
@@ -1240,18 +1233,18 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.dumplog.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.dumplog.title"),
             item: "create_log_file",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
                     UI.Input.OSDLog.writeLogToFile();
-                    Utils.showAlert("info", Settings.getLocalizedString("Alerts.exportlog"));
+                    Utils.showAlert("info", Settings.getLocalizedString("alerts.exportlog"));
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.onscreenlog.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.onscreenlog.title"),
             item: "toggle_on_screen_log",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1265,7 +1258,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.debugmode.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.debugmode.title") +"@br@@us10@",
             item: "toggle_debug_mode",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1274,20 +1267,20 @@ Core.defineMenus = function () {
                     {
                         Settings.Data.debugMode = false;
                         mp.enable_messages("info");
-                        Utils.showAlert("info", Settings.getLocalizedString("Alerts.debugmode.disabled"));
+                        Utils.showAlert("info", Settings.getLocalizedString("alerts.debugmode.disabled"));
                     }
                     else
                     {
                         Settings.Data.debugMode = true;
                         mp.enable_messages("debug");
-                        Utils.showAlert("info", Settings.getLocalizedString("Alerts.debugmode.enabled"));
+                        Utils.showAlert("info", Settings.getLocalizedString("alerts.debugmode.enabled"));
                     }
                     Settings.save();
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.inputcommand.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.inputcommand.title"),
             item: "command_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1297,7 +1290,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.setSize(26) + UI.SSA.setFont("Font Awesome 6 Free Brands") + "" + UI.SSA.setSize(35) + UI.SSA.setFont(Utils.commonFontName) + "  " + Settings.getLocalizedString("Development.inputjs.title") +"@br@@us10@",
+            title: UI.SSA.setSize(26) + UI.SSA.setFont("Font Awesome 6 Free Brands") + "" + UI.SSA.setSize(35) + UI.SSA.setFont(Utils.commonFontName) + "  " + Settings.getLocalizedString("development.inputjs.title") +"@br@@us10@",
             item: "javascript_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1307,7 +1300,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.tests.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.tests.title") + "@br@@us10@",
             item: "open_tests_menu",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1317,7 +1310,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Development.restart.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.restart.title"),
             item: "restart_mpv",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1331,7 +1324,7 @@ Core.defineMenus = function () {
     var SettingsMenuSettings = {
         autoClose: 0,
         // image: "settings",
-        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Preferences.menu.title"),
+        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("preferences.menu.title"),
         description: descriptionSettings(
             Utils.displayVersion,
             Utils.displayVersionMpv
@@ -1341,7 +1334,7 @@ Core.defineMenus = function () {
 
     var SettingsMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.configuration.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.configuration.title"),
             item: "configuration",
             eventHandler: function (event, menu) {
                 // pre-create the other menu and just open it here
@@ -1350,7 +1343,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.updates.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.updates.title"),
             item: "updates",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1358,12 +1351,12 @@ Core.defineMenus = function () {
                     var updateConfirmation = false;
                     var setDescription = function()
                     {
-                        var d = Settings.getLocalizedString("Updates.menu.description.version") +
+                        var d = Settings.getLocalizedString("updates.menu.description.version") +
                         UI.SSA.setColorYellow() +
                         Core.fancyCurrentVersion;
                         if(!OS.isGit)
                         {
-                            d += Settings.getLocalizedString("Updates.menu.description.latest") +
+                            d += Settings.getLocalizedString("updates.menu.description.latest") +
                             UI.SSA.setColorYellow() +
                             Settings.Data.newestVersion;
                         }
@@ -1372,7 +1365,7 @@ Core.defineMenus = function () {
                     }
                     var umenu = new UI.Menus.Menu(
                         {
-                            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Updates.menu.title"),
+                            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("updates.menu.title"),
                             autoClose: "0",
                             description: setDescription(),
                         },
@@ -1389,7 +1382,7 @@ Core.defineMenus = function () {
                                 Utils.doUpdate();
                             } else {
                                 umenu.items[1].title =
-                                    UI.SSA.setColorRed() + Settings.getLocalizedString("Updates.confirm.title");
+                                    UI.SSA.setColorRed() + Settings.getLocalizedString("updates.confirm.title");
                                 umenu.redrawMenu();
                                 updateConfirmation = true;
                             }
@@ -1400,7 +1393,7 @@ Core.defineMenus = function () {
                                 {
                                     if (umenu.items.length == 1) {
                                         umenu.items.push({
-                                            title: Settings.getLocalizedString("Updates.pull.title"),
+                                            title: Settings.getLocalizedString("updates.pull.title"),
                                             item: "update",
                                         });
                                     }
@@ -1410,7 +1403,7 @@ Core.defineMenus = function () {
                                     if (umenu.items.length == 1) {
                                         umenu.items.push({
                                             title:
-                                            Settings.getLocalizedString("Updates.update.title") +
+                                            Settings.getLocalizedString("updates.update.title") +
                                                 UI.SSA.setColorYellow() +
                                                 Settings.Data.newestVersion,
                                             item: "update",
@@ -1449,16 +1442,17 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.credits.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.credits.title") +"@br@@us10@",
             item: "credits",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
                     var cmenu = new UI.Menus.Menu(
                         {
-                            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Credits.menu.title"),
+                            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("credits.menu.title"),
                             autoClose: "0",
-                            description: Utils.getCredits().replaceAll("\n", "@br@"),
+                            description: "All of this would not be possible without these projects:", // Utils.getCredits().replaceAll("\n", "@br@")
+                            scrollingEnabled: true
                         },
                         [],
                         Core.Menus.SettingsMenu
@@ -1468,12 +1462,30 @@ Core.defineMenus = function () {
                             cmenu = undefined;
                         }
                     };
+                    var lines = mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Credits.txt")).split("\n");
+                    for (var i = 0; i < lines.length; i++)
+                    {
+                        if (lines[i].trim() != "")
+                        {
+                            if (!lines[i].includes("used"))
+                            {
+                                if (!lines[i].includes("none"))
+                                {
+                                    if (lines[i].charAt(0) != " ")
+                                    {
+                                        cmenu.items.push({ title: lines[i], description: lines[i+1], eventHandler: function(){} });
+                                        i++;
+                                    }
+                                }
+                            }
+                        }
+                    }
                     cmenu.showMenu();
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.toggleclock.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.toggleclock.title"),
             item: "toggle_clock",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1489,7 +1501,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.toggleinfo.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.toggleinfo.title") +"@br@@us10@",
             item: "toggle_information",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1499,7 +1511,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.openfolder.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.openfolder.title"),
             item: "open_config_folder",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1509,7 +1521,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.reload.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.reload.title"),
             item: "reload_config",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1519,12 +1531,12 @@ Core.defineMenus = function () {
                     Settings.inputConfig.reload();
                     Settings.presets.reload();
                     Settings.reload();
-                    Utils.showAlert("info", Settings.getLocalizedString("Alerts.configreload"));
+                    Utils.showAlert("info", Settings.getLocalizedString("alerts.configreload"));
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.reinit.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.reinit.title") + "@br@@us10@",
             item: "reinitialize_plugin",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1537,7 +1549,7 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.development.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.development.title") +"@br@@us10@",
             item: "development_options",
             eventHandler: function (event, menu) {
                 if (event == "enter")
@@ -1553,7 +1565,7 @@ Core.defineMenus = function () {
     {
         if (mp.utils.file_info(mp.utils.get_user_path("~~/uninstaller.exe")) != undefined) {
             SettingsMenuItems.push({
-                title: UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Preferences.uninstall.title"),
+                title: UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.uninstall.title"),
                 item: "uninstall",
                 eventHandler: function (event, menu) {
                     if (event == "enter")
@@ -1561,13 +1573,13 @@ Core.defineMenus = function () {
                         menu.hideMenu();
                         var uninstMenu = new UI.Menus.Menu(
                             {
-                                title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("Uninstall.menu.title"),
-                                description: Settings.getLocalizedString("Uninstall.menu.description"),
+                                title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("uninstall.menu.title"),
+                                description: Settings.getLocalizedString("uninstall.menu.description"),
                                 autoClose: 0
                             },
                             [
                                 {
-                                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Uninstall.confirm.title"),
+                                    title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("uninstall.confirm.title"),
                                     item: "confirm",
                                     state: false,
                                     eventHandler: function (event, menu)
@@ -1578,7 +1590,7 @@ Core.defineMenus = function () {
                                             {
                                                 OS.unregisterMpv();
                                                 mp.utils.write_file("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
-                                                Utils.showAlert("warn", Settings.getLocalizedString("Alerts.uninstall"));
+                                                Utils.showAlert("warn", Settings.getLocalizedString("alerts.uninstall"));
                                                 setTimeout(function(){
                                                     mp.commandv("run",mp.utils.get_user_path("~~/uninstaller.exe"));
                                                     mp.commandv("quit-watch-later");
@@ -1590,7 +1602,7 @@ Core.defineMenus = function () {
                                             else
                                             {
                                                 this.state = true;
-                                                this.title = UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Uninstall.areyousure.title");
+                                                this.title = UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("uninstall.areyousure.title");
                                                 menu.redrawMenu();
                                             }
                                         }
@@ -1603,7 +1615,7 @@ Core.defineMenus = function () {
                             if (event == "show")
                             {
                                 var item = uninstMenu.getItemByName("confirm");
-                                item.title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Uninstall.confirm.title");
+                                item.title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("uninstall.confirm.title");
                                 item.state = false;
                                 uninstMenu.redrawMenu();
                             }
@@ -1625,7 +1637,7 @@ Core.defineMenus = function () {
     Core.Menus.SettingsDevelopmentSubMenu = new UI.Menus.Menu(
         {
             autoClose: 0,
-            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Development.menu.title"),
+            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("development.menu.title"),
             description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
             //customKeyEvents: [{key: "h", event: "help"}]
         },
@@ -1634,12 +1646,12 @@ Core.defineMenus = function () {
     );
     Core.Menus.SettingsDevelopmentSubMenu.eventHandler = function(){};
 
-    var enabledText = Settings.getLocalizedString("Config.item.description.suffix") + UI.SSA.setColorGreen() + Settings.getLocalizedString("Global.enabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
-    var disabledText = Settings.getLocalizedString("Config.item.description.suffix") + UI.SSA.setColorRed() + Settings.getLocalizedString("Global.disabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+    var enabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorGreen() + Settings.getLocalizedString("global.enabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
+    var disabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var languageChanged = false;
     var SettingsConfigurationSubMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.item.back.title") + "@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title") + "@br@@us10@@br@",
             item: "save",
             color: "999999",
             eventHandler: function (event, menu) {
@@ -1662,11 +1674,11 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.language.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.language.title"),
             item: "language",
             list: [],
             index: 0,
-            descriptionPrefix: Settings.getLocalizedString("Config.language.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.language.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1688,9 +1700,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.notifyupdates.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.notifyupdates.title"),
             item: "notify_about_updates",
-            descriptionPrefix: Settings.getLocalizedString("Config.notifyupdates.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.notifyupdates.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1711,19 +1723,19 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA("✏ ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.selectorcolor.title"),
+            title: UI.SSA.insertSymbolFA("✏ ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.selectorcolor.title"),
             item: "selector_color",
             list: [
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.custom"), "color": ""},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.green"), "color": "66ff66"},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.purple"), "color": "bb108d"},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.red"), "color": "eb4034"},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.yellow"), "color": "ffff33"},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.blue"), "color": "00ccff"},
-                {"title": Settings.getLocalizedString("Config.selectorcolor.color.pink"), "color": "ff77ff"}
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.custom"), "color": ""},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.green"), "color": "66ff66"},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.purple"), "color": "bb108d"},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.red"), "color": "eb4034"},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.yellow"), "color": "ffff33"},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.blue"), "color": "00ccff"},
+                {"title": Settings.getLocalizedString("config.selectorcolor.color.pink"), "color": "ff77ff"}
             ],
             index: 0,
-            descriptionPrefix: Settings.getLocalizedString("Config.selectorcolor.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.selectorcolor.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1750,9 +1762,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.showhints.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.showhints.title"),
             item: "show_hints",
-            descriptionPrefix: Settings.getLocalizedString("Config.showhints.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.showhints.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1773,9 +1785,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.showclock.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.showclock.title"),
             item: "show_clock",
-            descriptionPrefix: Settings.getLocalizedString("Config.showclock.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.showclock.description"),
             description: "",
             eventHandler: function(event, menu) {
                 if (event == "right") {
@@ -1797,9 +1809,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.clockposition.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.clockposition.title"),
             item: "clock_position",
-            descriptionPrefix: Settings.getLocalizedString("Config.clockposition.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.clockposition.description"),
             description: "",
             eventHandler: function(event, menu) {
                 if (event == "right") {
@@ -1859,9 +1871,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.fademenu.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.fademenu.title"),
             item: "menu_fade_in_out",
-            descriptionPrefix: Settings.getLocalizedString("Config.fademenu.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.fademenu.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1882,9 +1894,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.scrollalerts.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.scrollalerts.title"),
             item: "scroll_alerts",
-            descriptionPrefix: Settings.getLocalizedString("Config.scrollalerts.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.scrollalerts.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1905,9 +1917,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.shortfilenames.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.shortfilenames.title"),
             item: "short_file_names",
-            descriptionPrefix: Settings.getLocalizedString("Config.shortfilenames.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.shortfilenames.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1928,9 +1940,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.showhiddenfiles.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.showhiddenfiles.title"),
             item: "show_hidden_files",
-            descriptionPrefix: Settings.getLocalizedString("Config.showhiddenfiles.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.showhiddenfiles.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1951,9 +1963,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.usetrash.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.usetrash.title"),
             item: "use_trash",
-            descriptionPrefix: Settings.getLocalizedString("Config.usetrash.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.usetrash.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1974,9 +1986,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.allowfolderdeletion.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.allowfolderdeletion.title"),
             item: "allow_deleting_folders",
-            descriptionPrefix: Settings.getLocalizedString("Config.allowfolderdeletion.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.allowfolderdeletion.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -1997,9 +2009,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.systemnotifications.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.systemnotifications.title") + "@br@@us10@",
             item: "use_system_notifications",
-            descriptionPrefix: Settings.getLocalizedString("Config.systemnotifications.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.systemnotifications.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -2020,9 +2032,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.ipcserver.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.ipcserver.title"),
             item: "ipc_server",
-            descriptionPrefix: Settings.getLocalizedString("Config.ipcserver.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.ipcserver.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -2043,9 +2055,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("Config.savefulllog.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.savefulllog.title"),
             item: "save_full_log",
-            descriptionPrefix: Settings.getLocalizedString("Config.savefulllog.description"),
+            descriptionPrefix: Settings.getLocalizedString("config.savefulllog.description"),
             description: "",
             eventHandler: function (event, menu) {
                 if (event == "right")
@@ -2071,8 +2083,8 @@ Core.defineMenus = function () {
         {
             autoClose: 0,
             scrollingEnabled: true,
-            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Config.menu.title"),
-            description: Settings.getLocalizedString("Config.menu.description")
+            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("config.menu.title"),
+            description: Settings.getLocalizedString("config.menu.description")
             //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsConfigurationSubMenuItems,
@@ -2323,7 +2335,7 @@ Core.defineMenus = function () {
     var ColorsMenuSettings = {
         // image: "colors",
         title:
-            UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Colors.menu.title"),
+            UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("colors.menu.title"),
         description: descriptionColors(
             Video.Colors.name,
             Settings.Data.defaultColorProfile
@@ -2334,7 +2346,7 @@ Core.defineMenus = function () {
 
     var ColorsMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("Colors.disable.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("colors.disable.title") +"@br@@us10@",
             item: "none",
         },
     ];
@@ -2375,12 +2387,12 @@ Core.defineMenus = function () {
                 if (action == "none") {
                     Utils.showAlert(
                         "info",
-                        Settings.getLocalizedString("Alerts.colors.disabled")
+                        Settings.getLocalizedString("alerts.colors.disabled")
                     );
                 } else {
                     Utils.showAlert(
                         "info",
-                        Settings.getLocalizedString("Alerts.colors.enabled") +
+                        Settings.getLocalizedString("alerts.colors.enabled") +
                         UI.SSA.setColorYellow() + Video.Colors.name
                     );
                 }
@@ -2409,7 +2421,7 @@ Core.defineMenus = function () {
                     );
                     Utils.showAlert(
                         "info",
-                        Settings.getLocalizedString("Alerts.colorschanged") +
+                        Settings.getLocalizedString("alerts.colorschanged") +
                         Settings.Data.defaultColorProfile
                     );
                     Settings.save();
@@ -2424,8 +2436,8 @@ Core.defineMenus = function () {
     };
 
     Core.Menus.TestsMenu = new UI.Menus.Menu({
-        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("Tests.menu.title"),
-        description: Settings.getLocalizedString("Tests.menu.description"),
+        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("tests.menu.title"),
+        description: Settings.getLocalizedString("tests.menu.description"),
         autoClose: 0
     },[],undefined);
 
@@ -2457,7 +2469,7 @@ Core.defineMenus = function () {
         }
 
         testsMenuitems.push({
-            title: Settings.getLocalizedString("Tests.runall.title"),
+            title: Settings.getLocalizedString("tests.runall.title"),
             item: "",
             eventHandler: function(event, menu)
             {
@@ -2472,7 +2484,7 @@ Core.defineMenus = function () {
         });
 
         testsMenuitems.push({
-            title: Settings.getLocalizedString("Tests.reset.title"),
+            title: Settings.getLocalizedString("tests.reset.title"),
             item: "",
             eventHandler: function(event, menu)
             {
@@ -2522,10 +2534,10 @@ Core.defineMenus = function () {
             {
                 return;
             }
-            Core.Menus.TestsMenu.setDescription(Settings.getLocalizedString("Tests.menu.description.running"));
+            Core.Menus.TestsMenu.setDescription(Settings.getLocalizedString("tests.menu.description.running"));
             Core.Menus.TestsMenu.redrawMenu();
             Tests.run(item);
-            Core.Menus.TestsMenu.setDescription(Settings.getLocalizedString("Tests.menu.description.finished"));
+            Core.Menus.TestsMenu.setDescription(Settings.getLocalizedString("tests.menu.description.finished"));
             Core.Menus.TestsMenu.redrawMenu();
         }
     };
@@ -2628,7 +2640,6 @@ Core.doFileChecks = function () {
  */
 Core.startExecution = function () {
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
-
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Settings.Data.currentVersion = "2.0.0";
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2644,7 +2655,6 @@ Core.startExecution = function () {
     mp.register_event("log-message", UI.Input.OSDLog.addToBuffer);
     OS.init();
     Core.fancyCurrentVersion = Settings.Data.currentVersion;
-
     if (OS.isGit)
     {
         if (OS.gitAvailable)
@@ -2656,7 +2666,6 @@ Core.startExecution = function () {
             Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-git";
         }
     }
-
     Utils.log("easympv " + Core.fancyCurrentVersion + " starting...","startup","info");
 
     Utils.log("Checking for updates...","startup","info");
@@ -2665,21 +2674,17 @@ Core.startExecution = function () {
     },1000);
 
     Core.doFileChecks();
-
     if(Settings.Data.startIPCServer)
     {
         Utils.setIPCServer();
     }
-
     Utils.log("Reading files","startup","info");
-    //Settings.presets.reload(); // already gets called in Setup
     Settings.cache.reload();
 
     if (Settings.Data.isFirstLaunch) {
         Utils.log("Task: initial setup","startup","info");
         Setup.Start();
     }
-
     if (Environment.BrowserWorkDir != undefined) {
 	    mp.msg.warn("Browser override: " + Environment.BrowserWorkDir);
         Browsers.FileBrowser.currentLocation = Environment.BrowserWorkDir;
@@ -2688,12 +2693,11 @@ Core.startExecution = function () {
     {
         Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
     }
-
     Core.defineMenus();
     Core.doRegistrations();
-
     Video.Colors.name = Settings.Data.defaultColorProfile;
     Video.Colors.apply(Settings.Data.defaultColorProfile);
+    //eval(extensionCode);
 
     Utils.log("Finished loading after " + (Date.now() - startTime) + "ms!","startup","info");
 }

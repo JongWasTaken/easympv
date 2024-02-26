@@ -237,7 +237,7 @@ Utils.exitMpv = function () {
     if (Utils.updateInProgress) {
         Utils.showAlert(
             "warning",
-            Settings.getLocalizedString("Alerts.updateinprogress")
+            Settings.getLocalizedString("alerts.updateinprogress")
         );
     } else {
         mp.commandv("quit-watch-later");
@@ -308,7 +308,7 @@ Utils.doUpdateStage2 = function () // extract
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.getLocalizedString("Alerts.updatefailed")
+            Settings.getLocalizedString("alerts.updatefailed")
         );
         return;
     }
@@ -333,7 +333,7 @@ Utils.doUpdateStage3 = function () // delete package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.getLocalizedString("Alerts.updatefailed.extracterror")
+            Settings.getLocalizedString("alerts.updatefailed.extracterror")
         );
         return;
     }
@@ -353,7 +353,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.getLocalizedString("Alerts.updatefailed.deleteerror")
+            Settings.getLocalizedString("alerts.updatefailed.deleteerror")
         );
         return;
     }
@@ -397,14 +397,14 @@ Utils.doUpdateStage5 = function () {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "info",
-            Settings.getLocalizedString("Alerts.updatefinished")
+            Settings.getLocalizedString("alerts.updatefinished")
         );
         Utils.updateAvailable = false;
     } else {
         Utils.unblockQuitButtons();
         Utils.showAlert(
             "error",
-            Settings.getLocalizedString("Alerts.updatefailed.applyerror")
+            Settings.getLocalizedString("alerts.updatefailed.applyerror")
         );
         return;
     }
@@ -444,16 +444,16 @@ Utils.updateMpv = function () {
             if (Utils.updateAvailableMpv) {
                 OS.updateMpvWindows(Settings.Data.mpvLocation);
             } else {
-                Utils.showAlert("info", Settings.getLocalizedString("Alerts.uptodate"));
+                Utils.showAlert("info", Settings.getLocalizedString("alerts.uptodate"));
             }
         } else {
             Utils.showAlert(
                 "error",
-                Settings.getLocalizedString("Alerts.locationunknown")
+                Settings.getLocalizedString("alerts.locationunknown")
             );
         }
     } else {
-        Utils.showAlert("error", Settings.getLocalizedString("Alerts.onlyonwindows"));
+        Utils.showAlert("error", Settings.getLocalizedString("alerts.onlyonwindows"));
     }
     return;
 };
@@ -557,7 +557,13 @@ Utils.getCurrentTime = function()
     var offset = time.split("+")[1].slice(0,2);
     time = time.split(" ")[0].slice(0,5);
     var temp = time.split(":");
-    var hour = Number(temp[0]) + Number(offset);
+    var hour = Number(temp[0]);
+
+    if (Settings.Data.daylightSavingTime)
+    {
+        hour = hour + Number(offset);
+    }
+
     hour = hour.toString();
 
     if (hour == "24")
