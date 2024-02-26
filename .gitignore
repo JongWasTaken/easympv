@@ -25,3 +25,4 @@ scripts/easympv/min/
 scripts/easympv/min/*
 minified.js
 scripts/easympv/shaders/bfi.vpy
+.vscode/settings.json
