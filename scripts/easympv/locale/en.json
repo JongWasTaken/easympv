@@ -36,6 +36,7 @@
     "alerts.url.loaded": "URL is being loaded!",
     "alerts.url.invalid": "Input is not a valid URL!",
     "alerts.browser.playing": "Playing ",
+    "alerts.browser.playing.unsupported": "Trying to play unsupported file ",
     "alerts.browser.loadsubs": "Loading subtitles: ",
     "alerts.browser.fileremoved": "Removed ",
     "alerts.browser.fileremoved.error": "Could not remove ",
@@ -127,6 +128,7 @@
     "browser.favorites.title": "Favorites",
     "browser.refresh.title": "Refresh",
     "browser.openinexplorer.title": "Open in File Explorer",
+    "browser.openrandom.title": "Open random file",
 
     "context.menu.title": "File Actions",
     "context.menu.title.folder": "Folder Actions",

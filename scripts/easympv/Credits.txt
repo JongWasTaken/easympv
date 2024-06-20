@@ -28,6 +28,6 @@ FSRCNNX
 nnedi13
   licensed under the LGPLv3+ License
 CRT, adapted from crt-easymode
-  licensed under the GPL License, taken from https://www.reddit.com/r/mpv/comments/qet39q/is_it_possible_to_make_mpv_look_like_an_old_crt/hhvlo6g/
+  licensed under the GPL License, taken from https://www.reddit.com/r/mpv/comments/qet39q/
 
 Inspired by VideoPlayerCode's scripts.

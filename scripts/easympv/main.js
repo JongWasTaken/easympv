@@ -46,14 +46,14 @@ KNOWN ISSUES:
 var startTime = Date.now();
 
 // Polyfills and extensions first
-eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Polyfills.js")));
+eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Preload.js")));
 
 /**
  * We start with parsing of the EASYMPV_ARGS environment variable, for future use.
  * Example: EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming" mpv <file>
  */
 var Environment = {};
-Environment.Arguments = mp.utils.getenv("EASYMPV_ARGS");
+Environment.Arguments = mpv.getEnv("EASYMPV_ARGS");
 if(Environment.Arguments != undefined)
 {
     Environment.Arguments = Environment.Arguments.split(";");
@@ -82,7 +82,7 @@ if(Environment.Arguments != undefined)
                 {
                     value = value.split(",");
                     Environment.SettingsOverrides = {};
-                    mp.msg.info("Environment variable overrides the following settings:");
+                    mpv.printInfo("Environment variable overrides the following settings:");
                     for (var j = 0; j < value.length; j++)
                     {
                         var temp2 = value[j].split(":");
@@ -99,22 +99,26 @@ if(Environment.Arguments != undefined)
                             }
 
                             Environment.SettingsOverrides[temp2[0]] = val;
-                            mp.msg.info(temp2[0] + " -> " + val);
+                            mpv.printInfo(temp2[0] + " -> " + val);
                         }
                     }
                 }
             }
         }
         catch (e) {
-            mp.msg.error("Error occured while processing EASYMPV_ARGS environment variable!");
-            mp.msg.error("Error description: " + e);
+            mpv.printError("Error occured while processing EASYMPV_ARGS environment variable!");
+            mpv.printError("Error description: " + e);
         }
     }
 }
+Environment.undead = false;
+if (typeof Watchdog != "undefined") {
+    Environment.undead = true;
+    Watchdog = undefined;
+}
 
 var Extensions = [];
-var extensionCode = "";
-if (true == false && mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
+if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
 {
     var extensions = mpv.getDirectoryContents(mpv.getUserPath("~~/scripts/easympv/extensions/"), "files");
     if (extensions.length != 0)
@@ -123,24 +127,21 @@ if (true == false && mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensio
         var extMeta = {};
         for (var j = 0; j < extensions.length; j++)
         {
-            extText = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/extensions/" + extensions[j]));
             try {
+                extText = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/extensions/" + extensions[j]));
                 extMeta = JSON.parse(extText.substring(2,extText.indexOf('\n')+1).trim());
                 extMeta.code = extText.substring(extText.indexOf('\n')+1);
                 Extensions.push(extMeta);
-                mp.msg.info("Found extension \"" + extensions[j] + "\"!\n");
+                mpv.printInfo("Found extension \"" + extensions[j] + "\"!");
             }
             catch(e)
             {
-                mp.msg.error("Invalid metadata for extension \"" + extensions[j] + "\":\n" + e.toString());
-                mp.msg.error("This extension will not be loaded!");
+                mpv.printError("Invalid metadata for extension \"" + extensions[j] + "\":\n" + e.toString());
+                mpv.printError("This extension will not be loaded!");
             }
         }
     }
 
-    for (var k = 0; k < Extensions.length; k++) {
-        extensionCode += Extensions[k].code + "\n";
-    }
 }
 
 /**
@@ -152,18 +153,24 @@ if (true == false && mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensio
  * modules accessing other modules.
  * The only downside to this approach is that we need to make sure files are eval()'d in the correct order, otherwise we crash.
  */
-//Environment.isDebug = false;
-if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/minified.js")) != undefined && !Environment.isDebug)
+if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/minified.js")) && !Environment.isDebug)
 {
-    mp.msg.info("Running on minified code!");
-    eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/minified.js")));
+    mpv.printInfo("Running on minified code!");
+    eval(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/minified.js")));
 }
 else
 {
-    var loadOrder = ["Settings.js", "OS.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "Chapters.js", "Core.js", "Setup.js", "Tests.js", "Video.js"];
-    var code = "";
+    var loadOrder = ["Settings.js", "OS.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "Chapters.js", "Core.js", "Setup.js", "Tests.js", "Video.js", "ExtensionLoader.js"];
+    var code = "/* THIS FILE EXISTS FOR DEBUGGING PURPOSES ONLY: DO NOT COMMIT; DO NOT EDIT; CHANGES WILL BE LOST! */\n\n";
     for (var i = 0; i < loadOrder.length; i++)
-    { code += mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/" + loadOrder[i])) + "\n\n"; }
+    { code += mpv.readFile(mpv.getUserPath("~~/scripts/easympv/" + loadOrder[i])) + "\n\n"; }
+    if (Environment.isDebug) {
+        mpv.printWarn("Debug mode enabled: Code will be written to \"runtime.js\" before evaluation!")
+        mpv.writeFile(
+            "file://" + mpv.getUserPath("~~/scripts/easympv/runtime.js"),
+            code
+        );
+    }
     eval(code);
 }
 
@@ -176,7 +183,7 @@ else
         Core.startExecution();
     }
     catch (e) {
-        mp.msg.error("Encountered issue(s) during startup!");
-        mp.msg.error("Issue description: " + e);
+        mpv.printError("Encountered issue(s) during startup!");
+        mpv.printError("Issue description: " + e);
     }
 }

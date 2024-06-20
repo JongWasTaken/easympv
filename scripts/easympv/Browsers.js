@@ -71,6 +71,7 @@ Browsers.DeviceBrowser = {};
 
 Browsers.Selector.menu = undefined;
 Browsers.Selector.menuSettings = {
+    menuId: "browser-selector",
     customKeyEvents: [{key: "h", event: "help"}]
 };
 Browsers.Selector.cachedParentMenu = undefined;
@@ -125,11 +126,11 @@ Browsers.Selector.menuEventHandler = function (event, item) {
             UI.Input.show(function (success, input) {
                 if (success) {
                     if (input.includes("://")) {
-                        mp.command("write-watch-later-config");
+                        mpv.command("write-watch-later-config");
                         if (input.includes("&list=")) {
-                            mp.commandv("loadlist", input);
+                            mpv.commandv("loadlist", input);
                         } else {
-                            mp.commandv("loadfile", input);
+                            mpv.commandv("loadfile", input);
                         }
                         Utils.showAlert("info", Settings.getLocalizedString("alerts.url.loaded"));
                     }
@@ -198,12 +199,12 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
     {
         if (entry.type != "subtitle")
         {
-            mp.command("write-watch-later-config");
+            mpv.command("write-watch-later-config");
             Utils.showAlert(
                 "info",
                 Settings.getLocalizedString("alerts.browser.playing") + entry.item
             );
-            mp.commandv(
+            mpv.commandv(
                 "loadfile",
                 Browsers.FileBrowser.currentLocation +
                     OS.directorySeperator +
@@ -220,13 +221,25 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
                 "info",
                 Settings.getLocalizedString("alerts.browser.loadsubs") + entry.item
             );
-            mp.commandv(
+            mpv.commandv(
                 "sub-add",
                 Browsers.FileBrowser.currentLocation +
                     OS.directorySeperator +
                     entry.item
             );
         }
+    } else {
+        mpv.command("write-watch-later-config");
+        Utils.showAlert(
+            "info",
+            Settings.getLocalizedString("alerts.browser.playing.unsupported") + entry.item
+        );
+        mpv.commandv(
+            "loadfile",
+            Browsers.FileBrowser.currentLocation +
+                OS.directorySeperator +
+                entry.item
+        );
     }
 };
 
@@ -284,7 +297,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     ) {
         var isFolder = true;
     } else {
-        var temp = mp.utils.file_info(
+        var temp = mpv.fileInfo(
             Browsers.FileBrowser.currentLocation +
                 OS.directorySeperator +
                 item
@@ -364,9 +377,9 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                 if (isFolder) {
                     contextMenu.hideMenu();
                     path = path.replaceAll("\/\/","\/");
-                    if (Settings.Data["fileBrowserFavorites"].locations.indexOf(path) == -1)
+                    if (Settings.Data.fileBrowserFavorites.indexOf(path) == -1)
                     {
-                        Settings.Data["fileBrowserFavorites"].locations.push(path);
+                        Settings.Data.fileBrowserFavorites.push(path);
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
                         Utils.showAlert("info",Settings.getLocalizedString("alerts.favorites.added"));
                         Settings.save();
@@ -504,9 +517,9 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
     }
 
     if (event == "show") {
-        if (Browsers.FileBrowser.menu.items.length >= 5)
+        if (Browsers.FileBrowser.menu.items.length >= 6)
         {
-            Browsers.FileBrowser.menu.selectedItemIndex = 4;
+            Browsers.FileBrowser.menu.selectedItemIndex = 5;
         }
         Browsers.FileBrowser.menu.redrawMenu();
         return;
@@ -553,7 +566,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             } else {
                 // turns out mp.file_info can return undefined in rare edgecases
                 // this fixes a bug where opening a mount folder of an unmounted drive would crash everything
-                var temp = mp.utils.file_info(
+                var temp = mpv.fileInfo(
                     Browsers.FileBrowser.currentLocation +
                         OS.directorySeperator +
                         item
@@ -662,14 +675,14 @@ Browsers.FileBrowser.open = function (parentMenu) {
             }
         }
     } else {
-        if (mp.utils.file_info(Browsers.FileBrowser.currentLocation) != undefined) {
-            var currentLocationContents = mp.utils.readdir(
+        if (mpv.fileExists(Browsers.FileBrowser.currentLocation)) {
+            var currentLocationContents = mpv.getDirectoryContents(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
         } else {
-            Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
-            var currentLocationContents = mp.utils.readdir(
+            Browsers.FileBrowser.currentLocation = mpv.getProperty("working-directory");
+            var currentLocationContents = mpv.getDirectoryContents(
                 Browsers.FileBrowser.currentLocation,
                 "dirs"
             );
@@ -739,7 +752,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 });
             }
         }
-        var currentLocationContents = mp.utils.readdir(
+        var currentLocationContents = mpv.getDirectoryContents(
             Browsers.FileBrowser.currentLocation,
             "files"
         );
@@ -755,7 +768,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     location: currentLocationContents[i]
                 }
             );
-        
+
         }
         currentLocationFiles.sort(function(a, b) {
             return a.name.localeCompare(b.name);
@@ -834,6 +847,23 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 }
             }
         });
+        items.unshift({
+            title: UI.SSA.insertSymbolFA("? ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.openrandom.title") +"@br@@us10@",
+            color: "999999",
+            eventHandler: function(event, menu)
+            {
+                if (event == "enter")
+                {
+                    var list = [];
+                    for(var k = 0; k < items.length; k++) {
+                        if (items[k].type == "video" || items[k].type == "audio" || items[k].type == "image") {
+                            list.push(items[k]);
+                        }
+                    }
+                    Browsers.FileBrowser.menuEventHandler("enter",list[Math.floor(Math.random() * list.length)].item);
+                }
+            }
+        });
     }
 
     items.unshift({
@@ -857,11 +887,11 @@ Browsers.FileBrowser.open = function (parentMenu) {
             if (event == "enter")
             {
                 var favItems = [];
-                for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++)
+                for (var i = 0; i < Settings.Data.fileBrowserFavorites.length; i++)
                 {
                     favItems.push({
-                        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.Data["fileBrowserFavorites"].locations[i],
-                        item: Settings.Data["fileBrowserFavorites"].locations[i],
+                        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.Data.fileBrowserFavorites[i],
+                        item: Settings.Data.fileBrowserFavorites[i],
                         color: "FFFF90"
                     });
                 }
@@ -883,10 +913,10 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     }
                     if(event == "right")
                     {
-                        var pos = Settings.Data["fileBrowserFavorites"].locations.indexOf(item);
+                        var pos = Settings.Data.fileBrowserFavorites.indexOf(item);
                         if (pos != -1)
                         {
-                            Settings.Data["fileBrowserFavorites"].locations.splice(pos,1);
+                            Settings.Data.fileBrowserFavorites.splice(pos,1);
                             favMenu.items.splice(pos+1,1);
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
@@ -950,9 +980,9 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
         });
         Browsers.DriveBrowser.menu.redrawMenu();
     } else if (event == "enter" && Browsers.DriveBrowser.menuMode == "ask") {
-        mp.command("write-watch-later-config");
+        mpv.command("write-watch-later-config");
         if (OS.isWindows) {
-            mp.commandv(
+            mpv.commandv(
                 "loadfile",
                 item + "://longest/" + Browsers.DriveBrowser.cachedDriveName
             );
@@ -963,7 +993,7 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
                     "..."
             );
         } else {
-            mp.commandv(
+            mpv.commandv(
                 "loadfile",
                 item +
                     "://longest//dev/" +
@@ -1007,7 +1037,7 @@ Browsers.DriveBrowser.open = function (parentMenu) {
             }
         }
     } else {
-        var deviceList = mp.utils.readdir("/dev/", "all");
+        var deviceList = mpv.getDirectoryContents("/dev/", "all");
         deviceList.sort();
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("sr")) {
@@ -1045,13 +1075,13 @@ Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
     }
 
     if (event == "enter") {
-        //mp.commandv("apply-profile", "low-latency");
-        mp.set_property("file-local-options/profile", "low-latency"); // should only apply to currrent file
+        //mpv.commandv("apply-profile", "low-latency");
+        mpv.setProperty("file-local-options/profile", "low-latency"); // should only apply to currrent file
 
         if (OS.isWindows) {
-            mp.commandv("loadfile", "av://dshow:video=" + item);
+            mpv.commandv("loadfile", "av://dshow:video=" + item);
         } else {
-            mp.commandv("loadfile", "av://v4l2:/dev/" + item);
+            mpv.commandv("loadfile", "av://v4l2:/dev/" + item);
         }
         Utils.showAlert(
             "info",
@@ -1070,13 +1100,12 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
         Browsers.DeviceBrowser.cachedParentMenu = parentMenu;
     }
     if (OS.isWindows) {
-        var r = mp.command_native({
+        var r = mpv.commandNative({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
             args: [
-                mp.utils
-                    .get_user_path("~~/scripts/easympv/GetDevices.exe")
+                mpv.getUserPath("~~/scripts/easympv/GetDevices.exe")
                     .replaceAll("/", "\\"),
             ],
         });
@@ -1092,7 +1121,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             }
         }
     } else {
-        var deviceList = mp.utils.readdir("/dev/", "all");
+        var deviceList = mpv.getDirectoryContents("/dev/", "all");
         deviceList.sort();
         for (var i = 0; i < deviceList.length; i++) {
             if (deviceList[i].includes("video")) {

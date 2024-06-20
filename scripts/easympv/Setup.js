@@ -276,7 +276,7 @@ Setup.Start = function () {
     Setup.Menus.Page2.settings.title = title(2,pageTotal);
     Setup.Menus.Page3.settings.title = title(3,pageTotal);
     // disable all menus keys
-    var bindings = JSON.parse(mpx.get_property("input-bindings"));
+    var bindings = JSON.parse(mpv.getProperty("input-bindings"));
     var keysToBlock = [];
     Setup.idsToUnblock = [];
     for (i = 0; i < bindings.length; i++) {

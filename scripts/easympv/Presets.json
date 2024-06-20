@@ -200,6 +200,7 @@
         { "type": "video", "name": "MPEG-4 Video", "extension": ".mp4v" },
         { "type": "video", "name": "MPEG-4 Video", "extension": ".mpg4" },
         { "type": "audio", "name": "MPEG-4 Audio", "extension": ".m4a" },
+        { "type": "audio", "name": "MPEG-4 Audiobook", "extension": ".m4b" },
         { "type": "audio", "name": "Raw AAC Audio", "extension": ".aac" },
         { "type": "video", "name": "Raw H.264/AVC Video", "extension": ".h264" },
         { "type": "video", "name": "Raw H.264/AVC Video", "extension": ".avc" },

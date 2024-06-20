@@ -28,7 +28,7 @@ Tests.json = undefined;
 Tests.runFromFile = function(name) {
     if (Tests.json == undefined)
     {
-        Tests.json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Tests.json")));
+        Tests.json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Tests.json")));
         return;
     }
 
@@ -67,7 +67,7 @@ Tests.runFromFile = function(name) {
             {
                 if (arg.includes("~~"))
                 {
-                    arg = mp.utils.get_user_path(arg);
+                    arg = mpv.getUserPath(arg);
                 }
                 toEval += "\"" + arg + "\"";
             }
@@ -135,7 +135,7 @@ Tests.runFromFile = function(name) {
                 var temp = directive.content;
                 if (temp.includes("~~"))
                 {
-                    temp = mp.utils.get_user_path(temp);
+                    temp = mpv.getUserPath(temp);
                 }
                 OS.fileRemoveSystemwide(temp);
             }
@@ -188,7 +188,7 @@ var Test_API_CreateMenu = function (name) {
             ]
         }
     }
-    mp.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
+    mpv.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
 };
 
 var Test_API_RemoveMenu = function (name) {
@@ -211,11 +211,11 @@ var Test_API_RemoveMenu = function (name) {
         'command': 'removemenu',
         'arguments': {}
     }
-    mp.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
+    mpv.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
 };
 
 var Test_OS_GetImageInfo = function (name) {
-    var output = OS.getImageInfo(mp.utils.get_user_path("~~/scripts/easympv/images/logo.bmp")).stdout;
+    var output = OS.getImageInfo(mpv.getUserPath("~~/scripts/easympv/images/logo.bmp")).stdout;
     var success = false;
     if (OS.isWindows)
     {

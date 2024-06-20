@@ -1,5 +1,5 @@
 /*
- * POLYFILLS.JS (PART OF EASYMPV)
+ * PRELOAD.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
@@ -80,8 +80,8 @@ mpv.fileExists = function (path) {
 
 /**
  * Lists content of given directory path.
- * @param path Full path to directory.
- * @param filter Either "files" or "dirs". Leave undefined for none.
+ * @param {string} path Full path to directory.
+ * @param {string} filter Either "files" or "dirs". Leave undefined for none.
  * @returns String Array of elements
  */
 mpv.getDirectoryContents = function(path, filter) {
@@ -94,11 +94,23 @@ mpv.getDirectoryContents = function(path, filter) {
 
 /**
  * Reads file contents from given path
- * @param path Full path to file.
+ * @param {string} path Full path to file.
  * @returns {string} File contents.
  */
 mpv.readFile = function (path) {
     return mp.utils.read_file(path);
+};
+
+/**
+ * Reads file contents from given path
+ * @param {string} path Full path to file.
+ * @param {string} content File contents.
+ */
+mpv.writeFile = function (path, content) {
+    if (content == undefined) {
+        content = "";
+    }
+    return mp.utils.write_file(path, content);
 };
 
 // print
@@ -117,7 +129,7 @@ mpv.printError = function (msg) {
 // misc
 /**
  * Gets contents of a given environment variable.
- * @param envvar Environment variable.
+ * @param {string} envvar Environment variable.
  * @returns Environment variable contents, or undefined.
  */
 mpv.getEnv = function (envvar) {
@@ -164,6 +176,18 @@ mpv.getProperty = function (property) {
     return mp.get_property(property);
 };
 
+mpv.getPropertyNumber = function (property) {
+    return mp.get_property_number(property);
+};
+
+mpv.getPropertyOSD = function (property) {
+    return mp.get_property_osd(property);
+}
+
+mpv.getPropertyNative = function (property) {
+    return mp.get_property_native(property);
+}
+
 mpv.osdMessage = function (msg) {
     return mp.osd_message(msg);
 };
@@ -172,8 +196,16 @@ mpv.command = function (command) {
     return mp.command(command);
 };
 
-mpv.commandv = function (c1, c2, c3, c4, c5) {
-    return mp.commandv(c1, c2, c3, c4, c5);
+mpv.commandNative = function (obj) {
+    return mp.command_native(obj);
+};
+
+mpv.commandNativeAsync = function (obj, callback) {
+    return mp.command_native_async(obj, callback);
+};
+
+mpv.commandv = function () {
+    return mp.commandv.apply(this,arguments);
 };
 
 mpv.enableMessages = function (type) {

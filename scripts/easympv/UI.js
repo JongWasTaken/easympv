@@ -14,14 +14,14 @@ UI.SSA = {};
  * @returns {string} SSA tag sequence
 */
 UI.SSA.startSequence = function () {
-    return mp.get_property_osd("osd-ass-cc/0");
+    return mpv.getPropertyOSD("osd-ass-cc/0");
 };
 
 /** Stops a SSA sequence.
  * @returns {string} SSA tag sequence
 */
 UI.SSA.endSequence = function () {
-    return mp.get_property_osd("osd-ass-cc/1");
+    return mpv.getPropertyOSD("osd-ass-cc/1");
 };
 
 /** Sets or unsets SSA bold tag.
@@ -110,8 +110,8 @@ UI.SSA.setPositionAbsolutePercentage = function (x, y, origin) {
         origin = "top-left";
     }
 
-    var width = Number(mp.get_property("osd-width"));
-    var height = Number(mp.get_property("osd-height"));
+    var width = Number(mpv.getProperty("osd-width"));
+    var height = Number(mpv.getProperty("osd-height"));
 
     if (origin == "top-left")
     {
@@ -151,8 +151,8 @@ UI.SSA.setPositionScreenCorner = function(corner, offset)
         corner = "top-left";
     }
 
-    var width = Number(mp.get_property("osd-width"));
-    var height = Number(mp.get_property("osd-height"));
+    var width = Number(mpv.getProperty("osd-width"));
+    var height = Number(mpv.getProperty("osd-height"));
 
     if ((width / 16) > (height / 9))
     {
@@ -198,8 +198,8 @@ UI.SSA.setPositionScreenCorner = function(corner, offset)
 */
 UI.SSA.findIdealScale = function ()
 {
-    var width = Number(mp.get_property("osd-width"));
-    var height = Number(mp.get_property("osd-height"));
+    var width = Number(mpv.getProperty("osd-width"));
+    var height = Number(mpv.getProperty("osd-height"));
 
     var scaleFactor = 0;
 
@@ -523,7 +523,7 @@ UI.Image = {};
  * @returns {object} Object, with properties: h,w,offset
  */
 UI.Image.getImageInfo = function (file) {
-    file = mp.utils.get_user_path(file);
+    file = mpv.getUserPath(file);
     var h, w, offset;
     // try using system tools to get image metadata
     var r = OS.getImageInfo(file);
@@ -534,7 +534,7 @@ UI.Image.getImageInfo = function (file) {
             w = data[0];
             h = data[1];
             offset =
-                mp.utils.file_info(file).size - 4 * w * h;
+            mpv.fileInfo(file).size - 4 * w * h;
         } else {
             var data = input.split(",");
             var dataDimensions;
@@ -564,8 +564,8 @@ UI.Image.getImageInfo = function (file) {
     // otherwise try to use old way (parsing a .info file)
     else {
         filex = file + ".info";
-        if (mp.utils.file_info(filex) != undefined) {
-            var data = mp.utils.read_file(filex).split(";");
+        if (mpv.fileExists(filex)) {
+            var data = mpv.readFile(filex).split(";");
             for (var i = 0; i < data.length; i++) {
                 var pair = data[i].split("=");
                 if (pair[0] == "h") {
@@ -579,8 +579,7 @@ UI.Image.getImageInfo = function (file) {
             h = 60;
             w = 200;
         }
-        offset =
-            mp.utils.file_info(file).size - 4 * w * h;
+        offset = mpv.fileInfo(file).size - 4 * w * h;
     }
 
     return (result = { h: h, w: w, offset: offset });
@@ -602,7 +601,7 @@ UI.Image.__getFilebyName = function (name) {
 UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
     return {
         id: id,
-        file: mp.utils.get_user_path("~~/scripts/easympv/images/") + file,
+        file: mpv.getUserPath("~~/scripts/easympv/images/") + file,
         width: width,
         height: height,
         x: x,
@@ -656,9 +655,9 @@ UI.Image.status = function (name) {
  */
 UI.Image.getScale = function () {
     var scale = "";
-    var height = mp.get_property("osd-height");
+    var height = mpv.getProperty("osd-height");
     if (height == 0) {
-        height = mp.get_property("height");
+        height = mpv.getProperty("height");
     }
 
     if (height < 1090) {
@@ -685,12 +684,12 @@ UI.Image.show = function (name, x, y) {
         image.x = x;
         image.y = y;
         if (!image.active) {
-            mp.commandv(
+            mpv.commandv(
                 "overlay-add",
                 image.id,
                 image.x,
                 image.y,
-                mp.utils.get_user_path(image.file),
+                mpv.getUserPath(image.file),
                 image.offset,
                 "bgra",
                 image.width,
@@ -710,9 +709,9 @@ UI.Image.show = function (name, x, y) {
  */
 UI.Image.toggle = function (name, x, y) {
     var scale = "";
-    var height = mp.get_property("osd-height");
+    var height = mpv.getProperty("osd-height");
     if (height == 0) {
-        height = mp.get_property("height");
+        height = mpv.getProperty("height");
     }
 
     if (height < 1090) {
@@ -727,7 +726,7 @@ UI.Image.toggle = function (name, x, y) {
     if (!image.active) {
         UI.Image.show(image.name, x, y);
     } else {
-        mp.commandv("overlay-remove", image.id);
+        mpv.commandv("overlay-remove", image.id);
         image.active = false;
     }
 };
@@ -740,9 +739,9 @@ UI.Image.hide = function (name) {
     if (name != null) {
         var image;
         //var scale = "";
-        var height = mp.get_property("osd-height");
+        var height = mpv.getProperty("osd-height");
         if (height == 0) {
-            height = mp.get_property("height");
+            height = mpv.getProperty("height");
         }
 
         /*
@@ -757,19 +756,19 @@ UI.Image.hide = function (name) {
 
         image = UI.Image.__getFilebyName(name);
         if (image.active) {
-            mp.commandv("overlay-remove", image.id);
+            mpv.commandv("overlay-remove", image.id);
             image.active = false;
         }
 
         image = UI.Image.__getFilebyName("2" + name);
         if (image.active) {
-            mp.commandv("overlay-remove", image.id);
+            mpv.commandv("overlay-remove", image.id);
             image.active = false;
         }
 
         image = UI.Image.__getFilebyName("4" + name);
         if (image.active) {
-            mp.commandv("overlay-remove", image.id);
+            mpv.commandv("overlay-remove", image.id);
             image.active = false;
         }
     }
@@ -874,8 +873,8 @@ UI.Time._show = function()
 
     UI.Time.OSD = mp.create_osd_overlay("ass-events");
     // OSD is allowed entire window space
-    UI.Time.OSD.res_y = mp.get_property("osd-height");
-    UI.Time.OSD.res_x = mp.get_property("osd-width");
+    UI.Time.OSD.res_y = mpv.getProperty("osd-height");
+    UI.Time.OSD.res_x = mpv.getProperty("osd-width");
     UI.Time.OSD.z = 1;
 
     UI.Time.OSD.data = UI.Time.assembleContent();
@@ -899,7 +898,7 @@ UI.Time._hide = function()
 {
     UI.Time._stopTimer();
     if (UI.Time.OSD != undefined) {
-        mp.commandv(
+        mpv.commandv(
             "osd-overlay",
             UI.Time.OSD.id,
             "none",
@@ -1246,7 +1245,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.doubleScrollWorkaround != undefined) {
         this.settings.doubleScrollWorkaround = settings.doubleScrollWorkaround;
     } else {
-        if (mp.utils.getenv("XDG_CURRENT_DESKTOP") == "GNOME") {
+        if (mpv.getEnv("XDG_CURRENT_DESKTOP") == "GNOME") {
             this.settings.doubleScrollWorkaround = true;
         } else {
             this.settings.doubleScrollWorkaround = false;
@@ -1431,14 +1430,24 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
                 action: "enter",
             },
             {
+                key: "HOME",
+                id: "menu_key_goto_top",
+                action: "top",
+            },
+            {
+                key: "END",
+                id: "menu_key_goto_bottom",
+                action: "bottom",
+            },
+            {
                 key: "PGUP",
                 id: "menu_key_page_up",
-                action: "top",
+                action: "page_up",
             },
             {
                 key: "PGDWN",
                 id: "menu_key_page_down",
-                action: "bottom",
+                action: "page_down",
             }
         ];
     }
@@ -1570,12 +1579,12 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
         var title = this.settings.title;
         if (this.settings.image != undefined) {
             if (
-                (mp.get_property("osd-height") >= 1060 &&
-                    mp.get_property("osd-height") <= 1100) ||
-                (mp.get_property("osd-height") >= 1420 &&
-                    mp.get_property("osd-height") <= 1460) ||
-                (mp.get_property("osd-height") >= 2140 &&
-                    mp.get_property("osd-height") <= 2180)
+                (mpv.getProperty("osd-height") >= 1060 &&
+                    mpv.getProperty("osd-height") <= 1100) ||
+                (mpv.getProperty("osd-height") >= 1420 &&
+                    mpv.getProperty("osd-height") <= 1460) ||
+                (mpv.getProperty("osd-height") >= 2140 &&
+                    mpv.getProperty("osd-height") <= 2180)
             ) {
                 title = "        ";
                 this.allowDrawImage = true;
@@ -1604,7 +1613,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
             var drawItems = [];
             var allowedItemCount =
                 Math.floor(
-                    mp.get_property("osd-height") / this.settings.fontSize
+                    mpv.getProperty("osd-height") / this.settings.fontSize
                 ) + 5;
 
             var startItem =
@@ -1823,12 +1832,12 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
         var title = this.settings.title;
         if (this.settings.image != undefined) {
             if (
-                (mp.get_property("osd-height") >= 1060 &&
-                    mp.get_property("osd-height") <= 1100) ||
-                (mp.get_property("osd-height") >= 1420 &&
-                    mp.get_property("osd-height") <= 1460) ||
-                (mp.get_property("osd-height") >= 2140 &&
-                    mp.get_property("osd-height") <= 2180)
+                (mpv.getProperty("osd-height") >= 1060 &&
+                    mpv.getProperty("osd-height") <= 1100) ||
+                (mpv.getProperty("osd-height") >= 1420 &&
+                    mpv.getProperty("osd-height") <= 1460) ||
+                (mpv.getProperty("osd-height") >= 2140 &&
+                    mpv.getProperty("osd-height") <= 2180)
             ) {
                 title = "        ";
                 this.allowDrawImage = true;
@@ -1866,7 +1875,7 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
             var drawItems = [];
             var allowedItemCount =
                 Math.floor(
-                    mp.get_property("osd-height") / this.settings.fontSize
+                    mpv.getProperty("osd-height") / this.settings.fontSize
                 ) + 5;
 
             var startItem =
@@ -1897,13 +1906,19 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
             var currentItem = drawItems[i];
             var title = currentItem.title;
             var postItemActions = [""];
-            if (
-                title.includes("@") &&
-                !(title.match(/@/g) || []).length.isOdd()
-            ) {
-                postItemActions = title.match(/\@(.*?)\@/g);
-                title = title.replace(/\@(.*?)\@/g, "");
+            try {
+                if (
+                    title.includes("@") &&
+                    !(title.match(/@/g) || []).length.isOdd()
+                ) {
+                    postItemActions = title.match(/\@(.*?)\@/g);
+                    title = title.replace(/\@(.*?)\@/g, "");
+                }
             }
+            catch(e) {
+                mpv.printWarn("[UI] Menu with id \"" + this.settings.menuId + "\" contains a broken item at position " + i + " of the \"items\" array, which caused this error: " + e);
+            }
+
             var color = "";
             var description = "";
 
@@ -2093,6 +2108,24 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
             this._constructMenuCache();
             this._drawMenu();
             this.eventLocked = false;
+        } else if (action == "page_up") {
+            var temp = this.selectedItemIndex - 10;
+            if (temp < 0) {
+                temp = 0;
+            }
+            this.selectedItemIndex = temp;
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
+        } else if (action == "page_down") {
+            var temp = this.selectedItemIndex + 10;
+            if (temp > (this.items.length - 1)) {
+                temp = this.items.length - 1;
+            }
+            this.selectedItemIndex = temp;
+            this._constructMenuCache();
+            this._drawMenu();
+            this.eventLocked = false;
         } else {
             var item = this.items[this.selectedItemIndex];
             if (item.item == "@back@" && action == "enter") {
@@ -2113,10 +2146,10 @@ UI.Menus.Menu.prototype._initOSD = function () {
         if (this.OSD == undefined) {
             this.OSD = mp.create_osd_overlay("ass-events");
             // OSD is allowed entire window space
-            //this.OSD.res_y = mp.get_property("osd-height");
-            //this.OSD.res_x = mp.get_property("osd-width");
-            this.OSD.res_y = mp.get_property("osd-height");
-            this.OSD.res_x = mp.get_property("osd-width");
+            //this.OSD.res_y = mpv.getProperty("osd-height");
+            //this.OSD.res_x = mpv.getProperty("osd-width");
+            this.OSD.res_y = mpv.getProperty("osd-height");
+            this.OSD.res_x = mpv.getProperty("osd-width");
             this.OSD.z = this.settings.zIndex;
         }
     }
@@ -2129,7 +2162,7 @@ UI.Menus.Menu.prototype._drawMenu = function () {
     if (this.settings.displayMethod == "message") {
         mp.osd_message(this.cachedMenuText, 1000);
         // seem to be the same
-        //mp.commandv("show-text",this.cachedMenuText,1000)
+        //mpv.commandv("show-text",this.cachedMenuText,1000)
     }
 
     if (this.settings.displayMethod == "overlay") {
@@ -2195,7 +2228,7 @@ UI.Menus.Menu.prototype._fadeOut = function () {
             x._constructMenuCache();
             x._drawMenu();
         } else {
-            mp.commandv(
+            mpv.commandv(
                 "osd-overlay",
                 x.OSD.id,
                 "none",
@@ -2218,14 +2251,23 @@ UI.Menus.Menu.prototype._fadeOut = function () {
     this.fadeOutInterval.start;
 };
 
-/** Convenience method to get an item by its name. 
- * @param {string} name - Name of the item
+/** Convenience method to get an item by its id.
+ * @deprecated Use getItemById() instead!
+ * @param {string} id - ID of the item
  * @returns {object} desired item, if found (otherwise undefined)
 */
-UI.Menus.Menu.prototype.getItemByName = function (name) {
+UI.Menus.Menu.prototype.getItemByName = function (id) {
+    return this.getItemById(id);
+}
+
+/** Convenience method to get an item by its ID.
+ * @param {string} id - ID of the item
+ * @returns {object} desired item, if found (otherwise undefined)
+*/
+UI.Menus.Menu.prototype.getItemById = function (id) {
     for(var i = 0; i < this.items.length; i++)
     {
-        if (this.items[i].item == name)
+        if (this.items[i].item == id)
         return this.items[i];
     }
     return undefined;
@@ -2237,7 +2279,6 @@ UI.Menus.Menu.prototype.getItemByName = function (name) {
 UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
         this.allowDrawImage = false;
-        //this._dispatchEvent("preshow");
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
         this.selectedItemIndex = 0;
@@ -2291,7 +2332,7 @@ UI.Menus.Menu.prototype.hideMenu = function () {
             }
             else
             {
-                mp.commandv(
+                mpv.commandv(
                     "osd-overlay",
                     this.OSD.id,
                     "none",
@@ -2352,12 +2393,24 @@ UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
     this.eventHandler(event, item.item);
 }
 
+/** Safely appends an item to the menu.
+ * @param {object} item - Selected item
+*/
+UI.Menus.Menu.prototype.appendItem = function (item) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
+    this.items.push(item);
+}
+
 /** This method should be overwritten with your own implementation.
  * @param {string} event - Name of the event that got dispatched
- * @param {string} action - Name of the action that dispatched the event 
+ * @param {string} action - Name of the action that dispatched the event
 */
 UI.Menus.Menu.prototype.eventHandler = function (event, action) {
-    mp.msg.warn("[UI] Menu \"" + this.settings.title + "\" has no event handler!");
+    mpv.printWarn("[UI] Menu \"" + this.settings.title + "\" has no event handler!");
 };
 
 /** If enabled, the menu key will not work to close the currently active menu. */
@@ -2395,6 +2448,9 @@ UI.Menus.switchCurrentMenu = function (newMenu, currentMenu) {
     }
 };
 
+/** Convenience method to get a menu by its ID. Returns undefined if no menu with the given ID exists.
+ * @param {string} name - id of the menu
+ */
 UI.Menus.getMenuById = function(name) {
     var menu = undefined;
     for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
@@ -2404,6 +2460,23 @@ UI.Menus.getMenuById = function(name) {
             break;
         }
     }
+    return menu;
+}
+
+/** Convenience method to get a menu by a substring of its ID. Returns undefined if no menu with the given ID exists.
+ * If possible, use getMenuById() instead!
+ * @param {string} name - substring of an id of the menu
+ */
+UI.Menus.findMenuById = function(name) {
+    var menu = undefined;
+    for (var i = 0; i < UI.Menus.registeredMenus.length; i++) {
+        if (UI.Menus.registeredMenus[i].settings.menuId.includes(name))
+        {
+            menu = UI.Menus.registeredMenus[i];
+            break;
+        }
+    }
+    mpv.printWarn("Found menu id for substring \""+ name +"\": " + menu.settings.menuId);
     return menu;
 }
 
@@ -2420,8 +2493,8 @@ UI.Alerts.show = function (type, line) {
 /*
     mp.observe_property("osd-height", undefined, function () {
         if (
-            mp.get_property("osd-height") != osdHeight ||
-            mp.get_property("osd-width") != osdWidth
+            mpv.getProperty("osd-height") != osdHeight ||
+            mpv.getProperty("osd-width") != osdWidth
         ) {
             UI.Alert.hide();
         }
@@ -2429,8 +2502,8 @@ UI.Alerts.show = function (type, line) {
 
     mp.observe_property("osd-width", undefined, function () {
         if (
-            mp.get_property("osd-height") != osdHeight ||
-            mp.get_property("osd-width") != osdWidth
+            mpv.getProperty("osd-height") != osdHeight ||
+            mpv.getProperty("osd-width") != osdWidth
         ) {
             alert.settings.fadeOut = false;
             alert.hide();
@@ -2484,8 +2557,8 @@ UI.Alert._show = function(content)
         UI.Alert.isVisible = true;
         if (UI.Alert.OSD == undefined) {
             UI.Alert.OSD = mp.create_osd_overlay("ass-events");
-            UI.Alert.OSD.res_y = mp.get_property("osd-height");
-            UI.Alert.OSD.res_x = mp.get_property("osd-width");
+            UI.Alert.OSD.res_y = mpv.getProperty("osd-height");
+            UI.Alert.OSD.res_x = mpv.getProperty("osd-width");
             UI.Alert.OSD.z = 1;
         }
 
@@ -2521,7 +2594,7 @@ UI.Alert._hide = function()
     UI.Alert.isVisible = false;
     UI.Alert.startTime = undefined;
     if (UI.Alert.OSD != undefined) {
-        mp.commandv(
+        mpv.commandv(
             "osd-overlay",
             UI.Alert.OSD.id,
             "none",
@@ -2778,7 +2851,7 @@ UI.Input.show = function (callback, prefix) {
         return;
     }
 
-    mp.commandv("set","pause","yes");
+    mpv.commandv("set","pause","yes");
 
     if(prefix != undefined)
     {
@@ -2825,8 +2898,8 @@ UI.Input.show = function (callback, prefix) {
     }
 
     UI.Input.OSD = mp.create_osd_overlay("ass-events");
-    UI.Input.OSD.res_y = mp.get_property("osd-height");
-    UI.Input.OSD.res_x = mp.get_property("osd-width");
+    UI.Input.OSD.res_y = mpv.getProperty("osd-height");
+    UI.Input.OSD.res_x = mpv.getProperty("osd-width");
     UI.Input.OSD.z = 1000;
 
     UI.Input.Prefix += UI.Input.InputPrefix;
@@ -2847,7 +2920,7 @@ UI.Input.hide = function (success) {
         mp.remove_key_binding(currentKey.id);
     }
 
-    mp.commandv(
+    mpv.commandv(
         "osd-overlay",
         UI.Input.OSD.id,
         "none",
@@ -2877,8 +2950,8 @@ UI.Input.OSDLog.Buffer = [];
 UI.Input.OSDLog.show = function () {
 
     UI.Input.OSDLog.OSD = mp.create_osd_overlay("ass-events");
-    UI.Input.OSDLog.OSD.res_y = mp.get_property("osd-height");
-    UI.Input.OSDLog.OSD.res_x = mp.get_property("osd-width"); // TODO: 101?
+    UI.Input.OSDLog.OSD.res_y = mpv.getProperty("osd-height");
+    UI.Input.OSDLog.OSD.res_x = mpv.getProperty("osd-width"); // TODO: 101?
     UI.Input.OSDLog.OSD.z = 1;
 
     UI.Input.OSDLog.Timer = setInterval(function () {
@@ -2933,8 +3006,8 @@ UI.Input.OSDLog.writeLogToFile = function ()
         data += "[" + UI.Input.OSDLog.Buffer[i].time + "] [" + UI.Input.OSDLog.Buffer[i].prefix + "] " + UI.Input.OSDLog.Buffer[i].text;
     }
 
-    mp.utils.write_file(
-        "file://" + mp.utils.get_user_path("~~desktop/easympv.log"),
+    mpv.writeFile(
+        "file://" + mpv.getUserPath("~~desktop/easympv.log"),
         data
     );
 
@@ -2944,7 +3017,7 @@ UI.Input.OSDLog.writeLogToFile = function ()
 
 UI.Input.OSDLog.hide = function () {
     clearInterval(UI.Input.OSDLog.Timer);
-    mp.commandv(
+    mpv.commandv(
         "osd-overlay",
         UI.Input.OSDLog.OSD.id,
         "none",
@@ -2961,7 +3034,7 @@ UI.Input.OSDLog.hide = function () {
 UI.Input.showInteractiveCommandInput = function () {
     var readCommand = function (success, result) {
         if (success) {
-            mp.command(result);
+            mpv.command(result);
             Utils.showAlert(
                 "info",
                 "Command executed!"
@@ -2975,14 +3048,14 @@ UI.Input.showJavascriptInput = function () {
         var readCommand = function (success, result) {
             if (success) {
                 try{
-                    var print = function (object) { mp.msg.warn(JSON.stringify(object,undefined,4)); };
+                    var print = function (object) { mpv.printWarn(JSON.stringify(object,undefined,4)); };
                     var clearOSD = function(id) {
                         mp.osd_message("");
                         if (id == undefined){
-                            mp.msg.warn("Force-removing all overlays: you might see error messages!");
+                            mpv.printWarn("Force-removing all overlays: you might see error messages!");
                             for (var i = 0; i < 1000; i++)
                             {
-                                mp.commandv(
+                                mpv.commandv(
                                     "osd-overlay",
                                     i,
                                     "none",
@@ -2997,7 +3070,7 @@ UI.Input.showJavascriptInput = function () {
                         }
                         else
                         {
-                            mp.commandv(
+                            mpv.commandv(
                                 "osd-overlay",
                                 id,
                                 "none",
@@ -3013,15 +3086,20 @@ UI.Input.showJavascriptInput = function () {
                     var cmd = function (cmd) {
                         print(OS._call(cmd));
                     }
+                    var crash = function() {
+                        mpv.printWarn("CRASH FORCED: LOG IS INVALID!");
+                        UI.Input = {};
+                    }
                     var help = function () {
                         if (UI.Input.OSDLog.OSD == undefined) {
                             UI.Input.OSDLog.show();
                         }
                         //UI.Input.OSDLog.hide();
-                        mp.msg.warn("help() output:\nList of helper functions:\n"+
-                        "print(obj) -> shorthand for mp.msg.warn(JSON.stringify(obj))\n"+
+                        mpv.printWarn("help() output:\nList of helper functions:\n"+
+                        "print(obj) -> shorthand for mpv.printWarn(JSON.stringify(obj))\n"+
                         "cmd(command) -> execute shell command\n"+
-                        "clearOSD() -> force-removes ALL OSDs and messages on screen"
+                        "clearOSD() -> force-removes ALL OSDs and messages on screen\n" +
+                        "crash() -> force-crashes easympv"
                         );
                     };
                     eval(result);

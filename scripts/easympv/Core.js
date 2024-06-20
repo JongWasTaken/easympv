@@ -26,7 +26,7 @@ Core.enableChapterSeeking = true;
 Core.setSaveTimer = function()
 {
     Core.saveTimer = setInterval(function(){
-        mp.command("write-watch-later-config");
+        mpv.command("write-watch-later-config");
     }, 30000);
 }
 
@@ -48,9 +48,9 @@ Core.pauseSaveTimer = function(_,pause) {
 Core.onFileLoad = function () {
     // mpv does not provide a reliable way to get the current filename, so we (ab)use playlists
     // (stream-open-filename does not work with relative paths and URLs!)
-    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-        if (mp.get_property("playlist/" + i + "/current") == "yes") {
-            cFile = mp.get_property("playlist/" + i + "/filename");
+    for (var i = 0; i < Number(mpv.getProperty("playlist/count")); i++) {
+        if (mpv.getProperty("playlist/" + i + "/current") == "yes") {
+            cFile = mpv.getProperty("playlist/" + i + "/filename");
             break;
         }
     }
@@ -59,12 +59,10 @@ Core.onFileLoad = function () {
     if (cFile != undefined) {
         if (
             !OS.isWindows &&
-            mp.utils.file_info(
-                mp.get_property("working-directory") + "/" + cFile
-            ) != undefined
+            mpv.fileExists(mpv.getProperty("working-directory") + "/" + cFile)
         ) {
             cFile =
-                mp.get_property("working-directory") +
+                mpv.getProperty("working-directory") +
                 "/" +
                 cFile.replaceAll("./", "");
         }
@@ -74,19 +72,16 @@ Core.onFileLoad = function () {
 
     if (isFirstFile) {
         if (
-            mp.utils.file_info(
-                mp.utils.get_user_path("~~/") + "/default.sofa"
-            ) != undefined
+            mpv.fileExists(mpv.getUserPath("~~/") + "/default.sofa")
         ) {
             Utils.log("Sofa file found!");
-            var path = mp.utils
-                .get_user_path("~~/")
+            var path = mpv.getUserPath("~~/")
                 .toString()
                 .replace(/\\/g, "/")
                 .substring(2);
             if (OS.isWindows)
             {
-                mp.commandv(
+                mpv.commandv(
                     "af",
                     "set",
                     "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
@@ -94,7 +89,7 @@ Core.onFileLoad = function () {
             }
             else
             {
-                mp.commandv(
+                mpv.commandv(
                     "af",
                     "set",
                     "lavfi=[sofalizer=sofa=" + path + "/default.sofa]"
@@ -176,26 +171,26 @@ Core.doRegistrations = function () {
 
     var handleChapterSeek = function(direction)
     {
-        var chapters = mp.get_property("chapters");
+        var chapters = mpv.getProperty("chapters");
         if (chapters == undefined) {chapters = 0;}
         else {chapters = Number(chapters);}
-        var chapter = mp.get_property("chapter");
+        var chapter = mpv.getProperty("chapter");
         if (chapter == undefined) {chapter = 0;}
         else {chapter = Number(chapter);}
         if ((chapter + direction) < 0)
         {
-            mp.command("playlist_prev")
-            mp.commandv("script-message", "osc-playlist")
+            mpv.command("playlist_prev")
+            mpv.commandv("script-message", "osc-playlist")
         }
         else if ((chapter + direction) >= chapters)
         {
-            mp.command("playlist_next")
-            mp.commandv("script-message", "osc-playlist")
+            mpv.command("playlist_next")
+            mpv.commandv("script-message", "osc-playlist")
         }
         else
         {
-            mp.commandv("add", "chapter", direction)
-            mp.commandv("script-message", "osc-chapterlist")
+            mpv.commandv("add", "chapter", direction)
+            mpv.commandv("script-message", "osc-chapterlist")
         }
     }
 
@@ -244,28 +239,28 @@ Core.doRegistrations = function () {
         // using commandv does not give user feedback, so we need to that
 
         // left stick
-        mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mp.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
-        mp.add_forced_key_binding("s", "empv_steaminput_ldown", function() { mp.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mp.get_property("volume")) + "%"); });
-        mp.add_forced_key_binding("a", "empv_steaminput_lleft", function() { mp.commandv("script_binding","chapter_prev"); });
-        mp.add_forced_key_binding("d", "empv_steaminput_lright", function() { mp.commandv("script_binding","chapter_next"); });
+        mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mpv.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
+        mp.add_forced_key_binding("s", "empv_steaminput_ldown", function() { mpv.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
+        mp.add_forced_key_binding("a", "empv_steaminput_lleft", function() { mpv.commandv("script_binding","chapter_prev"); });
+        mp.add_forced_key_binding("d", "empv_steaminput_lright", function() { mpv.commandv("script_binding","chapter_next"); });
 
         // dpad
-        mp.add_forced_key_binding("1", "empv_steaminput_dup", function() { mp.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
-        mp.add_forced_key_binding("3", "empv_steaminput_ddown", function() { mp.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mp.get_property("speed")).toFixed(2)); });
-        mp.add_forced_key_binding("4", "empv_steaminput_dleft", function() { mp.commandv("seek","5"); });
-        mp.add_forced_key_binding("2", "empv_steaminput_dright", function() { mp.commandv("seek","-5"); });
+        mp.add_forced_key_binding("1", "empv_steaminput_dup", function() { mpv.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("3", "empv_steaminput_ddown", function() { mpv.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("4", "empv_steaminput_dleft", function() { mpv.commandv("seek","5"); });
+        mp.add_forced_key_binding("2", "empv_steaminput_dright", function() { mpv.commandv("seek","-5"); });
 
         // right stick is mouse
 
         // buttons
-        mp.add_forced_key_binding("esc", "empv_steaminput_start", function() { mp.commandv("script_binding","easympv"); });
-        mp.add_forced_key_binding("tab", "empv_steaminput_select", function() { mp.commandv("script_binding","stats/display-stats-toggle"); });
-        mp.add_forced_key_binding("space", "empv_steaminput_a", function() { mp.commandv("cycle","pause"); });
-        mp.add_forced_key_binding("e", "empv_steaminput_b", function() { mp.commandv("cycle","pause"); });
-        mp.add_forced_key_binding("r", "empv_steaminput_x", function() { mp.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mp.get_property("video-aspect-override")); });
-        mp.add_forced_key_binding("f", "empv_steaminput_y", function() { mp.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mp.get_property("sub-scale")).toFixed(3)); });
-        mp.add_forced_key_binding("WHEEL_UP", "empv_steaminput_rb", function() { mp.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
-        mp.add_forced_key_binding("WHEEL_DOWN", "empv_steaminput_lb", function() { mp.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mp.get_property("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("esc", "empv_steaminput_start", function() { mpv.commandv("script_binding","easympv"); });
+        mp.add_forced_key_binding("tab", "empv_steaminput_select", function() { mpv.commandv("script_binding","stats/display-stats-toggle"); });
+        mp.add_forced_key_binding("space", "empv_steaminput_a", function() { mpv.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("e", "empv_steaminput_b", function() { mpv.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("r", "empv_steaminput_x", function() { mpv.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mpv.getProperty("video-aspect-override")); });
+        mp.add_forced_key_binding("f", "empv_steaminput_y", function() { mpv.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mpv.getProperty("sub-scale")).toFixed(3)); });
+        mp.add_forced_key_binding("WHEEL_UP", "empv_steaminput_rb", function() { mpv.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("WHEEL_DOWN", "empv_steaminput_lb", function() { mpv.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
 
         // lt and rt are mouse buttons
     }
@@ -273,7 +268,11 @@ Core.doRegistrations = function () {
     // Registering functions to events
     mp.register_event("file-loaded", Core.onFileLoad);
     mp.register_event("shutdown", Core.onShutdown);
-    mp.register_script_message("json",API.handleIncomingJSON);
+    mp.register_script_message("json", API.handleIncomingJSON);
+    mp.register_script_message("__watchdog", function(data) {
+        mpv.commandv("script-message-to", "easympv_watchdog", "__watchdog", data);
+    });
+
 
     if (Core.enableSaveTimer)
     {
@@ -385,6 +384,7 @@ Core.defineMenus = function () {
 
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + " easympv",
+        menuId: "main",
         description: "",
         image: "logo",
         customKeyEvents: [{key: "h", event: "help"}]
@@ -477,13 +477,13 @@ Core.defineMenus = function () {
 
     /*
     // TODO: this needs to be moved to onFileLoad
-    if (Number(mp.get_property("playlist-count")) > 1) {
+    if (Number(mpv.getProperty("playlist-count")) > 1) {
         MainMenuItems.splice(2, 0, {
             title: "[Shuffle playlist]@br@",
             item: "shuffle",
             eventHandler: function(event, menu) {
                 menu.hideMenu();
-                mp.commandv("playlist-shuffle");
+                mpv.commandv("playlist-shuffle");
             }
         });
     }
@@ -501,15 +501,15 @@ Core.defineMenus = function () {
                 Core.Menus.MainMenu.hideMenu();
                 var playlist = "   ";
                 var i;
-                for (i = 0; i < mp.get_property("playlist/count"); i++) {
-                    if (mp.get_property("playlist/" + i + "/playing") === "yes") {
+                for (i = 0; i < mpv.getProperty("playlist/count"); i++) {
+                    if (mpv.getProperty("playlist/" + i + "/playing") === "yes") {
                         playlist = playlist + "➤ ";
                     } else {
                         playlist = playlist + "   ";
                     }
                     playlist =
                         playlist +
-                        mp.get_property("playlist/" + i + "/filename") +
+                        mpv.getProperty("playlist/" + i + "/filename") +
                         "@br@";
                 }
                 mp.osd_message(UI.SSA.startSequence() + UI.SSA.setSize(8) + playlist, 3);
@@ -550,7 +550,7 @@ Core.defineMenus = function () {
     Core.Menus.PlaybackMenu = new UI.Menus.Menu(
         {
             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("playback.menu.title"),
-            menuId: "main",
+            menuId: "playback",
             description: Settings.getLocalizedString("playback.menu.description"),
             autoClose: 8
         },
@@ -582,15 +582,15 @@ Core.defineMenus = function () {
                     if (event == "left" || event == "right" || event == "enter")
                     {
                         this.description = Settings.getLocalizedString("playback.deinterlacing.description")
-                        if (mp.get_property("deinterlace") == "yes")
+                        if (mpv.getProperty("deinterlace") == "yes")
                         {
                             this.description += UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled");
-                            mp.set_property("deinterlace", "no");
+                            mpv.setProperty("deinterlace", "no");
                         }
                         else
                         {
                             this.description += UI.SSA.setColorGreen() +Settings.getLocalizedString("global.enabled");
-                            mp.set_property("deinterlace", "yes");
+                            mpv.setProperty("deinterlace", "yes");
                         }
                         menu.redrawMenu();
                     }
@@ -697,7 +697,7 @@ Core.defineMenus = function () {
                     }
 
                     this.description += Settings.getLocalizedString("playback.subtitlesize.description") + UI.SSA.setColorGreen() + this.data_values[this.data_selection] + "x";
-                    mp.set_property("sub-scale", this.data_values[this.data_selection]);
+                    mpv.setProperty("sub-scale", this.data_values[this.data_selection]);
                     menu.redrawMenu();
                 }
             },
@@ -707,14 +707,14 @@ Core.defineMenus = function () {
                 eventHandler: function(event, menu) {
                     if (event == "left" || event == "enter")
                     {
-                        mp.commandv("add","sub-delay","-0.1");
+                        mpv.commandv("add","sub-delay","-0.1");
                     }
                     else if (event == "right")
                     {
-                        mp.commandv("add","sub-delay","+0.1");
+                        mpv.commandv("add","sub-delay","+0.1");
                     }
 
-                    var delay = mp.get_property("sub-delay");
+                    var delay = mpv.getProperty("sub-delay");
                     if (delay.charAt(0) == "-")
                     {
                         this.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
@@ -731,7 +731,7 @@ Core.defineMenus = function () {
                 item: "audiovolume",
                 eventHandler: function(event, menu) {
                     this.description = "";
-                    var volume = Number(mp.get_property("volume"));
+                    var volume = Number(mpv.getProperty("volume"));
                     if (event == "left" || event == "enter")
                     {
                         if (volume != 0)
@@ -750,7 +750,7 @@ Core.defineMenus = function () {
                     }
 
                     this.description += Settings.getLocalizedString("playback.volume.description") + UI.SSA.setColorGreen() + volume  + "%";
-                    mp.set_property("volume", volume);
+                    mpv.setProperty("volume", volume);
                     menu.redrawMenu();
                 }
             },
@@ -759,7 +759,7 @@ Core.defineMenus = function () {
                 item: "speed",
                 eventHandler: function(event, menu) {
                     this.description = "";
-                    var speed = Number(mp.get_property("speed").trim().slice(0,3));
+                    var speed = Number(mpv.getProperty("speed").trim().slice(0,3));
 
 
                     if (event == "left" || event == "enter")
@@ -784,7 +784,7 @@ Core.defineMenus = function () {
                     if (speed.length == 2) { speed = speed.slice(0,1) + "." + speed.slice(1,2)};
 
                     this.description += Settings.getLocalizedString("playback.speed.description") + UI.SSA.setColorGreen() + speed  + "x";
-                    mp.set_property("speed", speed);
+                    mpv.setProperty("speed", speed);
                     menu.redrawMenu();
                 }
             }
@@ -805,7 +805,7 @@ Core.defineMenus = function () {
             var item_subtitledelay = Core.Menus.PlaybackMenu.getItemByName("subtitledelay");
 
             item_deinterlace.description = Settings.getLocalizedString("playback.deinterlacing.description")
-            if (mp.get_property("deinterlace") == "yes")
+            if (mpv.getProperty("deinterlace") == "yes")
             {
                 item_deinterlace.description += UI.SSA.setColorGreen() + Settings.getLocalizedString("global.enabled");
             }
@@ -816,10 +816,10 @@ Core.defineMenus = function () {
 
             item_fps.data_selection = item_fps.data_values.indexOf(Video.FPS.getFixedFPS().trim());
 
-            var aspect = mp.get_property("video-aspect-override").trim().slice(0,6);
+            var aspect = mpv.getProperty("video-aspect-override").trim().slice(0,6);
             item_aspectratio.data_selection = item_aspectratio.data_values.indexOf(aspect);
 
-            item_subtitlesize.data_selection = item_subtitlesize.data_values.indexOf(mp.get_property("sub-scale").trim().slice(0,3));
+            item_subtitlesize.data_selection = item_subtitlesize.data_values.indexOf(mpv.getProperty("sub-scale").trim().slice(0,3));
 
             if (item_fps.data_selection == -1) {item_fps.data_selection = 0;}
             if (item_aspectratio.data_selection == -1) {item_aspectratio.data_selection = 0;}
@@ -829,10 +829,10 @@ Core.defineMenus = function () {
             item_subtitlesize.description = Settings.getLocalizedString("playback.subtitlesize.description") + UI.SSA.setColorGreen() + item_subtitlesize.data_values[item_subtitlesize.data_selection]  + "x";
             item_aspectratio.description = Settings.getLocalizedString("playback.aspectratio.description");
             item_aspectratio.description += UI.SSA.setColorGreen() + item_aspectratio.data_keys[item_aspectratio.data_selection];
-            item_volume.description = Settings.getLocalizedString("playback.volume.description") + UI.SSA.setColorGreen() + Math.floor(Number(mp.get_property("volume"))) + "%";
-            item_speed.description = Settings.getLocalizedString("playback.speed.description") + UI.SSA.setColorGreen() + mp.get_property("speed").slice(0,3) + "x";
+            item_volume.description = Settings.getLocalizedString("playback.volume.description") + UI.SSA.setColorGreen() + Math.floor(Number(mpv.getProperty("volume"))) + "%";
+            item_speed.description = Settings.getLocalizedString("playback.speed.description") + UI.SSA.setColorGreen() + mpv.getProperty("speed").slice(0,3) + "x";
 
-            var delay = mp.get_property("sub-delay");
+            var delay = mpv.getProperty("sub-delay");
             if (delay.charAt(0) == "-")
             {
                 item_subtitledelay.description = Settings.getLocalizedString("playback.subtitledelay.description") + UI.SSA.setColorGreen() + delay.slice(0,4) + "s";
@@ -846,7 +846,7 @@ Core.defineMenus = function () {
         else if (event == "hide")
         {
             var item_aspectratio = Core.Menus.PlaybackMenu.getItemByName("aspectratio");
-            mp.set_property("video-aspect-override",item_aspectratio.data_values[item_aspectratio.data_selection]);
+            mpv.setProperty("video-aspect-override",item_aspectratio.data_values[item_aspectratio.data_selection]);
         }
     }
 
@@ -982,7 +982,7 @@ Core.defineMenus = function () {
                                         return;
                                     }
 
-                                    mp.commandv("playlist-play-index",this.item)
+                                    mpv.commandv("playlist-play-index",this.item)
                                     menu.hideMenu();
                                     return;
                                 }
@@ -1228,7 +1228,7 @@ Core.defineMenus = function () {
                     Settings.save();
                     Core.doUnregistrations();
                     Core.startExecution();
-                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -1462,7 +1462,7 @@ Core.defineMenus = function () {
                             cmenu = undefined;
                         }
                     };
-                    var lines = mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Credits.txt")).split("\n");
+                    var lines = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Credits.txt")).split("\n");
                     for (var i = 0; i < lines.length; i++)
                     {
                         if (lines[i].trim() != "")
@@ -1506,7 +1506,7 @@ Core.defineMenus = function () {
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
-                    mp.commandv("script-binding","stats/display-stats-toggle");
+                    mpv.commandv("script-binding","stats/display-stats-toggle");
                 }
             }
         },
@@ -1544,7 +1544,7 @@ Core.defineMenus = function () {
                     menu.hideMenu();
                     Core.doUnregistrations();
                     Core.startExecution();
-                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -1563,7 +1563,7 @@ Core.defineMenus = function () {
 
     if (OS.isWindows)
     {
-        if (mp.utils.file_info(mp.utils.get_user_path("~~/uninstaller.exe")) != undefined) {
+        if (mpv.fileExists(mpv.getUserPath("~~/uninstaller.exe"))) {
             SettingsMenuItems.push({
                 title: UI.SSA.setColorRed() + UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.uninstall.title"),
                 item: "uninstall",
@@ -1589,11 +1589,11 @@ Core.defineMenus = function () {
                                             if (this.state)
                                             {
                                                 OS.unregisterMpv();
-                                                mp.utils.write_file("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
+                                                mpv.writeFile("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
                                                 Utils.showAlert("warn", Settings.getLocalizedString("alerts.uninstall"));
                                                 setTimeout(function(){
-                                                    mp.commandv("run",mp.utils.get_user_path("~~/uninstaller.exe"));
-                                                    mp.commandv("quit-watch-later");
+                                                    mpv.commandv("run",mpv.getUserPath("~~/uninstaller.exe"));
+                                                    mpv.commandv("quit-watch-later");
                                                 },15000);
                                                 Utils.blockQuitButtons();
 
@@ -1669,7 +1669,7 @@ Core.defineMenus = function () {
                         Core.doUnregistrations();
                         Core.startExecution();
                     }
-                    //mp.commandv("script-message-to", "easympv", "__internal", "restart");
+                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -2098,15 +2098,15 @@ Core.defineMenus = function () {
             var item = undefined;
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("language")
-            var locales = mp.utils.readdir(
-                mp.utils.get_user_path("~~/scripts/easympv/locale/"),
+            var locales = mpv.getDirectoryContents(
+                mpv.getUserPath("~~/scripts/easympv/locale/"),
                 "files"
             );
             locales.sort();
             var json = {};
             for (var i = 0; i < locales.length; i++)
             {
-                json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/") + locales[i]));
+                json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/locale/") + locales[i]));
                 item.list.push(
                     {
                         id: locales[i].split(".")[0],
@@ -2282,16 +2282,14 @@ Core.defineMenus = function () {
             Core.Menus.SettingsMenu.hideMenu();
             if (action == "togglesofa") {
                 if (
-                    mp.utils.file_info(mp.utils.get_user_path("~~/default.sofa")) !=
-                    undefined
+                    mpv.fileExists(mpv.getUserPath("~~/default.sofa"))
                 ) {
                     sofaEnabled = !sofaEnabled;
-                    var path = mp.utils
-                        .get_user_path("~~/")
+                    var path = mpv.getUserPath("~~/")
                         .toString()
                         .replace(/\\/g, "/")
                         .substring(2);
-                    mp.commandv(
+                    mpv.commandv(
                         "af",
                         "toggle",
                         "lavfi=[sofalizer=sofa=C\\\\:" + path + "/default.sofa]"
@@ -2438,7 +2436,8 @@ Core.defineMenus = function () {
     Core.Menus.TestsMenu = new UI.Menus.Menu({
         title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("tests.menu.title"),
         description: Settings.getLocalizedString("tests.menu.description"),
-        autoClose: 0
+        autoClose: 0,
+        menuId: "tests"
     },[],undefined);
 
     var createItemList = function()
@@ -2544,7 +2543,7 @@ Core.defineMenus = function () {
 }
 
 Core.doFileChecks = function () {
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/easympvUtility.exe")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("~~/easympvUtility.exe"))) {
         Utils.log("Task: delete old 1.x files","startup","info");
         OS.fileRemove("script-opts/colorbox.conf");
         OS.fileRemove("script-opts/easympv.conf");
@@ -2554,7 +2553,7 @@ Core.doFileChecks = function () {
         OS.fileRemove("easympvUtility.exe");
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
         Utils.log("Task: reset easympv.conf (file missing)","startup","info");
         Settings.migrate();
         resetOccured = true;
@@ -2568,7 +2567,7 @@ Core.doFileChecks = function () {
         }
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/mpv.conf"))) {
         Utils.log("Task: reset mpvConfig (file missing)","startup","info");
         Settings.mpvConfig.reset();
         resetOccured = true;
@@ -2582,7 +2581,7 @@ Core.doFileChecks = function () {
         }
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/input.conf"))) {
         Utils.log("Task: reset inputConfig (file missing)","startup","info");
         Settings.inputConfig.reset();
         resetOccured = true;
@@ -2607,25 +2606,25 @@ Core.doFileChecks = function () {
         Settings.inputConfig.reload();
     };
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autoload.lua")) != undefined)
+    if (mpv.fileExists(mpv.getUserPath("~~/scripts/autoload.lua")))
     {
         Autoload.enabled = false;
         Utils.log("autoload.lua has been detected! Please remove/disable that script in order to use easympv's build-in playlist manager!","startup","warn");
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/autosave.lua")) != undefined)
+    if (mpv.fileExists(mpv.getUserPath("~~/scripts/autosave.lua")))
     {
         Core.enableSaveTimer = false;
         Utils.log("autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in automatic saving feature!","startup","warn");
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/scripts/betterchapters.lua")) != undefined)
+    if (mpv.fileExists(mpv.getUserPath("~~/scripts/betterchapters.lua")))
     {
         Core.enableChapterSeeking = false;
         Utils.log("betterchapters.lua has been detected! Please remove/disable that script in order to use easympv's build-in chapter seeking feature!","startup","warn");
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/INSTALLER_DATA_REGISTER")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("~~/INSTALLER_DATA_REGISTER"))) {
         if (OS.isWindows)
         {
             Utils.log("User installed using installer, registering mpv...","startup","info");
@@ -2639,6 +2638,10 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
+    if (Environment.undead) {
+        mp.osd_message("easympv was loaded using evaluation! Expect issues...", 3);
+    }
+
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
     //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     Settings.Data.currentVersion = "2.0.0";
@@ -2686,18 +2689,19 @@ Core.startExecution = function () {
         Setup.Start();
     }
     if (Environment.BrowserWorkDir != undefined) {
-	    mp.msg.warn("Browser override: " + Environment.BrowserWorkDir);
+	    mpv.printWarn("Browser override: " + Environment.BrowserWorkDir);
         Browsers.FileBrowser.currentLocation = Environment.BrowserWorkDir;
     }
     else
     {
-        Browsers.FileBrowser.currentLocation = mp.get_property("working-directory");
+        Browsers.FileBrowser.currentLocation = mpv.getProperty("working-directory");
     }
     Core.defineMenus();
     Core.doRegistrations();
     Video.Colors.name = Settings.Data.defaultColorProfile;
     Video.Colors.apply(Settings.Data.defaultColorProfile);
-    //eval(extensionCode);
+
+    ExtensionLoader.init();
 
     Utils.log("Finished loading after " + (Date.now() - startTime) + "ms!","startup","info");
 }

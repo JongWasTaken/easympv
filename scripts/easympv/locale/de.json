@@ -35,7 +35,8 @@
     "alerts.discdrive.open": "Öffne Disc Laufwerk ",
     "alerts.url.loaded": "URL wird geladen!",
     "alerts.url.invalid": "Die angegebene URL ist inkorrekt!",
-    "alerts.browser.playing": "Spiele ",
+    "alerts.browser.playing": "Lade ",
+    "alerts.browser.playing.unsupported": "Lade unbekannte Datei ",
     "alerts.browser.loadsubs": "Lade Untertitel: ",
     "alerts.browser.fileremoved": "Entfernt: ",
     "alerts.browser.fileremoved.error": "Fehler beim Entfernen: ",
@@ -127,6 +128,7 @@
     "browser.favorites.title": "Favoriten",
     "browser.refresh.title": "Aktualisieren",
     "browser.openinexplorer.title": "Im Datei Explorer öffnen",
+    "browser.openrandom.title": "Zufällige Datei öffen",
 
     "context.menu.title": "Datei Aktionen",
     "context.menu.title.folder": "Ordner Aktionen",

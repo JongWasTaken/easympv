@@ -58,7 +58,7 @@ Settings.Data = {
     compatibilityMode: false,
     debugMode: false,
     saveFullLog: false,
-    fileBrowserFavorites: { locations: [] },
+    fileBrowserFavorites: [],
     // Versioning
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
@@ -79,13 +79,9 @@ Settings.load = function () {
  * Deserializes easympv.conf and updates Settings.Data.
  */
 Settings.reload = function () {
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) ==
-        undefined
-    )
+    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf")))
         return;
-    var lines = mp.utils
-        .read_file(mp.utils.get_user_path("~~/easympv.conf"))
+    var lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
         .replaceAll("\r\n", "\n")
         .split("\n");
 
@@ -104,8 +100,20 @@ Settings.reload = function () {
                     }
                     catch (e)
                     {
-                        mp.msg.warn("Could not parse JSON in easympv.conf: " + e);
-                        value = { locations: [] };
+                        mpv.printWarn("Could not parse JSON in easympv.conf: " + e);
+                        value = {};
+                    }
+                }
+                else if (value.charAt(0) == "[")
+                {
+                    try
+                    {
+                        value = JSON.parse(value);
+                    }
+                    catch (e)
+                    {
+                        mpv.printWarn("Could not parse JSON in easympv.conf: " + e);
+                        value = [];
                     }
                 }
                 else
@@ -124,8 +132,13 @@ Settings.reload = function () {
         }
     }
 
-    for (var i = 0; i < Settings.Data["fileBrowserFavorites"].locations.length; i++) {
-        Settings.Data["fileBrowserFavorites"].locations[i] = Settings.Data["fileBrowserFavorites"].locations[i].replaceAll("\/\/","\/");
+    if (Settings.Data.fileBrowserFavorites.hasOwnProperty("locations")) {
+        var temp = Settings.Data.fileBrowserFavorites.locations;
+        Settings.Data.fileBrowserFavorites = temp;
+    }
+
+    for (var i = 0; i < Settings.Data.fileBrowserFavorites.length; i++) {
+        Settings.Data.fileBrowserFavorites[i] = Settings.Data.fileBrowserFavorites[i].replaceAll("\/\/","\/");
     }
 
     if(Environment.SettingsOverrides != undefined)
@@ -144,10 +157,7 @@ Settings.save = function () {
     this.DataCopy = "";
     var lines = [];
 
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) ==
-        undefined
-    ) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
         var defaultConfigString = "";
         defaultConfigString += "### easympv.conf ###\n";
         defaultConfigString += "\n";
@@ -335,7 +345,7 @@ Settings.save = function () {
         defaultConfigString +=
             "# List of favorite'd folders in the File Browser.\n";
         defaultConfigString +=
-            "# This should be a valid JSON array. Default: {\"locations\":[]}\n";
+            "# This should be a valid JSON array. Default: []\n";
         defaultConfigString += "fileBrowserFavorites=x\n";
         defaultConfigString += "\n";
         defaultConfigString += "\n";
@@ -391,8 +401,7 @@ Settings.save = function () {
 
         lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
     } else {
-        lines = mp.utils
-            .read_file(mp.utils.get_user_path("~~/easympv.conf"))
+        lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
     }
@@ -416,17 +425,17 @@ Settings.save = function () {
         this.DataCopy = this.DataCopy + lines[i] + "\n";
     }
     this.DataCopy = this.DataCopy.replace(new RegExp("\\n$"), "");
-    mp.utils.write_file(
-        "file://" + mp.utils.get_user_path("~~/easympv.conf"),
+    mpv.writeFile(
+        "file://" + mpv.getUserPath("~~/easympv.conf"),
         this.DataCopy
     );
 };
 
 Settings.findMpvWindows = function () {
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/INSTALLER_DATA_LOCATION")) != undefined)
+    if (mpv.fileExists(mpv.getUserPath("~~/INSTALLER_DATA_LOCATION")))
     {
-        var loc = mp.utils.read_file(mp.utils.get_user_path("~~/INSTALLER_DATA_LOCATION")).trim();
+        var loc = mpv.readFile(mpv.getUserPath("~~/INSTALLER_DATA_LOCATION")).trim();
         Settings.Data.mpvLocation = loc;
         OS.fileRemove("INSTALLER_DATA_LOCATION");
         return;
@@ -435,15 +444,15 @@ Settings.findMpvWindows = function () {
     if(OS.isWindows && Settings.Data.mpvLocation == "unknown")
     {
         var searchPaths = [
-            mp.utils.getenv("LOCALAPPDATA") + "\\mpv\\",
-            mp.utils.getenv("PROGRAMFILES") + "\\mpv\\",
-            mp.utils.getenv("userprofile") + "\\Desktop\\mpv\\"
+            mpv.getEnv("LOCALAPPDATA") + "\\mpv\\",
+            mpv.getEnv("PROGRAMFILES") + "\\mpv\\",
+            mpv.getEnv("userprofile") + "\\Desktop\\mpv\\"
         ];
         var location = undefined;
 
         for(var s = 0; s < searchPaths.length; s++)
         {
-            if(mp.utils.file_info(mp.utils.get_user_path(searchPaths[s] + "mpv.exe")) != undefined){
+            if(mpv.fileExists(mpv.getUserPath(searchPaths[s] + "mpv.exe"))){
                 location = searchPaths[s];
                 break;
             }
@@ -459,12 +468,8 @@ Settings.findMpvWindows = function () {
 Settings.migrate = function () {
     var copy = {};
     // read current settings into variable
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) !=
-        undefined
-    ) {
-        var lines = mp.utils
-            .read_file(mp.utils.get_user_path("~~/easympv.conf"))
+    if (mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
+        var lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
 
@@ -570,13 +575,10 @@ Settings.mpvConfig.load = function () {
  * Deserializes mpv.conf and updates Settings.mpvConfig.Data.
  */
 Settings.mpvConfig.reload = function () {
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/mpv.conf")) == undefined
-    ) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/mpv.conf"))) {
         return;
     } else {
-        var confFile = mp.utils
-            .read_file(mp.utils.get_user_path("~~/mpv.conf"))
+        var confFile = mpv.readFile(mpv.getUserPath("~~/mpv.conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
     }
@@ -604,7 +606,7 @@ Settings.mpvConfig.reload = function () {
         {
             value = "yes";
         }
-        mp.set_property(option.replaceAll("_", "-"),value);
+        mpv.setProperty(option.replaceAll("_", "-"),value);
     }
 };
 
@@ -637,8 +639,8 @@ Settings.mpvConfig.save = function () {
     }
 
     //copy = copy.replace(new RegExp("\\n$"), "");
-    mp.utils.write_file(
-        "file://" + mp.utils.get_user_path("~~/mpv.conf"),
+    mpv.writeFile(
+        "file://" + mpv.getUserPath("~~/mpv.conf"),
         lines.join("\n")
     );
 };
@@ -697,8 +699,8 @@ Settings.inputConfig.reset = function () {
         'Shift+PGDWN cycle-values video-aspect "16:9" "4:3" "1024:429"\n';
     //defaultConfigString = defaultConfigString.replaceAll("\r\n","\n");
 
-    mp.utils.write_file(
-        "file://" + mp.utils.get_user_path("~~/input.conf"),
+    mpv.writeFile(
+        "file://" + mpv.getUserPath("~~/input.conf"),
         defaultConfigString
     );
 
@@ -708,13 +710,12 @@ Settings.inputConfig.reset = function () {
 };
 
 Settings.inputConfig.reload = function () {
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/input.conf")) == undefined)
+    if (!mpv.fileExists(mpv.getUserPath("~~/input.conf")))
     {
         return;
     };
 
-    var lines = mp.utils
-    .read_file(mp.utils.get_user_path("~~/input.conf"))
+    var lines = mpv.readFile(mpv.getUserPath("~~/input.conf"))
     .replaceAll("\r\n", "\n")
     .split("\n");
 
@@ -723,7 +724,7 @@ Settings.inputConfig.reload = function () {
             if (lines[i].trim() != "")
             {
                 var command = lines[i].trim().split("#")[0];
-                mp.commandv("keybind",command.split(" ")[0],command.substring(command.indexOf(" ") + 1));
+                mpv.commandv("keybind",command.split(" ")[0],command.substring(command.indexOf(" ") + 1));
             }
         }
     }
@@ -755,11 +756,11 @@ Settings.presets.images = [];
 
 Settings.presets.load = function () {
     try {
-        mp.msg.info("[settings] Loading language: " + Settings.Data.language);
-        Settings.locale = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
+        mpv.printInfo("[settings] Loading language: " + Settings.Data.language);
+        Settings.locale = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
     }
     catch (_) {
-        mp.msg.warn("[settings] Selected language could not be loaded! Falling back to localization keys...");
+        mpv.printWarn("[settings] Selected language could not be loaded! Falling back to localization keys...");
         Settings.locale = {};
     }
 
@@ -780,9 +781,9 @@ Settings.presets.load = function () {
         seperator = ";";
     };
 
-    if(mp.utils.file_info(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")) != undefined)
+    if(mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/Presets.json")))
     {
-        var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Presets.json")));
+        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Presets.json")));
         if (json["shadersets"] != undefined) {
             for (var set in json["shadersets"]) {
                 var filelist = "";
@@ -869,9 +870,9 @@ Settings.presets.load = function () {
         }
     }
 
-    if(mp.utils.file_info(mp.utils.get_user_path("~~/easympv.json")) != undefined)
+    if(mpv.fileExists(mpv.getUserPath("~~/easympv.json")))
     {
-        var jsonUser = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv.json")));
+        var jsonUser = JSON.parse(mpv.readFile(mpv.getUserPath("~~/easympv.json")));
 
         if (jsonUser["shadersets"] != undefined) {
             for (var set in jsonUser["shadersets"]) {
@@ -940,8 +941,8 @@ Settings.presets.load = function () {
             "images": []
         };
 
-        mp.utils.write_file(
-            "file://" + mp.utils.get_user_path("~~/easympv.json"),
+        mpv.writeFile(
+            "file://" + mpv.getUserPath("~~/easympv.json"),
             JSON.stringify(dummyFile,null,4)
         );
     }
@@ -970,19 +971,16 @@ Settings.cache.load = function() {
 
     Settings.cache.perFileSaves = [];
 
-    if(
-        mp.utils.file_info(mp.utils.get_user_path("~~/easympv-cache.json")) !=
-        undefined
-    ) {
-        var json = JSON.parse(mp.utils.read_file(mp.utils.get_user_path("~~/easympv-cache.json")));
+    if(mpv.fileExists(mpv.getUserPath("~~/easympv-cache.json"))) {
+        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/easympv-cache.json")));
         for(var i = 0; i < json["perFileSaves"].length; i++)
         {
             var key = json["perFileSaves"][i];
-            //mp.msg.warn(key.timestamp)
+            //mpv.printWarn(key.timestamp)
             if (key.timestamp != undefined)
             {
-                //mp.msg.warn(Number(currentTime - key.timestamp));
-                //mp.msg.warn(Number(currentTime - key.timestamp) < period);
+                //mpv.printWarn(Number(currentTime - key.timestamp));
+                //mpv.printWarn(Number(currentTime - key.timestamp) < period);
                 if (Number(currentTime - key.timestamp) < period)
                 {
                     Settings.cache.perFileSaves.push(key);
@@ -1006,8 +1004,8 @@ Settings.cache.save = function() {
         perFileSaves: Settings.cache.perFileSaves,
     };
 
-    mp.utils.write_file(
-        "file://" + mp.utils.get_user_path("~~/easympv-cache.json"),
+    mpv.writeFile(
+        "file://" + mpv.getUserPath("~~/easympv-cache.json"),
         JSON.stringify(temp,null,4)
     );
 }

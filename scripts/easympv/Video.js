@@ -17,7 +17,7 @@ Video.FPS.setFixedFPS = function(fps)
 {
     if (fps != undefined)
     {
-        mp.commandv(
+        mpv.commandv(
             "vf",
             "set",
             "@empvfps:fps=fps=" + fps
@@ -25,7 +25,7 @@ Video.FPS.setFixedFPS = function(fps)
     }
     else
     {
-        mp.commandv(
+        mpv.commandv(
             "vf",
             "remove",
             "@empvfps"
@@ -37,7 +37,7 @@ Video.FPS.setFixedFPS = function(fps)
 Video.FPS.getFixedFPS = function()
 {
     var output = "native";
-    var filters = mp.get_property_native("vf");
+    var filters = mpv.getPropertyNative("vf");
     if (filters.length != 0)
     {
         for (var i = 0; i < filters.length; i++)
@@ -55,13 +55,13 @@ Video.FPS.getFixedFPS = function()
 Video.FPS.checkVRR = function ()
 {
     var double = "";
-    if (Number(mp.get_property("container-fps")) < (Settings.Data.refreshRate / 2) && mp.get_property("speed") == 1) {
-        double = String(Number(mp.get_property("container-fps")) * 2);
+    if (Number(mpv.getProperty("container-fps")) < (Settings.Data.refreshRate / 2) && mpv.getProperty("speed") == 1) {
+        double = String(Number(mpv.getProperty("container-fps")) * 2);
         if (double < 48) { double = double * 2};
-        mp.set_property("override-display-fps",double)
+        mpv.setProperty("override-display-fps",double)
         Video.FPS.setFixedFPS(double);
     } else {
-        mp.set_property("override-display-fps",Settings.Data.refreshRate);
+        mpv.setProperty("override-display-fps",Settings.Data.refreshRate);
         Video.FPS.setFixedFPS();
     }
 }
@@ -80,7 +80,7 @@ Video.Shaders.apply = function (shader) {
 	}
 
         var resolutions = [300, 480, 720, 1080, 1440, 2560, 3000],
-            file_resolution = Number(mp.get_property("video-params/h"));
+            file_resolution = Number(mpv.getProperty("video-params/h"));
 
         var closest = resolutions.reduce(function (prev, curr) {
             return Math.abs(curr - file_resolution) <
@@ -109,9 +109,9 @@ Video.Shaders.apply = function (shader) {
         shader == undefined
     ) {
         Video.Shaders.name = "none";
-        mp.commandv("change-list", "glsl-shaders", "clr", "");
+        mpv.commandv("change-list", "glsl-shaders", "clr", "");
     } else {
-        mp.commandv("change-list", "glsl-shaders", "clr", "");
+        mpv.commandv("change-list", "glsl-shaders", "clr", "");
         if (shader.includes("none") || shader.includes("undefined")) {
             Video.Shaders.name = "none";
         } else {
@@ -123,7 +123,7 @@ Video.Shaders.apply = function (shader) {
         for (i = 0; i < Settings.presets.shadersets.length; i++) {
             if (Settings.presets.shadersets[i].name == shader) {
                 shaderFound = true;
-                mp.commandv(
+                mpv.commandv(
                     "change-list",
                     "glsl-shaders",
                     "set",
@@ -136,7 +136,7 @@ Video.Shaders.apply = function (shader) {
         {
             for (i = 0; i < Settings.presets.shadersetsUser.length; i++) {
                 if (Settings.presets.shadersetsUser[i].name == shader) {
-                    mp.commandv(
+                    mpv.commandv(
                         "change-list",
                         "glsl-shaders",
                         "set",
@@ -147,7 +147,7 @@ Video.Shaders.apply = function (shader) {
             }
         }
 
-        mp.msg.info("[shaders] Switching to preset: " + Video.Shaders.name);
+        mpv.printInfo("[shaders] Switching to preset: " + Video.Shaders.name);
     }
 };
 
@@ -187,7 +187,7 @@ Video.Colors.apply = function (name) {
     }
 
     for (var property in values) {
-        mp.set_property(property, values[property]);
+        mpv.setProperty(property, values[property]);
     }
     Video.Colors.name = name;
 };

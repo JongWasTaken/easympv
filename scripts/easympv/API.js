@@ -132,7 +132,7 @@ API.Commands = {
 }
 
 API.handleIncomingJSON = function(json) {
-    //mp.msg.warn("Incoming JSON: " + json);
+    //mpv.printWarn("Incoming JSON: " + json);
     if(json == undefined) {
         return;
     }
@@ -158,5 +158,5 @@ API.sendJSON = function(target,data) {
         return;
     if(data == undefined)
         return;
-    mp.commandv("script-message-to", target, "easympv-response", data);
+    mpv.commandv("script-message-to", target, "easympv-response", data);
 }

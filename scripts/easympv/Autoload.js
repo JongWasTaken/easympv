@@ -56,7 +56,7 @@ Autoload.loadFolder = function(force) {
     }
 
 
-    var currentDirectory = mp.utils.readdir(Autoload.location, "files");
+    var currentDirectory = mpv.getDirectoryContents(Autoload.location, "files");
 
     if (currentDirectory == undefined) // non-file playlist
     {
@@ -168,7 +168,7 @@ Autoload.refresh = function()
 Autoload._reversePopulate = function ()
 {
     Autoload.playlist = [];
-    var playlist = JSON.parse(mp.get_property("playlist"));
+    var playlist = JSON.parse(mpv.getProperty("playlist"));
     //dump(playlist);
     if (playlist.length == 0)
     {
@@ -260,13 +260,13 @@ Autoload.moveTo = function (index, target)
 
 Autoload.buildPlaylist = function ()
 {
-    mp.commandv("playlist-clear"); // removes all entries except currently playing
+    mpv.commandv("playlist-clear"); // removes all entries except currently playing
     var prepend = function(path)
     {
         // to future me: DO NOT TOUCH THIS FUNCTION
-        var pos = mp.get_property_number("playlist-count");
-        mp.commandv("loadfile", path, "append")
-        mp.commandv("playlist-move", pos, 0);
+        var pos = mpv.getPropertyNumber("playlist-count");
+        mpv.commandv("loadfile", path, "append")
+        mpv.commandv("playlist-move", pos, 0);
     }
 
     var toPrepend = [];
@@ -305,7 +305,7 @@ Autoload.buildPlaylist = function ()
 
     for (var l = 0; l < toAppend.length; l++)
     {
-        mp.commandv("loadfile", toAppend[l], "append");
+        mpv.commandv("loadfile", toAppend[l], "append");
     }
 
 }

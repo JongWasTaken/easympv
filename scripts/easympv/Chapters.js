@@ -18,8 +18,8 @@ Chapters.status = "disabled";
 Chapters.handler = function () {
     // Called on every chapter change (in main.js)
     Utils.log("Chapter change detected", "chapters","info");
-    Chapters.current = mp.get_property("chapter"); // Which chapter is currently playing
-    Chapters.total = Number(mp.get_property("chapters")) - 1; // Total number of chapters in video file
+    Chapters.current = mpv.getProperty("chapter"); // Which chapter is currently playing
+    Chapters.total = Number(mpv.getProperty("chapters")) - 1; // Total number of chapters in video file
 
     // Try to identify 'style' by comparing data to common patterns
     // Even though this seems janky, it works suprisingly well
@@ -42,7 +42,7 @@ Chapters.handler = function () {
                     Chapters.current == 4 ||
                     Chapters.current == 5
                 ) {
-                    mp.command("no-osd add chapter 1");
+                    mpv.command("no-osd add chapter 1");
                 }
             } else if (Chapters.style == "classic") {
                 if (
@@ -50,7 +50,7 @@ Chapters.handler = function () {
                     Chapters.current == 3 ||
                     Chapters.current == 4
                 ) {
-                    mp.command("no-osd add chapter 1");
+                    mpv.command("no-osd add chapter 1");
                 }
             } else if (Chapters.style == "modernalt") {
                 if (
@@ -58,33 +58,33 @@ Chapters.handler = function () {
                     Chapters.current == 2 ||
                     Chapters.current == 3
                 ) {
-                    mp.command("no-osd add chapter 1");
+                    mpv.command("no-osd add chapter 1");
                 }
             }
         } else if (Chapters.mode == "slowdown") {
             if (Chapters.style == "modern") {
                 if (Chapters.current == 1 || Chapters.current == 4) {
-                    Chapters.cspeed = mp.get_property("speed");
-                    mp.set_property("speed", 1);
+                    Chapters.cspeed = mpv.getProperty("speed");
+                    mpv.setProperty("speed", 1);
                 }
                 if (Chapters.current == 2 || Chapters.current == 5) {
-                    mp.set_property("speed", Chapters.cspeed);
+                    mpv.setProperty("speed", Chapters.cspeed);
                 }
             } else if (Chapters.style == "classic") {
                 if (Chapters.current == 0 || Chapters.current == 3) {
-                    Chapters.cspeed = mp.get_property("speed");
-                    mp.set_property("speed", 1);
+                    Chapters.cspeed = mpv.getProperty("speed");
+                    mpv.setProperty("speed", 1);
                 }
                 if (Chapters.current == 1 || Chapters.current == 4) {
-                    mp.set_property("speed", Chapters.cspeed);
+                    mpv.setProperty("speed", Chapters.cspeed);
                 }
             } else if (Chapters.style == "modernalt") {
                 if (Chapters.current == 0 || Chapters.current == 2) {
-                    Chapters.cspeed = mp.get_property("speed");
-                    mp.set_property("speed", 1);
+                    Chapters.cspeed = mpv.getProperty("speed");
+                    mpv.setProperty("speed", 1);
                 }
                 if (Chapters.current == 1 || Chapters.current == 3) {
-                    mp.set_property("speed", Chapters.cspeed);
+                    mpv.setProperty("speed", Chapters.cspeed);
                 }
             }
         }

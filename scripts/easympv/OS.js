@@ -14,7 +14,7 @@ var OS = {};
 OS.repoName = "easympv-installer"; // change to easympv once stable
 OS.checksCompleted = false;
 OS.gitAvailable = false;
-OS.isGit = mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) != undefined ? true : false;
+OS.isGit = mpv.fileExists(mpv.getUserPath("~~/.git/"));
 OS.gitCommit = "";
 OS.name = undefined;
 OS.isWindows = false;
@@ -25,14 +25,14 @@ OS._connectionChecked = false;
 OS._isConnected = false;
 
 OS.init = function () {
-    if (mp.utils.getenv("OS") == "Windows_NT") {
+    if (mpv.getEnv("OS") == "Windows_NT") {
         OS.name = "win";
         OS.isWindows = true;
         OS.directorySeperator = "\\";
         Utils.commonFontName = "Overpass Light";
         Utils.log("Detected operating system: Windows","startup","info");
     } else {
-        var uname = mp.command_native({
+        var uname = mpv.commandNative({
             name: "subprocess",
             playback_only: false,
             capture_stdout: true,
@@ -62,7 +62,7 @@ OS.init = function () {
                     "Your OS is untested, but if it is similar to Linux it will probably be fine.","startup","error"
                 );
             }
-            if (mp.utils.getenv("SteamGamepadUI") != undefined)
+            if (mpv.getEnv("SteamGamepadUI") != undefined)
             {
                 Utils.log("Detected Steam GamepadUI","startup","info");
                 OS.isSteamGamepadUI = true;
@@ -83,11 +83,11 @@ OS._performChecks = function () {
     } else {
         r = OS._call("which git");
     }
-    if (mp.utils.file_info(r.stdout.trim()) != undefined) {
+    if (mpv.fileExists(r.stdout.trim())) {
         OS.gitAvailable = true;
     }
     if (OS.gitAvailable && OS.isGit) {
-        var configdir = mp.utils.get_user_path("~~/");
+        var configdir = mpv.getUserPath("~~/");
         var and = "&&";
         if (OS.isWindows) { and = ";"; }
         OS.gitCommit = OS._call("cd "+configdir+" "+ and +" git rev-parse --abbrev-ref HEAD").stdout.trim() + "-" + OS._call("cd "+configdir+" "+ and +" git rev-parse --short HEAD").stdout.trim();
@@ -106,8 +106,8 @@ OS._call = function (cmd,async,callback) {
     }
 
     if (OS.isWindows) {
-        mp.utils.write_file(
-            "file://" + mp.utils.get_user_path("~~/.tmp-powershell.ps1"),
+        mpv.writeFile(
+            "file://" + mpv.getUserPath("~~/.tmp-powershell.ps1"),
             cmd// + "\nRemove-Item -Path $MyInvocation.MyCommand.Source\nexit 0"
         );
     }
@@ -119,7 +119,7 @@ OS._call = function (cmd,async,callback) {
             "-ExecutionPolicy",
             "bypass",
             "-Command",
-            mp.utils.get_user_path("~~/.tmp-powershell.ps1")
+            mpv.getUserPath("~~/.tmp-powershell.ps1")
         ];
     } else {
         var args = [
@@ -131,7 +131,7 @@ OS._call = function (cmd,async,callback) {
 
     if(async)
     {
-        var r = mp.command_native_async(
+        var r = mpv.commandNativeAsync(
             {
                 name: "subprocess",
                 playback_only: false,
@@ -143,7 +143,7 @@ OS._call = function (cmd,async,callback) {
     }
     else
     {
-        var r = mp.command_native(
+        var r = mpv.commandNative(
             {
                 name: "subprocess",
                 playback_only: false,
@@ -156,10 +156,10 @@ OS._call = function (cmd,async,callback) {
 
     if (OS.isWindows)
     {
-        if (mp.utils.file_info(mp.utils.get_user_path("~~/.tmp-powershell.ps1")) != undefined)
+        if (mpv.fileExists(mpv.getUserPath("~~/.tmp-powershell.ps1")))
         {
-            var dcommand = "Remove-Item -Path \""+ mp.utils.get_user_path("~~/.tmp-powershell.ps1") +"\" -Force";
-            mp.command_native(
+            var dcommand = "Remove-Item -Path \""+ mpv.getUserPath("~~/.tmp-powershell.ps1") +"\" -Force";
+            mpv.commandNative(
                 {
                     name: "subprocess",
                     playback_only: false,
@@ -184,11 +184,11 @@ OS.openFile = function(file,raw) {
     }
 
     if (raw == undefined) {
-        file = mp.utils.get_user_path("~~/") + "/" + file;
+        file = mpv.getUserPath("~~/") + "/" + file;
         file = file.replaceAll("//", "/");
         file = file.replaceAll('"+"', "/");
     }
-    mp.msg.warn(file);
+    mpv.printWarn(file);
     if (OS.isWindows) {
         file = file.replaceAll("/", "\\");
         // look at this monstrosity. why is windows the way it is?
@@ -199,9 +199,9 @@ OS.openFile = function(file,raw) {
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1}\n"+
         "exit $LASTEXITCODE",false,undefined);
     } else if (OS.name == "linux") {
-        mp.commandv("run", "sh", "-c", "xdg-open " + file);
+        mpv.commandv("run", "sh", "-c", "xdg-open " + file);
     } else if (OS.name == "macos") {
-        mp.commandv("run", "sh", "-c", "/System/Applications/TextEdit.app/Contents/MacOS/TextEdit " + file);
+        mpv.commandv("run", "sh", "-c", "/System/Applications/TextEdit.app/Contents/MacOS/TextEdit " + file);
     }
     Utils.log("Opening file: " + file,"main","info");
 };
@@ -247,22 +247,22 @@ OS.showMessage = function(text,async) {
         return;
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("/usr/bin/zenity")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("/usr/bin/zenity"))) {
         OS._call("/usr/bin/zenity --info --title=\"mpv\" --text=\""+ text + "\"",async,callback);
         return;
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("/usr/bin/yad")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("/usr/bin/yad"))) {
         OS._call("/usr/bin/yad --info --title=\"mpv\" --text=\""+ text + "\"",async,callback);
         return;
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("/usr/bin/kdialog")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("/usr/bin/kdialog"))) {
         OS._call("/usr/bin/kdialog --msgbox \"" + text +"\"",async,callback);
         return;
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("/usr/bin/xmessage")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("/usr/bin/xmessage"))) {
         OS._call("/usr/bin/xmessage \"" + text +"\"",async,callback);
         return;
     }
@@ -303,7 +303,7 @@ OS.showNotification = function(text) {
         return OS._call("osascript -e \"display notification \\\""+ text +"\\\" with title \\\"mpv\\\"\"").status  == 0 ? true : false;
     }
 
-    if (mp.utils.file_info(mp.utils.get_user_path("/usr/bin/notify-send")) != undefined) {
+    if (mpv.fileExists(mpv.getUserPath("/usr/bin/notify-send"))) {
         return OS._call("/usr/bin/notify-send -i mpv -t 5000 \"mpv\" \""+ text +"\"").status == 0 ? true : false;
     }
 
@@ -381,7 +381,7 @@ OS.gitUpdate = function (callback) {
 
 // get-package
 OS.packageGetAsync = function (tag, callback) {
-    if(mp.utils.file_info("~~" + OS.directorySeperator + "package.zip") != undefined)
+    if(mpv.fileExists("~~" + OS.directorySeperator + "package.zip"))
     {
         OS.fileRemove("package.zip");
     }
@@ -402,7 +402,7 @@ OS.packageGetAsync = function (tag, callback) {
 
 // extract-package
 OS.packageExtractAsync = function (callback) {
-    if(mp.utils.file_info("~~" + OS.directorySeperator + "package.zip") == undefined)
+    if(!mpv.fileExists("~~" + OS.directorySeperator + "package.zip"))
     {
         return false;
     }
@@ -432,7 +432,7 @@ OS.packageRemoveAsync = function (callback) {
 
 // apply-package
 OS.packageApplyAsync = function (tag,callback) {
-    if(mp.utils.file_info("~~" + OS.directorySeperator + "easympv-" + tag) == undefined)
+    if(!mpv.fileExists("~~" + OS.directorySeperator + "easympv-" + tag))
     {
         return false;
     }
@@ -452,13 +452,13 @@ OS.packageApplyAsync = function (tag,callback) {
 
 //
 OS.fileInfo = function (file) {
-    return mp.utils.file_info(file);
+    return mpv.fileInfo(file);
 }
 
 // remove-file
 OS.fileRemove = function (file) {
     file = file.replaceAll("/",OS.directorySeperator);
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/") + OS.directorySeperator + file) == undefined)
+    if (!mpv.fileExists(mpv.getUserPath("~~/") + OS.directorySeperator + file))
     {
         return false;
     }
@@ -475,7 +475,7 @@ OS.fileRemove = function (file) {
 }
 
 OS.fileTrashSystemwide = function (path) {
-    if (mp.utils.file_info(path) == undefined)
+    if (!mpv.fileExists(path))
     {
         return false;
     }
@@ -517,7 +517,7 @@ OS.fileTrashSystemwide = function (path) {
 
 
 OS.fileRemoveSystemwide = function (path) {
-    if (mp.utils.file_info(path) == undefined)
+    if (!mpv.fileExists(path))
     {
         return false;
     }

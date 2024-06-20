@@ -146,16 +146,16 @@ Utils.setIPCServer = function () {
     Utils.pipeName = "mpv";
     Utils.log("Started IPC Server: PipeName is \""+Utils.pipeName+"\"","startup","info");
     if (OS.isWindows) {
-        mp.set_property("input-ipc-server", Utils.pipeName); // named pipes exist in the limbo
+        mpv.setProperty("input-ipc-server", Utils.pipeName); // named pipes exist in the limbo
     } else {
-        mp.set_property("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
+        mpv.setProperty("input-ipc-server", "/tmp/" + Utils.pipeName); // sockets need a location
     }
 };
 
-Utils.mpvVersion = mp.get_property("mpv-version").substring(4).split("-")[0];
+Utils.mpvVersion = mpv.getProperty("mpv-version").substring(4).split("-")[0];
 Utils.mpvComparableVersion = Number(Utils.mpvVersion.substring(2));
-Utils.ffmpegVersion = mp.get_property("ffmpeg-version");
-Utils.libassVersion = mp.get_property("libass-version");
+Utils.ffmpegVersion = mpv.getProperty("ffmpeg-version");
+Utils.libassVersion = mpv.getProperty("libass-version");
 
 
 /**
@@ -187,7 +187,7 @@ Utils.showSystemMessagebox = function (text, async) {
 
     if(!OS.isWindows)
     {
-        var isTerminal = (mp.utils.getenv("TERM") != undefined);
+        var isTerminal = (mpv.getEnv("TERM") != undefined);
         if(isTerminal) {Utils.log(text,"messagebox","info"); return;}
     }
 
@@ -240,7 +240,7 @@ Utils.exitMpv = function () {
             Settings.getLocalizedString("alerts.updateinprogress")
         );
     } else {
-        mp.commandv("quit-watch-later");
+        mpv.commandv("quit-watch-later");
     }
 };
 
@@ -249,7 +249,7 @@ Utils.exitMpv = function () {
  */
 Utils.blockQuitButtons = function () {
     Utils.updateInProgress = true;
-    var bindings = JSON.parse(mp.get_property("input-bindings"));
+    var bindings = JSON.parse(mpv.getProperty("input-bindings"));
     var keysToBlock = [];
     Utils.idsToUnblock = [];
     for (var i = 0; i < bindings.length; i++) {
@@ -299,10 +299,7 @@ Utils.doUpdateStage1 = function () // download
  */
 Utils.doUpdateStage2 = function () // extract
 {
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) !=
-        undefined
-    ) {
+    if (mpv.fileExists(mpv.getUserPath("~~/package.zip"))) {
         OS.packageExtractAsync(Utils.doUpdateStage3);
     } else {
         Utils.unblockQuitButtons();
@@ -320,13 +317,8 @@ Utils.doUpdateStage2 = function () // extract
 Utils.doUpdateStage3 = function () // delete package
 {
     if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) !=
-            undefined &&
-        mp.utils.file_info(
-            mp.utils.get_user_path(
-                "~~/easympv-" + Utils.latestUpdateData.version + "/"
-            )
-        ) != undefined
+        mpv.fileExists(mpv.getUserPath("~~/package.zip")) &&
+        mpv.fileExists(mpv.getUserPath("~~/easympv-" + Utils.latestUpdateData.version + "/"))
     ) {
         OS.packageRemoveAsync(Utils.doUpdateStage4);
     } else {
@@ -345,8 +337,7 @@ Utils.doUpdateStage3 = function () // delete package
 Utils.doUpdateStage4 = function () // apply extracted package
 {
     if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/package.zip")) ==
-        undefined
+        !mpv.fileExists(mpv.getUserPath("~~/package.zip"))
     ) {
         OS.packageApplyAsync(Utils.latestUpdateData.version,Utils.doUpdateStage5)
     } else {
@@ -364,8 +355,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
  */
 Utils.doUpdateStage5 = function () {
     if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/extractedPackage")) ==
-        undefined
+        !mpv.fileExists(mpv.getUserPath("~~/extractedPackage"))
     ) {
         if (Utils.latestUpdateData.removeFiles.length != 0) {
             for (
@@ -420,7 +410,7 @@ Utils.doUpdate = function () {
 
     Utils.blockQuitButtons();
 
-    if (mp.utils.file_info(mp.utils.get_user_path("~~/.git/")) == undefined)
+    if (!mpv.fileExists(mpv.getUserPath("~~/.git/")))
     {
         Utils.doUpdateStage1();
     }
@@ -474,13 +464,10 @@ Utils.compareVersions = function (currentVersion, newestVersion) {
  * @return {string} credits
  */
 Utils.getCredits = function () {
-    if (
-        mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) ==
-        undefined
-    )
+    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf")))
         return;
-    return mp.utils.read_file(
-        mp.utils.get_user_path("~~/scripts/easympv/Credits.txt")
+    return mpv.readFile(
+        mpv.getUserPath("~~/scripts/easympv/Credits.txt")
     );
 };
 
@@ -493,10 +480,10 @@ Utils.restartMpv = function () {
         mpvLocation = Settings.Data.mpvLocation;
     }
 
-    if (mp.utils.file_info(mpvLocation) == undefined)
+    if (!mpv.fileExists(mpvLocation))
     {
         Utils.log("mpv location is unknown! mpv will now terminate!","restart","info");
-        mp.commandv("quit-watch-later");
+        mpv.commandv("quit-watch-later");
     }
 
     if (OS.isWindows)
@@ -505,11 +492,11 @@ Utils.restartMpv = function () {
         mpvLocation = mpvLocation.replaceAll("/", "\\");
     }
 
-    var cFile = mp.get_property("playlist/0/filename");
+    var cFile = mpv.getProperty("playlist/0/filename");
 
-    for (var i = 0; i < Number(mp.get_property("playlist/count")); i++) {
-        if (mp.get_property("playlist/" + i + "/current") == "yes") {
-            cFile = mp.get_property("playlist/" + i + "/filename");
+    for (var i = 0; i < Number(mpv.getProperty("playlist/count")); i++) {
+        if (mpv.getProperty("playlist/" + i + "/current") == "yes") {
+            cFile = mpv.getProperty("playlist/" + i + "/filename");
             break;
         }
     }
@@ -518,12 +505,12 @@ Utils.restartMpv = function () {
     if (cFile != undefined) {
         if (
             !OS.isWindows &&
-            mp.utils.file_info(
-                mp.get_property("working-directory") + "/" + cFile
-            ) != undefined
+            mpv.fileExists(
+                mpv.getProperty("working-directory") + "/" + cFile
+            )
         ) {
             cFile =
-                mp.get_property("working-directory") +
+                mpv.getProperty("working-directory") +
                 "/" +
                 cFile.replaceAll("./", "");
         }
@@ -532,12 +519,12 @@ Utils.restartMpv = function () {
     {
         cFile = "--player-operation-mode=pseudo-gui";
     }
-    mp.msg.warn(mpvLocation);
-    mp.msg.warn(cFile);
-    mp.commandv("run",mpvLocation,cFile);
+    mpv.printWarn(mpvLocation);
+    mpv.printWarn(cFile);
+    mpv.commandv("run",mpvLocation,cFile);
     Utils.log("!!! mpv will be restarted !!!","restart","warn")
     Utils.log("!!! Any custom options have not been passed to the new mpv instance, please restart manually if neccessary !!!","restart","warn")
-    mp.commandv("quit-watch-later");
+    mpv.commandv("quit-watch-later");
 }
 
 Utils.printCallStack = function(name) {
