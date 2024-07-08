@@ -39,10 +39,11 @@ Settings.Data = {
     showClock: false,
     clockPosition: "top-left",
     fadeMenus: false,
-    scrollAlerts: true,
     // Sets
     defaultShaderSet: "none",
     defaultColorProfile: "none",
+    // Extensions
+    enabledExtensions: ["chapters.js"],
     // VRR
     simpleVRR: false,
     refreshRate: 144,
@@ -53,12 +54,11 @@ Settings.Data = {
     allowFolderDeletion: false,
     // Misc
     startIPCServer: false,
-    useNativeNotifications: false,
     notifyAboutUpdates: true,
     compatibilityMode: false,
     debugMode: false,
     saveFullLog: false,
-    fileBrowserFavorites: [],
+    fileBrowserFavorites: [""],
     // Versioning
     currentVersion: "0.0.0",
     newestVersion: "0.0.1",
@@ -172,7 +172,7 @@ Settings.save = function () {
         defaultConfigString += "# Location of mpv executable.\n";
         defaultConfigString += "# Default: unknown\n";
         defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\\\n";
-        defaultConfigString += "# Use a full path. This is only required on Windows, as on other Operating Systems it is assumed to in the $PATH.\n";
+        defaultConfigString += "# Use a full path. This is only required on Windows, as on other Operating Systems it is assumed to be in the $PATH.\n";
         defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
         defaultConfigString += "mpvLocation=unknown\n";
         defaultConfigString += "\n";
@@ -224,12 +224,14 @@ Settings.save = function () {
         defaultConfigString += "# This ultimately comes down to personal preference.\n";
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "fadeMenus=true\n";
+/*
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to have alerts move across the screen.\n";
         defaultConfigString += "# Having this enabled might result in a performance penalty.\n";
         defaultConfigString += "# This ultimately comes down to personal preference.\n";
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "scrollAlerts=true\n";
+*/
         defaultConfigString += "\n";
         defaultConfigString += "\n";
         defaultConfigString += "## SETS\n";
@@ -245,6 +247,15 @@ Settings.save = function () {
         defaultConfigString +=
             "# Use the full name of a profile as it appears in the colors menu!\n";
         defaultConfigString += "defaultColorProfile=x\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## Extensions\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# List of extension file names to load on startup.\n";
+        defaultConfigString += "# It is recommended to not modify this manually. Use the menu instead!\n";
+        defaultConfigString += "# This should be a valid JSON array containing strings.\n";
+        defaultConfigString += "# Default: [\"chapters.js\"]\n";
+        defaultConfigString += "enabledExtensions=[\"chapters.js\"]";
         defaultConfigString += "\n";
         defaultConfigString += "\n";
         defaultConfigString += "## VRR\n";
@@ -307,6 +318,7 @@ Settings.save = function () {
             "# On Unix-likes a socket will be created: /tmp/mpv\n";
         defaultConfigString += "startIPCServer=x\n";
         defaultConfigString += "\n";
+                    /*
         defaultConfigString +=
             "# Whether to use your operating system's native notifications.\n";
         defaultConfigString +=
@@ -315,6 +327,7 @@ Settings.save = function () {
             "# Default: false\n";
         defaultConfigString += "useNativeNotifications=x\n";
         defaultConfigString += "\n";
+                */
         defaultConfigString += "# Whether to show alerts when out-of-date.\n";
         defaultConfigString += "# Default: true\n";
         defaultConfigString += "notifyAboutUpdates=x\n";
@@ -756,11 +769,11 @@ Settings.presets.images = [];
 
 Settings.presets.load = function () {
     try {
-        mpv.printInfo("[settings] Loading language: " + Settings.Data.language);
+        mpv.printInfo("Loading language: " + Settings.Data.language);
         Settings.locale = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
     }
     catch (_) {
-        mpv.printWarn("[settings] Selected language could not be loaded! Falling back to localization keys...");
+        mpv.printWarn("Selected language could not be loaded! Falling back to localization keys...");
         Settings.locale = {};
     }
 
@@ -965,7 +978,6 @@ Settings.getLocalizedString = function(identifier)
 Settings.cache.perFileSaves = [];
 
 Settings.cache.load = function() {
-
     var currentTime = Date.now();
     var period = 2592000; // 30 * 24 * 60 * 60
 

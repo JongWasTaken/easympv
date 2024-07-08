@@ -85,6 +85,10 @@ Download the latest release (or the master branch) and put all files into `%appd
 Launch mpv to generate config files (`mpv.conf`, `input.conf`, `easympv.conf`) and follow the on-screen instructions.  
 
 ## Known Issues
+### General
+- Custom fonts may not load on newer mpv versions.
+    - Workaround: Install all fonts in the `fonts` directory manually to fix this!
+- macOS code paths have not been tested in a while and will probably cause issues or crashes.
 ### Autoload.js
 - The generated mpv playlist will sometimes clear itself.
 - The generated mpv playlist will sometimes not be in the correct order.
@@ -95,19 +99,13 @@ Because of these issues, it is currently recommended to use [`autoload.lua`](htt
 The Autoload module will be disabled automatically.
 ### UI.js
 - Clock positioning can look incorrect on non-standard resolutions.
+    - Will be fixed by giving the user more control over the positioning
 ### Utils.js
 - Git update will currently lock up mpv in most cases.
-### Misc
-- macOS code paths have not been tested in a while and will probably cause issues or crashes.
 ### Syncplay Incompatibility
 - SyncPlay's chat integration somehow offsets the OSD, which makes menus appear out of bounds.
     - Workaround: Disable chat integration, and use the SyncPlay window instead.
     - I am currently unaware of a solution to this.
-
-## Ideas
-- Overhaul menu definition to make code more readable?
-    - This would also make third-party menu integration possible.
-    - This would result in a lot of work, so this idea might be scrapped.
 
 ## Localization
 easympv now supports different languages!  

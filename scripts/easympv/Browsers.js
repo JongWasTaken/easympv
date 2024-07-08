@@ -18,7 +18,7 @@ Comments are also missing.
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
  */
 var Browsers = {};
-
+Browsers.alertCategory = "Browsers";
 Browsers.modifyTitle = function (title)
 {
     if(Settings.Data.shortFileNames)
@@ -71,30 +71,29 @@ Browsers.DeviceBrowser = {};
 
 Browsers.Selector.menu = undefined;
 Browsers.Selector.menuSettings = {
-    menuId: "browser-selector",
-    customKeyEvents: [{key: "h", event: "help"}]
+    menuId: "browser-selector"
 };
 Browsers.Selector.cachedParentMenu = undefined;
 
 Browsers.FileBrowser.currentLocation = undefined;
 Browsers.FileBrowser.menu = undefined;
 Browsers.FileBrowser.menuSettings = {
+    menuId: "file-browser",
     autoClose: 0,
     scrollingEnabled: true,
     fadeOut: false,
-    fadeIn: false,
-    customKeyEvents: [{key: "h", event: "help"}]
+    fadeIn: false
 };
 Browsers.FileBrowser.cachedParentMenu = undefined;
 
 Browsers.DriveBrowser.menu = undefined;
 Browsers.DriveBrowser.menuSettings = {
+    menuId: "drive-browser",
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
     fadeOut: false,
-    fadeIn: false,
-    customKeyEvents: [{key: "h", event: "help"}]
+    fadeIn: false
 };
 Browsers.DriveBrowser.cachedParentMenu = undefined;
 Browsers.DriveBrowser.menuMode = "list";
@@ -102,12 +101,12 @@ Browsers.DriveBrowser.cachedDriveName = "";
 
 Browsers.DeviceBrowser.menu = undefined;
 Browsers.DeviceBrowser.menuSettings = {
+    menuId: "device-browser",
     autoClose: 0,
     scrollingEnabled: true,
     scrollingPosition: 8,
     fadeOut: false,
-    fadeIn: false,
-    customKeyEvents: [{key: "h", event: "help"}]
+    fadeIn: false
 };
 Browsers.DeviceBrowser.cachedParentMenu = undefined;
 
@@ -117,7 +116,7 @@ Browsers.Selector.menuEventHandler = function (event, item) {
         Browsers.Selector.menu = undefined;
 
         if (item == "file") {
-            Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
+            Browsers.FileBrowser.loadCurrentDirectory(Browsers.Selector.cachedParentMenu);
         } else if (item == "disc") {
             Browsers.DriveBrowser.open(Browsers.Selector.cachedParentMenu);
         } else if (item == "device") {
@@ -132,19 +131,16 @@ Browsers.Selector.menuEventHandler = function (event, item) {
                         } else {
                             mpv.commandv("loadfile", input);
                         }
-                        Utils.showAlert("info", Settings.getLocalizedString("alerts.url.loaded"));
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.url.loaded"), Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                     else
                     {
-                        Utils.showAlert("info", Settings.getLocalizedString("alerts.url.invalid"));
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.url.invalid"), Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                 }
-            },"URL: ");
+            }, "URL: ");
         }
-        return;
-    }
-    if (event == "help") {
-        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#selector-menu", true);
+
         return;
     }
 };
@@ -199,28 +195,34 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
     {
         if (entry.type != "subtitle")
         {
-            mpv.command("write-watch-later-config");
-            Utils.showAlert(
-                "info",
-                Settings.getLocalizedString("alerts.browser.playing") + entry.item
-            );
-            mpv.commandv(
-                "loadfile",
-                Browsers.FileBrowser.currentLocation +
+            if (entry.type == "script") {
+                OS.fileMoveSystemwide(Browsers.FileBrowser.currentLocation +
                     OS.directorySeperator +
-                    entry.item
-            );
-            if (Autoload.enabled)
-            {
-                Autoload.loadFolder(true);
+                    entry.item,
+                    mpv.getUserPath("~~/scripts/")
+                );
+                UI.Alerts.push(Settings.getLocalizedString("alerts.browser.installed") + entry.item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+
+            } else {
+                mpv.command("write-watch-later-config");
+                UI.Alerts.push(Settings.getLocalizedString("alerts.browser.playing") + entry.item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+
+                mpv.commandv(
+                    "loadfile",
+                    Browsers.FileBrowser.currentLocation +
+                        OS.directorySeperator +
+                        entry.item
+                );
+                if (Autoload.enabled)
+                {
+                    Autoload.loadFolder(true);
+                }
             }
         }
         else
         {
-            Utils.showAlert(
-                "info",
-                Settings.getLocalizedString("alerts.browser.loadsubs") + entry.item
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.browser.loadsubs") + entry.item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+
             mpv.commandv(
                 "sub-add",
                 Browsers.FileBrowser.currentLocation +
@@ -230,10 +232,8 @@ Browsers.FileBrowser.openFileSafe = function (entry) {
         }
     } else {
         mpv.command("write-watch-later-config");
-        Utils.showAlert(
-            "info",
-            Settings.getLocalizedString("alerts.browser.playing.unsupported") + entry.item
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.browser.playing.unsupported") + entry.item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+
         mpv.commandv(
             "loadfile",
             Browsers.FileBrowser.currentLocation +
@@ -284,7 +284,7 @@ Browsers.FileBrowser.changeDirectory = function (directory) {
         Browsers.FileBrowser.menu = undefined;
     }
     catch(e) {} // ignore that
-    Browsers.FileBrowser.open();
+    Browsers.FileBrowser.loadCurrentDirectory();
 };
 
 Browsers.FileBrowser.openContextMenu = function(item) {
@@ -358,7 +358,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                 return;
             }
             contextMenu.hideMenu();
-            Browsers.FileBrowser.open();
+            Browsers.FileBrowser.loadCurrentDirectory();
         }
     });
 
@@ -381,13 +381,13 @@ Browsers.FileBrowser.openContextMenu = function(item) {
                     {
                         Settings.Data.fileBrowserFavorites.push(path);
                         //Browsers.FileBrowser.menu.appendSuffixToCurrentItem();
-                        Utils.showAlert("info",Settings.getLocalizedString("alerts.favorites.added"));
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.favorites.added"), Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
                         Settings.save();
                         menu.hideMenu();
-                        Browsers.FileBrowser.open(Browsers.Selector.cachedParentMenu);
+                        Browsers.FileBrowser.loadCurrentDirectory(Browsers.Selector.cachedParentMenu);
                         return;
                     }
-                    Utils.showAlert("error",Settings.getLocalizedString("alerts.favorites.added.error"));
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.favorites.added.error"), Browsers.alertCategory, UI.Alerts.Urgencies.Error);
                     return;
                 }
             }
@@ -455,21 +455,16 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 
                     if (removeFile(path))
                     {
-                        Utils.showAlert(
-                            "info",
-                            Settings.getLocalizedString("alerts.browser.fileremoved") + type + ": " + item
-                        );
+
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.browser.fileremoved") + type + ": " + item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                     else
                     {
-                        Utils.showAlert(
-                            "error",
-                            Settings.getLocalizedString("alerts.browser.fileremoved.error") + type + ": " + item
-                        );
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.browser.fileremoved.error") + type + ": " + item, Browsers.alertCategory, UI.Alerts.Urgencies.Error);
                     }
                     contextMenu.hideMenu();
                     Browsers.FileBrowser.cachedFileBrowserPosition = Browsers.FileBrowser.cachedFileBrowserPosition - 1;
-                    Browsers.FileBrowser.open();
+                    Browsers.FileBrowser.loadCurrentDirectory();
                 } else {
                     this.title = UI.SSA.setColorRed() + "Are you sure?";
                     deleteConfirm = true;
@@ -488,6 +483,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     var deleteConfirm = false;
 
     var contextMenu = new UI.Menus.Menu({
+        menuId: "file-browser-context-menu",
         title: contextMenuTitle,
         description: Settings.getLocalizedString("context.menu.description") + contextMenuDescriptionIcon + "@br@",
         autoClose: 0,
@@ -495,7 +491,6 @@ Browsers.FileBrowser.openContextMenu = function(item) {
         fadeIn: false
     },items,
     Browsers.FileBrowser.menu);
-    contextMenu.eventHandler = function(){};
     contextMenu.showMenu();
 };
 
@@ -508,11 +503,6 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
             Browsers.FileBrowser.menu.selectedItemIndex = Browsers.FileBrowser.cachedFileBrowserPosition;
             Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
         }
-        return;
-    }
-
-    if (event == "help") {
-        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#file-browser", true);
         return;
     }
 
@@ -605,7 +595,7 @@ Browsers.FileBrowser.menuEventHandler = function (event, item) {
     }
 };
 
-Browsers.FileBrowser.open = function (parentMenu) {
+Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
     if (parentMenu == undefined) {
         parentMenu = Browsers.FileBrowser.cachedParentMenu;
     } else {
@@ -833,11 +823,11 @@ Browsers.FileBrowser.open = function (parentMenu) {
             Settings.getLocalizedString("browser.driveselector.title")
         ) + " " + UI.SSA.setBold(false) + "@br@@br@" + Settings.getLocalizedString("browser.menu.description");
     Browsers.FileBrowser.menuSettings.backButtonTitle =
-        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.back.title") +"@br@@us10@";
+        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.back.title") +UI.Menus.commonSeperator;
     if (Browsers.FileBrowser.currentLocation != "@DRIVESELECTOR@")
     {
         items.unshift({
-            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.openinexplorer.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.openinexplorer.title") +UI.Menus.commonSeperator,
             color: "999999",
             eventHandler: function(event, menu)
             {
@@ -848,7 +838,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             }
         });
         items.unshift({
-            title: UI.SSA.insertSymbolFA("? ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.openrandom.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA("? ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("browser.openrandom.title") +UI.Menus.commonSeperator,
             color: "999999",
             eventHandler: function(event, menu)
             {
@@ -874,7 +864,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
             if (event == "enter")
             {
                 menu.hideMenu();
-                Browsers.FileBrowser.open();
+                Browsers.FileBrowser.loadCurrentDirectory();
             }
         }
     });
@@ -897,6 +887,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                 }
 
                 var favMenu = new UI.Menus.Menu({
+                    menuId: "favorites-menu",
                     autoClose: 0,
                     scrollingEnabled: true,
                     title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("favorites.menu.title"),
@@ -908,7 +899,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                     {
                         Browsers.FileBrowser.currentLocation = item;
                         favMenu.hideMenu();
-                        Browsers.FileBrowser.open();
+                        Browsers.FileBrowser.loadCurrentDirectory();
                         return;
                     }
                     if(event == "right")
@@ -921,7 +912,7 @@ Browsers.FileBrowser.open = function (parentMenu) {
                             favMenu.selectedItemIndex = 0;
                             Settings.save();
                             favMenu.redrawMenu();
-                            Utils.showAlert("info",Settings.getLocalizedString("alerts.favorites.removed"))
+                            UI.Alerts.push(Settings.getLocalizedString("alerts.favorites.removed"), Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
                         }
                         return;
                     }
@@ -951,11 +942,6 @@ Browsers.FileBrowser.open = function (parentMenu) {
 };
 
 Browsers.DriveBrowser.menuEventHandler = function (event, item) {
-    if (event == "help") {
-        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#drive-browser", true);
-        return;
-    }
-
     if (event == "enter" && Browsers.DriveBrowser.menuMode == "list") {
         Browsers.DriveBrowser.cachedDriveName = item;
         Browsers.DriveBrowser.menuMode = "ask";
@@ -986,12 +972,9 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
                 "loadfile",
                 item + "://longest/" + Browsers.DriveBrowser.cachedDriveName
             );
-            Utils.showAlert(
-                "info",
-                Settings.getLocalizedString("alerts.discdrive.open") +
-                    Browsers.DriveBrowser.cachedDriveName +
-                    "..."
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.discdrive.open") +
+            Browsers.DriveBrowser.cachedDriveName +
+            "...", Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
         } else {
             mpv.commandv(
                 "loadfile",
@@ -999,12 +982,9 @@ Browsers.DriveBrowser.menuEventHandler = function (event, item) {
                     "://longest//dev/" +
                     Browsers.DriveBrowser.cachedDriveName
             );
-            Utils.showAlert(
-                "info",
-                Settings.getLocalizedString("alerts.discdrive.open") +
-                    Browsers.DriveBrowser.cachedDriveName +
-                    "..."
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.discdrive.open") +
+            Browsers.DriveBrowser.cachedDriveName +
+            "...", Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
         }
         Browsers.DriveBrowser.cachedDriveName = "";
         Browsers.DriveBrowser.menuMode = "list";
@@ -1069,11 +1049,6 @@ Browsers.DriveBrowser.open = function (parentMenu) {
 };
 
 Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
-    if (event == "help") {
-        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#device-browser", true);
-        return;
-    }
-
     if (event == "enter") {
         //mpv.commandv("apply-profile", "low-latency");
         mpv.setProperty("file-local-options/profile", "low-latency"); // should only apply to currrent file
@@ -1083,10 +1058,9 @@ Browsers.DeviceBrowser.menuEventHandler = function (event, item) {
         } else {
             mpv.commandv("loadfile", "av://v4l2:/dev/" + item);
         }
-        Utils.showAlert(
-            "info",
-            Settings.getLocalizedString("alerts.device.open") + item
-        );
+
+        UI.Alerts.push(Settings.getLocalizedString("alerts.device.open") + item, Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+
         Browsers.DeviceBrowser.menu.hideMenu();
         Browsers.DeviceBrowser.menu = undefined;
     }

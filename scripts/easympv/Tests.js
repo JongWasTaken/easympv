@@ -250,7 +250,7 @@ var Test_OS_GetWindowsDriveInfo = function (name) {
 }
 
 var Test_UI_ShowAlert = function (name) {
-    UI.Alerts.show("info", "Test Alert");
+    UI.Alerts.push("Test Alert", "Tests", UI.Alerts.Urgencies.Normal);
     Core.Menus.TestsMenu.setResultForItem(name,undefined);
     Core.Menus.TestsMenu.redrawMenu();
 }

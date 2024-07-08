@@ -8,6 +8,8 @@
 
 var Autoload = {};
 
+Autoload.alertCategory = "Autoload";
+
 Autoload.loadedFile = "";
 Autoload.location = "";
 Autoload.previousLocation = "";

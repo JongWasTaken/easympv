@@ -36,6 +36,18 @@ UI.SSA.setBold = function (bold) {
     return "\{\\b0}";
 }
 
+/** Sets or unsets SSA italic tag.
+ * @param {boolean} italic - Whether italic should be enabled or disabled
+ * @returns {string} SSA tag sequence
+*/
+UI.SSA.setItalic = function (italic) {
+    if (italic)
+    {
+        return "{\\i1}";
+    }
+    return "\{\\i0}";
+}
+
 /** Sets SSA font size tag.
  * @param {number} fontSize - Desired font size
  * @returns {string} SSA tag sequence
@@ -45,7 +57,7 @@ UI.SSA.setSize = function (fontSize) {
 };
 
 /** Sets SSA text allignment tag.
- * @param {number} type - Desired allignment: Number on the numbad (e.g. 1 is bottom-left, 9 is top-right)
+ * @param {number} type - Desired allignment: Number on the numpad (e.g. 1 is bottom-left, 9 is top-right)
  * @returns {string} SSA tag sequence
 */
 UI.SSA.setAllignment = function (type) {
@@ -58,6 +70,7 @@ UI.SSA.setAllignment = function (type) {
  * @returns {string} SSA tag sequence
 */
 UI.SSA.setScale = function (scalePercent) {
+    if (scalePercent == undefined) scalePercent = UI.SSA.findIdealScale();
     return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
 };
 
@@ -319,7 +332,7 @@ UI.SSA.insertSymbolFA = function (symbol, size, defaultSize, fontNameAfter) {
 };
 
 /** Sets SSA text primary color tag.
- * @param {number} hex - Web hex color (without #)
+ * @param {string} hex - Web hex color (without #)
  * @returns {string} SSA tag sequence
 */
 UI.SSA.setColor = function (hex) {
@@ -333,7 +346,7 @@ UI.SSA.setColor = function (hex) {
 };
 
 /** Sets SSA text secondary color tag.
- * @param {number} hex - Web hex color (without #)
+ * @param {string} hex - Web hex color (without #)
  * @returns {string} SSA tag sequence
 */
 UI.SSA.setSecondaryColor = function (hex) {
@@ -1027,6 +1040,8 @@ USAGE:
  */
 UI.Menus = {};
 
+UI.Menus.commonSeperator = "@br@@us10@";
+
 /** List of registered menus. */
 UI.Menus.registeredMenus = [];
 
@@ -1048,6 +1063,8 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     } else {
         this.items = [];
     }
+
+    Events.beforeCreateMenu.invoke(settings, items);
 
     if (settings.autoClose != undefined) {
         this.settings.autoClose = settings.autoClose;
@@ -1130,6 +1147,12 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
         this.settings.menuId = String(Math.floor(Math.random()*90) + 10);
     }
 
+    if (settings.helpTarget != undefined) {
+        this.settings.helpTarget = settings.helpTarget;
+    } else {
+        this.settings.helpTarget = this.settings.menuId;
+    }
+
     if (settings.fadeIn != undefined) {
         this.settings.fadeIn = settings.fadeIn;
     } else {
@@ -1157,7 +1180,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     if (settings.backButtonTitle != undefined) {
         this.settings.backButtonTitle = settings.backButtonTitle;
     } else {
-        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("global.back.title") + "@br@@us10@";
+        this.settings.backButtonTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("global.back.title") + UI.Menus.commonSeperator;
         /*
         UI.SSA.insertSymbolFA(
             "",
@@ -1448,6 +1471,11 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
                 key: "PGDWN",
                 id: "menu_key_page_down",
                 action: "page_down",
+            },
+            {
+                key: "h",
+                id: "menu_key_help",
+                action: "help"
             }
         ];
     }
@@ -1498,6 +1526,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
     this.suffixCacheIndex = -1;
     this.autoCloseStart = -1;
     this.eventLocked = false;
+    Events.afterCreateMenu.invoke(this);
     UI.Menus.registeredMenus.push(this);
 };
 
@@ -1905,6 +1934,11 @@ UI.Menus.Menu.prototype._constructMenuCache = function () {
         for (var i = 0; i < drawItems.length; i++) {
             var currentItem = drawItems[i];
             var title = currentItem.title;
+            if (currentItem.hasSeperator != undefined) {
+                if (currentItem.hasSeperator) {
+                    title += UI.Menus.commonSeperator;
+                }
+            }
             var postItemActions = [""];
             try {
                 if (
@@ -2273,11 +2307,40 @@ UI.Menus.Menu.prototype.getItemById = function (id) {
     return undefined;
 }
 
+/** Convenience method to get an item by its ID.
+ * @param {string} id - ID of the item
+ * @param {object} menu - Target menu
+ * @returns {object} desired item, if found (otherwise undefined)
+*/
+UI.Menus.Menu.getItemByIdStatic = function (id, menu) {
+    for(var i = 0; i < menu.items.length; i++)
+    {
+        if (menu.items[i].item == id)
+        return menu.items[i];
+    }
+    return undefined;
+}
+
+/** Convenience method to get an item by its ID.
+ * @param {string} id - ID of the item
+ * @param {array} items - Target items array
+ * @returns {object} desired item, if found (otherwise undefined)
+*/
+UI.Menus.Menu.getItemByIdStaticDirect = function (id, items) {
+    for(var i = 0; i < items.length; i++)
+    {
+        if (items[i].item == id)
+        return items[i];
+    }
+    return undefined;
+}
+
 /** Method to show the menu on screen.
  * This will call all the required prerequisite functions.
 */
 UI.Menus.Menu.prototype.showMenu = function () {
     if (!this.isMenuVisible) {
+        if (Events.beforeShowMenu.invoke(this)) return;
         this.allowDrawImage = false;
         this.autoCloseStart = mp.get_time();
         this._overrideKeybinds();
@@ -2301,6 +2364,7 @@ UI.Menus.Menu.prototype.showMenu = function () {
         if (this.allowDrawImage) {
             UI.Image.show(this.settings.image, 25, 25);
         }
+        Events.afterShowMenu.invoke(this);
     }
 };
 
@@ -2309,6 +2373,7 @@ UI.Menus.Menu.prototype.showMenu = function () {
 */
 UI.Menus.Menu.prototype.hideMenu = function () {
     this._dispatchEvent("hide");
+    if (Events.beforeHideMenu.invoke(this)) return;
     if (this.settings.displayMethod == "message") {
         mp.osd_message("");
         if (this.isMenuVisible) {
@@ -2351,6 +2416,7 @@ UI.Menus.Menu.prototype.hideMenu = function () {
             }
         }
     }
+    Events.afterHideMenu.invoke(this);
 };
 
 /** Convenience method to toggle the menu on screen.*/
@@ -2390,11 +2456,15 @@ UI.Menus.Menu.prototype._dispatchEvent = function (event, item) {
         return;
     }
 
+    if (event == "help") {
+        OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#" + this.settings.helpTarget, true);
+    }
+
     this.eventHandler(event, item.item);
 }
 
-/** Safely appends an item to the menu.
- * @param {object} item - Selected item
+/** Appends an item to the menu.
+ * @param {object} item - New item
 */
 UI.Menus.Menu.prototype.appendItem = function (item) {
     if (item == undefined)
@@ -2405,16 +2475,74 @@ UI.Menus.Menu.prototype.appendItem = function (item) {
     this.items.push(item);
 }
 
+/** Inserts an item after another item in this menu.
+ * @param {string} id - Item ID to append after
+ * @param {object} item - New item
+*/
+UI.Menus.Menu.prototype.insertAfterItem = function (id, item) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
+    for(var i = 0; i < this.items.length; i++)
+    {
+        if (this.items[i].item == id) break;
+    }
+    if (i == this.items.length) return;
+
+    this.items.splice(i+1, 0, item);
+}
+
 /** This method should be overwritten with your own implementation.
  * @param {string} event - Name of the event that got dispatched
  * @param {string} action - Name of the action that dispatched the event
 */
 UI.Menus.Menu.prototype.eventHandler = function (event, action) {
-    mpv.printWarn("[UI] Menu \"" + this.settings.title + "\" has no event handler!");
 };
 
 /** If enabled, the menu key will not work to close the currently active menu. */
 UI.Menus.menuKeyDisabled = false;
+
+/** Inserts an item after another item in a menu.
+ * @param {string} id - Item ID to append after
+ * @param {object} item - New item
+ * @param {object} menu - Target menu
+*/
+UI.Menus.Menu.insertAfterItemStatic = function (id, item, menu) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
+    for(var i = 0; i < menu.items.length; i++)
+    {
+        if (menu.items[i].item == id) break;
+    }
+    if (i == menu.items.length) return;
+
+    menu.items.splice(i+1, 0, item);
+}
+
+/** Inserts an item after another item directly.
+ * @param {string} id - Item ID to append after
+ * @param {object} item - New item
+ * @param {array} items - Items array of a menu
+*/
+UI.Menus.Menu.insertAfterItemStaticDirect = function (id, item, items) {
+    if (item == undefined)
+    {
+       item = { title: undefined, item: undefined, eventHandler: undefined };
+    }
+
+    for(var i = 0; i < items.length; i++)
+    {
+        if (items[i].item == id) break;
+    }
+    if (i == items.length) return;
+
+    items.splice(i+1, 0, item);
+}
 
 /** Convenience method to get the currently displayed menu.
  * @returns {object} - Displayed menu, otherwise undefined
@@ -2464,7 +2592,7 @@ UI.Menus.getMenuById = function(name) {
 }
 
 /** Convenience method to get a menu by a substring of its ID. Returns undefined if no menu with the given ID exists.
- * If possible, use getMenuById() instead!
+ * If possible, use `getMenuById()` instead!
  * @param {string} name - substring of an id of the menu
  */
 UI.Menus.findMenuById = function(name) {
@@ -2480,86 +2608,264 @@ UI.Menus.findMenuById = function(name) {
     return menu;
 }
 
-/*----------------------------------------------------------------
-CLASS: UI.Alert
-DESCRIPTION:
-    This static class is used to show alerts/notifications inside mpv.
-USAGE:
-    (TODO)
-----------------------------------------------------------------*/
+
 
 UI.Alerts = {};
-UI.Alerts.show = function (type, line) {
-/*
-    mp.observe_property("osd-height", undefined, function () {
-        if (
-            mpv.getProperty("osd-height") != osdHeight ||
-            mpv.getProperty("osd-width") != osdWidth
-        ) {
-            UI.Alert.hide();
-        }
-    });
+UI.Alerts.Urgencies = {};
+UI.Alerts.Urgencies.Normal = {"icon": "", "color": "FFFFFF"};
+UI.Alerts.Urgencies.Info = UI.Alerts.Urgencies.Normal;
+UI.Alerts.Urgencies.Warning = {"icon": "", "color": "FFC12B"};
+UI.Alerts.Urgencies.Error = {"icon": "", "color": "FF612B"};
 
-    mp.observe_property("osd-width", undefined, function () {
-        if (
-            mpv.getProperty("osd-height") != osdHeight ||
-            mpv.getProperty("osd-width") != osdWidth
-        ) {
-            alert.settings.fadeOut = false;
-            alert.hide();
-        }
-    });
-    */
+UI.Alerts.OSD = undefined;
 
-    UI.Alert._show(line.replaceAll("@br@", " "));
+UI.Alerts.Interval = 1000;
+UI.Alerts.Buffer = [];
+UI.Alerts.initialized = false;
+
+/**
+ * Initializes the new alerts system. Used internally. Called after `Events.lateInit`.
+ */
+UI.Alerts._init = function () {
+    if (UI.Alerts.initialized) return;
+    UI.Alerts.OSD = mp.create_osd_overlay("ass-events");
+    UI.Alerts.OSD.res_y = mpv.getProperty("osd-height");
+    UI.Alerts.OSD.res_x = mpv.getProperty("osd-width");
+    UI.Alerts.OSD.z = 1;
+
+    UI.Alerts.OSD.data = "";
+    UI.Alerts.OSD.update();
+    UI.Alerts._loop();
+    UI.Alerts.initialized = true;
+}
+
+/**
+ * Shows an alert/notification to the user.
+ *   
+ * @param {string} content - Alert content
+ * @param {string} category - From where this alert originates, e.g. an extension name, module name, etc.
+ * @param {object} urgency - One of the pseudo-enumerators in `UI.Alerts.Urgencies` (defaults to `Normal`).  
+ * Will change color and icon of this alert.  
+ * You may also pass your own, by creating an object with two keys: `{"icon": "<FONT_AWESOME_ICON_GOES_HERE>", "color": "FFFFFF"}`.
+ */
+UI.Alerts.push = function(content, category, urgency)
+{
+    UI.Alerts.Interval = 100;
+
+    var notification = {};
+    notification.content = content;
+
+    if (urgency == undefined || typeof(urgency) == "string") {
+        urgency = UI.Alerts.Urgencies.Normal;
+    }
+    notification.urgency = urgency;
+    if (category == undefined || category == "") category = "easympv";
+    notification.category = category;
+    notification.startTime = mp.get_time();
+    notification.fancyTime = Utils.getCurrentTime();
+
+    UI.Alerts.Buffer.push(notification);
+
+
+    //if (!UI.Alerts.initialized) {
+    //    UI.Alerts._init();
+    //}
+}
+
+/**
+ * @deprecated
+ * This method exists solely for compatibility reasons.  
+ * Please use `UI.Alerts.push();` instead!  
+ *   
+ * Before the alerts rewrite you would show an alert like this: `UI.Alerts.show(<level>, <content>);`.  
+ * The new alerts system is more verbose and requires more information, for which this method provides default values.
+ * @param {undefined} _ignored - the new alerts system does not use this value
+ * @param {string} content - Alert content
+ */
+UI.Alerts.show = function (_ignored, content) {
+    if (false) {
+        return UI.oldAlerts._show(line.replaceAll("@br@", " "));
+    }
+    mpv.printWarn("Received legacy alert: " + content);
+    mpv.printWarn("Please use UI.Alerts.push() directly!");
+    return UI.Alerts.push(content.replaceAll("@br@", " "), undefined, UI.Alerts.Urgencies.Normal);
 };
 
-UI.Alert = {};
+UI.Alerts._loop = function () {
+    UI.Alerts.OSD.res_y = mpv.getProperty("osd-height");
+    UI.Alerts.OSD.res_x = mpv.getProperty("osd-width");
 
-UI.Alert.OSD = undefined;
-UI.Alert.Timer = undefined;
-UI.Alert.startTime = undefined;
-UI.Alert.content = undefined;
-UI.Alert.isVisible = false;
+    for (var i = 0; i < UI.Alerts.Buffer.length; i++) {
+        if (UI.Alerts.Buffer[i].startTime + 3 < mp.get_time()) {
+            UI.Alerts.Buffer.splice(i, 1);
+        }
+    }
 
-UI.Alert._startTimer = function() {
-    UI.Alert.Timer = setInterval(function () {
-        if (3 <= 0 || UI.Alert.startTime <= -1) {
+    if (UI.Alerts.Buffer.length == 0) {
+        UI.Alerts.OSD.data = "";
+        UI.Alerts.Interval = 1000;
+        //UI.Alerts.OSD = undefined;
+        //UI.Alerts.initialized = false;
+        //return;
+    } else {
+        UI.Alerts.OSD.data = UI.Alerts._build();
+        UI.Alerts.Interval = 100;
+    }
+
+    UI.Alerts.OSD.update();
+    setTimeout(UI.Alerts._loop, UI.Alerts.Interval);
+}
+
+UI.Alerts._build = function () {
+    var content = "";
+
+    var transparency = 0;
+    var scaleFactor = UI.SSA.findIdealScale();
+    var scale = UI.SSA.setScale(scaleFactor);
+    var border = UI.SSA.setBorder(1);
+    var font = UI.SSA.setFont(Utils.commonFontName);
+    var fontSize = 32;
+    var currentLinePosition = 0;
+
+    var findLinePosition = function (size, custom) {
+        // How this works:
+        // https://www.md-subs.com/line-spacing-in-ssa (Method 5/Conclusion)
+
+        var origin = "-2000000";
+        var modifier = 0;
+        if (size == undefined) {
+            size = 1;
+        }
+        if (custom == undefined) {
+            custom = 0;
+        }
+        switch (size) {
+            // These numbers define the line spacings
+            case 0:
+                modifier = 0.0007;
+                break; // small
+            case 1:
+                modifier = 0.0009;
+                break; // normal
+            case 2:
+                modifier = 0.0015;
+                break; // big
+            case 3:
+                modifier = 0.002;
+                break; // huge
+            case 4:
+                modifier = custom;
+                break; // custom
+        }
+        modifier = modifier * (0.01 * scaleFactor);
+        currentLinePosition = currentLinePosition - modifier;
+        return (
+            "{\\org(" +
+            origin +
+            ",0)\\fr" +
+            currentLinePosition.toFixed(5) +
+            "}"
+        );
+    };
+
+    var lineStart = function (
+        positionType,
+        fontSizeModifier,
+        customPositionModifier
+    ) {
+        if (fontSizeModifier == undefined) {
+            fontSizeModifier = 0;
+        }
+        if (customPositionModifier == undefined) {
+            customPositionModifier = 0;
+        }
+        if (positionType == undefined) {
+            positionType = 1;
+        }
+        var s = "";
+        s +=
+            UI.SSA.setAllignment(5) +
+            UI.SSA.setPositionAbsolutePercentage(50, 0) +
+            scale + findLinePosition(positionType, customPositionModifier) +
+            border + font +
+            UI.SSA.setTransparencyPercentage(transparency) +
+            UI.SSA.setSize(fontSize + fontSizeModifier);
+        return s;
+    };
+
+    var lineEnd = function () {
+        var s = "\n";
+        return s;
+    };
+
+    var lineBlank = function () {
+        var s;
+        s = lineStart(4, 0, 0.0005) + lineEnd();
+        return s;
+    };
+
+    for (var i = 0; i < UI.Alerts.Buffer.length; i++) {
+        content += lineStart(2, -10) + 
+            UI.SSA.setColor(UI.Alerts.Buffer[i].urgency.color) + UI.SSA.insertSymbolFA(UI.Alerts.Buffer[i].urgency.icon, fontSize-16, fontSize-10) +
+            " " + UI.Alerts.Buffer[i].category + UI.SSA.setItalic(1) +
+            " at " + UI.SSA.setItalic(0) +
+            UI.SSA.setBold(1) + UI.Alerts.Buffer[i].fancyTime + UI.SSA.setBold(0) +
+            ":" +
+            lineEnd();
+        content += lineStart(0, 0) + UI.Alerts.Buffer[i].content + lineEnd();
+    }
+
+    return content;
+}
+
+
+
+UI.oldAlerts = {};
+
+UI.oldAlerts.OSD = undefined;
+UI.oldAlerts.Timer = undefined;
+UI.oldAlerts.startTime = undefined;
+UI.oldAlerts.content = undefined;
+UI.oldAlerts.isVisible = false;
+
+UI.oldAlerts._startTimer = function() {
+    UI.oldAlerts.Timer = setInterval(function () {
+        if (3 <= 0 || UI.oldAlerts.startTime <= -1) {
             return;
         }
-        if (UI.Alert.startTime <= mp.get_time() - 3) {
-            UI.Alert._stopTimer();
-            UI.Alert._hide();
+        if (UI.oldAlerts.startTime <= mp.get_time() - 3) {
+            UI.oldAlerts._stopTimer();
+            UI.oldAlerts._hide();
         }
     }, 1000);
 };
 
-UI.Alert._stopTimer = function () {
-    if (UI.Alert.Timer != undefined) {
-        clearInterval(UI.Alert.Timer);
-        UI.Alert.Timer = undefined;
+UI.oldAlerts._stopTimer = function () {
+    if (UI.oldAlerts.Timer != undefined) {
+        clearInterval(UI.oldAlerts.Timer);
+        UI.oldAlerts.Timer = undefined;
     }
 };
 
-UI.Alert._assembleContent = function (xpos,ypos) {
+UI.oldAlerts._assembleContent = function (xpos,ypos) {
     return UI.SSA.setPositionAbsolutePercentage(xpos,ypos) +
     UI.SSA.setBorder(1) +
     UI.SSA.setSize("36") +
-    UI.SSA.setFont(Utils.commonFontName) + UI.Alert.content;
+    UI.SSA.setFont(Utils.commonFontName) + UI.oldAlerts.content;
 }
 
-UI.Alert._show = function(content)
+UI.oldAlerts._show = function(content)
 {
-    UI.Alert.content = content;
-    UI.Alert.startTime = mp.get_time();
+    UI.oldAlerts.content = content;
+    UI.oldAlerts.startTime = mp.get_time();
 
-    if (!UI.Alert.isVisible) {
-        UI.Alert.isVisible = true;
-        if (UI.Alert.OSD == undefined) {
-            UI.Alert.OSD = mp.create_osd_overlay("ass-events");
-            UI.Alert.OSD.res_y = mpv.getProperty("osd-height");
-            UI.Alert.OSD.res_x = mpv.getProperty("osd-width");
-            UI.Alert.OSD.z = 1;
+    if (!UI.oldAlerts.isVisible) {
+        UI.oldAlerts.isVisible = true;
+        if (UI.oldAlerts.OSD == undefined) {
+            UI.oldAlerts.OSD = mp.create_osd_overlay("ass-events");
+            UI.oldAlerts.OSD.res_y = mpv.getProperty("osd-height");
+            UI.oldAlerts.OSD.res_x = mpv.getProperty("osd-width");
+            UI.oldAlerts.OSD.z = 1;
         }
 
         if(Settings.Data.scrollAlerts)
@@ -2570,33 +2876,33 @@ UI.Alert._show = function(content)
                 if (pos < target)
                 {
                     pos = pos + 0.2;
-                    UI.Alert.OSD.data = UI.Alert._assembleContent(pos,1);
-                    UI.Alert.OSD.update();
+                    UI.oldAlerts.OSD.data = UI.oldAlerts._assembleContent(pos,1);
+                    UI.oldAlerts.OSD.update();
                 }
                 else
                 {
                     clearInterval(interval);
-                    UI.Alert._hide();
+                    UI.oldAlerts._hide();
                 }
             }, 10);
         }
         else
         {
-            UI.Alert.OSD.data = UI.Alert._assembleContent(33,1);
-            UI.Alert.OSD.update();
-            UI.Alert._startTimer();
+            UI.oldAlerts.OSD.data = UI.oldAlerts._assembleContent(33,1);
+            UI.oldAlerts.OSD.update();
+            UI.oldAlerts._startTimer();
         }
     }
 }
 
-UI.Alert._hide = function()
+UI.oldAlerts._hide = function()
 {
-    UI.Alert.isVisible = false;
-    UI.Alert.startTime = undefined;
-    if (UI.Alert.OSD != undefined) {
+    UI.oldAlerts.isVisible = false;
+    UI.oldAlerts.startTime = undefined;
+    if (UI.oldAlerts.OSD != undefined) {
         mpv.commandv(
             "osd-overlay",
-            UI.Alert.OSD.id,
+            UI.oldAlerts.OSD.id,
             "none",
             "",
             0,
@@ -2605,7 +2911,7 @@ UI.Alert._hide = function()
             "no",
             "no"
         );
-        UI.Alert.OSD = undefined;
+        UI.oldAlerts.OSD = undefined;
     }
 }
 
@@ -2619,7 +2925,7 @@ DESCRIPTION:
     non-static.
 USAGE:
     Call UI.Input.show(callback,prefix_description), where:
-    callback should be something like function(success, result),
+    callback should be function(success, result):
         success is a boolean, indicates whether input has been sent
         result is the actual input string
     prefix_description -> the text in front of the input field
@@ -2841,7 +3147,7 @@ UI.Input.handleKeyPress = function (key)
     {
         UI.Input.Buffer = UI.Input.returnBufferInserted(key);
     }
-    UI.Input.OSD.data = UI.Input.Prefix + UI.Input.returnBufferInserted("_");
+    UI.Input.OSD.data = UI.Input.Prefix + UI.Input.returnBufferInserted("|");
     UI.Input.OSD.update();
 }
 
@@ -2903,7 +3209,7 @@ UI.Input.show = function (callback, prefix) {
     UI.Input.OSD.z = 1000;
 
     UI.Input.Prefix += UI.Input.InputPrefix;
-    UI.Input.OSD.data = UI.Input.Prefix + "_";
+    UI.Input.OSD.data = UI.Input.Prefix + "|";
     UI.Input.OSD.update();
     UI.Input.Callback = callback;
 }
@@ -3035,14 +3341,13 @@ UI.Input.showInteractiveCommandInput = function () {
     var readCommand = function (success, result) {
         if (success) {
             mpv.command(result);
-            Utils.showAlert(
-                "info",
-                "Command executed!"
-            );
+            UI.Alerts.push("Command executed!" , UI.Input.alertCategory, UI.Alerts.Urgencies.Normal);
         }
     };
     UI.Input.show(readCommand,"Command: ");
 }
+
+UI.Input.alertCategory = "Text Input";
 
 UI.Input.showJavascriptInput = function () {
         var readCommand = function (success, result) {
@@ -3094,7 +3399,6 @@ UI.Input.showJavascriptInput = function () {
                         if (UI.Input.OSDLog.OSD == undefined) {
                             UI.Input.OSDLog.show();
                         }
-                        //UI.Input.OSDLog.hide();
                         mpv.printWarn("help() output:\nList of helper functions:\n"+
                         "print(obj) -> shorthand for mpv.printWarn(JSON.stringify(obj))\n"+
                         "cmd(command) -> execute shell command\n"+
@@ -3103,17 +3407,11 @@ UI.Input.showJavascriptInput = function () {
                         );
                     };
                     eval(result);
-                    Utils.showAlert(
-                        "info",
-                        "Expression evaluated! Check log for more info."
-                    );
+                    UI.Alerts.push("Expression evaluated! Check log for more info." , UI.Input.alertCategory, UI.Alerts.Urgencies.Normal);
                 }
                 catch(e)
                 {
-                    Utils.showAlert(
-                        "error",
-                        "Invalid Expression! Error: " + e
-                    );
+                    UI.Alerts.push("Invalid Expression! Error: " + e, UI.Input.alertCategory, UI.Alerts.Urgencies.Error);
                 }
             }
         };

@@ -161,12 +161,12 @@ Utils.libassVersion = mpv.getProperty("libass-version");
 /**
  * X.
  */
-Utils.log = function (text, subject, level) {
+Utils.log = function (text, _, level) {
     var msg = "";
-    if (subject != undefined)
-    {
-        msg += "[" + subject + "] "
-    }
+    //if (subject != undefined)
+    //{
+    //    msg += "[" + subject + "] "
+    //}
 
     if (level == undefined)
     {
@@ -195,32 +195,6 @@ Utils.showSystemMessagebox = function (text, async) {
 };
 
 /**
- * X.
- */
- Utils.showAlert = function (type,text) {
-    if (Settings.Data.useNativeNotifications)
-    {
-        var worked = OS.showNotification(text.replace(/\{(.+?)\}/g,'').replace(/@br@/g,'\\n'));
-
-        if(!worked)
-        {
-            UI.Alerts.show(type,text);
-        }
-    }
-    else
-    {
-        //Windows.Alerts.show(type,text);
-        UI.Alerts.show(type,text);
-    }
-
-    if (type == "warning")
-    {
-        type = "warn";
-    }
-    Utils.log(text,"alert",type);
-};
-
-/**
  * Fetches newest mpv version number.
  */
 Utils.getLatestMpvVersion = function () {
@@ -235,10 +209,7 @@ Utils.getLatestMpvVersion = function () {
  */
 Utils.exitMpv = function () {
     if (Utils.updateInProgress) {
-        Utils.showAlert(
-            "warning",
-            Settings.getLocalizedString("alerts.updateinprogress")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updateinprogress"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Warning);
     } else {
         mpv.commandv("quit-watch-later");
     }
@@ -286,6 +257,8 @@ Utils.unblockQuitButtons = function () {
     }
 };
 
+Utils.updateChainAlertCategory = "Update Chain";
+
 /**
  * Stage 1 of the update chain. Downloads newest package.
  */
@@ -303,10 +276,7 @@ Utils.doUpdateStage2 = function () // extract
         OS.packageExtractAsync(Utils.doUpdateStage3);
     } else {
         Utils.unblockQuitButtons();
-        Utils.showAlert(
-            "error",
-            Settings.getLocalizedString("alerts.updatefailed")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updatefailed"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Error);
         return;
     }
 };
@@ -323,10 +293,7 @@ Utils.doUpdateStage3 = function () // delete package
         OS.packageRemoveAsync(Utils.doUpdateStage4);
     } else {
         Utils.unblockQuitButtons();
-        Utils.showAlert(
-            "error",
-            Settings.getLocalizedString("alerts.updatefailed.extracterror")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updatefailed.extracterror"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Error);
         return;
     }
 };
@@ -342,10 +309,7 @@ Utils.doUpdateStage4 = function () // apply extracted package
         OS.packageApplyAsync(Utils.latestUpdateData.version,Utils.doUpdateStage5)
     } else {
         Utils.unblockQuitButtons();
-        Utils.showAlert(
-            "error",
-            Settings.getLocalizedString("alerts.updatefailed.deleteerror")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updatefailed.deleteerror"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Error);
         return;
     }
 };
@@ -385,17 +349,12 @@ Utils.doUpdateStage5 = function () {
 
         // done
         Utils.unblockQuitButtons();
-        Utils.showAlert(
-            "info",
-            Settings.getLocalizedString("alerts.updatefinished")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updatefinished"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Normal);
+
         Utils.updateAvailable = false;
     } else {
         Utils.unblockQuitButtons();
-        Utils.showAlert(
-            "error",
-            Settings.getLocalizedString("alerts.updatefailed.applyerror")
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.updatefailed.applyerror"), Utils.updateChainAlertCategory, UI.Alerts.Urgencies.Error);
         return;
     }
 };
@@ -434,16 +393,13 @@ Utils.updateMpv = function () {
             if (Utils.updateAvailableMpv) {
                 OS.updateMpvWindows(Settings.Data.mpvLocation);
             } else {
-                Utils.showAlert("info", Settings.getLocalizedString("alerts.uptodate"));
+                UI.Alerts.push(Settings.getLocalizedString("alerts.uptodate"), undefined, UI.Alerts.Urgencies.Normal);
             }
         } else {
-            Utils.showAlert(
-                "error",
-                Settings.getLocalizedString("alerts.locationunknown")
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.locationunknown"), undefined, UI.Alerts.Urgencies.Error);
         }
     } else {
-        Utils.showAlert("error", Settings.getLocalizedString("alerts.onlyonwindows"));
+        UI.Alerts.push(Settings.getLocalizedString("alerts.onlyonwindows"), undefined, UI.Alerts.Urgencies.Normal);
     }
     return;
 };

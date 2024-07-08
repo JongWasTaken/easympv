@@ -20,6 +20,8 @@ var cFile;
 
 Core.Menus = {};
 
+Core.alertCategory = "easympv Core";
+
 Core.enableSaveTimer = true;
 Core.enableChapterSeeking = true;
 
@@ -107,8 +109,6 @@ Core.onFileLoad = function () {
             Autoload.loadFolder();
         }
     }
-
-
 
     for (var i = 0; i < Settings.cache.perFileSaves.length; i++) {
         if (Settings.cache.perFileSaves[i].file == cFile){
@@ -236,7 +236,7 @@ Core.doRegistrations = function () {
     {
         // override keys to work with gamepad
         // THIS ASSUMES THE DEFAULT KEYBOARD+MOUSE EMULATION PRESET IN STEAM INPUT
-        // using commandv does not give user feedback, so we need to that
+        // using commandv does not give user feedback, so we need to do that
 
         // left stick
         mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mpv.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
@@ -280,13 +280,6 @@ Core.doRegistrations = function () {
         Core.setSaveTimer();
     }
 
-    // Registering an observer to check for chapter changes (Chapters.js)
-    mp.observe_property(
-        "chapter-metadata/by-key/title",
-        undefined,
-        Chapters.handler
-    );
-
     if(Settings.Data.simpleVRR)
     {
         mp.observe_property("speed",undefined,Video.FPS.checkVRR);
@@ -294,6 +287,8 @@ Core.doRegistrations = function () {
 
     // Registering an observer to redraw Menus on window size change
     mp.observe_property("osd-height", undefined, redrawMenus);
+
+    Events.duringRegistration.invoke();
 }
 
 Core.doUnregistrations = function () {
@@ -338,7 +333,6 @@ Core.doUnregistrations = function () {
     mp.unregister_event(Core.onShutdown);
     mp.unregister_event(API.handleIncomingJSON);
 
-    mp.unobserve_property(Chapters.handler);
     mp.unobserve_property(redrawMenus);
 
     if (Core.enableSaveTimer)
@@ -348,6 +342,8 @@ Core.doUnregistrations = function () {
         } catch(e) {}
         Core.saveTimer = undefined;
     }
+
+    Events.duringUnregistration.invoke();
 }
 
 Core.defineMenus = function () {
@@ -384,10 +380,9 @@ Core.defineMenus = function () {
 
     var MainMenuSettings = {
         title: UI.SSA.insertSymbolFA("") + " easympv",
-        menuId: "main",
+        menuId: "main-menu",
         description: "",
-        image: "logo",
-        customKeyEvents: [{key: "h", event: "help"}]
+        image: "logo"
     };
 
     var MainMenuItems = [
@@ -401,8 +396,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.open.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.open.title"),
             item: "open",
+            hasSeperator: true,
             description: Settings.getLocalizedString("main.open.description"),
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -414,18 +410,10 @@ Core.defineMenus = function () {
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.playback.title"),
             item: "playback",
+            hasSeperator: true,
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaybackMenu,menu);
-                }
-            }
-        },
-        {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.chapters.title") +"@br@@us10@",
-            item: "chapters",
-            eventHandler: function(event, menu) {
-                if (event == "enter") {
-                    UI.Menus.switchCurrentMenu(Core.Menus.ChaptersMenu,menu);
                 }
             }
         },
@@ -452,7 +440,7 @@ Core.defineMenus = function () {
                         quitTitle = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.quit.title");
                         this.title =
                             UI.SSA.setColorRed() + Settings.getLocalizedString("main.quitconfirm.title");
-                        if (this.hasUnderscore) { this.title += "@br@@us10@"}
+                        if (this.hasUnderscore) { this.title += UI.Menus.commonSeperator}
                         menu.redrawMenu();
                     }
                 }
@@ -492,10 +480,6 @@ Core.defineMenus = function () {
     var quitCounter = 0;
     var quitTitle = Core.Menus.MainMenu.getItemByName("quit").title;
     Core.Menus.MainMenu.eventHandler = function (event, action) {
-        if (event == "help") {
-            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#main-menu", true);
-            return;
-        }
 /*
             if (action == "show-playlist") {
                 Core.Menus.MainMenu.hideMenu();
@@ -518,7 +502,7 @@ Core.defineMenus = function () {
         if (event == "hide") {
             var quitItem = Core.Menus.MainMenu.getItemByName("quit");
             quitItem.title = quitTitle;
-            if (quitItem.hasUnderscore) { quitItem.title += "@br@@us10@"; }
+            if (quitItem.hasUnderscore) { quitItem.title += UI.Menus.commonSeperator; }
             quitCounter = 0;
             return;
         }
@@ -536,12 +520,9 @@ Core.defineMenus = function () {
             }
             if (Utils.updateAvailable && notifyAboutUpdates) {
                 notifyAboutUpdates = false;
-                Utils.showAlert(
-                    "info",
-                    Settings.getLocalizedString("alerts.updateavailable") +
-                    Core.fancyCurrentVersion +
-                    Settings.getLocalizedString("alerts.updateavailable.newversion") + Settings.Data.newestVersion
-                );
+                UI.Alerts.push(Settings.getLocalizedString("alerts.updateavailable") +
+                Core.fancyCurrentVersion +
+                Settings.getLocalizedString("alerts.updateavailable.newversion") + Settings.Data.newestVersion, Core.alertCategory, UI.Alerts.Urgencies.Normal);
             }
             return;
         }
@@ -550,7 +531,7 @@ Core.defineMenus = function () {
     Core.Menus.PlaybackMenu = new UI.Menus.Menu(
         {
             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("playback.menu.title"),
-            menuId: "playback",
+            menuId: "playback-menu",
             description: Settings.getLocalizedString("playback.menu.description"),
             autoClose: 8
         },
@@ -566,8 +547,9 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.colors.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.colors.title"),
                 item: "colors",
+                hasSeperator: true,
                 description: Settings.getLocalizedString("playback.colors.description"),
                 eventHandler: function(event, menu) {
                     if (event == "enter") {
@@ -637,8 +619,9 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.aspectratio.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.aspectratio.title"),
                 item: "aspectratio",
+                hasSeperator: true,
                 data_selection: 0,
                 data_keys: [
                     "native", "16:9", "4:3", "1.85:1", "2.39:1", "3:2", "1:1"
@@ -702,8 +685,9 @@ Core.defineMenus = function () {
                 }
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.subtitledelay.title") +"@br@@us10@",
+                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("playback.subtitledelay.title"),
                 item: "subtitledelay",
+                hasSeperator: true,
                 eventHandler: function(event, menu) {
                     if (event == "left" || event == "enter")
                     {
@@ -854,10 +838,10 @@ Core.defineMenus = function () {
 
     Core.Menus.PlaylistMenu = new UI.Menus.Menu(
         {
+            menuId: "playlist-menu",
             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("playlist.menu.title"),
             description: playlistMenuDescription,
-            scrollingEnabled: true,
-            customKeyEvents: [{key: "h", event: "help"}]
+            scrollingEnabled: true
         },
         [],
         Core.Menus.MainMenu
@@ -890,17 +874,11 @@ Core.defineMenus = function () {
                     var status = Autoload.removeAt(Core.Menus.PlaylistMenu.itemCache);
                     if (status)
                     {
-                        Utils.showAlert(
-                            "info",
-                            Settings.getLocalizedString("alerts.playlist.itemremoved")
-                        );
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.playlist.itemremoved"), Autoload.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                     else
                     {
-                        Utils.showAlert(
-                            "error",
-                            Settings.getLocalizedString("alerts.playlist.itemremovederror")
-                        );
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.playlist.itemremovederror"), Autoload.alertCategory, UI.Alerts.Urgencies.Error);
                     }
                     Autoload.buildPlaylist();
                     UI.Menus.switchCurrentMenu(Core.Menus.PlaylistMenu,menu);
@@ -911,6 +889,7 @@ Core.defineMenus = function () {
 
     var playlistContextMenu = new UI.Menus.Menu(
         {
+            menuId: "playlist-context-menu",
             title: Settings.getLocalizedString("playlistcontext.menu.title"),
             description: Settings.getLocalizedString("playlistcontext.menu.description"),
         },
@@ -992,17 +971,11 @@ Core.defineMenus = function () {
                                     var status = Autoload.moveTo(menu.itemCache,this.item);
                                     if (status)
                                     {
-                                        Utils.showAlert(
-                                            "info",
-                                            Settings.getLocalizedString("alerts.playlist.itemmoved")
-                                        );
+                                        UI.Alerts.push(Settings.getLocalizedString("alerts.playlist.itemmoved"), Autoload.alertCategory, UI.Alerts.Urgencies.Normal);
                                     }
                                     else
                                     {
-                                        Utils.showAlert(
-                                            "error",
-                                            Settings.getLocalizedString("alerts.playlist.itemmovederror")
-                                        );
+                                        UI.Alerts.push(Settings.getLocalizedString("alerts.playlist.itemmovederror"), Autoload.alertCategory, UI.Alerts.Urgencies.Error);
                                     }
 
                                     Core.Menus.PlaylistMenu.mode = "select";
@@ -1033,19 +1006,20 @@ Core.defineMenus = function () {
     }
 
     var ShadersMenuSettings = {
+        menuId: "shaders-menu",
         title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("shaders.menu.title"),
         description: descriptionShaders(
             Video.Shaders.name,
             Settings.Data.defaultShaderSet
         ),
         // image: "shaders",
-        scrollingEnabled: true,
-        customKeyEvents: [{key: "h", event: "help"}]
+        scrollingEnabled: true
     };
 
     var ShadersMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("shaders.disable.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("shaders.disable.title"),
+            hasSeperator: true,
             item: "none",
         },
         {
@@ -1053,13 +1027,14 @@ Core.defineMenus = function () {
             item: "Automatic All-Purpose",
         },
         {
-            title: "Recommended Anime4K Settings (Worse, but less demanding)",
+            title: "Recommended Anime4K Settings",
             item: "Automatic Anime4K (Worse, but less demanding)",
         },
         {
-            title: "Recommended Anime4K Settings (Better, but more demanding)@br@@us10@",
-            item: "Automatic Anime4K (Better, but more demanding)",
-        },
+            title: "Recommended Retro Settings",
+            item: "CRT + Denoise & Sharpen",
+            hasSeperator: true
+        }
     ];
 
     for (var i = 0; i < Settings.presets.shadersets.length; i++) {
@@ -1082,6 +1057,8 @@ Core.defineMenus = function () {
         Core.Menus.PlaybackMenu
     );
 
+    Core.Menus.ShadersMenu.alertCategory = "Shader Manager";
+
     Core.Menus.ShadersMenu.eventHandler = function (event, action) {
 
         switch (event) {
@@ -1101,16 +1078,10 @@ Core.defineMenus = function () {
                         )
                     );
                     if (action == "none") {
-                        Utils.showAlert(
-                            "info",
-                            Settings.getLocalizedString("alerts.shaders.disabled")
-                        );
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.shaders.disabled"), Core.Menus.ShadersMenu.alertCategory, UI.Alerts.Urgencies.Normal);
+
                     } else {
-                        Utils.showAlert(
-                            "info",
-                            Settings.getLocalizedString("alerts.shaders.enabled") +
-                            UI.SSA.setColorYellow() + Video.Shaders.name
-                        );
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.shaders.enabled") + UI.SSA.setColorYellow() + Video.Shaders.name, Core.Menus.ShadersMenu.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                 }
                 break;
@@ -1130,11 +1101,7 @@ Core.defineMenus = function () {
                 if (action != "@back@") {
                     Settings.Data.defaultShaderSet = action;
                     Settings.save();
-                    Utils.showAlert(
-                        "info",
-                        Settings.getLocalizedString("alerts.shaderchanged") +
-                        Settings.Data.defaultShaderSet
-                    );
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.shaderchanged") + Settings.Data.defaultShaderSet, Core.Menus.ShadersMenu.alertCategory, UI.Alerts.Urgencies.Normal);
                     Core.Menus.ShadersMenu.setDescription(
                         descriptionShaders(
                             Video.Shaders.name,
@@ -1143,64 +1110,8 @@ Core.defineMenus = function () {
                     );
                 }
                 break;
-            case "help":
-                OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#shaders-menu", true);
-                break;
             default:
                 break;
-        }
-    };
-
-    var ChaptersMenuSettings = {
-        // image: "chapters",
-        title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("chapters.menu.title"),
-        description: Settings.getLocalizedString("chapters.menu.description"),
-        customKeyEvents: [{key: "h", event: "help"}],
-    };
-
-    var ChaptersMenuItems = [
-        {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.mode.title"),
-            item: "tmode",
-            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + Chapters.mode,
-            eventHandler: function(event, menu)
-            {
-                if (Chapters.mode == "skip") {
-                    Chapters.mode = "slowdown";
-                } else {
-                    Chapters.mode = "skip";
-                }
-                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + Chapters.mode;
-                menu.redrawMenu();
-            }
-        },
-        {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.toggle.title"),
-            item: "tstatus",
-            description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + Chapters.status,
-            eventHandler: function(event, menu)
-            {
-                if (Chapters.status == "disabled") {
-                    Chapters.status = Settings.getLocalizedString("global.enabled");
-                } else {
-                    Chapters.status = Settings.getLocalizedString("global.disabled");
-                }
-                this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + Chapters.status;
-                menu.redrawMenu();
-            }
-        },
-    ];
-
-    Core.Menus.ChaptersMenu = new UI.Menus.Menu(
-        ChaptersMenuSettings,
-        ChaptersMenuItems,
-        Core.Menus.MainMenu
-    );
-
-    Core.Menus.ChaptersMenu.eventHandler = function (event, action) {
-        if (event == "help")
-        {
-            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#chapters-menu", true);
         }
     };
 
@@ -1218,8 +1129,9 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.firsttime.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.firsttime.title"),
             item: "do_config_migration",
+            hasSeperator: true,
             eventHandler: function(event, menu) {
                 if (event == "enter")
                 {
@@ -1239,7 +1151,7 @@ Core.defineMenus = function () {
                 if (event == "enter") {
                     menu.hideMenu();
                     UI.Input.OSDLog.writeLogToFile();
-                    Utils.showAlert("info", Settings.getLocalizedString("alerts.exportlog"));
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.exportlog"), Core.alertCategory, UI.Alerts.Urgencies.Normal);
                 }
             }
         },
@@ -1258,7 +1170,8 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.debugmode.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.debugmode.title"),
+            hasSeperator: true,
             item: "toggle_debug_mode",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1267,13 +1180,13 @@ Core.defineMenus = function () {
                     {
                         Settings.Data.debugMode = false;
                         mp.enable_messages("info");
-                        Utils.showAlert("info", Settings.getLocalizedString("alerts.debugmode.disabled"));
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.debugmode.disabled"), Core.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                     else
                     {
                         Settings.Data.debugMode = true;
                         mp.enable_messages("debug");
-                        Utils.showAlert("info", Settings.getLocalizedString("alerts.debugmode.enabled"));
+                        UI.Alerts.push(Settings.getLocalizedString("alerts.debugmode.enabled"), Core.alertCategory, UI.Alerts.Urgencies.Normal);
                     }
                     Settings.save();
                 }
@@ -1290,7 +1203,8 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.setSize(26) + UI.SSA.setFont("Font Awesome 6 Free Brands") + "" + UI.SSA.setSize(35) + UI.SSA.setFont(Utils.commonFontName) + "  " + Settings.getLocalizedString("development.inputjs.title") +"@br@@us10@",
+            title: UI.SSA.setSize(26) + UI.SSA.setFont("Font Awesome 6 Free Brands") + "" + UI.SSA.setSize(35) + UI.SSA.setFont(Utils.commonFontName) + "  " + Settings.getLocalizedString("development.inputjs.title"),
+            hasSeperator: true,
             item: "javascript_input",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1300,12 +1214,24 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.tests.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.tests.title"),
+            hasSeperator: true,
             item: "open_tests_menu",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
                     Core.Menus.TestsMenu.showMenu();
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("development.minify.title"),
+            hasSeperator: true,
+            item: "create_minified_bundle",
+            eventHandler: function(event, menu) {
+                if (event == "enter") {
+                    UI.Alerts.push(OS.createMinifiedBundle(), OS.alertCategory, UI.Alerts.Urgencies.Normal);
+                    menu.hideMenu();
                 }
             }
         },
@@ -1322,14 +1248,14 @@ Core.defineMenus = function () {
     ];
 
     var SettingsMenuSettings = {
+        menuId: "settings-menu",
         autoClose: 0,
         // image: "settings",
         title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("preferences.menu.title"),
         description: descriptionSettings(
             Utils.displayVersion,
             Utils.displayVersionMpv
-        ),
-        customKeyEvents: [{key: "h", event: "help"}]
+        )
     };
 
     var SettingsMenuItems = [
@@ -1340,6 +1266,14 @@ Core.defineMenus = function () {
                 // pre-create the other menu and just open it here
                 menu.hideMenu();
                 Core.Menus.SettingsConfigurationSubMenu.showMenu();
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.extensions.title"),
+            item: "extensions",
+            eventHandler: function (event, menu) {
+                menu.hideMenu();
+                Core.Menus.SettingsExtensionsSubMenu.showMenu();
             }
         },
         {
@@ -1365,6 +1299,7 @@ Core.defineMenus = function () {
                     }
                     var umenu = new UI.Menus.Menu(
                         {
+                            menuId: "update-menu",
                             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("updates.menu.title"),
                             autoClose: "0",
                             description: setDescription(),
@@ -1442,13 +1377,15 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.credits.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.credits.title"),
+            hasSeperator: true,
             item: "credits",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
                     menu.hideMenu();
                     var cmenu = new UI.Menus.Menu(
                         {
+                            menuId: "credits-menu",
                             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("credits.menu.title"),
                             autoClose: "0",
                             description: "All of this would not be possible without these projects:", // Utils.getCredits().replaceAll("\n", "@br@")
@@ -1480,6 +1417,17 @@ Core.defineMenus = function () {
                             }
                         }
                     }
+
+                    if (cmenu.items.length > 3) {
+                        var cmenu_counter = 0;
+                        cmenu.items[2].eventHandler = function(event, menu) {
+                            if (cmenu_counter == 9) {
+                                UI.Alerts.push("This will be a secret at some point! :)", Core.alertCategory, UI.Alerts.Urgencies.Normal);
+                                cmenu_counter = 0;
+                            } else cmenu_counter++;
+                        };
+                    }
+
                     cmenu.showMenu();
                 }
             }
@@ -1501,7 +1449,8 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.toggleinfo.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.toggleinfo.title"),
+            hasSeperator: true,
             item: "toggle_information",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
@@ -1531,15 +1480,17 @@ Core.defineMenus = function () {
                     Settings.inputConfig.reload();
                     Settings.presets.reload();
                     Settings.reload();
-                    Utils.showAlert("info", Settings.getLocalizedString("alerts.configreload"));
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.configreload"), undefined, UI.Alerts.Urgencies.Normal);
                 }
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.reinit.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.reinit.title"),
+            hasSeperator: true,
             item: "reinitialize_plugin",
             eventHandler: function(event, menu) {
                 if (event == "enter") {
+                    Environment.startTime = Date.now();
                     menu.settings.fadeOut = false;
                     menu.hideMenu();
                     Core.doUnregistrations();
@@ -1549,7 +1500,8 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.development.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("preferences.development.title"),
+            hasSeperator: true,
             item: "development_options",
             eventHandler: function (event, menu) {
                 if (event == "enter")
@@ -1573,6 +1525,7 @@ Core.defineMenus = function () {
                         menu.hideMenu();
                         var uninstMenu = new UI.Menus.Menu(
                             {
+                                menuId: "uninstallation-menu",
                                 title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("uninstall.menu.title"),
                                 description: Settings.getLocalizedString("uninstall.menu.description"),
                                 autoClose: 0
@@ -1590,7 +1543,7 @@ Core.defineMenus = function () {
                                             {
                                                 OS.unregisterMpv();
                                                 mpv.writeFile("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
-                                                Utils.showAlert("warn", Settings.getLocalizedString("alerts.uninstall"));
+                                                UI.Alerts.push(Settings.getLocalizedString("alerts.uninstall"), undefined, UI.Alerts.Urgencies.Warning);
                                                 setTimeout(function(){
                                                     mpv.commandv("run",mpv.getUserPath("~~/uninstaller.exe"));
                                                     mpv.commandv("quit-watch-later");
@@ -1636,27 +1589,28 @@ Core.defineMenus = function () {
 
     Core.Menus.SettingsDevelopmentSubMenu = new UI.Menus.Menu(
         {
+            menuId: "settings-development-menu",
             autoClose: 0,
             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("development.menu.title"),
             description: "ffmpeg " + Utils.ffmpegVersion + "@br@libass" + Utils.libassVersion
-            //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsDevelopmentSubMenuItems,
         Core.Menus.SettingsMenu
     );
-    Core.Menus.SettingsDevelopmentSubMenu.eventHandler = function(){};
 
     var enabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorGreen() + Settings.getLocalizedString("global.enabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var disabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var languageChanged = false;
     var SettingsConfigurationSubMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title") + "@br@@us10@@br@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title"),
+            hasSeperator: true,
             item: "save",
             color: "999999",
             eventHandler: function (event, menu) {
                 if (event == "enter")
                 {
+                    menu.settings.fadeOut = false;
                     Settings.save();
                     menu.hideMenu();
                     if (languageChanged)
@@ -1666,10 +1620,10 @@ Core.defineMenus = function () {
                     else
                     {
                         Utils.log("Restarting plugin to apply changes...","settings","info");
+                        Environment.startTime = Date.now();
                         Core.doUnregistrations();
                         Core.startExecution();
                     }
-                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
                 }
             }
         },
@@ -2009,7 +1963,8 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.systemnotifications.title") + "@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.systemnotifications.title"),
+            hasSeperator: true,
             item: "use_system_notifications",
             descriptionPrefix: Settings.getLocalizedString("config.systemnotifications.description"),
             description: "",
@@ -2081,11 +2036,11 @@ Core.defineMenus = function () {
 
     Core.Menus.SettingsConfigurationSubMenu = new UI.Menus.Menu(
         {
+            menuId: "settings-sub-menu",
             autoClose: 0,
             scrollingEnabled: true,
             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("config.menu.title"),
             description: Settings.getLocalizedString("config.menu.description")
-            //customKeyEvents: [{key: "h", event: "help"}]
         },
         SettingsConfigurationSubMenuItems,
         undefined
@@ -2277,6 +2232,92 @@ Core.defineMenus = function () {
         }
     };
 
+    SettingsExtensionsSubMenuItems = [
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title"),
+            item: "save",
+            hasSeperator: true,
+            color: "999999",
+            eventHandler: function (event, menu) {
+                if (event == "enter")
+                {
+                    menu.settings.fadeOut = false;
+                    Settings.save();
+                    menu.hideMenu();
+                    Utils.restartMpv();
+                }
+            }
+        },
+        {
+            "title": UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("extensions.store.title"),
+            "item": "get_more_extensions",
+            "description": "Not yet implemented!",
+            "hasSeperator": true,
+            "eventHandler": function(event, menu) {}
+        }
+    ];
+
+    Core.Menus.SettingsExtensionsSubMenu = new UI.Menus.Menu(
+        {
+            menuId: "settings-extensions-menu",
+            autoClose: 0,
+            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("extensions.menu.title"),
+            description: Settings.getLocalizedString("extensions.menu.description")
+        },
+        SettingsExtensionsSubMenuItems,
+        undefined
+    );
+
+    Core.Menus.SettingsExtensionsSubMenu.__makeTitle = function(name, filename, icon) {
+        return UI.SSA.insertSymbolFA(icon + " ",26,30) + name + UI.SSA.setColorGray() + " (" + filename + ")";
+    }
+
+    Core.Menus.SettingsExtensionsSubMenu.__makeDescription = function(description, version, author, active) {
+        var d = "\"" + description + "\"@br@" + UI.SSA.setColorYellow() + "Version " + version + " by " + author + "@br@";
+        if (active) {
+            d += enabledText;
+        } else d += disabledText;
+        return d;
+    }
+
+    Core.Menus.SettingsExtensionsSubMenu.eventHandler = function (event, action) {
+        if (event == "show") {
+            for (var i = 0; i < Environment.Extensions.length; i++) {
+                this.items.push({
+                    "title": Core.Menus.SettingsExtensionsSubMenu.__makeTitle(Environment.Extensions[i].name, Environment.Extensions[i].filename, Environment.Extensions[i].icon),
+                    "description": Core.Menus.SettingsExtensionsSubMenu.__makeDescription(Environment.Extensions[i].description, Environment.Extensions[i].version, Environment.Extensions[i].author, Environment.Extensions[i].loaded),
+                    "item": Environment.Extensions[i].filename,
+                    "extensionIndex": i,
+                    "eventHandler": function(event, menu) {
+                        if (event == "right") {
+                            var active = ExtensionManager.toggleExtension(this.item);
+                            this.title = Core.Menus.SettingsExtensionsSubMenu.__makeTitle(
+                                Environment.Extensions[this.extensionIndex].name,
+                                Environment.Extensions[this.extensionIndex].filename,
+                                Environment.Extensions[this.extensionIndex].icon
+                            );
+                            this.description = Core.Menus.SettingsExtensionsSubMenu.__makeDescription(
+                                Environment.Extensions[this.extensionIndex].description,
+                                Environment.Extensions[this.extensionIndex].version,
+                                Environment.Extensions[this.extensionIndex].author,
+                                active
+                            );
+                            menu.redrawMenu();
+                        } else if (event == "left") {
+                            var url = Environment.Extensions[this.extensionIndex].url;
+                            if (url != undefined) {
+                                OS.openFile(Environment.Extensions[this.extensionIndex].url, true);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        if (event == "hide") {
+            this.items = this.items.slice(0,1);
+        }
+    };
+
     Core.Menus.SettingsMenu.eventHandler = function (event, action) {
             /*
             Core.Menus.SettingsMenu.hideMenu();
@@ -2324,27 +2365,24 @@ Core.defineMenus = function () {
             );
             return;
         }
-        if (event == "help") {
-            OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#settings-menu", true);
-            return;
-        }
     };
 
     var ColorsMenuSettings = {
         // image: "colors",
+        menuId: "colors-menu",
         title:
             UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("colors.menu.title"),
         description: descriptionColors(
             Video.Colors.name,
             Settings.Data.defaultColorProfile
         ),
-        scrollingEnabled: true,
-        customKeyEvents: [{key: "h", event: "help"}]
+        scrollingEnabled: true
     };
 
     var ColorsMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("colors.disable.title") +"@br@@us10@",
+            title: UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("colors.disable.title"),
+            hasSeperator: true,
             item: "none",
         },
     ];
@@ -2369,6 +2407,8 @@ Core.defineMenus = function () {
         Core.Menus.PlaybackMenu
     );
 
+    Core.Menus.ColorsMenu.alertCategory = "Color Filter Manager";
+
     Core.Menus.ColorsMenu.eventHandler = function (event, action) {
         switch (event) {
             case "show":
@@ -2383,18 +2423,10 @@ Core.defineMenus = function () {
                 Core.Menus.ColorsMenu.hideMenu();
                 Video.Colors.apply(action);
                 if (action == "none") {
-                    Utils.showAlert(
-                        "info",
-                        Settings.getLocalizedString("alerts.colors.disabled")
-                    );
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.colors.disabled"), Core.Menus.ColorsMenu.alertCategory, UI.Alerts.Urgencies.Normal);
                 } else {
-                    Utils.showAlert(
-                        "info",
-                        Settings.getLocalizedString("alerts.colors.enabled") +
-                        UI.SSA.setColorYellow() + Video.Colors.name
-                    );
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.colors.enabled") + UI.SSA.setColorYellow() + Video.Colors.name, Core.Menus.ColorsMenu.alertCategory, UI.Alerts.Urgencies.Normal);
                 }
-
                 break;
             case "right":
                 if (action != "@back@") {
@@ -2417,16 +2449,9 @@ Core.defineMenus = function () {
                             Settings.Data.defaultColorProfile
                         )
                     );
-                    Utils.showAlert(
-                        "info",
-                        Settings.getLocalizedString("alerts.colorschanged") +
-                        Settings.Data.defaultColorProfile
-                    );
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.colorschanged") + Settings.Data.defaultColorProfile, Core.Menus.ColorsMenu.alertCategory, UI.Alerts.Urgencies.Normal);
                     Settings.save();
                 }
-                break;
-            case "help":
-                OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Help#colors-menu", true);
                 break;
             default:
                 break;
@@ -2437,7 +2462,7 @@ Core.defineMenus = function () {
         title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("tests.menu.title"),
         description: Settings.getLocalizedString("tests.menu.description"),
         autoClose: 0,
-        menuId: "tests"
+        menuId: "tests-menu"
     },[],undefined);
 
     var createItemList = function()
@@ -2609,19 +2634,19 @@ Core.doFileChecks = function () {
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/autoload.lua")))
     {
         Autoload.enabled = false;
-        Utils.log("autoload.lua has been detected! Please remove/disable that script in order to use easympv's build-in playlist manager!","startup","warn");
+        Utils.log("autoload.lua has been detected! easympv's build-in playlist manager has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/autosave.lua")))
     {
         Core.enableSaveTimer = false;
-        Utils.log("autosave.lua has been detected! Please remove/disable that script in order to use easympv's build-in automatic saving feature!","startup","warn");
+        Utils.log("autosave.lua has been detected! easympv's build-in automatic saving feature has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/betterchapters.lua")))
     {
         Core.enableChapterSeeking = false;
-        Utils.log("betterchapters.lua has been detected! Please remove/disable that script in order to use easympv's build-in chapter seeking feature!","startup","warn");
+        Utils.log("betterchapters.lua has been detected! easympv's build-in chapter seeking feature has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/INSTALLER_DATA_REGISTER"))) {
@@ -2638,6 +2663,8 @@ Core.doFileChecks = function () {
  * The main function, called by main.js.
  */
 Core.startExecution = function () {
+    ExtensionManager.init();
+    Events.earlyInit.invoke();
     if (Environment.undead) {
         mp.osd_message("easympv was loaded using evaluation! Expect issues...", 3);
     }
@@ -2674,7 +2701,7 @@ Core.startExecution = function () {
     Utils.log("Checking for updates...","startup","info");
     setTimeout(function() {
         Utils.getLatestUpdateData();
-    },1000);
+    }, 1000);
 
     Core.doFileChecks();
     if(Settings.Data.startIPCServer)
@@ -2696,12 +2723,13 @@ Core.startExecution = function () {
     {
         Browsers.FileBrowser.currentLocation = mpv.getProperty("working-directory");
     }
+    Events.lateInit.invoke();
+    UI.Alerts._init();
     Core.defineMenus();
     Core.doRegistrations();
     Video.Colors.name = Settings.Data.defaultColorProfile;
     Video.Colors.apply(Settings.Data.defaultColorProfile);
 
-    ExtensionLoader.init();
-
-    Utils.log("Finished loading after " + (Date.now() - startTime) + "ms!","startup","info");
+    Utils.log("Finished loading after " + (Date.now() - Environment.startTime) + "ms!","startup","info");
+    Events.afterInit.invoke();
 }

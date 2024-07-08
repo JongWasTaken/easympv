@@ -147,7 +147,7 @@ Video.Shaders.apply = function (shader) {
             }
         }
 
-        mpv.printInfo("[shaders] Switching to preset: " + Video.Shaders.name);
+        mpv.printInfo("Switching to preset: " + Video.Shaders.name);
     }
 };
 

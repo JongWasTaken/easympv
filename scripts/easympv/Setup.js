@@ -31,11 +31,12 @@ var title = function (n1,n2) {
 }
 Setup.Menus.Page1 = new UI.Menus.Menu(
     {
+        menuId: "ftw-menu-1",
+        helpTarget: "introduction",
         title: "",
         description: Settings.getLocalizedString("ftw.page1.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
-        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
@@ -55,10 +56,6 @@ Setup.Menus.Page1 = new UI.Menus.Menu(
     ],
     undefined
 );
-Setup.Menus.Page1.eventHandler = function (event, action) {
-    if (event == "show") { return;}
-    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#introduction", true);}
-};
 
 Setup.Menus.Page2Options = {
     PerformanceName: [
@@ -79,11 +76,12 @@ Setup.Menus.Page2Options = {
 
 Setup.Menus.Page2 = new UI.Menus.Menu(
     {
+        menuId: "ftw-menu-2",
+        helpTarget: "choosing-default-settings",
         title: "",
         description: Settings.getLocalizedString("ftw.page2.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
-        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
@@ -166,17 +164,15 @@ Setup.Menus.Page2 = new UI.Menus.Menu(
     ],
     Setup.Menus.Page1
 );
-Setup.Menus.Page2.eventHandler = function (event, action) {
-    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#choosing-default-settings", true);}
-};
 
 Setup.Menus.Page3 = new UI.Menus.Menu(
     {
+        menuId: "ftw-menu-3",
+        helpTarget: "finishing-up",
         title: "",
         description: Settings.getLocalizedString("ftw.page3.description"),
         selectedItemColor: menuColor,
         autoClose: 0,
-        customKeyEvents: [{key: "h", event: "help"}],
         fadeIn: false,
         fadeOut: false
     },
@@ -265,9 +261,6 @@ Setup.Menus.Page3 = new UI.Menus.Menu(
     ],
     Setup.Menus.Page2
 );
-Setup.Menus.Page3.eventHandler = function (event, action) {
-    if (event == "help") {OS.openFile("https://github.com/JongWasTaken/easympv/wiki/Setup#finishing-up", true);}
-};
 
 Setup.Start = function () {
     Settings.load();

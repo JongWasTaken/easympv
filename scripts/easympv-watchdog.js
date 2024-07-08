@@ -33,7 +33,7 @@
         - Watchdog execution stops.
         - easympv does not work!
 
-    That is everything it for now.
+    That is everything it can do for now.
 */
 
 String.prototype.replaceAll = function (str, newStr) {

@@ -11,6 +11,8 @@
  */
 var OS = {};
 
+OS.alertCategory = "OS Interaction Module";
+
 OS.repoName = "easympv-installer"; // change to easympv once stable
 OS.checksCompleted = false;
 OS.gitAvailable = false;
@@ -177,7 +179,7 @@ OS._call = function (cmd,async,callback) {
     return "";
 }
 
-OS.openFile = function(file,raw) {
+OS.openFile = function(file, raw) {
     if (file == undefined)
     {
         file = ""
@@ -188,7 +190,7 @@ OS.openFile = function(file,raw) {
         file = file.replaceAll("//", "/");
         file = file.replaceAll('"+"', "/");
     }
-    mpv.printWarn(file);
+    //mpv.printWarn(file);
     if (OS.isWindows) {
         file = file.replaceAll("/", "\\");
         // look at this monstrosity. why is windows the way it is?
@@ -198,10 +200,11 @@ OS.openFile = function(file,raw) {
         "}\n"+
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1}\n"+
         "exit $LASTEXITCODE",false,undefined);
+        // meanwhile *nix:
     } else if (OS.name == "linux") {
         mpv.commandv("run", "sh", "-c", "xdg-open " + file);
     } else if (OS.name == "macos") {
-        mpv.commandv("run", "sh", "-c", "/System/Applications/TextEdit.app/Contents/MacOS/TextEdit " + file);
+        mpv.commandv("run", "sh", "-c", "open " + file);
     }
     Utils.log("Opening file: " + file,"main","info");
 };
@@ -455,6 +458,28 @@ OS.fileInfo = function (file) {
     return mpv.fileInfo(file);
 }
 
+// move-file
+OS.fileMoveSystemwide = function (source, target) {
+    file = file.replaceAll("/",OS.directorySeperator);
+    target = target.replaceAll("/",OS.directorySeperator);
+
+    if (!mpv.fileExists(source))
+    {
+        return false;
+    }
+    var exitCode = 127;
+    if(OS.isWindows)
+    {
+        // TODO: no idea how this works on Windows
+        exitCode = OS._call("Move-Item -Path \"$env:APPDATA\\mpv\\"+file+"\" -Force").status;
+    }
+    else
+    {
+        exitCode = OS._call("mv \"" + file + "\" \"" + target + "\"").status;
+    }
+    return exitCode == 0 ? true: false;
+}
+
 // remove-file
 OS.fileRemove = function (file) {
     file = file.replaceAll("/",OS.directorySeperator);
@@ -626,26 +651,17 @@ OS.runScriptElevated = function (path, callback) {
  */
 OS.registerMpv = function () {
     var onFinished = function () {
-        Utils.showAlert(
-            "info",
-            "Successfully registered mpv! " +
-            "Do not close any windows that have" +
-            " opened. They will close themselves."
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.registered"), OS.alertCategory, UI.Alerts.Urgencies.Normal);
     };
 
     if (OS.isWindows) {
         if (Settings.Data.mpvLocation != "unknown") {
             OS.runScriptElevated(Settings.Data.mpvLocation + "\\installer\\mpv-install.bat",onFinished);
         } else {
-            Utils.showAlert(
-                "error",
-                "mpv location is unknown. " +
-                "Please update easympv.conf!"
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.locationunknown"), OS.alertCategory, UI.Alerts.Urgencies.Error);
         }
     } else {
-        Utils.showAlert("error", "Only supported on Windows.");
+        UI.Alerts.push(Settings.getLocalizedString("alerts.onlyonwindows"), OS.alertCategory, UI.Alerts.Urgencies.Normal);
     }
     return;
 };
@@ -655,26 +671,34 @@ OS.registerMpv = function () {
  */
 OS.unregisterMpv = function () {
     var onFinished = function () {
-        Utils.showAlert(
-            "info",
-            "Successfully unregistered mpv! " +
-            "Do not close any windows that have" +
-            " opened. They will close themselves."
-        );
+        UI.Alerts.push(Settings.getLocalizedString("alerts.unregistered"), OS.alertCategory, UI.Alerts.Urgencies.Normal);
     };
 
     if (OS.isWindows) {
         if (Settings.Data.mpvLocation != "unknown") {
             OS.runScriptElevated(Settings.Data.mpvLocation + "\\installer\\mpv-uninstall.bat",onFinished);
         } else {
-            Utils.showAlert(
-                "error",
-                "mpv location is unknown. " +
-                "Please update easympv.conf!"
-            );
+            UI.Alerts.push(Settings.getLocalizedString("alerts.locationunknown"), OS.alertCategory, UI.Alerts.Urgencies.Error);
         }
     } else {
-        Utils.showAlert("error", "Only supported on Windows.");
+        UI.Alerts.push(Settings.getLocalizedString("alerts.onlyonwindows"), OS.alertCategory, UI.Alerts.Urgencies.Normal);
     }
     return;
+};
+
+OS.createMinifiedBundle = function () {
+    //if (Environment.minified) return "Cannot minify in minified environment!";
+    if (OS.isWindows) return "Cannot minify on Windows!";
+    if (!mpv.fileExists("/usr/bin/uglifyjs")) return "UglifyJS not installed!";
+
+    for(var i = 0; i < Environment.LoadOrder.length; i++) {
+        if (!mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/") + Environment.LoadOrder[i])) {
+            return "Necessary files are not available, as this is not a development environment!";
+        }
+    }
+
+    if(OS._call("cd ~/.config/mpv/scripts/easympv/ && /usr/bin/uglifyjs " + Environment.LoadOrder.join(" ") + " --ie -o ./minified.js").status == 0 ? true: false) {
+        return  "Successfully created \'minified.js\" in script root!";
+    }
+    return "Error during minification!";
 };

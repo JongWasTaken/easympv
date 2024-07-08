@@ -35,6 +35,7 @@
     "alerts.discdrive.open": "Öffne Disc Laufwerk ",
     "alerts.url.loaded": "URL wird geladen!",
     "alerts.url.invalid": "Die angegebene URL ist inkorrekt!",
+    "alerts.browser.installed": "Installiert: ",
     "alerts.browser.playing": "Lade ",
     "alerts.browser.playing.unsupported": "Lade unbekannte Datei ",
     "alerts.browser.loadsubs": "Lade Untertitel: ",
@@ -52,6 +53,8 @@
     "alerts.uptodate": "mpv ist auf dem neusten Stand.",
     "alerts.locationunknown": "mpv Standort ist unbekannt. Bitte easympv.conf editieren!",
     "alerts.onlyonwindows": "Diese Funktion ist nur unter Windows verfügbar.",
+    "alerts.registered": "Successfully registered mpv! Do not close any windows that have opened. They will close themselves.",
+    "alerts.unregistered": "Successfully unregistered mpv! Do not close any windows that have opened. They will close themselves.",
 
     "main.close.title": "Schließen",
     "main.open.title": "Öffnen...",
@@ -151,6 +154,7 @@
     "favorites.menu.description": "Nutze die \"rechts\" Aktion um einen Eintrag zu entfernen!",
 
     "preferences.menu.title": "Einstellungen",
+    "preferences.extensions.title": "Erweiterungen",
     "preferences.configuration.title": "Konfiguration",
     "preferences.updates.title": "Updates",
     "preferences.credits.title": "Credits",
@@ -161,6 +165,10 @@
     "preferences.reinit.title": "Plugin neustarten",
     "preferences.development.title": "Entwickleroptionen",
     "preferences.uninstall.title": "mpv entfernen...",
+
+    "extensions.menu.title": "Erweiterungen",
+    "extensions.menu.description": "Dieses Menü listet alle installierten Erweiterungen. Nutze die \"rechts\" Aktion um eine Erweiterung ein- oder auszuschalten.@br@Nutze die \"links\" Aktion um die Webseite der Erweiterung zu öffnen, falls vorhanden.",
+    "extensions.store.title": "Mehr Erweiterungen...",
 
     "updates.menu.title": "Updates",
     "updates.menu.description.version": "Du hast Version ",
@@ -185,6 +193,7 @@
     "development.inputcommand.title": "Command Eingabe",
     "development.inputjs.title": "JavaScript Eingabe",
     "development.tests.title": "Testmenü öffnen",
+    "development.minify.title": "Minified bundle generieren",
     "development.restart.title": "mpv neustarten",
 
     "config.menu.title": "Konfigurationsoptionen",

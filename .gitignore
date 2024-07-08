@@ -27,3 +27,4 @@ minified.js
 scripts/easympv/shaders/bfi.vpy
 .vscode/settings.json
 scripts/easympv/runtime.js
+autoload.lua

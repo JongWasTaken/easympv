@@ -297,7 +297,10 @@
         { "type": "subtitle", "name": "Matroska Subtitles", "extension": ".mks" },
         { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ass" },
         { "type": "subtitle", "name": "SSA Subtitles", "extension": ".ssa" },
-        { "type": "subtitle", "name": "Text Subtitles", "extension": ".srt" }
+        { "type": "subtitle", "name": "Text Subtitles", "extension": ".srt" },
+
+        { "type": "script", "name": "Lua Script", "extension": ".lua" },
+        { "type": "script", "name": "JS Script", "extension": ".js" }
     ],
     "images": [
         {

@@ -114,6 +114,10 @@ mpv.writeFile = function (path, content) {
 };
 
 // print
+mpv.printDebug = function (msg) {
+    return mp.msg.debug(msg);
+};
+
 mpv.printInfo = function (msg) {
     return mp.msg.info(msg);
 };

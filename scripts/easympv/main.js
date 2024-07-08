@@ -42,17 +42,17 @@ KNOWN ISSUES:
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 */
+var Environment = {};
 
-var startTime = Date.now();
+Environment.startTime = Date.now();
 
 // Polyfills and extensions first
 eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Preload.js")));
 
 /**
- * We start with parsing of the EASYMPV_ARGS environment variable, for future use.
- * Example: EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming" mpv <file>
+ * We start with parsing of the `EASYMPV_ARGS` environment variable, for future use.  
+ * Example: `EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming" mpv <file>`
  */
-var Environment = {};
 Environment.Arguments = mpv.getEnv("EASYMPV_ARGS");
 if(Environment.Arguments != undefined)
 {
@@ -117,7 +117,7 @@ if (typeof Watchdog != "undefined") {
     Watchdog = undefined;
 }
 
-var Extensions = [];
+Environment.Extensions = [];
 if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
 {
     var extensions = mpv.getDirectoryContents(mpv.getUserPath("~~/scripts/easympv/extensions/"), "files");
@@ -131,13 +131,17 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
                 extText = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/extensions/" + extensions[j]));
                 extMeta = JSON.parse(extText.substring(2,extText.indexOf('\n')+1).trim());
                 extMeta.code = extText.substring(extText.indexOf('\n')+1);
-                Extensions.push(extMeta);
-                mpv.printInfo("Found extension \"" + extensions[j] + "\"!");
+                extMeta.filename = extensions[j];
+                extMeta.loaded = false;
+                if (extMeta.icon == undefined) extMeta.icon = "";
+                if (extMeta.description == undefined) { extMeta.description = "No description."; }
+                Environment.Extensions.push(extMeta);
+                mpv.printDebug("Found extension \"" + extensions[j] + "\"!");
             }
             catch(e)
             {
                 mpv.printError("Invalid metadata for extension \"" + extensions[j] + "\":\n" + e.toString());
-                mpv.printError("This extension will not be loaded!");
+                mpv.printError("This extension cannot be loaded!");
             }
         }
     }
@@ -152,18 +156,29 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
  * I found that using eval() instead of import() actually decreases start-up times, while also resolving some issues around
  * modules accessing other modules.
  * The only downside to this approach is that we need to make sure files are eval()'d in the correct order, otherwise we crash.
+ * This also has the added benefit of making all code easily minifiable.
  */
+Environment.LoadOrder = ["Settings.js", "OS.js", "Events.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "ExtensionManager.js", "Core.js", "Setup.js", "Tests.js", "Video.js"];
+Environment.broken = false;
+Environment.minified = false;
 if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/minified.js")) && !Environment.isDebug)
 {
     mpv.printInfo("Running on minified code!");
+    Environment.minified = true;
     eval(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/minified.js")));
 }
 else
 {
-    var loadOrder = ["Settings.js", "OS.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "Chapters.js", "Core.js", "Setup.js", "Tests.js", "Video.js", "ExtensionLoader.js"];
     var code = "/* THIS FILE EXISTS FOR DEBUGGING PURPOSES ONLY: DO NOT COMMIT; DO NOT EDIT; CHANGES WILL BE LOST! */\n\n";
-    for (var i = 0; i < loadOrder.length; i++)
-    { code += mpv.readFile(mpv.getUserPath("~~/scripts/easympv/" + loadOrder[i])) + "\n\n"; }
+    for (var i = 0; i < Environment.LoadOrder.length; i++)
+    {
+        try {
+            code += mpv.readFile(mpv.getUserPath("~~/scripts/easympv/" + Environment.LoadOrder[i])) + "\n\n";
+        } catch (e) {
+            Environment.broken = true;
+            mpv.printError("Core files are missing or not accessible! Your installation might be corrupt!");
+        }
+    }
     if (Environment.isDebug) {
         mpv.printWarn("Debug mode enabled: Code will be written to \"runtime.js\" before evaluation!")
         mpv.writeFile(
@@ -171,19 +186,28 @@ else
             code
         );
     }
-    eval(code);
+    try {
+        eval(code);
+    } catch (e) {
+        Environment.broken = true;
+        mpv.printError("Could not evaluate easympv code: " + e);
+    }
 }
 
-if (Environment.isDebug) {
-    Core.startExecution();
-}
-else
-{
-    try {
+if (Environment.broken) {
+    mpv.printError("easympv will not be loaded due to previous errors!");
+} else {
+    if (Environment.isDebug) {
         Core.startExecution();
     }
-    catch (e) {
-        mpv.printError("Encountered issue(s) during startup!");
-        mpv.printError("Issue description: " + e);
+    else
+    {
+        try {
+            Core.startExecution();
+        }
+        catch (e) {
+            mpv.printError("Encountered issue(s) during startup!");
+            mpv.printError("Issue description: " + e);
+        }
     }
 }
