@@ -22,142 +22,6 @@ Tests.run = function (name)
     return Tests.list[name].target(name);
 }
 
-/*
-Tests.json = undefined;
-
-Tests.runFromFile = function(name) {
-    if (Tests.json == undefined)
-    {
-        Tests.json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Tests.json")));
-        return;
-    }
-
-    if (name == "ignore")
-    {
-        return;
-    }
-
-    var test = Tests.json[name];
-    if (test == undefined)
-    {
-        return;
-    }
-
-    Utils.log("Starting test: \"" + name + "\"","Tests","warn");
-
-    if (test.variables != undefined)
-    {
-        Utils.log("Setting variables...","Tests","info");
-        for (var i = 0; i < test.variables.length; i++) {
-            eval("var " + test.variables[i] + ";");
-        }
-    }
-
-    var evaluate = function(target, arguments, destination)
-    {
-        var output = {};
-
-        // target
-        var toEval = target + "(";
-
-        // arguments
-        for (var i = 0; i < arguments.length; i++) {
-            var arg = arguments[i];
-            if (typeof(arg) == "string" && arg.charAt(0) != "@")
-            {
-                if (arg.includes("~~"))
-                {
-                    arg = mpv.getUserPath(arg);
-                }
-                toEval += "\"" + arg + "\"";
-            }
-            else
-            {
-                toEval += arg.replaceAll("@","");
-            }
-
-            if ((i+1) != arguments.length)
-            {
-                toEval += ",";
-            }
-        }
-        toEval += ");";
-        Utils.log("Assembled eval string: " + toEval,"Tests","info");
-
-        try {
-            eval("output = " + toEval);
-        } catch(e) {
-            Utils.log("Eval execution crashed!","Tests","error");
-            output = "*crashed*";
-        }
-
-        if(destination != undefined)
-        {
-            eval(destination + " = output;");
-        }
-
-        // expectedResult
-        if (typeof(output) == "object")
-        {
-            output = JSON.stringify(output);
-        }
-        return output;
-    }
-
-    if (test.preparation != undefined)
-    {
-        Utils.log("Evaluating preparation functions...","Tests","info");
-        for (var i = 0; i < test.preparation.length; i++) {
-            var output = evaluate(test.preparation[i].target,test.preparation[i].arguments,test.preparation[i].destination);
-            Utils.log("Preparation function returned \"" + output + "\"","Tests","info");
-        }
-    }
-
-    Utils.log("Evaluating main function...","Tests","info");
-    var output = evaluate(test.target,test.arguments);
-
-    if (typeof(test.expectedResult) == "object")
-    {
-        test.expectedResult = JSON.stringify(test.expectedResult);
-    }
-
-    Utils.log("Test eval output: " + output,"Tests","info");
-    Utils.log("Expected output: " + test.expectedResult,"Tests","info");
-
-    // cleanup
-    if (test.cleanup != undefined)
-    {
-        Utils.log("Cleaning up...","Tests","info")
-        for (var i = 0; i < test.cleanup.length; i++) {
-            var directive = test.cleanup[i];
-            if (directive.type == "file")
-            {
-                var temp = directive.content;
-                if (temp.includes("~~"))
-                {
-                    temp = mpv.getUserPath(temp);
-                }
-                OS.fileRemoveSystemwide(temp);
-            }
-        }
-    }
-    var finalResult = undefined;
-    if (output == test.expectedResult)
-    {
-        Utils.log("Test \"" + name + "\" PASSED!","Tests","warn");
-        finalResult = true;
-    }
-    else
-    {
-        Utils.log("Test \"" + name + "\" FAILED!","Tests","warn");
-        finalResult = false;
-    }
-
-    Core.Menus.TestsMenu.setResultForItem(name,finalResult);
-    Core.Menus.TestsMenu.redrawMenu();
-};
-*/
-
 var Test_API_CreateMenu = function (name) {
     var success = undefined;
     mp.register_script_message("easympv-response", function (res) {
@@ -249,8 +113,18 @@ var Test_OS_GetWindowsDriveInfo = function (name) {
     Core.Menus.TestsMenu.redrawMenu();
 }
 
-var Test_UI_ShowAlert = function (name) {
-    UI.Alerts.push("Test Alert", "Tests", UI.Alerts.Urgencies.Normal);
+var Test_UI_ShowAlertInfo = function (name) {
+    UI.Alerts.push("Test Info Alert", "Tests", UI.Alerts.Urgencies.Normal);
+    Core.Menus.TestsMenu.setResultForItem(name,undefined);
+    Core.Menus.TestsMenu.redrawMenu();
+}
+var Test_UI_ShowAlertWarn = function (name) {
+    UI.Alerts.push("Test Warn Alert", "Tests", UI.Alerts.Urgencies.Warning);
+    Core.Menus.TestsMenu.setResultForItem(name,undefined);
+    Core.Menus.TestsMenu.redrawMenu();
+}
+var Test_UI_ShowAlertError = function (name) {
+    UI.Alerts.push("Test Error Alert", "Tests", UI.Alerts.Urgencies.Error);
     Core.Menus.TestsMenu.setResultForItem(name,undefined);
     Core.Menus.TestsMenu.redrawMenu();
 }
@@ -262,5 +136,8 @@ Tests.list = {
     "OS: show message": { "target": Test_OS_ShowMessage, "description": "(Check for yourself)" },
     "OS: show notification": { "target": Test_OS_ShowNotification },
     "OS: get windows drive info": { "target": Test_OS_GetWindowsDriveInfo, "description": "(Only runs on Windows)" },
-    "UI: show alert": { "target": Test_UI_ShowAlert, "description": "(Check for yourself)" },
+    "UI: show info alert": { "target": Test_UI_ShowAlertInfo, "description": "(Check for yourself)" },
+    "UI: show warn alert": { "target": Test_UI_ShowAlertWarn, "description": "(Check for yourself)" },
+    "UI: show error alert": { "target": Test_UI_ShowAlertError, "description": "(Check for yourself)" }
+
 };

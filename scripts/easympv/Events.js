@@ -82,79 +82,93 @@ Events.README = {};
 
 /**
  * - Called first in `Core.startExecution()`, before any file checks, OS detection, update checks and first time launch check.
- * - Registered callbacks will receive no arguments
- * - Cannot be cancelled
+ * - Registered callbacks will receive no arguments.
+ * - Cannot be cancelled.
  */
 Events.earlyInit = new Events.Event();
 
 /**
  * - Called late in `Core.startExecution()`, before menu construction and hotkeys registration.
- * - Registered callbacks will receive no arguments
- * - Cannot be cancelled
+ * - Registered callbacks will receive no arguments.
+ * - Cannot be cancelled.
  */
 Events.lateInit = new Events.Event();
 
 /**
  * - Called last in `Core.startExecution()`, everything has finished at this point.
- * - Registered callbacks will receive no arguments
- * - Cannot be cancelled
+ * - Registered callbacks will receive no arguments.
+ * - Cannot be cancelled.
  */
 Events.afterInit = new Events.Event();
 
 /**
- * - Called before a menu gets instanciated durng easympv initialization
- * - Registered callbacks will receive 2 argument: `settings object, items array`
- * - Cannot be cancelled
- * - Arguments can be modified, e.g. to add items to the menu
+ * - Called last in `Core.onFileLoad()`, but only if the current file is the first file to be loaded this session.
+ * - Registered callbacks will receive 1 argument: `cFile string`, a string containing the full path to the loaded file.
+ * - Cannot be cancelled.
+ */
+Events.onFirstFileLoad = new Events.Event();
+
+/**
+ * - Called last in `Core.onFileLoad()`.
+ * - Registered callbacks will receive 1 argument: `cFile string`, a string containing the full path to the loaded file.
+ * - Cannot be cancelled.
+ */
+Events.onFileLoad = new Events.Event();
+
+/**
+ * - Called before a menu gets instanciated durng easympv initialization.
+ * - Registered callbacks will receive 2 arguments: `settings object, items array`.
+ * - Cannot be cancelled.
+ * - Arguments can be modified, e.g. to add items to the menu.
  */
 Events.beforeCreateMenu = new Events.Event();
 
 /**
- * - Called after a menu gets instanciated durng easympv initialization
- * - Registered callbacks will receive 1 argument: `menu object`
- * - Cannot be cancelled
+ * - Called after a menu gets instanciated durng easympv initialization.
+ * - Registered callbacks will receive 1 argument: `menu object`.
+ * - Cannot be cancelled.
  */
 Events.afterCreateMenu = new Events.Event();
 
 /**
- * - Called before `Menus.Menu.prototype.showMenu()`, if no menu is on screen
- * - Registered callbacks will receive 1 argument: `menu object`
- * - Can be cancelled
+ * - Called before `Menus.Menu.prototype.showMenu()`, if no menu is on screen.
+ * - Registered callbacks will receive 1 argument: `menu object`.
+ * - Can be cancelled.
  */
 Events.beforeShowMenu = new Events.Event();
 
 /**
- * - Called after `Menus.Menu.prototype.showMenu()`, if no menu is on screen
- * - Registered callbacks will receive 1 argument: `menu object`
- * - Cannot be cancelled
+ * - Called after `Menus.Menu.prototype.showMenu()`, if no menu is on screen.
+ * - Registered callbacks will receive 1 argument: `menu object`.
+ * - Cannot be cancelled.
  */
 Events.afterShowMenu = new Events.Event();
 
 /**
- * - Called before `Menus.Menu.prototype.hideMenu()`, if the menu is on screen
- * - Registered callbacks will receive 1 argument: `menu object`
- * - Can be cancelled
+ * - Called before `Menus.Menu.prototype.hideMenu()`, if the menu is on screen.
+ * - Registered callbacks will receive 1 argument: `menu object`.
+ * - Can be cancelled.
  */
 Events.beforeHideMenu = new Events.Event();
 
 /**
- * - Called after `Menus.Menu.prototype.hideMenu()`, if the menu is on screen
- * - Registered callbacks will receive 1 argument: `menu object`
- * - Cannot be cancelled
+ * - Called after `Menus.Menu.prototype.hideMenu()`, if the menu is on screen.
+ * - Registered callbacks will receive 1 argument: `menu object`.
+ * - Cannot be cancelled.
  */
 Events.afterHideMenu = new Events.Event();
 
 /**
- * - Called during `Core.doRegistrations()`, used for registering keybinds and mpv events
- * - Registered callbacks will receive no arguments
- * - Cannot be cancelled
+ * - Called during `Core.doRegistrations()`, used for registering keybinds and mpv events.
+ * - Registered callbacks will receive no arguments.
+ * - Cannot be cancelled.
  * - **You must also register a listener for `Events.duringKeyUnregistration` which undoes all your changes!**
  */
 Events.duringRegistration = new Events.Event();
 
 /**
- * - Called during `Core.doUnregistrations()`, used for unregistering keybinds and mpv events
- * - Registered callbacks will receive no arguments
- * - Cannot be cancelled
+ * - Called during `Core.doUnregistrations()`, used for unregistering keybinds and mpv events.
+ * - Registered callbacks will receive no arguments.
+ * - Cannot be cancelled.
  */
 Events.duringUnregistration = new Events.Event();

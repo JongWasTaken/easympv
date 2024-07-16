@@ -439,7 +439,7 @@ Settings.save = function () {
     }
     this.DataCopy = this.DataCopy.replace(new RegExp("\\n$"), "");
     mpv.writeFile(
-        "file://" + mpv.getUserPath("~~/easympv.conf"),
+        mpv.getUserPath("~~/easympv.conf"),
         this.DataCopy
     );
 };
@@ -653,7 +653,7 @@ Settings.mpvConfig.save = function () {
 
     //copy = copy.replace(new RegExp("\\n$"), "");
     mpv.writeFile(
-        "file://" + mpv.getUserPath("~~/mpv.conf"),
+        mpv.getUserPath("~~/mpv.conf"),
         lines.join("\n")
     );
 };
@@ -713,7 +713,7 @@ Settings.inputConfig.reset = function () {
     //defaultConfigString = defaultConfigString.replaceAll("\r\n","\n");
 
     mpv.writeFile(
-        "file://" + mpv.getUserPath("~~/input.conf"),
+        mpv.getUserPath("~~/input.conf"),
         defaultConfigString
     );
 
@@ -955,7 +955,7 @@ Settings.presets.load = function () {
         };
 
         mpv.writeFile(
-            "file://" + mpv.getUserPath("~~/easympv.json"),
+            mpv.getUserPath("~~/easympv.json"),
             JSON.stringify(dummyFile,null,4)
         );
     }
@@ -1017,7 +1017,7 @@ Settings.cache.save = function() {
     };
 
     mpv.writeFile(
-        "file://" + mpv.getUserPath("~~/easympv-cache.json"),
+        mpv.getUserPath("~~/easympv-cache.json"),
         JSON.stringify(temp,null,4)
     );
 }

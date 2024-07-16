@@ -37,7 +37,7 @@ Video.FPS.setFixedFPS = function(fps)
 Video.FPS.getFixedFPS = function()
 {
     var output = "native";
-    var filters = mpv.getPropertyNative("vf");
+    var filters = mpv.getPropertyAsNative("vf");
     if (filters.length != 0)
     {
         for (var i = 0; i < filters.length; i++)

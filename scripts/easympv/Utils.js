@@ -428,24 +428,29 @@ Utils.getCredits = function () {
 };
 
 Utils.restartMpv = function () {
-    // try to restart mpv in-place
+    var proper = OS.getProcessArguments();
     var mpvLocation = "/usr/bin/mpv";
 
-    if (Settings.Data.mpvLocation != "unknown")
-    {
-        mpvLocation = Settings.Data.mpvLocation;
+    if (proper != undefined) {
+        mpvLocation = proper.splice(0, 1)[0];
     }
+    else {
+        if (Settings.Data.mpvLocation != "unknown")
+        {
+            mpvLocation = Settings.Data.mpvLocation;
+        }
 
-    if (!mpv.fileExists(mpvLocation))
-    {
-        Utils.log("mpv location is unknown! mpv will now terminate!","restart","info");
-        mpv.commandv("quit-watch-later");
-    }
+        if (!mpv.fileExists(mpvLocation))
+        {
+            Utils.log("mpv location is unknown! mpv will now terminate!","restart","info");
+            mpv.commandv("quit-watch-later");
+        }
 
-    if (OS.isWindows)
-    {
-        mpvLocation = mpvLocation + "mpv.exe"
-        mpvLocation = mpvLocation.replaceAll("/", "\\");
+        if (OS.isWindows)
+        {
+            mpvLocation = mpvLocation + "mpv.exe"
+            mpvLocation = mpvLocation.replaceAll("/", "\\");
+        }
     }
 
     var cFile = mpv.getProperty("playlist/0/filename");
@@ -475,11 +480,18 @@ Utils.restartMpv = function () {
     {
         cFile = "--player-operation-mode=pseudo-gui";
     }
-    mpv.printWarn(mpvLocation);
-    mpv.printWarn(cFile);
-    mpv.commandv("run",mpvLocation,cFile);
-    Utils.log("!!! mpv will be restarted !!!","restart","warn")
-    Utils.log("!!! Any custom options have not been passed to the new mpv instance, please restart manually if neccessary !!!","restart","warn")
+
+    var args = [];
+    args.push("run");
+    args.push(mpvLocation);
+    for (var i = 0; i < proper.length; i++) {
+        args.push(proper[i]);
+    }
+    args.push(cFile);
+
+    mpv.commandv.apply(undefined, args);
+    mpv.printWarn("!!! mpv will be restarted !!!");
+    mpv.printWarn("!!! Custom options may not have been passed to the new mpv instance, please restart manually if neccessary !!!");
     mpv.commandv("quit-watch-later");
 }
 

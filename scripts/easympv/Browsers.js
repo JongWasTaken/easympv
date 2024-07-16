@@ -348,8 +348,9 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     var items = [];
 
     items.push({
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("global.back.title") + "@br@@br@",
+        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("global.back.title"), // "@br@@br@"
         color: "909090",
+        hasSeperator: true,
         item: "",
         eventHandler: function(action, menu)
         {
@@ -888,6 +889,7 @@ Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
 
                 var favMenu = new UI.Menus.Menu({
                     menuId: "favorites-menu",
+                    fadeOut: false, // fixes issue where multiple menus could appear at the same time
                     autoClose: 0,
                     scrollingEnabled: true,
                     title: UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("favorites.menu.title"),

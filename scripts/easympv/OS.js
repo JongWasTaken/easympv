@@ -109,7 +109,7 @@ OS._call = function (cmd,async,callback) {
 
     if (OS.isWindows) {
         mpv.writeFile(
-            "file://" + mpv.getUserPath("~~/.tmp-powershell.ps1"),
+            mpv.getUserPath("~~/.tmp-powershell.ps1"),
             cmd// + "\nRemove-Item -Path $MyInvocation.MyCommand.Source\nexit 0"
         );
     }
@@ -470,8 +470,8 @@ OS.fileMoveSystemwide = function (source, target) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        // TODO: no idea how this works on Windows
-        exitCode = OS._call("Move-Item -Path \"$env:APPDATA\\mpv\\"+file+"\" -Force").status;
+        // TODO: no idea if this works on Windows
+        exitCode = OS._call("Move-Item -Path \""+source+"\" -Destination \""+target+"\" -Force").status;
     }
     else
     {
@@ -685,6 +685,37 @@ OS.unregisterMpv = function () {
     }
     return;
 };
+
+OS.getProcessArguments = function () {
+    var proc = undefined;
+    if (OS.isWindows) {
+        proc = OS._call(
+            "$fstring = \"\" \n"+
+            "try \n"+
+            "{ \n"+
+            "    $fstring = Get-WmiObject -Query \"SELECT CommandLine FROM Win32_Process WHERE ProcessID = "+mpv.getPid()+"\"\n"+
+            "} \n"+
+            "Catch [system.exception] \n"+
+            "{exit 1} \n"+
+            "Write-Output $fstring \n"+
+            "exit 0");
+    } else {
+        proc = OS._call("ps -p "+ mpv.getPid() +" -o args --no-headers");
+    }
+
+    if (proc.status != 0) return undefined;
+    var args = proc.stdout.trim().split(" ");
+
+    var out = [];
+    out.push(args[0]);
+    for (var i = 1; i < args.length; i++) {
+        if (args[i].charAt(0) == "-" && args[i].charAt(1) == "-") {
+            out.push(args[i]);
+        }
+    }
+
+    return out;
+}
 
 OS.createMinifiedBundle = function () {
     //if (Environment.minified) return "Cannot minify in minified environment!";

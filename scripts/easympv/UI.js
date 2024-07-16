@@ -14,14 +14,14 @@ UI.SSA = {};
  * @returns {string} SSA tag sequence
 */
 UI.SSA.startSequence = function () {
-    return mpv.getPropertyOSD("osd-ass-cc/0");
+    return mpv.getPropertyOfOsd("osd-ass-cc/0");
 };
 
 /** Stops a SSA sequence.
  * @returns {string} SSA tag sequence
 */
 UI.SSA.endSequence = function () {
-    return mpv.getPropertyOSD("osd-ass-cc/1");
+    return mpv.getPropertyOfOsd("osd-ass-cc/1");
 };
 
 /** Sets or unsets SSA bold tag.
@@ -1048,7 +1048,7 @@ UI.Menus.registeredMenus = [];
 /** Create an instance of this class to create a menu.
  * @param {object} settings - Initial settings for this menu. See source code for possible options.
  * @param {Array} items - List of inital items. Each item should be an object, see source code for structure.
- * @param {object} parentMenu - If this menu is accessed via another menu, pass the parent menu here to automatically add a back button.
+ * @param {object|string} parentMenu - If this menu is accessed via another menu, pass the parent menu here to automatically add a back button. You may also pass the menuId of the parent instead.
  * @returns {object} Instance of UI.Menus.Menu
  */
 UI.Menus.Menu = function (settings, items, parentMenu) {
@@ -1498,9 +1498,11 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
 
     if (parentMenu != undefined) {
         this.hasBackButton = true;
-        this.parentMenu = parentMenu;
+        if (typeof(parentMenu) == "object") {
+            this.parentMenu = parentMenu.settings.menuId;
+        } else this.parentMenu = parentMenu;
         this.items.unshift({
-            title: this.settings.backButtonTitle, // ↑
+            title: this.settings.backButtonTitle,
             item: "@back@",
             color: this.settings.backButtonColor,
         });
@@ -2162,9 +2164,13 @@ UI.Menus.Menu.prototype._keyPressHandler = function (action, key) {
             this.eventLocked = false;
         } else {
             var item = this.items[this.selectedItemIndex];
-            if (item.item == "@back@" && action == "enter") {
+            if (item.item == "@back@" && action == "enter" && this.parentMenu != undefined) {
                 this.toggleMenu();
-                this.parentMenu.toggleMenu();
+                var menu = UI.Menus.getMenuById(this.parentMenu);
+                if (menu != undefined) {
+                    menu.toggleMenu();
+                } else this.hideMenu();
+                //this.parentMenu.toggleMenu();
                 this.eventLocked = false;
             } else {
                 this._dispatchEvent(action, item);
@@ -2545,7 +2551,7 @@ UI.Menus.Menu.insertAfterItemStaticDirect = function (id, item, items) {
 }
 
 /** Convenience method to get the currently displayed menu.
- * @returns {object} - Displayed menu, otherwise undefined
+ * @returns {object} Displayed menu, otherwise undefined
  */
 UI.Menus.getDisplayedMenu = function () {
     var cMenu = undefined;
@@ -2805,9 +2811,9 @@ UI.Alerts._build = function () {
     };
 
     for (var i = 0; i < UI.Alerts.Buffer.length; i++) {
-        content += lineStart(2, -10) + 
+        content += lineStart(2, -10) +
             UI.SSA.setColor(UI.Alerts.Buffer[i].urgency.color) + UI.SSA.insertSymbolFA(UI.Alerts.Buffer[i].urgency.icon, fontSize-16, fontSize-10) +
-            " " + UI.Alerts.Buffer[i].category + UI.SSA.setItalic(1) +
+            UI.SSA.setItalic(1) + " in " + UI.SSA.setItalic(0) + UI.SSA.setBold(1) + UI.Alerts.Buffer[i].category + UI.SSA.setBold(0) + UI.SSA.setItalic(1) +
             " at " + UI.SSA.setItalic(0) +
             UI.SSA.setBold(1) + UI.Alerts.Buffer[i].fancyTime + UI.SSA.setBold(0) +
             ":" +
@@ -2817,8 +2823,6 @@ UI.Alerts._build = function () {
 
     return content;
 }
-
-
 
 UI.oldAlerts = {};
 
@@ -3313,7 +3317,7 @@ UI.Input.OSDLog.writeLogToFile = function ()
     }
 
     mpv.writeFile(
-        "file://" + mpv.getUserPath("~~desktop/easympv.log"),
+        mpv.getUserPath("~~desktop/easympv.log"),
         data
     );
 
@@ -3357,8 +3361,9 @@ UI.Input.showJavascriptInput = function () {
                     var clearOSD = function(id) {
                         mp.osd_message("");
                         if (id == undefined){
+                            UI.Alerts.push("Force-removing all overlays: you might see error messages!", UI.Input.alertCategory, UI.Alerts.Urgencies.Warning);
                             mpv.printWarn("Force-removing all overlays: you might see error messages!");
-                            for (var i = 0; i < 1000; i++)
+                            for (var i = 0; i < 10000; i++)
                             {
                                 mpv.commandv(
                                     "osd-overlay",

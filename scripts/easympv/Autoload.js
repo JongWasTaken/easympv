@@ -266,7 +266,7 @@ Autoload.buildPlaylist = function ()
     var prepend = function(path)
     {
         // to future me: DO NOT TOUCH THIS FUNCTION
-        var pos = mpv.getPropertyNumber("playlist-count");
+        var pos = mpv.getPropertyAsNumber("playlist-count");
         mpv.commandv("loadfile", path, "append")
         mpv.commandv("playlist-move", pos, 0);
     }

@@ -49,11 +49,12 @@ Environment.startTime = Date.now();
 // Polyfills and extensions first
 eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Preload.js")));
 
+Environment.Arguments = mpv.getEnv("EASYMPV_ARGS");
+
 /**
- * We start with parsing of the `EASYMPV_ARGS` environment variable, for future use.  
+ * We start with parsing of the `EASYMPV_ARGS` environment variable, for future use.
  * Example: `EASYMPV_ARGS="options=forcedMenuKey:z,showHiddenFiles:true;debug=true;workdir=/mnt/smb/Anime/Incoming" mpv <file>`
  */
-Environment.Arguments = mpv.getEnv("EASYMPV_ARGS");
 if(Environment.Arguments != undefined)
 {
     Environment.Arguments = Environment.Arguments.split(";");
@@ -182,7 +183,7 @@ else
     if (Environment.isDebug) {
         mpv.printWarn("Debug mode enabled: Code will be written to \"runtime.js\" before evaluation!")
         mpv.writeFile(
-            "file://" + mpv.getUserPath("~~/scripts/easympv/runtime.js"),
+            mpv.getUserPath("~~/scripts/easympv/runtime.js"),
             code
         );
     }

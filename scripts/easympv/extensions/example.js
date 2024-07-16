@@ -90,7 +90,7 @@ Events.lateInit.register(ExampleExtension.name, function() {
         Events.duringRegistration.register(ExampleExtension.name, function() {
             // Force-Register the key "j", which will unhook Events.beforeShowMenu.
             mp.add_forced_key_binding("j", "example_extension_unlock_menu", function() {
-                // Events have the "kick" prototype function, which can be used to remove a registrants callback.
+                // Events have the "kick" method, which can be used to remove a registrants callback.
                 // For obvious reasons, please only use this function to remove your own callbacks...
                 Events.beforeShowMenu.kick(ExampleExtension.name);
                 UI.Alerts.push("Menu unlocked!", ExampleExtension.name, UI.Alerts.Urgencies.Warning);
@@ -111,6 +111,23 @@ Events.lateInit.register(ExampleExtension.name, function() {
     That is everything you need to know about events.
 
     For more general information, like how to create menus, please refer to the easympv source code, which should be commented (mostly (hopefully)).
+
+    Finally, here are some general guidelines you should keep in mind:
+    - DO NOT MODIFY OR SAVE EASYMPV SETTINGS IN ANY WAY!
+        - Seriously. It is very easy to completely wipe that data by accident.
+        - For example, trying to save the config before it got initialized will completely wipe it.
+        - You are however allowed to read them, e.g. Settings.Data.debugMode, just don't modify them.
+    - Try to not block the thread.
+        - Unfortunately mpv does not give us much to work with here.
+            - We are stuck on ES5 (a rather quirky implementation of it), so we don't have promises and all that.
+            - mpv does not expose any multi-threading capabilities.
+            - Most built-in mpv functions do not allow for callbacks.
+        - But even with all those limitations, we can still write code that does not suck:
+            - Obviously, use callbacks when possible.
+            - setTimeout has some properties that we can (ab)use for this, check the MDN page for it.
+            - Just don't do anything that could block the thread for a long time in the first place. There are usually better ways of doing whatever needs to be done.
+    - Use try/catch. This was already touched on before.
+        - If an extension crashes, it will take easympv with it.
 
     Good luck!
 */

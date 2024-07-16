@@ -53,7 +53,7 @@ Math.percentage = function (partialValue, totalValue) {
 var mpv = {};
 /**
  * Resolves special character sequences in given path.
- * @param path Path.
+ * @param {string} path Path.
  * @returns {string} Resolved path.
  */
 mpv.getUserPath = function (path) {
@@ -62,8 +62,8 @@ mpv.getUserPath = function (path) {
 
 /**
  * Returns metadata about given file path.
- * @param path Full path to file.
- * @returns Metadata, or undefined if the file does not exist.
+ * @param {string} path Full path to file.
+ * @returns {object} Metadata, or undefined if the file does not exist.
  */
 mpv.fileInfo = function (path) {
     return mp.utils.file_info(path);
@@ -71,8 +71,8 @@ mpv.fileInfo = function (path) {
 
 /**
  * Checks if path exists.
- * @param path Full path to file.
- * @returns Boolean
+ * @param {string} path Full path to file.
+ * @returns {boolean}
  */
 mpv.fileExists = function (path) {
     return mp.utils.file_info(path) != undefined;
@@ -93,8 +93,8 @@ mpv.getDirectoryContents = function(path, filter) {
 };
 
 /**
- * Reads file contents from given path
- * @param {string} path Full path to file.
+ * Reads file contents from given path.  
+ * @param {string} path Full path to target file.
  * @returns {string} File contents.
  */
 mpv.readFile = function (path) {
@@ -102,18 +102,18 @@ mpv.readFile = function (path) {
 };
 
 /**
- * Reads file contents from given path
- * @param {string} path Full path to file.
- * @param {string} content File contents.
+ * Writes string to given path.  
+ * Note: This function already prepends `file://` to the given path, do not add it yourself.
+ * @param {string} path Full path to target file.
+ * @param {string} content File contents. Set to `undefined` to create an empty file.
  */
 mpv.writeFile = function (path, content) {
     if (content == undefined) {
         content = "";
     }
-    return mp.utils.write_file(path, content);
+    return mp.utils.write_file("file://" + path, content);
 };
 
-// print
 mpv.printDebug = function (msg) {
     return mp.msg.debug(msg);
 };
@@ -130,22 +130,33 @@ mpv.printError = function (msg) {
     return mp.msg.error(msg);
 };
 
-// misc
 /**
  * Gets contents of a given environment variable.
  * @param {string} envvar Environment variable.
- * @returns Environment variable contents, or undefined.
+ * @returns {string} Environment variable contents, or `undefined`.
  */
 mpv.getEnv = function (envvar) {
     return mp.utils.getenv(envvar);
 };
 
-mpv.addKeyBinding = function (key, id, callback) {
+/**
+ * Returns process id of the current mpv instance.
+ * @returns {number}
+ */
+mpv.getPid = function () {
+    return mp.utils.getpid();
+}
+
+mpv.addKeyBinding = function (key, id, callback, forced) {
+    if (forced == undefined) forced = false;
+    if (forced) {
+        return mp.add_forced_key_binding(key, id, callback);
+    }
     return mp.add_key_binding(key, id, callback);
 };
 
 mpv.addForcedKeyBinding = function (key, id, callback) {
-    return mp.add_forced_key_binding(key, id, callback);
+    return mpv.addKeyBinding(key, id, callback, true);
 };
 
 mpv.removeKeyBinding = function (id) {
@@ -156,8 +167,8 @@ mpv.registerEvent = function (id, callback) {
     return mp.register_event(id, callback);
 };
 
-mpv.unregisterEvent = function (functionSignature) {
-    return mp.unregister_event(functionSignature);
+mpv.unregisterEvent = function (fn) {
+    return mp.unregister_event(fn);
 };
 
 mpv.registerScriptMessage = function (id, callback) {
@@ -168,8 +179,8 @@ mpv.observeProperty = function (property, id, callback) {
     return mp.observe_property(property, id, callback);
 };
 
-mpv.unobserveProperty = function (functionSignature) {
-    return mp.unobserve_property(functionSignature);
+mpv.unobserveProperty = function (fn) {
+    return mp.unobserve_property(fn);
 };
 
 mpv.setProperty = function (property, value) {
@@ -180,15 +191,15 @@ mpv.getProperty = function (property) {
     return mp.get_property(property);
 };
 
-mpv.getPropertyNumber = function (property) {
+mpv.getPropertyAsNumber = function (property) {
     return mp.get_property_number(property);
 };
 
-mpv.getPropertyOSD = function (property) {
+mpv.getPropertyOfOsd = function (property) {
     return mp.get_property_osd(property);
 }
 
-mpv.getPropertyNative = function (property) {
+mpv.getPropertyAsNative = function (property) {
     return mp.get_property_native(property);
 }
 

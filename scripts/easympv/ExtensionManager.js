@@ -1,5 +1,7 @@
 ExtensionManager = {};
 
+ExtensionManager.alertCategory = "Extension Manager";
+
 ExtensionManager.checkExtensionAllowed = function(filename) {
     for (var e = 0; e < Settings.Data.enabledExtensions.length; e++) {
         if (Settings.Data.enabledExtensions[e] == filename) return true;

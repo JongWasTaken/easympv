@@ -16,8 +16,6 @@ var notifyAboutUpdates = false;
 Core.fancyCurrentVersion = "";
 var cFile;
 
-//TODO: clean up
-
 Core.Menus = {};
 
 Core.alertCategory = "easympv Core";
@@ -108,6 +106,7 @@ Core.onFileLoad = function () {
             Autoload.loadedFile = cFile;
             Autoload.loadFolder();
         }
+        Events.onFirstFileLoad.invoke(cFile);
     }
 
     for (var i = 0; i < Settings.cache.perFileSaves.length; i++) {
@@ -129,6 +128,8 @@ Core.onFileLoad = function () {
         Autoload.loadedFile = cFile;
         Autoload.loadFolder();
     }
+
+    Events.onFileLoad.invoke(cFile);
 };
 
 Core.onShutdown = function () {
@@ -1422,7 +1423,7 @@ Core.defineMenus = function () {
                         var cmenu_counter = 0;
                         cmenu.items[2].eventHandler = function(event, menu) {
                             if (cmenu_counter == 9) {
-                                UI.Alerts.push("This will be a secret at some point! :)", Core.alertCategory, UI.Alerts.Urgencies.Normal);
+                                UI.Alerts.push("You found a secret! Not that it actually does anything...", Core.alertCategory, UI.Alerts.Urgencies.Normal);
                                 cmenu_counter = 0;
                             } else cmenu_counter++;
                         };
@@ -1542,7 +1543,7 @@ Core.defineMenus = function () {
                                             if (this.state)
                                             {
                                                 OS.unregisterMpv();
-                                                mpv.writeFile("file://~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
+                                                mpv.writeFile("~~/INSTALLER_UNINSTALL_DATA", Settings.Data.mpvLocation);
                                                 UI.Alerts.push(Settings.getLocalizedString("alerts.uninstall"), undefined, UI.Alerts.Urgencies.Warning);
                                                 setTimeout(function(){
                                                     mpv.commandv("run",mpv.getUserPath("~~/uninstaller.exe"));
@@ -1601,10 +1602,11 @@ Core.defineMenus = function () {
     var enabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorGreen() + Settings.getLocalizedString("global.enabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var disabledText = Settings.getLocalizedString("config.item.description.suffix") + UI.SSA.setColorRed() + Settings.getLocalizedString("global.disabled") + UI.SSA.insertSymbolFA(" ", 18, 28, Utils.commonFontName);
     var languageChanged = false;
+    var SettingsMenuBackup = {};
     var SettingsConfigurationSubMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title"),
-            hasSeperator: true,
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.save.title"),
+            hasSeperator: false,
             item: "save",
             color: "999999",
             eventHandler: function (event, menu) {
@@ -1624,6 +1626,21 @@ Core.defineMenus = function () {
                         Core.doUnregistrations();
                         Core.startExecution();
                     }
+                }
+            }
+        },
+        {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.discard.title"),
+            hasSeperator: true,
+            item: "discard",
+            color: "999999",
+            eventHandler: function (event, menu) {
+                if (event == "enter")
+                {
+                    Settings.Data = JSON.parse(JSON.stringify(SettingsMenuBackup));
+                    SettingsMenuBackup = {};
+                    Settings.save();
+                    menu.hideMenu();
                 }
             }
         },
@@ -1848,29 +1865,6 @@ Core.defineMenus = function () {
             }
         },
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.scrollalerts.title"),
-            item: "scroll_alerts",
-            descriptionPrefix: Settings.getLocalizedString("config.scrollalerts.description"),
-            description: "",
-            eventHandler: function (event, menu) {
-                if (event == "right")
-                {
-                    if(Settings.Data.scrollAlerts)
-                    {
-                        Settings.Data.scrollAlerts = false;
-                        this.description = this.descriptionPrefix + disabledText;
-                    }
-                    else
-                    {
-                        Settings.Data.scrollAlerts = true;
-                        this.description = this.descriptionPrefix + enabledText;
-                    }
-                    menu.redrawMenu();
-                    Settings.save();
-                }
-            }
-        },
-        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.shortfilenames.title"),
             item: "short_file_names",
             descriptionPrefix: Settings.getLocalizedString("config.shortfilenames.description"),
@@ -1942,6 +1936,7 @@ Core.defineMenus = function () {
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.allowfolderdeletion.title"),
             item: "allow_deleting_folders",
+            hasSeperator: true,
             descriptionPrefix: Settings.getLocalizedString("config.allowfolderdeletion.description"),
             description: "",
             eventHandler: function (event, menu) {
@@ -1962,6 +1957,7 @@ Core.defineMenus = function () {
                 }
             }
         },
+        /*
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.systemnotifications.title"),
             hasSeperator: true,
@@ -1986,6 +1982,7 @@ Core.defineMenus = function () {
                 }
             }
         },
+        */
         {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.ipcserver.title"),
             item: "ipc_server",
@@ -2050,6 +2047,9 @@ Core.defineMenus = function () {
         if (event == "show")
         {
             UI.Menus.menuKeyDisabled = true;
+
+            SettingsMenuBackup = JSON.parse(JSON.stringify(Settings.Data));
+
             var item = undefined;
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("language")
@@ -2144,6 +2144,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
+            /*
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("scroll_alerts");
             if(Settings.Data.scrollAlerts)
             {
@@ -2153,6 +2154,7 @@ Core.defineMenus = function () {
             {
                 item.description = item.descriptionPrefix + disabledText;
             }
+            */
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("short_file_names");
             if(Settings.Data.shortFileNames)
@@ -2195,6 +2197,7 @@ Core.defineMenus = function () {
                 item.description = item.descriptionPrefix + disabledText;
             }
 
+            /*
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("use_system_notifications");
             if(Settings.Data.useNativeNotifications)
             {
@@ -2204,6 +2207,7 @@ Core.defineMenus = function () {
             {
                 item.description = item.descriptionPrefix + disabledText;
             }
+            */
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("ipc_server");
             if(Settings.Data.startIPCServer)
@@ -2234,9 +2238,9 @@ Core.defineMenus = function () {
 
     SettingsExtensionsSubMenuItems = [
         {
-            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.item.back.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("extensions.item.save.title"),
             item: "save",
-            hasSeperator: true,
+            hasSeperator: false,
             color: "999999",
             eventHandler: function (event, menu) {
                 if (event == "enter")
@@ -2249,11 +2253,27 @@ Core.defineMenus = function () {
             }
         },
         {
-            "title": UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("extensions.store.title"),
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("extensions.item.discard.title"),
+            description: UI.SSA.setColorDarkRed() + Settings.getLocalizedString("extensions.item.discard.description"),
+            item: "discard",
+            hasSeperator: true,
+            color: "999999",
+            eventHandler: function (event, menu) {
+                if (event == "enter")
+                {
+                    Settings.save();
+                    menu.hideMenu();
+                }
+            }
+        },
+        {
+            "title": UI.SSA.insertSymbolFA(" ",26,30) + Settings.getLocalizedString("extensions.item.store.title"),
             "item": "get_more_extensions",
             "description": "Not yet implemented!",
             "hasSeperator": true,
-            "eventHandler": function(event, menu) {}
+            "eventHandler": function(event, menu) {
+                UI.Alerts.push("This feature is not yet implemented.", ExtensionManager.alertCategory, UI.Alerts.Urgencies.Normal);
+            }
         }
     ];
 
@@ -2314,7 +2334,7 @@ Core.defineMenus = function () {
             }
         }
         if (event == "hide") {
-            this.items = this.items.slice(0,1);
+            this.items = this.items.slice(0,3);
         }
     };
 

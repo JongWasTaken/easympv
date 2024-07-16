@@ -168,7 +168,10 @@
 
     "extensions.menu.title": "Erweiterungen",
     "extensions.menu.description": "Dieses Menü listet alle installierten Erweiterungen. Nutze die \"rechts\" Aktion um eine Erweiterung ein- oder auszuschalten.@br@Nutze die \"links\" Aktion um die Webseite der Erweiterung zu öffnen, falls vorhanden.",
-    "extensions.store.title": "Mehr Erweiterungen...",
+    "extensions.item.store.title": "Mehr Erweiterungen...",
+    "extensions.item.save.title": "Jetzt Neustarten",
+    "extensions.item.discard.title": "Später Neustarten",
+    "extensions.item.discard.description": "Änderungen werden möglicherweise erst nach dem nächsten Neustart sichtbar!",
 
     "updates.menu.title": "Updates",
     "updates.menu.description.version": "Du hast Version ",
@@ -199,7 +202,8 @@
     "config.menu.title": "Konfigurationsoptionen",
     "config.menu.description": "Benutze die \"rechts\" Aktion um eine Option zu ändern.@br@Du kannst die Konfigurationsdatei auch direkt editieren.@br@Dieses Menü wird sich nicht selbst schließen und kann nicht mit dem Hotkey geschlossen werden.",
     "config.item.description.suffix": "Derzeit ",
-    "config.item.back.title": "Speichern & Neuladen",
+    "config.item.save.title": "Speichern & Neuladen",
+    "config.item.discard.title": "Änderungen verwerfen",
     "config.language.title": "Sprache",
     "config.language.description": "Die Sprache der Benutzeroberfläche.@br@Derzeit ",
     "config.notifyupdates.title": "Über neue Versionen informieren",

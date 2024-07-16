@@ -168,7 +168,10 @@
 
     "extensions.menu.title": "Extensions",
     "extensions.menu.description": "This menu lists all installed extensions. You may toggle an extension with the \"right\" action.@br@Use the \"left\" action to open the associated website of an extension, if the author added one.",
-    "extensions.store.title": "Get more extensions...",
+    "extensions.item.store.title": "Get more extensions...",
+    "extensions.item.save.title": "Restart now",
+    "extensions.item.discard.title": "Restart later",
+    "extensions.item.discard.description": "Changes may not apply until you restart!",
 
     "updates.menu.title": "Updates",
     "updates.menu.description.version": "You are on version ",
@@ -199,7 +202,8 @@
     "config.menu.title": "Configuration Options",
     "config.menu.description": "Use the \"right\" action to toggle an option.@br@Edit the configuration file directly for more options.@br@This menu will not close automatically and cannot be closed using the hotkey.",
     "config.item.description.suffix": "Currently ",
-    "config.item.back.title": "Save & Reload",
+    "config.item.save.title": "Save & Reload",
+    "config.item.discard.title": "Discard Changes",
     "config.language.title": "Language",
     "config.language.description": "The language the UI is presented in.@br@Currently ",
     "config.notifyupdates.title": "Notify about new updates",
