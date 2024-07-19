@@ -398,6 +398,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
     items.push({
         title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("context.open.title"),
         item: "",
+        hasSeperator: isFolder,
         eventHandler: function(action, menu)
         {
             Browsers.FileBrowser.cachedFileBrowserPosition = undefined;
@@ -420,6 +421,30 @@ Browsers.FileBrowser.openContextMenu = function(item) {
             }
         }
     });
+
+    if (!isFolder) {
+        items.push({
+            title: UI.SSA.insertSymbolFA(" ", 25, 35, Utils.commonFontName) + Settings.getLocalizedString("context.opennewwindow.title"),
+            item: "",
+            hasSeperator: true,
+            eventHandler: function(action, menu)
+            {
+                if (action != "enter")
+                {
+                    return;
+                }
+                if(!isFolder)
+                {
+                    Utils.restartMpv(Browsers.FileBrowser.currentLocation +
+                        OS.directorySeperator +
+                        item, false);
+                    UI.Alerts.push(Settings.getLocalizedString("alerts.browser.opennewwindow"), Browsers.alertCategory, UI.Alerts.Urgencies.Normal);
+                    contextMenu.hideMenu();
+                    Browsers.FileBrowser.loadCurrentDirectory();
+                }
+            }
+        });
+    }
 
     if (!isFolder || Settings.Data.allowFolderDeletion)
     {

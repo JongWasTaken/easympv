@@ -38,6 +38,7 @@
     "alerts.browser.installed": "Installed ",
     "alerts.browser.playing": "Playing ",
     "alerts.browser.playing.unsupported": "Trying to play unsupported file ",
+    "alerts.browser.opennewwindow": "File was opened in new window.",
     "alerts.browser.loadsubs": "Loading subtitles: ",
     "alerts.browser.fileremoved": "Removed ",
     "alerts.browser.fileremoved.error": "Could not remove ",
@@ -138,6 +139,7 @@
     "context.menu.description": "Select what to do with this item. @br@@br@",
     "context.favorites.title": "Add to favorites",
     "context.open.title": "Open",
+    "context.opennewwindow.title": "Open in new window",
     "context.remove.title": "Remove",
     "context.remove.disabled": "Removing folders is disabled",
 

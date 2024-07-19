@@ -38,6 +38,7 @@
     "alerts.browser.installed": "Installiert: ",
     "alerts.browser.playing": "Lade ",
     "alerts.browser.playing.unsupported": "Lade unbekannte Datei ",
+    "alerts.browser.opennewwindow": "Datei wurde in einem neuen Fenster geöffnet.",
     "alerts.browser.loadsubs": "Lade Untertitel: ",
     "alerts.browser.fileremoved": "Entfernt: ",
     "alerts.browser.fileremoved.error": "Fehler beim Entfernen: ",
@@ -138,6 +139,7 @@
     "context.menu.description": "Was soll mit diesem Eintrag geschehen?@br@@br@",
     "context.favorites.title": "Zu Favoriten hinzufügen",
     "context.open.title": "Öffnen",
+    "context.opennewwindow.title": "In neuem Fenster öffnen",
     "context.remove.title": "Entfernen",
     "context.remove.disabled": "Orderentfernung ist zurzeit ausgeschaltet!",
 

@@ -427,7 +427,10 @@ Utils.getCredits = function () {
     );
 };
 
-Utils.restartMpv = function () {
+Utils.restartMpv = function (file, exit) {
+
+    if (exit == undefined) exit = true;
+
     var proper = OS.getProcessArguments();
     var mpvLocation = "/usr/bin/mpv";
 
@@ -487,12 +490,16 @@ Utils.restartMpv = function () {
     for (var i = 0; i < proper.length; i++) {
         args.push(proper[i]);
     }
-    args.push(cFile);
+    if (file != undefined) {
+        args.push(file);
+    } else args.push(cFile);
 
     mpv.commandv.apply(undefined, args);
-    mpv.printWarn("!!! mpv will be restarted !!!");
-    mpv.printWarn("!!! Custom options may not have been passed to the new mpv instance, please restart manually if neccessary !!!");
-    mpv.commandv("quit-watch-later");
+    if(exit) {
+        mpv.printWarn("!!! mpv will be restarted !!!");
+        mpv.printWarn("!!! Custom options may not have been passed to the new mpv instance, please restart manually if neccessary !!!");
+        mpv.commandv("quit-watch-later");
+    }
 }
 
 Utils.printCallStack = function(name) {
