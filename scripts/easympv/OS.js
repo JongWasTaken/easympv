@@ -240,7 +240,6 @@ OS.showMessage = function(text,async) {
     {
         OS._call("Add-Type -AssemblyName System.Windows.Forms\n"+
             "$result = [System.Windows.Forms.MessageBox]::Show(\""+ text +"\",\"mpv\",[System.Windows.Forms.MessageBoxButtons]::OK)\n"+
-            //"Remove-Item -Path $MyInvocation.MyCommand.Source\n" +
             "exit 0\n",async,callback);
         return;
     }
@@ -284,7 +283,6 @@ OS.showNotification = function(text) {
             "    $balloon.BalloonTipTitle = \"mpv\"  \n"+
             "    $balloon.Visible = $true  \n"+
             "    $balloon.ShowBalloonTip(5000) \n"+
-            //"    Remove-Item -Path $MyInvocation.MyCommand.Source \n"+
             "    exit 0 \n"+
             "} \n"+
             "catch \n"+
@@ -292,11 +290,10 @@ OS.showNotification = function(text) {
             "    $global:balloon = New-Object System.Windows.Forms.NotifyIcon \n"+
             "    $path = (Get-Process \"explorer\").Path \n"+
             "    $balloon.Icon = [System.Drawing.Icon]::ExtractAssociatedIcon($path) \n"+
-            "   $balloon.BalloonTipText = \""+ text +"\" \n"+
+            "    $balloon.BalloonTipText = \""+ text +"\" \n"+
             "    $balloon.BalloonTipTitle = \"mpv\"  \n"+
             "    $balloon.Visible = $true  \n"+
             "    $balloon.ShowBalloonTip(5000) \n"+
-            //"    Remove-Item -Path $MyInvocation.MyCommand.Source \n"+
             "    exit 0 \n"+
             "} \n"+
             "exit 1 \n").status  == 0 ? true : false;

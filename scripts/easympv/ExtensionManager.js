@@ -1,5 +1,7 @@
 ExtensionManager = {};
 
+ExtensionManager.Sandbox = {};
+
 ExtensionManager.alertCategory = "Extension Manager";
 
 ExtensionManager.checkExtensionAllowed = function(filename) {
@@ -12,16 +14,46 @@ ExtensionManager.checkExtensionAllowed = function(filename) {
 ExtensionManager.init = function() {
     if (Environment.Extensions.length == 0) return;
     for (var i = 0; i < Environment.Extensions.length; i++) {
-        if (ExtensionManager.checkExtensionAllowed(Environment.Extensions[i].filename)) {
+        var ext = Environment.Extensions[i];
+        if (ExtensionManager.checkExtensionAllowed(ext.filename)) {
+            ExtensionManager._preprocessCode(i);
             try {
-                eval(Environment.Extensions[i].code + "\n");
-                Environment.Extensions[i].loaded = true;
+                if (ext.preprocessed) {
+                    eval(ext.code + "\n");
+                    ext.code = "// Extension has been loaded, code is not required anymore!";
+                    ext.loaded = true;
+                } else throw "Could not preprocess extension!";
             }
             catch(e) {
-                mpv.printError("[Core] Exception while loading extension \"" + Environment.Extensions[i].name + " " + Environment.Extensions[i].version + "\": " + e)
+                UI.Alerts.push("Failed to load extension \"" + ext.name + "\"! Check log for details.", ExtensionManager.alertCategory, UI.Alerts.Urgencies.Error)
+                mpv.printError("[Core] Exception while loading extension \"" + ext.name + " " + ext.version + "\": " + e)
             }
         }
     }
+}
+
+ExtensionManager._preprocessCode = function(extensionIndex) {
+    var extension = Environment.Extensions[extensionIndex];
+    if (extension == undefined) return;
+    if (extension.preprocessed == undefined) return;
+    if (extension.preprocessed == true) return;
+
+    // set up extension pseudo namespace thingy
+    if (ExtensionManager.Sandbox[extension.instanceName] != undefined) {
+        extension.instanceName = extension.instanceName + "_1";
+    };
+    ExtensionManager.Sandbox[extension.instanceName] = {};
+    // replace fields
+    extension.code = extension.code.replaceAll("\\$self", "ExtensionManager.Sandbox." + extension.instanceName);
+    extension.code = extension.code.replaceAll("\\$metadata", "Environment.Extensions[" + extensionIndex + "]");
+    // replace methods
+    extension.code = extension.code.replaceAll("\\.\\$register\\(", ".register(\"" + extension.instanceName + "\",");
+    extension.code = extension.code.replaceAll("\\.\\$unregister\\(", ".kick(\"" + extension.instanceName + "\"");
+
+    if (extension.debug) {
+        mpv.printWarn(extension.code);
+    }
+    extension.preprocessed = true;
 }
 
 ExtensionManager.disallowExtension = function(filename) {

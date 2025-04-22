@@ -1,4 +1,4 @@
-// {"name": "Chapters Extension", "author": "Jong", "version": "2.0.0", "icon": "", "description": "Adds auto-skipping and auto-slowdown for certain chapters in a file, like openings and endings.@br@Replaces previous built-in module."}
+// {"name": "Chapter Utilities", "author": "Jong", "version": "2.0.0", "icon": "", "description": "Adds auto-skipping and auto-slowdown for certain chapters in a file, like openings and endings.@br@Replaces previous built-in module."}
 
 /*
  * CHAPTERS.JS (PART OF EASYMPV)
@@ -8,87 +8,103 @@
  * License:        MIT License
  */
 
-var ChaptersExtension = {};
+$self.name = "Chapter Utilities";
 
-ChaptersExtension.name = "Chapters Extension";
+$self.total = 0;
+$self.current = 0;
+$self.type = "unknown";
+$self.cspeed = 1;
+$self.mode = "skip";
+$self.status = "disabled";
 
-ChaptersExtension.total = 0;
-ChaptersExtension.current = 0;
-ChaptersExtension.type = "unknown";
-ChaptersExtension.cspeed = 1;
-ChaptersExtension.mode = "skip";
-ChaptersExtension.status = "disabled";
-
-ChaptersExtension.handler = function () {
+$self.handler = function () {
     // Called on every chapter change
 
-    ChaptersExtension.current = mpv.getProperty("chapter"); // Which chapter is currently playing
-    ChaptersExtension.total = Number(mpv.getProperty("chapters")) - 1; // Total number of chapters in video file
+    $self.current = mpv.getProperty("chapter"); // Which chapter is currently playing
+    $self.total = Number(mpv.getProperty("chapters")) - 1; // Total number of chapters in video file
 
     // Try to identify type by comparing data to common patterns
-    // Even though this seems janky, it works suprisingly well
-    if (ChaptersExtension.total >= 5) {
-        ChaptersExtension.type = "modern";
-    } else if (ChaptersExtension.total == 4) {
-        ChaptersExtension.type = "classic";
-    } else if (ChaptersExtension.total == 3) {
-        ChaptersExtension.type = "modernalt";
+    // Even though this seems completly arbitrary, it works suprisingly well
+    if ($self.total >= 5) {
+        $self.type = "modern";
+    } else if ($self.total == 4) {
+        $self.type = "classic";
+    } else if ($self.total == 3) {
+        $self.type = "modernalt";
     } else {
-        ChaptersExtension.type = "unknown";
+        $self.type = "unknown";
     }
 
     // Do the actual operation
-    if (ChaptersExtension.status == "enabled") {
-        if (ChaptersExtension.mode == "skip") {
-            if (ChaptersExtension.type == "modern") {
+    if ($self.status == "enabled") {
+        if ($self.mode == "skip") {
+            if ($self.type == "modern") {
                 if (
-                    ChaptersExtension.current == 1 ||
-                    ChaptersExtension.current == 4 ||
-                    ChaptersExtension.current == 5
+                    $self.current == 1 ||
+                    $self.current == 4 ||
+                    $self.current == 5
                 ) {
                     mpv.command("no-osd add chapter 1");
                 }
-            } else if (ChaptersExtension.type == "classic") {
+            } else if ($self.type == "classic") {
                 if (
-                    ChaptersExtension.current == 0 ||
-                    ChaptersExtension.current == 3 ||
-                    ChaptersExtension.current == 4
+                    $self.current == 0 ||
+                    $self.current == 3 ||
+                    $self.current == 4
                 ) {
                     mpv.command("no-osd add chapter 1");
                 }
-            } else if (ChaptersExtension.type == "modernalt") {
+            } else if ($self.type == "modernalt") {
                 if (
-                    ChaptersExtension.current == 0 ||
-                    ChaptersExtension.current == 2 ||
-                    ChaptersExtension.current == 3
+                    $self.current == 0 ||
+                    $self.current == 2 ||
+                    $self.current == 3
                 ) {
                     mpv.command("no-osd add chapter 1");
                 }
             }
-        } else if (ChaptersExtension.mode == "slowdown") {
-            if (ChaptersExtension.type == "modern") {
-                if (ChaptersExtension.current == 1 || ChaptersExtension.current == 4) {
-                    ChaptersExtension.cspeed = mpv.getProperty("speed");
+        } else if ($self.mode == "slowdown") {
+            if ($self.type == "modern") {
+                if (
+                    $self.current == 1 ||
+                    $self.current == 4
+                ) {
+                    $self.cspeed = mpv.getProperty("speed");
                     mpv.setProperty("speed", 1);
                 }
-                if (ChaptersExtension.current == 2 || ChaptersExtension.current == 5) {
-                    mpv.setProperty("speed", ChaptersExtension.cspeed);
+                if (
+                    $self.current == 2 ||
+                    $self.current == 5
+                ) {
+                    mpv.setProperty("speed", $self.cspeed);
                 }
-            } else if (ChaptersExtension.type == "classic") {
-                if (ChaptersExtension.current == 0 || ChaptersExtension.current == 3) {
-                    ChaptersExtension.cspeed = mpv.getProperty("speed");
+            } else if ($self.type == "classic") {
+                if (
+                    $self.current == 0 ||
+                    $self.current == 3
+                ) {
+                    $self.cspeed = mpv.getProperty("speed");
                     mpv.setProperty("speed", 1);
                 }
-                if (ChaptersExtension.current == 1 || ChaptersExtension.current == 4) {
-                    mpv.setProperty("speed", ChaptersExtension.cspeed);
+                if (
+                    $self.current == 1 ||
+                    $self.current == 4
+                ) {
+                    mpv.setProperty("speed", $self.cspeed);
                 }
-            } else if (ChaptersExtension.type == "modernalt") {
-                if (ChaptersExtension.current == 0 || ChaptersExtension.current == 2) {
-                    ChaptersExtension.cspeed = mpv.getProperty("speed");
+            } else if ($self.type == "modernalt") {
+                if (
+                    $self.current == 0 ||
+                    $self.current == 2
+                ) {
+                    $self.cspeed = mpv.getProperty("speed");
                     mpv.setProperty("speed", 1);
                 }
-                if (ChaptersExtension.current == 1 || ChaptersExtension.current == 3) {
-                    mpv.setProperty("speed", ChaptersExtension.cspeed);
+                if (
+                    $self.current == 1 ||
+                    $self.current == 3
+                ) {
+                    mpv.setProperty("speed", $self.cspeed);
                 }
             }
         }
@@ -96,75 +112,109 @@ ChaptersExtension.handler = function () {
 };
 
 // Our menu gets created after init, otherwise Core.Menus.MainMenu is undefined and the back button will not appear!
-ChaptersExtension.ChaptersMenu = undefined;
-Events.afterInit.register(ChaptersExtension.name, function() {
-    ChaptersExtension.ChaptersMenu = new UI.Menus.Menu(
+$self.ChaptersMenu = undefined;
+Events.afterInit.$register(function () {
+    $self.ChaptersMenu = new UI.Menus.Menu(
         {
             menuId: "chapters-menu",
-            title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("chapters.menu.title"),
-            description: Settings.getLocalizedString("chapters.menu.description")
+            title:
+                UI.SSA.insertSymbolFA("") +
+                " " +
+                Settings.getLocalizedString("chapters.menu.title"),
+            description: Settings.getLocalizedString(
+                "chapters.menu.description"
+            ),
         },
         [
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.mode.title"),
+                title:
+                    UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                    Settings.getLocalizedString("chapters.mode.title"),
                 item: "tmode",
-                description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + ChaptersExtension.mode,
-                eventHandler: function(event, menu)
-                {
-                    if (ChaptersExtension.mode == "skip") {
-                        ChaptersExtension.mode = "slowdown";
+                description:
+                    UI.SSA.setColorYellow() +
+                    Settings.getLocalizedString("chapters.currentmode") +
+                    $self.mode,
+                eventHandler: function (event, menu) {
+                    if ($self.mode == "skip") {
+                        $self.mode = "slowdown";
                     } else {
-                        ChaptersExtension.mode = "skip";
+                        $self.mode = "skip";
                     }
-                    this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.currentmode") + ChaptersExtension.mode;
+                    this.description =
+                        UI.SSA.setColorYellow() +
+                        Settings.getLocalizedString("chapters.currentmode") +
+                        $self.mode;
                     menu.redrawMenu();
-                }
+                },
             },
             {
-                title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("chapters.toggle.title"),
+                title:
+                    UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                    Settings.getLocalizedString("chapters.toggle.title"),
                 item: "tstatus",
-                description: UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + ChaptersExtension.status,
-                eventHandler: function(event, menu)
-                {
-                    if (ChaptersExtension.status == "disabled") {
-                        ChaptersExtension.status = Settings.getLocalizedString("global.enabled");
+                description:
+                    UI.SSA.setColorYellow() +
+                    Settings.getLocalizedString("chapters.status") +
+                    $self.status,
+                eventHandler: function (event, menu) {
+                    if ($self.status == "disabled") {
+                        $self.status =
+                            Settings.getLocalizedString("global.enabled");
                     } else {
-                        ChaptersExtension.status = Settings.getLocalizedString("global.disabled");
+                        $self.status =
+                            Settings.getLocalizedString("global.disabled");
                     }
-                    this.description = UI.SSA.setColorYellow() + Settings.getLocalizedString("chapters.status") + ChaptersExtension.status;
+                    this.description =
+                        UI.SSA.setColorYellow() +
+                        Settings.getLocalizedString("chapters.status") +
+                        $self.status;
                     menu.redrawMenu();
-                }
+                },
             },
         ],
         Core.Menus.MainMenu
     );
 });
 
-Events.duringRegistration.register(ChaptersExtension.name, function() {
+Events.duringRegistration.$register(function () {
     mp.observe_property(
         "chapter-metadata/by-key/title",
         undefined,
-        ChaptersExtension.handler
+        $self.handler
     );
 });
 
-Events.duringUnregistration.register(ChaptersExtension.name, function() {
-    mp.unobserve_property(ChaptersExtension.handler);
+Events.duringUnregistration.$register(function () {
+    mp.unobserve_property($self.handler);
 });
 
-Events.beforeCreateMenu.register(ChaptersExtension.name, function(settings, items) {
-    if (settings.menuId != "main-menu") return;
+Events.beforeCreateMenu.$register(
+    function (settings, items) {
+        if (settings.menuId != "main-menu") return;
 
-    UI.Menus.Menu.getItemByIdStaticDirect("playback", items).hasSeperator = false;
-    UI.Menus.Menu.insertAfterItemStaticDirect("playback",
-    {
-        title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("main.chapters.title"),
-        item: "chapters",
-        hasSeperator: true,
-        eventHandler: function(event, menu) {
-            if (event == "enter") {
-                UI.Menus.switchCurrentMenu(ChaptersExtension.ChaptersMenu,menu);
-            }
-        }
-    }, items);
-})
+        UI.Menus.Menu.getItemByIdStaticDirect(
+            "playback",
+            items
+        ).hasSeperator = false;
+        UI.Menus.Menu.insertAfterItemStaticDirect(
+            "playback",
+            {
+                title:
+                    UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                    Settings.getLocalizedString("main.chapters.title"),
+                item: "chapters",
+                hasSeperator: true,
+                eventHandler: function (event, menu) {
+                    if (event == "enter") {
+                        UI.Menus.switchCurrentMenu(
+                            $self.ChaptersMenu,
+                            menu
+                        );
+                    }
+                },
+            },
+            items
+        );
+    }
+);

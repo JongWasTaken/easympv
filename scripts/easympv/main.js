@@ -134,8 +134,24 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
                 extMeta.code = extText.substring(extText.indexOf('\n')+1);
                 extMeta.filename = extensions[j];
                 extMeta.loaded = false;
+                extMeta.preprocessed = false;
                 if (extMeta.icon == undefined) extMeta.icon = "";
                 if (extMeta.description == undefined) { extMeta.description = "No description."; }
+                if (extMeta.debug == undefined) { extMeta.debug = false; }
+                try {
+                    if (extMeta.debug) {
+                        mpv.printWarn("Extension \""+extMeta.filename+"\" has the debug property set. Extension code will be printed after preprocessing step.")
+                    }
+                }
+                catch (ignored) {
+                    mpv.printError("Extension \""+extMeta.filename+"\" has a non-boolean debug property!")
+                    extMeta.debug = false;
+                }
+
+                var temp = extMeta.filename.split(".");
+                temp.pop();
+                extMeta.instanceName = temp.join(".") + "_" + String(Math.floor(Math.random() * 10000));
+
                 Environment.Extensions.push(extMeta);
                 mpv.printDebug("Found extension \"" + extensions[j] + "\"!");
             }

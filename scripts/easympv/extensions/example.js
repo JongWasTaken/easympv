@@ -1,4 +1,4 @@
-// {"name": "Example Extension", "author": "Jong", "version": "1.0.0", "icon": "?", "description": "Reference for developers. Only runs in debug mode.@br@When enabled, locks the main menu until the \"j\" key is pressed!", "url": "https://github.com/JongWasTaken/easympv" }
+// {"name": "Example Extension", "author": "Jong", "version": "1.0.0", "icon": "", "description": "Reference for developers. Only runs in debug mode.@br@When enabled, locks the main menu until the \"j\" key is pressed!", "url": "https://github.com/JongWasTaken/easympv" }
 
 /*
  * EXAMPLE.JS (PART OF EASYMPV)
@@ -13,15 +13,18 @@
     As it is supposed to be a demonstration/explanation, it is disabled by default and only works when debug mode is enabled.
 
     The first line needs to be commented out valid json, containing strings named "name", "author", "version" and optionally "description" and "icon", like in this file.
+    You can access that data using the $metadata macro object, e.g. "$metadata.version" will be your declared version.
 
     Extension code is eval'd early into the plugin lifecycle.
     Events are used to make sure that whatever your try to add/modify/remove actually exists.
-    They can be hooked by calling Events.<EVENT_NAME>.register(<EXTENSION_NAME>, <CALLBACK>).
+    They can be hooked by calling Events.<EVENT_NAME>.$register(<CALLBACK>).
 
-    PLEASE make sure that you use the same extension name as in the first line, in this case "Example Extension"!
-    This allows for cleaner removal of extensions at runtime, should the user desire to do so.
+    Note that there is a difference between Events.<EVENT_NAME>.$register(<CALLBACK>) and Events.<EVENT_NAME>.register(<NAME>, <CALLBACK>).
+    The former is actually a macro for the latter, which removes the necessity to pass in a name, greatly simplifying code.
+    Similarly, use Events.<EVENT_NAME>.$unregister() instead of Events.<EVENT_NAME>.kick(<NAME>).
+    All macros are prefixed with a dollar sign, and get replaced with their real values before the extension actually gets eval'd.
 
-    A list of possible entrypoints:
+    Now a list of suggested entrypoints:
     - Events.earlyInit: Called first, before any file checks, OS detection, update checks and first time launch check.
         - Should not be used unless absolutely necessary!
     - Events.lateInit: Called after all checks, but before any menus have been constructed. Hotkeys are also not registered yet.
@@ -30,56 +33,69 @@
 
     Other events exist as well, make sure to check the source code for a full list (Events.js)!
 
-    Note that extension code is wrapped in a try/catch block, which will (hopefully) prevent easympv from crashing if an extension missbehaves.
-    Please make sure to wrap risky calls as well, just in case.
+    Note that extension code is wrapped in a try/catch block, which will (hopefully) prevent easympv from crashing if an extension misbehaves.
+    Please make sure to wrap risky calls as well.
 
-    Finally, make sure to tie variables to an object instead of declaring them directly.
-    Unfortunately there is no way to prevent collisions here, so choose a unique object name, ideally derived from the extension name.
+    Finally, make sure to tie variables to the $self object instead of declaring them directly.
+    So instead of "var myVariable = true", do "$self.mvVariable = true" instead!
+    $self gets preprocessed to an unique identifier, giving you a safe namespace and preventing collisions between extensions.
 */
 
-ExampleExtension = {};
-ExampleExtension.name = "Example Extension";
-
-Events.lateInit.register(ExampleExtension.name, function() {
-    // easympv includes a wrapper around most of mpv's built-in functions, declared in "Preload.js"!
+Events.lateInit.$register(function () {
+    // easympv includes wrappers around a lot of mpv's built-in functions, declared in "Preload.js"!
     mpv.printInfo("[Example Extension] Start!");
 
     // As said above, this plugin will only do something in debug mode, so we check for that.
-    if (Settings.Data.debugMode)
-    {
+    // It is worth noting that you could also skip hooking Events.lateInit and just hook all the other events directly.
+    // The way it is done here is only necessary because of the debug mode check below.
+    if (Settings.Data.debugMode) {
         // It is best practice to also use events for modifiying menus.
         // Use Events.beforeCreateMenu for that.
         // Other events could also be used for this purpose, but beforeCreateMenu is the easiest, as it receives the menus settings and items directly.
-        Events.beforeCreateMenu.register(ExampleExtension.name, function(settings, items) {
-            // Check what menu is being contructed right now.
-            if (settings.menuId != "main-menu") return;
+        Events.beforeCreateMenu.$register(
+            function (settings, items) {
+                // Check what menu is being contructed right now.
+                if (settings.menuId != "main-menu") return;
 
-            // Modify last item to add a seperator.
-            items[items.length - 1].title += UI.Menus.commonSeperator;
+                // Modify last item to add a seperator.
+                items[items.length - 1].title += UI.Menus.commonSeperator;
 
-            // Add the new item.
-            items.push(
-                {
-                    // If you want localization in your extension you will have to write something up yourself...
-                    title: UI.SSA.insertSymbolFA("? ", 26, 35, Utils.commonFontName) + "Example Menu Item",
+                // Add the new item.
+                items.push({
+                    // If you want localization in your extension you will have to come up with a solution by yourself, though maybe some kind of API for that would be possible...
+                    title:
+                        UI.SSA.insertSymbolFA(
+                            "? ",
+                            26,
+                            35,
+                            Utils.commonFontName
+                        ) + "Example Menu Item",
                     item: "example_extension_item",
                     description: "",
-                    eventHandler: function(event, menu) {
+                    eventHandler: function (event, menu) {
                         if (event == "enter") {
                             menu.hideMenu();
-                            UI.Alerts.push("Example Alert!", ExampleExtension.name, UI.Alerts.Urgencies.Normal);
+                            UI.Alerts.push(
+                                "Example Alert!",
+                                $metadata.name,
+                                UI.Alerts.Urgencies.Normal
+                            );
                         }
-                    }
-                }
-            );
+                    },
+                });
 
-            // Because we modified the menus items directly, nothing else needs to be done. Our changes will be present after the menu has been constructed.
-        });
+                // Because we modified the menus items directly, nothing else needs to be done. Our changes will be present after the menu has been constructed.
+            }
+        );
 
         // Some events can also cancel actions:
-        Events.beforeShowMenu.register(ExampleExtension.name, function(menu) {
+        Events.beforeShowMenu.$register(function (menu) {
             if (menu.settings.menuId != "main-menu") return false;
-            UI.Alerts.push("This menu is locked!", ExampleExtension.name, UI.Alerts.Urgencies.Warning);
+            UI.Alerts.push(
+                "This menu is locked!",
+                $metadata.name,
+                UI.Alerts.Urgencies.Warning
+            );
             return true;
         });
         // The above event will prevent the main menu from opening.
@@ -87,20 +103,29 @@ Events.lateInit.register(ExampleExtension.name, function() {
 
         // Now, lets turn this into a lock of sorts:
         // Hook another event, this time for key registration.
-        Events.duringRegistration.register(ExampleExtension.name, function() {
+        Events.duringRegistration.$register(function () {
             // Force-Register the key "j", which will unhook Events.beforeShowMenu.
-            mp.add_forced_key_binding("j", "example_extension_unlock_menu", function() {
-                // Events have the "kick" method, which can be used to remove a registrants callback.
-                // For obvious reasons, please only use this function to remove your own callbacks...
-                Events.beforeShowMenu.kick(ExampleExtension.name);
-                UI.Alerts.push("Menu unlocked!", ExampleExtension.name, UI.Alerts.Urgencies.Warning);
-            });
+            mp.add_forced_key_binding(
+                "j",
+                "example_extension_unlock_menu",
+                function () {
+                    // Use the $unregister() macro on an event to remove your listener.
+                    Events.beforeShowMenu.$unregister();
+                    UI.Alerts.push(
+                        "Menu unlocked!",
+                        $metadata.name,
+                        UI.Alerts.Urgencies.Warning
+                    );
+                }
+            );
         });
 
         // If you hook Events.duringRegistration, please also make sure to hook Events.duringUnregistration for the inverse.
-        Events.duringUnregistration.register(ExampleExtension.name, function() {
-            mp.remove_key_binding("example_extension_unlock_menu");
-        });
+        Events.duringUnregistration.$register(
+            function () {
+                mp.remove_key_binding("example_extension_unlock_menu");
+            }
+        );
 
         // Now, when launching mpv, the main menu should not be openable until the "j" key is pressed!
         mpv.printInfo("[Example Extension] Loaded!");
@@ -128,6 +153,8 @@ Events.lateInit.register(ExampleExtension.name, function() {
             - Just don't do anything that could block the thread for a long time in the first place. There are usually better ways of doing whatever needs to be done.
     - Use try/catch. This was already touched on before.
         - If an extension crashes, it will take easympv with it.
+    - If you encounter unexplainable bugs, you can try adding "debug": true to the metadata json object in line 1.
+        - This will print out your extension code after preprocessing, which might prove helpful for troubleshooting.
 
     Good luck!
 */

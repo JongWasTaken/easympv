@@ -10,40 +10,66 @@
 Events = {};
 
 /**
- * Base event class.  
- * Can be used to create new events. Simply create a new event object like this: `var myEvent = new Events.Event();`  
+ * Base event class.
+ * Can be used to create new events. Simply create a new event object like this: `var myEvent = new Events.Event(<limit>);`
  * Invoke event listeners by calling `myEvent.invoke(<ARGUMENTS_TO_PASS_ALONG>)`.
- * 
+ *
  * An event may also be used to cancel execution, as registered callbacks can return a boolean to initiate cancellation.
  * If _any_ callback returns `true`, then `myEvent.invoke()` will also return `true`.
+ *
+ * @param {number} `limit` Optional: limits the number of possible registrants if given
  */
-Events.Event = function () {
+Events.Event = function (limit) {
     this.registrants = [];
     this.listeners = [];
+    this.limit = 0;
+    if (limit != undefined) this.limit = limit;
 }
 
 /**
  * Registers a listener for this event.
  * @param {string} registrant Name of the listener
  * @param {function} callback Function accepting arguments for this event
+ * @returns {boolean} `true` if registration succeeded
  */
 Events.Event.prototype.register = function (registrant, callback) {
     if (registrant == null) {
-        return;
+        return false;
     }
     if (callback != null) {
         for (var i = 0; i < this.registrants.length; i++) {
             if (this.registrants[i] == registrant) {
-                return;
+                return false;
             }
         }
-        this.registrants.push(registrant);
-        this.listeners.push(callback);
+        if (this.limit == 0 || this.registrants.length < this.limit) {
+            this.registrants.push(registrant);
+            this.listeners.push(callback);
+            return true;
+        }
     }
+    return false;
 }
 
 /**
- * Removes listener and associated callback. Please only use this to remove yourself!
+ * Registers a listener to this event if called from inside an extension.
+ * Throws if called outside.
+ */
+Events.Event.prototype.$register = function () {
+    throw "Event.$register called from outside of extension!";
+}
+
+/**
+ * Unregisters a listener from this event if called from inside an extension.
+ * Throws if called outside.
+ */
+Events.Event.prototype.$unregister = function () {
+    throw "Event.$unregister called from outside of extension!";
+}
+
+/**
+ * Removes listener and associated callback.
+ * Extensions should use `Events.<EVENT_NAME>.$unregister()` instead!
  * @param {string} registrant Name of the listener
  */
 Events.Event.prototype.kick = function (registrant) {
@@ -74,8 +100,9 @@ Events.Event.prototype.invoke = function () {
 
 /**
  * `Events` contains all easympv events.
- * 
+ *
  * Register a listener by calling `Events.<EVENT_NAME>.register(<your_identifier_goes_here>, <callback_goes_here>)`.
+ * Extensions should use `Events.<EVENT_NAME>.$register(<callback_goes_here>)` instead.
  * Required arguments for the callback can be derived from the documentation of a given event.
  */
 Events.README = {};
@@ -159,16 +186,24 @@ Events.beforeHideMenu = new Events.Event();
 Events.afterHideMenu = new Events.Event();
 
 /**
- * - Called during `Core.doRegistrations()`, used for registering keybinds and mpv events.
+ * - Called during `Core.doRegistrations()`. Used for registering keybinds and mpv events.
  * - Registered callbacks will receive no arguments.
  * - Cannot be cancelled.
- * - **You must also register a listener for `Events.duringKeyUnregistration` which undoes all your changes!**
+ * - **You should also register a listener for `Events.duringKeyUnregistration` which undoes all your changes!**
  */
 Events.duringRegistration = new Events.Event();
 
 /**
- * - Called during `Core.doUnregistrations()`, used for unregistering keybinds and mpv events.
+ * - Called during `Core.doUnregistrations()`. Used for unregistering keybinds and mpv events.
  * - Registered callbacks will receive no arguments.
  * - Cannot be cancelled.
  */
 Events.duringUnregistration = new Events.Event();
+
+/**
+ * - Called before opening a file chosen by the user using the browser.
+ * - Registered callbacks will receive 2 arguments: `entry object`, `path string`.
+ * - Limited to a single listener!
+ * - Can be cancelled, to implement support for specific special file extensions.
+ */
+Events.beforeBrowserFileOpen = new Events.Event(1);

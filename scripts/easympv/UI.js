@@ -2516,6 +2516,8 @@ UI.Menus.menuKeyDisabled = false;
  * @param {object} menu - Target menu
 */
 UI.Menus.Menu.insertAfterItemStatic = function (id, item, menu) {
+    UI.Menus.Menu.insertAfterItemStaticDirect(id, item, menu.items);
+    /*
     if (item == undefined)
     {
        item = { title: undefined, item: undefined, eventHandler: undefined };
@@ -2528,6 +2530,7 @@ UI.Menus.Menu.insertAfterItemStatic = function (id, item, menu) {
     if (i == menu.items.length) return;
 
     menu.items.splice(i+1, 0, item);
+    */
 }
 
 /** Inserts an item after another item directly.
@@ -2547,7 +2550,7 @@ UI.Menus.Menu.insertAfterItemStaticDirect = function (id, item, items) {
     }
     if (i == items.length) return;
 
-    items.splice(i+1, 0, item);
+    items.splice(i + 1, 0, item);
 }
 
 /** Convenience method to get the currently displayed menu.

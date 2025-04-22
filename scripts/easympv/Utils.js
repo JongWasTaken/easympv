@@ -427,9 +427,46 @@ Utils.getCredits = function () {
     );
 };
 
-Utils.restartMpv = function (file, exit) {
+Utils.getFileName = function (path) {
+    var pathParts = path.split(OS.directorySeperator);
+    return pathParts[pathParts.length - 1];
+};
 
-    if (exit == undefined) exit = true;
+Utils.removeFileExtension = function (filename) {
+    var temp = Utils.getFileName(filename).split(".");
+    temp.pop();
+    return temp.join(".");
+};
+
+Utils.getParentDirectory = function (workDir) {
+    var newDir = "";
+    if (workDir.charAt(workDir.length - 1) == OS.directorySeperator) {
+        workDir = workDir.substring(0, workDir.length - 1);
+    }
+    var workDirTree = workDir.split(OS.directorySeperator);
+
+    if (!OS.isWindows && workDirTree.length < 3) {
+        workDirTree[0] = "/";
+    }
+
+    for (var i = 0; i < workDirTree.length - 1; i++) {
+        if (i == 0) {
+            newDir = workDirTree[0];
+        } else {
+            newDir = newDir + OS.directorySeperator + workDirTree[i];
+        }
+    }
+
+    if (newDir.charAt(newDir.length - 1) == ":") {
+        newDir += OS.directorySeperator;
+    }
+
+    return newDir;
+};
+
+Utils.restartMpv = function (targetFile, exitCurrentInstance) {
+
+    if (exitCurrentInstance == undefined) exitCurrentInstance = true;
 
     var proper = OS.getProcessArguments();
     var mpvLocation = "/usr/bin/mpv";
@@ -490,12 +527,12 @@ Utils.restartMpv = function (file, exit) {
     for (var i = 0; i < proper.length; i++) {
         args.push(proper[i]);
     }
-    if (file != undefined) {
-        args.push(file);
+    if (targetFile != undefined) {
+        args.push(targetFile);
     } else args.push(cFile);
 
     mpv.commandv.apply(undefined, args);
-    if(exit) {
+    if(exitCurrentInstance) {
         mpv.printWarn("!!! mpv will be restarted !!!");
         mpv.printWarn("!!! Custom options may not have been passed to the new mpv instance, please restart manually if neccessary !!!");
         mpv.commandv("quit-watch-later");

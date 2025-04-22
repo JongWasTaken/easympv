@@ -80,26 +80,37 @@ Watchdog.getConfigKey = function(key) {
     return undefined;
 }
 
-// main stuff
 Watchdog.pingCount = 0;
 mp.register_script_message("__watchdog",function() {
     Watchdog.pingCount = Watchdog.pingCount - 1;
 });
 
+Watchdog.lastPingCountAfterCrash = -1;
+Watchdog.maxPingCount = 5;
+
 Watchdog.mainLoop = setInterval(function() {
-    if (Watchdog.pingCount > 3) {
-        clearInterval(Watchdog.mainLoop);
-        mp.msg.warn("!!! EASYMPV HAS CRASHED !!!");
-        Watchdog.Menu.show(false);
+    if (Watchdog.pingCount > Watchdog.maxPingCount) {
+        //clearInterval(Watchdog.mainLoop);
+        if (!Watchdog.Menu.isShown()) {
+            mp.msg.warn("!!! EASYMPV MIGHT HAVE CRASHED !!!");
+            Watchdog.Menu.show(false);
+            Watchdog.lastPingCountAfterCrash = Watchdog.pingCount;
+        } else {
+            if (Watchdog.pingCount < Watchdog.lastPingCountAfterCrash) {
+                mp.msg.warn("!!! EASYMPV HAS RECOVERED !!!");
+                Watchdog.Menu.hide();
+                Watchdog.lastPingCountAfterCrash = -1;
+                Watchdog.pingCount = 0;
+            }
+        }
     }
     else
     {
         Watchdog.pingCount = Watchdog.pingCount + 1;
         mp.commandv("script-message-to", "easympv", "__watchdog", Watchdog.pingCount);
     }
-},1000);
+}, 1000);
 
-// recovery strategies
 Watchdog.Strategies = {};
 
 Watchdog.Strategies.hotLoad = function() {
@@ -122,7 +133,6 @@ Watchdog.Strategies.restartInPlace = function() {
         mp.msg.warn("mpv location is unknown! Showing screen again!");
         Watchdog.Menu.show(true);
         return;
-        //mp.commandv("quit-watch-later");
     }
 
     if (isWindows)
@@ -157,34 +167,47 @@ Watchdog.Strategies.restartInPlace = function() {
         cFile = "--player-operation-mode=pseudo-gui";
     }
     mp.commandv("write-watch-later-config");
-    mp.commandv("run", mpvLocation, cFile);
-    mp.msg.warn("!!! MPV WILL BE RESTARTED IN PLACE !!!");
-    mp.msg.warn("!!! ANY CUSTOM OPTIONS HAVE NOT BEEN PASSED TO THE NEW INSTANCE, RESTART MANUALLY IF NECESSARY !!!");
-    mp.commandv("quit");
+
+    var args = [];
+    args.push("run");
+    args.push(mpvLocation);
+    for (var i = 0; i < proper.length; i++) {
+        args.push(proper[i]);
+    }
+    if (targetFile != undefined) {
+        args.push(targetFile);
+    } else args.push(cFile);
+
+    mpv.commandv.apply(undefined, args);
+
+    mpv.printWarn("!!! mpv will be restarted !!!");
+    mpv.printWarn("!!! Custom options may not have been passed to the new mpv instance, please restart manually if neccessary !!!");
+    mpv.commandv("quit");
 }
 
 Watchdog.Menu = {};
 Watchdog.Menu.OSD = undefined;
+Watchdog.Menu._divider = "-------------------------------------------";
 Watchdog.Menu.assembleContent = function(disable_1)
 {
     var content = "{\\b1}{\\bord1}{\\1c&H0033FF&}!!! EASYMPV HAS CRASHED !!!\n";
     content += "{\\bord1}{\\1c&H0099FF&}This is a message from the easympv watchdog. This is a dedicated script which monitors easympv to provide a fallback in the event of a crash.\n";
-    content += "{\\bord1}{\\1c&H0099FF&}Please read this carefully. The easympv watchdog has not received any response from easympv for more than 3 seconds.\n";
-    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}It is safe to assume it crashed.{\\b0} You have a few options now:\n{\\bord1}-\n";
+    content += "{\\bord1}{\\1c&H0099FF&}The easympv watchdog has not received any response from easympv for more than 3 seconds.\n";
+    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}It is safe to assume it crashed.{\\b0} You have a few options now:\n{\\bord1}"+Watchdog.Menu._divider+"\n";
     if (disable_1) {
         content += "{\\bord1}{\\1c&HFFFFFF&}{\\b1}Option 1:{\\1c&H0033FF&}{\\b1} FAILED, try 2 instead!\n";
     }
     else {
         content += "{\\bord1}{\\1c&HFFFFFF&}{\\b1}Option 1:{\\b0} Restart mpv in place\n";
         content += "{\\bord1}{\\1c&HFFFFFF&} Will save playback data and restart mpv in a seamless way.\n";
-        content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Recommended, but might not work correctly on some systems.{\\b0}\n{\\bord1}-\n";
+        content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Recommended, but might not work correctly on some systems.{\\b0}\n{\\bord1}"+Watchdog.Menu._divider+"\n";
     }
     content += "{\\bord1}{\\1c&HFFFFFF&}{\\b1}Option 2:{\\b0} Load easympv again\n";
     content += "{\\bord1}{\\1c&HFFFFFF&} This will load easympv into the watchdog namespace, letting it take over. This will disable the watchdog for this session!\n";
-    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Not recommended:{\\b0} can cause further issues.\n{\\bord1}-\n";
+    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Not recommended:{\\b0} can cause further issues.\n{\\bord1}"+Watchdog.Menu._divider+"\n";
     content += "{\\bord1}{\\1c&HFFFFFF&}{\\b1}Option 3:{\\b0} Do nothing\n";
     content += "{\\bord1}{\\1c&HFFFFFF&} Will hide this message and not show it again for this session.\n";
-    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Choose this if you do not need easympv functionality right now.{\\b0}\n{\\bord1}-\n";
+    content += "{\\bord1}{\\1c&H0099FF&}{\\b1}Choose this if you do not need easympv functionality right now.{\\b0}\n{\\bord1}"+Watchdog.Menu._divider+"\n";
     content += "{\\bord1}{\\1c&H0033FF&}{\\b1}Press the desired option number on your keyboard to proceed.\n";
     content += "{\\bord1}{\\1c&H0033FF&}{\\b1}(TLDR: Just press 1, except if you had issues with that previously, in that case press 2 or restart manually.)\n";
     return content;
@@ -205,6 +228,10 @@ Watchdog.Menu.keyHandler = function(key) {
         Watchdog.Menu.hide();
         return;
     }
+}
+
+Watchdog.Menu.isShown = function() {
+    return (Watchdog.Menu.OSD != undefined);
 }
 
 Watchdog.Menu.show = function(disable_1)

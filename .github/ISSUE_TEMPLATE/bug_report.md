@@ -22,7 +22,7 @@ A clear and concise description of what you expected to happen.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. Arch Linux]
- - Version [e.g. 2.0.0, check in Menu -> Preferences]
+ - Version [e.g. 2.0.0-master-*, check in Menu -> Preferences]
 
 **Additional context**
 Add any other context about the problem here.

@@ -42,8 +42,6 @@ Settings.Data = {
     // Sets
     defaultShaderSet: "none",
     defaultColorProfile: "none",
-    // Extensions
-    enabledExtensions: ["chapters.js"],
     // VRR
     simpleVRR: false,
     refreshRate: 144,
@@ -58,6 +56,8 @@ Settings.Data = {
     compatibilityMode: false,
     debugMode: false,
     saveFullLog: false,
+    // Extensions
+    enabledExtensions: ["chapters.js"],
     fileBrowserFavorites: [""],
     // Versioning
     currentVersion: "0.0.0",
@@ -249,15 +249,6 @@ Settings.save = function () {
         defaultConfigString += "defaultColorProfile=x\n";
         defaultConfigString += "\n";
         defaultConfigString += "\n";
-        defaultConfigString += "## Extensions\n";
-        defaultConfigString += "\n";
-        defaultConfigString += "# List of extension file names to load on startup.\n";
-        defaultConfigString += "# It is recommended to not modify this manually. Use the menu instead!\n";
-        defaultConfigString += "# This should be a valid JSON array containing strings.\n";
-        defaultConfigString += "# Default: [\"chapters.js\"]\n";
-        defaultConfigString += "enabledExtensions=[\"chapters.js\"]";
-        defaultConfigString += "\n";
-        defaultConfigString += "\n";
         defaultConfigString += "## VRR\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Enables use of G-Sync/FreeSync in mpv.\n";
@@ -354,6 +345,15 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString +=
         "# ! Settings below are set automatically, though some might be of interest !\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "## Extensions\n";
+        defaultConfigString += "\n";
+        defaultConfigString += "# List of extension file names to load on startup.\n";
+        defaultConfigString += "# It is recommended to not modify this manually. Use the menu instead!\n";
+        defaultConfigString += "# This should be a valid JSON array containing strings.\n";
+        defaultConfigString += "# Default: [\"chapters.js\"]\n";
+        defaultConfigString += "enabledExtensions=[\"chapters.js\"]";
+        defaultConfigString += "\n";
         defaultConfigString += "\n";
         defaultConfigString +=
             "# List of favorite'd folders in the File Browser.\n";

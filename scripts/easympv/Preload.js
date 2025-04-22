@@ -81,7 +81,7 @@ mpv.fileExists = function (path) {
 /**
  * Lists content of given directory path.
  * @param {string} path Full path to directory.
- * @param {string} filter Either "files" or "dirs". Leave undefined for none.
+ * @param {string} filter Either `files` or `dirs`. Leave undefined for none.
  * @returns String Array of elements
  */
 mpv.getDirectoryContents = function(path, filter) {
@@ -93,7 +93,7 @@ mpv.getDirectoryContents = function(path, filter) {
 };
 
 /**
- * Reads file contents from given path.  
+ * Reads file contents from given path.
  * @param {string} path Full path to target file.
  * @returns {string} File contents.
  */
@@ -102,7 +102,7 @@ mpv.readFile = function (path) {
 };
 
 /**
- * Writes string to given path.  
+ * Writes string to given path.
  * Note: This function already prepends `file://` to the given path, do not add it yourself.
  * @param {string} path Full path to target file.
  * @param {string} content File contents. Set to `undefined` to create an empty file.
@@ -130,6 +130,11 @@ mpv.printError = function (msg) {
     return mp.msg.error(msg);
 };
 
+var console = {};
+console.log = function (msg) {
+    return mp.msg.info(msg);
+}
+
 /**
  * Gets contents of a given environment variable.
  * @param {string} envvar Environment variable.
@@ -145,6 +150,10 @@ mpv.getEnv = function (envvar) {
  */
 mpv.getPid = function () {
     return mp.utils.getpid();
+}
+
+mpv.getTime = function () {
+    return mp.get_time();
 }
 
 mpv.addKeyBinding = function (key, id, callback, forced) {

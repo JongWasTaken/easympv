@@ -187,7 +187,11 @@ Browsers.Selector.open = function (parentMenu) {
 };
 
 Browsers.FileBrowser.openFileSafe = function (entry) {
-    if (entry == undefined)
+    if(entry == undefined)
+    {
+        return;
+    }
+    if(Events.beforeBrowserFileOpen.invoke(entry, Browsers.FileBrowser.currentLocation + OS.directorySeperator + entry.item))
     {
         return;
     }
@@ -794,6 +798,8 @@ Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
             var color = "909090";
             var icon = " ";
             var type = "other";
+            var typeName = "Other File";
+            var extension = ".none";
             var supported = false;
 
             for (
@@ -825,6 +831,8 @@ Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
                     type = whitelist.type;
                     color = "ffffff";
                     supported = true;
+                    typeName = whitelist.name;
+                    extension = whitelist.extension;
                     break;
                 }
             }
@@ -835,7 +843,9 @@ Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
                     item: currentLocationFiles[i].location,
                     color: color,
                     type: type,
-                    supported: supported
+                    supported: supported,
+                    typeName: typeName,
+                    extension: extension
                 });
             }
         }
