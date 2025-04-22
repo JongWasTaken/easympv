@@ -364,17 +364,17 @@ OS.gitUpdate = function (callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("Set-Location $env:APPDATA\\mpv\\ \n"+
+        exitCode = OS._call("Set-Location "+mpv.getUserPath("~~/")+" \n"+
         "$processOptions = @{\n"+
         "FilePath = \"cmd.exe\"\n"+
-        "ArgumentList = \"/k\", \"cd $env:APPDATA\\mpv\ && git pull && exit %errorlevel%\"\n"+ 
+        "ArgumentList = \"/k\", \"cd "+mpv.getUserPath("~~/")+" && git pull && exit %errorlevel%\"\n"+ 
         "}\n"+
         "try { Start-Process @processOptions } Catch [system.exception] {exit 1} \n"+
         "exit $LASTEXITCODE",true,callback).status;
     }
     else
     {
-        exitCode = OS._call("cd ~/.config/mpv/ && git pull",true,callback).status;
+        exitCode = OS._call("cd "+mpv.getUserPath("~~/")+" && git pull",true,callback).status;
     }
     return exitCode == 0 ? true: false;
 }
@@ -390,12 +390,12 @@ OS.packageGetAsync = function (tag, callback) {
     if(OS.isWindows)
     {
         exitCode = OS._call("$webclient = New-Object System.Net.WebClient \n"+
-        "try { $webclient.DownloadFile(\"https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+"\",\"$env:appdata\\mpv\\package.zip\") } Catch [system.exception] {exit 1} \n"+
+        "try { $webclient.DownloadFile(\"https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+"\",\""+mpv.getUserPath("~~/package.zip")+"\") } Catch [system.exception] {exit 1} \n"+
         "exit 0",true,callback).status;
     }
     else
     {
-        exitCode = OS._call("curl -LJs https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+" -o \"$HOME/.config/mpv/package.zip\"",true,callback).status;
+        exitCode = OS._call("curl -LJs https://codeload.github.com/JongWasTaken/easympv/zip/refs/tags/"+tag+" -o \""+mpv.getUserPath("~~/package.zip")+"\"",true,callback).status;
     }
     return exitCode == 0 ? true: false;
 }
@@ -412,14 +412,14 @@ OS.packageExtractAsync = function (callback) {
     {
         exitCode = OS._call("try { \n"+
             "$shell = New-Object -ComObject Shell.Application \n"+
-            "$zip = $shell.Namespace(\"$env:APPDATA\\mpv\\package.zip\") \n"+
+            "$zip = $shell.Namespace(\""+ mpv.getUserPath("~~/package.zip") +"\") \n"+
             "$items = $zip.items() \n"+
-            "$shell.Namespace(\"$env:APPDATA\\mpv\").CopyHere($items, 1556) } \n"+
+            "$shell.Namespace(\""+mpv.getUserPath("~~/")+"\").CopyHere($items, 1556) } \n"+
             "Catch [system.exception] {exit 1} exit 0",true,callback).status;
     }
     else
     {
-        exitCode = OS._call("unzip \"$HOME/.config/mpv/package.zip\" -d \"$HOME/.config/mpv/\"",true,callback).status;
+        exitCode = OS._call("unzip \""+ mpv.getUserPath("~~/package.zip") +"\" -d \""+ mpv.getUserPath("~~/") +"\"",true,callback).status;
     }
     return exitCode == 0 ? true: false;
 }
@@ -432,7 +432,7 @@ OS.packageRemoveAsync = function (callback) {
 
 // apply-package
 OS.packageApplyAsync = function (tag,callback) {
-    if(!mpv.fileExists("~~" + OS.directorySeperator + "easympv-" + tag))
+    if(!mpv.fileExists(mpv.getUserPath("~~/easympv-" + tag)))
     {
         return false;
     }
@@ -440,12 +440,12 @@ OS.packageApplyAsync = function (tag,callback) {
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("Copy-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\*\" -Destination \"$env:APPDATA\\mpv\" -Recurse -Force \n"+
-        "Remove-Item -Path \"$env:APPDATA\\mpv\\easympv-"+tag+"\" -Force -Recurse",true,callback).status;
+        exitCode = OS._call("Copy-Item -Path \"" + mpv.getUserPath("~~/easympv-" + tag) + "\*\" -Destination \""+ mpv.getUserPath("~~/") +"\" -Recurse -Force \n"+
+        "Remove-Item -Path \"" + mpv.getUserPath("~~/easympv-" + tag) + "\" -Force -Recurse",true,callback).status;
     }
     else
     {
-        exitCode = OS._call("cp -r \"$HOME/.config/mpv/easympv-"+tag+"/\"* \"$HOME/.config/mpv/\" && rm -rf \"$HOME/.config/mpv/easympv-"+tag+"\"",true,callback).status;
+        exitCode = OS._call("cp -r \"" + mpv.getUserPath("~~/easympv-" + tag) + "/*\" \"" + mpv.getUserPath("~~/") + "\" && rm -rf \""+mpv.getUserPath("~~/easympv-" + tag)+"\"",true,callback).status;
     }
     return exitCode == 0 ? true: false;
 }
@@ -480,18 +480,18 @@ OS.fileMoveSystemwide = function (source, target) {
 // remove-file
 OS.fileRemove = function (file) {
     file = file.replaceAll("/",OS.directorySeperator);
-    if (!mpv.fileExists(mpv.getUserPath("~~/") + OS.directorySeperator + file))
+    if (!mpv.fileExists(mpv.getUserPath("~~/" + file)))
     {
         return false;
     }
     var exitCode = 127;
     if(OS.isWindows)
     {
-        exitCode = OS._call("Remove-Item -Path \"$env:APPDATA\\mpv\\"+file+"\" -Force").status;
+        exitCode = OS._call("Remove-Item -Path \""+mpv.getUserPath("~~/" + file)+"\" -Force").status;
     }
     else
     {
-        exitCode = OS._call("rm -rf \"$HOME/.config/mpv/"+file+"\"").status;
+        exitCode = OS._call("rm -rf \""+mpv.getUserPath("~~/" + file)+"\"").status;
     }
     return exitCode == 0 ? true: false;
 }
@@ -725,7 +725,7 @@ OS.createMinifiedBundle = function () {
         }
     }
 
-    if(OS._call("cd ~/.config/mpv/scripts/easympv/ && /usr/bin/uglifyjs " + Environment.LoadOrder.join(" ") + " --ie -o ./minified.js").status == 0 ? true: false) {
+    if(OS._call("cd " + mpv.getUserPath("~~/scripts/easympv/") + " && /usr/bin/uglifyjs " + Environment.LoadOrder.join(" ") + " --ie -o ./minified.js").status == 0 ? true: false) {
         return  "Successfully created \'minified.js\" in script root!";
     }
     return "Error during minification!";
