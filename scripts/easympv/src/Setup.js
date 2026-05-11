@@ -273,7 +273,7 @@ Setup.Start = function () {
     var keysToBlock = [];
     Setup.idsToUnblock = [];
     for (i = 0; i < bindings.length; i++) {
-        if (bindings[i].cmd.includes("script_binding easympv")) {
+        if (bindings[i].cmd.includes("script_binding " + Environment.brand)) {
             keysToBlock.push(bindings[i]);
         }
     }

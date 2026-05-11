@@ -1,5 +1,5 @@
 /*
- * EASYMPV_WATCHDOG.JS (PART OF EASYMPV)
+ * EASYMPV-WATCHDOG.JS (PART OF EASYMPV)
  *
  * Author:                  Jong
  * URL:                     https://github.com/JongWasTaken/easympv
@@ -58,6 +58,8 @@ String.prototype.includes = function (search, start) {
 
 var Watchdog = {};
 
+Watchdog.disabled = false;
+
 Watchdog.getConfigKey = function(key) {
     if (mp.utils.file_info(mp.utils.get_user_path("~~/easympv.conf")) == undefined)
         return undefined;
@@ -81,7 +83,7 @@ Watchdog.getConfigKey = function(key) {
 }
 
 Watchdog.pingCount = 0;
-mp.register_script_message("__watchdog",function() {
+mp.register_script_message("__watchdog", function() {
     Watchdog.pingCount = Watchdog.pingCount - 1;
 });
 
@@ -89,8 +91,10 @@ Watchdog.lastPingCountAfterCrash = -1;
 Watchdog.maxPingCount = 5;
 
 Watchdog.mainLoop = setInterval(function() {
+    if (Watchdog.disabled) {
+        clearInterval(Watchdog.mainLoop);
+    }
     if (Watchdog.pingCount > Watchdog.maxPingCount) {
-        //clearInterval(Watchdog.mainLoop);
         if (!Watchdog.Menu.isShown()) {
             mp.msg.warn("!!! EASYMPV MIGHT HAVE CRASHED !!!");
             Watchdog.Menu.show(false);
@@ -225,6 +229,7 @@ Watchdog.Menu.keyHandler = function(key) {
         return;
     }
     if (key == 3) {
+        Watchdog.disabled = true;
         Watchdog.Menu.hide();
         return;
     }

@@ -14,6 +14,8 @@ There is a lot of spaghetti here, read at your own risk.
 Comments are also missing.
 ----------------------------------------------------------------*/
 
+//TODO: add history, change flow regarding type question at the beginning
+
 /**
  * Module containing Browser menus for Files, Disc drives, Devices & URLs.
  */
@@ -525,7 +527,7 @@ Browsers.FileBrowser.openContextMenu = function(item) {
 };
 
 Browsers.FileBrowser.menuEventHandler = function (event, item) {
-
+    if (item == "@@INVALID@@") return;
     if (event == "draw")
     {
         if (Browsers.FileBrowser.cachedFileBrowserPosition != undefined)
@@ -695,160 +697,167 @@ Browsers.FileBrowser.loadCurrentDirectory = function (parentMenu) {
             }
         }
     } else {
-        if (mpv.fileExists(Browsers.FileBrowser.currentLocation)) {
-            var currentLocationContents = mpv.getDirectoryContents(
-                Browsers.FileBrowser.currentLocation,
-                "dirs"
-            );
-        } else {
+        if (!mpv.fileExists(Browsers.FileBrowser.currentLocation)) {
             Browsers.FileBrowser.currentLocation = mpv.getProperty("working-directory");
-            var currentLocationContents = mpv.getDirectoryContents(
-                Browsers.FileBrowser.currentLocation,
-                "dirs"
-            );
         }
 
-        var currentLocationFolders = [];
-        currentLocationContents.sort();
+        var parseContents = function(currentLocationContents) {
+            items.pop();
+            var currentLocationFolders = [];
+            currentLocationContents.sort();
 
-        for (var i = 0; i < currentLocationContents.length; i++) {
+            for (var i = 0; i < currentLocationContents.length; i++) {
 
-            currentLocationFolders.push(
-                {
-                    name: currentLocationContents[i],
-                    location: currentLocationContents[i]
-                }
-            );
-            /*
-            currentLocationFolders.push(
-                {
-                    name: Browsers.modifyTitle(currentLocationContents[i]),
-                    location: currentLocationContents[i]
-                }
-            );
-            */
-        }
-        currentLocationFolders.sort(function(a, b) {
-            return a.name.localeCompare(b.name);
-        });
-
-        if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
-        } else {
-            items.push({
-                title:
-                    UI.SSA.insertSymbolFA(" ", 30, 35, Utils.commonFontName) +
-                    ".." +
-                    OS.directorySeperator,
-                item: ".." + OS.directorySeperator,
-                color: "909090",
+                currentLocationFolders.push(
+                    {
+                        name: currentLocationContents[i],
+                        location: currentLocationContents[i]
+                    }
+                );
+                /*
+                currentLocationFolders.push(
+                    {
+                        name: Browsers.modifyTitle(currentLocationContents[i]),
+                        location: currentLocationContents[i]
+                    }
+                );
+                */
+            }
+            currentLocationFolders.sort(function(a, b) {
+                return a.name.localeCompare(b.name);
             });
-        }
-        for (var i = 0; i < currentLocationFolders.length; i++) {
-            if (currentLocationFolders[i].location.charAt(0) == ".") {
-                if (Settings.Data.showHiddenFiles) {
+
+            if (!OS.isWindows && Browsers.FileBrowser.currentLocation == "/") {
+            } else {
+                items.push({
+                    title:
+                        UI.SSA.insertSymbolFA(" ", 30, 35, Utils.commonFontName) +
+                        ".." +
+                        OS.directorySeperator,
+                    item: ".." + OS.directorySeperator,
+                    color: "909090",
+                });
+            }
+            for (var i = 0; i < currentLocationFolders.length; i++) {
+                if (currentLocationFolders[i].location.charAt(0) == ".") {
+                    if (Settings.Data.showHiddenFiles) {
+                        items.push({
+                            title:
+                                UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
+                                currentLocationFolders[i].name +
+                                OS.directorySeperator,
+                            item:
+                                currentLocationFolders[i].location +
+                                OS.directorySeperator,
+                            color: "FFFF90",
+                            type: "folder",
+                            supported: true
+                        });
+                    }
+                } else {
                     items.push({
                         title:
                             UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
                             currentLocationFolders[i].name +
                             OS.directorySeperator,
-                        item:
-                            currentLocationFolders[i].location +
-                            OS.directorySeperator,
+                        item: currentLocationFolders[i].location + OS.directorySeperator,
                         color: "FFFF90",
                         type: "folder",
                         supported: true
                     });
                 }
-            } else {
-                items.push({
-                    title:
-                        UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) +
-                        currentLocationFolders[i].name +
-                        OS.directorySeperator,
-                    item: currentLocationFolders[i].location + OS.directorySeperator,
-                    color: "FFFF90",
-                    type: "folder",
-                    supported: true
-                });
             }
-        }
-        var currentLocationContents = mpv.getDirectoryContents(
-            Browsers.FileBrowser.currentLocation,
-            "files"
-        );
-
-        var currentLocationFiles = [];
-        currentLocationContents.sort();
-
-        for (var i = 0; i < currentLocationContents.length; i++) {
-
-            currentLocationFiles.push(
-                {
-                    name: Browsers.modifyTitle(currentLocationContents[i]),
-                    location: currentLocationContents[i]
-                }
+            var currentLocationContents = mpv.getDirectoryContents(
+                Browsers.FileBrowser.currentLocation,
+                "files"
             );
 
-        }
-        currentLocationFiles.sort(function(a, b) {
-            return a.name.localeCompare(b.name);
-        });
+            var currentLocationFiles = [];
+            currentLocationContents.sort();
 
-        for (var i = 0; i < currentLocationFiles.length; i++) {
-            var color = "909090";
-            var icon = " ";
-            var type = "other";
-            var typeName = "Other File";
-            var extension = ".none";
-            var supported = false;
+            for (var i = 0; i < currentLocationContents.length; i++) {
 
-            for (
-                var j = 0;
-                j < Settings.presets.fileextensions.length;
-                j++
-            ) {
-                var whitelist = Settings.presets.fileextensions[j];
-                if (
-                    "." + currentLocationFiles[i].location.split('.').pop() == whitelist.extension
+                currentLocationFiles.push(
+                    {
+                        name: Browsers.modifyTitle(currentLocationContents[i]),
+                        location: currentLocationContents[i]
+                    }
+                );
+
+            }
+            currentLocationFiles.sort(function(a, b) {
+                return a.name.localeCompare(b.name);
+            });
+
+            for (var i = 0; i < currentLocationFiles.length; i++) {
+                var color = "909090";
+                var icon = " ";
+                var type = "other";
+                var typeName = "Other File";
+                var extension = ".none";
+                var supported = false;
+
+                for (
+                    var j = 0;
+                    j < Settings.presets.fileextensions.length;
+                    j++
                 ) {
+                    var whitelist = Settings.presets.fileextensions[j];
+                    if (
+                        "." + currentLocationFiles[i].location.split('.').pop() == whitelist.extension
+                    ) {
 
-                    if (whitelist.type == "video")
-                    {
-                        icon = " ";
+                        if (whitelist.type == "video")
+                        {
+                            icon = " ";
+                        }
+                        else if (whitelist.type == "audio")
+                        {
+                            icon = " ";
+                        }
+                        else if (whitelist.type == "image")
+                        {
+                            icon = " ";
+                        }
+                        else if (whitelist.type == "subtitle")
+                        {
+                            icon = " ";
+                        }
+                        type = whitelist.type;
+                        color = "ffffff";
+                        supported = true;
+                        typeName = whitelist.name;
+                        extension = whitelist.extension;
+                        break;
                     }
-                    else if (whitelist.type == "audio")
-                    {
-                        icon = " ";
-                    }
-                    else if (whitelist.type == "image")
-                    {
-                        icon = " ";
-                    }
-                    else if (whitelist.type == "subtitle")
-                    {
-                        icon = " ";
-                    }
-                    type = whitelist.type;
-                    color = "ffffff";
-                    supported = true;
-                    typeName = whitelist.name;
-                    extension = whitelist.extension;
-                    break;
+                }
+
+                if (currentLocationFiles[i].location.charAt(0) != "." || Settings.Data.showHiddenFiles) {
+                    items.push({
+                        title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + currentLocationFiles[i].name,
+                        item: currentLocationFiles[i].location,
+                        color: color,
+                        type: type,
+                        supported: supported,
+                        typeName: typeName,
+                        extension: extension
+                    });
                 }
             }
-
-            if (currentLocationFiles[i].location.charAt(0) != "." || Settings.Data.showHiddenFiles) {
-                items.push({
-                    title: UI.SSA.insertSymbolFA(icon, 26, 35, Utils.commonFontName) + currentLocationFiles[i].name,
-                    item: currentLocationFiles[i].location,
-                    color: color,
-                    type: type,
-                    supported: supported,
-                    typeName: typeName,
-                    extension: extension
-                });
-            }
+            Browsers.FileBrowser.menu.redrawMenu();
         }
+
+        items.push({
+            title: UI.SSA.insertSymbolFA("", 26, 35, Utils.commonFontName) + " Loading, please wait...",
+            item: "@@INVALID@@",
+            eventHandler: function() {}
+        });
+
+        mpv.getDirectoryContentsAsync(
+            Browsers.FileBrowser.currentLocation,
+            "dirs",
+            parseContents
+        );
     }
 
     Browsers.FileBrowser.menuSettings.title = UI.SSA.insertSymbolFA(" ") + Settings.getLocalizedString("browser.menu.title");
@@ -1116,7 +1125,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
             playback_only: false,
             capture_stdout: true,
             args: [
-                mpv.getUserPath("~~/scripts/easympv/GetDevices.exe")
+                mpv.getUserPath("~~/scripts/" + Environment.brand + "/assets/GetDevices.exe")
                     .replaceAll("/", "\\"),
             ],
         });
@@ -1139,7 +1148,7 @@ Browsers.DeviceBrowser.open = function (parentMenu) {
                 var title = UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + deviceList[i];
                 title +=
                     " - " +
-                    OS._call("cat /sys/class/video4linux/" + deviceList[i] + "/name",false,undefined).stdout.split(": ")[0];
+                    OS.call("cat /sys/class/video4linux/" + deviceList[i] + "/name",false,undefined).stdout.split(": ")[0];
                 items.push({
                     title: title,
                     item: deviceList[i],

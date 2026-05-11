@@ -76,7 +76,7 @@ Utils.getLatestUpdateData = function () {
                 Settings.Data.newestVersion = Utils.latestUpdateData.version;
                 Settings.save();
                 Utils.updateAvailable = Utils.compareVersions(
-                    Settings.Data.currentVersion,
+                    Environment.version,
                     Settings.Data.newestVersion
                 );
                 Utils.updateAvailableMpv = Utils.compareVersions(
@@ -124,7 +124,7 @@ Utils.setDisplayVersion = function () {
     if (Utils.updateAvailable) {
         Utils.displayVersion =
             UI.SSA.setColorRed() +
-            Settings.Data.currentVersion +
+            Environment.version +
             " (" +
             Settings.Data.newestVersion +
             " available)";
@@ -288,7 +288,7 @@ Utils.doUpdateStage3 = function () // delete package
 {
     if (
         mpv.fileExists(mpv.getUserPath("~~/package.zip")) &&
-        mpv.fileExists(mpv.getUserPath("~~/easympv-" + Utils.latestUpdateData.version + "/"))
+        mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +"-" + Utils.latestUpdateData.version + "/"))
     ) {
         OS.packageRemoveAsync(Utils.doUpdateStage4);
     } else {
@@ -342,7 +342,7 @@ Utils.doUpdateStage5 = function () {
             }
         }
         // update version
-        Settings.Data.currentVersion = Utils.latestUpdateData.version;
+        Environment.version = Utils.latestUpdateData.version;
 
         // save to file
         Settings.save();
@@ -412,18 +412,6 @@ Utils.compareVersions = function (currentVersion, newestVersion) {
     return (
         Number(currentVersion.replace(/\./g, "")) <
         Number(newestVersion.replaceAll(/\./g, ""))
-    );
-};
-
-/**
- * Reads and returns content of Credits file.
- * @return {string} credits
- */
-Utils.getCredits = function () {
-    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf")))
-        return;
-    return mpv.readFile(
-        mpv.getUserPath("~~/scripts/easympv/Credits.txt")
     );
 };
 

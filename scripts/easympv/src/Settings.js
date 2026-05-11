@@ -60,7 +60,6 @@ Settings.Data = {
     enabledExtensions: ["chapters.js"],
     fileBrowserFavorites: [""],
     // Versioning
-    currentVersion: "0.0.0",
     newestVersion: "0.0.1",
     doMigration: false,
     resetMpvConfig: false,
@@ -79,9 +78,9 @@ Settings.load = function () {
  * Deserializes easympv.conf and updates Settings.Data.
  */
 Settings.reload = function () {
-    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf")))
+    if (!mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +".conf")))
         return;
-    var lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
+    var lines = mpv.readFile(mpv.getUserPath("~~/"+ Environment.brand +".conf"))
         .replaceAll("\r\n", "\n")
         .split("\n");
 
@@ -100,7 +99,7 @@ Settings.reload = function () {
                     }
                     catch (e)
                     {
-                        mpv.printWarn("Could not parse JSON in easympv.conf: " + e);
+                        mpv.printWarn("Could not parse JSON in main config: " + e);
                         value = {};
                     }
                 }
@@ -112,7 +111,7 @@ Settings.reload = function () {
                     }
                     catch (e)
                     {
-                        mpv.printWarn("Could not parse JSON in easympv.conf: " + e);
+                        mpv.printWarn("Could not parse JSON in main config: " + e);
                         value = [];
                     }
                 }
@@ -157,30 +156,30 @@ Settings.save = function () {
     this.DataCopy = "";
     var lines = [];
 
-    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
+    if (!mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +".conf"))) {
         var defaultConfigString = "";
-        defaultConfigString += "### easympv.conf ###\n";
+        defaultConfigString += "### "+ Environment.brand +".conf ###\n";
         defaultConfigString += "\n";
         defaultConfigString += "## GENERAL\n";
         defaultConfigString += "\n";
-        defaultConfigString += "# Language of easympv.\n";
+        defaultConfigString += "# Language of "+ Environment.brand +".\n";
         defaultConfigString += "# Default: en\n";
         defaultConfigString += "# Possible values: \"en\" for english, \"de\" for german\n";
-        defaultConfigString += "# See all available languages in the \"locale\" folder of the easympv directory.\n";
+        defaultConfigString += "# See all available languages in the \"locale\" folder of the "+ Environment.brand +" directory.\n";
         defaultConfigString += "language=en\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Location of mpv executable.\n";
         defaultConfigString += "# Default: unknown\n";
         defaultConfigString += "# Example: C:\\Users\\user\\Desktop\\mpv\\\n";
         defaultConfigString += "# Use a full path. This is only required on Windows, as on other Operating Systems it is assumed to be in the $PATH.\n";
-        defaultConfigString += "# If this is set to unknown, easympv will attempt to find on your system.\n";
+        defaultConfigString += "# If this is set to unknown, "+ Environment.brand +" will attempt to find on your system.\n";
         defaultConfigString += "mpvLocation=unknown\n";
         defaultConfigString += "\n";
-        defaultConfigString += "# The key that easympv will force its menu on.\n";
+        defaultConfigString += "# The key that "+ Environment.brand +" will force its menu on.\n";
         defaultConfigString += "# Default: m\n";
         defaultConfigString += "# Set this to \"disable\" to disable forcing the keybind.\n";
         defaultConfigString += "# In that case, you will need to add your own keybind to input.conf:\n";
-        defaultConfigString += "# Something like: \"m script_binding easympv\"\n";
+        defaultConfigString += "# Something like: \"m script_binding "+ Environment.brand +"\"\n";
         defaultConfigString += "forcedMenuKey=m\n";
         defaultConfigString += "\n";
         defaultConfigString += "# Whether to add an hour to the current time, to compensate for daylight saving time.\n";
@@ -364,13 +363,7 @@ Settings.save = function () {
         defaultConfigString += "\n";
         defaultConfigString += "## VERSIONING AND TROUBLESHOOTING\n";
         defaultConfigString += "\n";
-        defaultConfigString +=
-            "# The currently installed version of easympv.\n";
-        defaultConfigString +=
-            "# This is modified automatically and should not be changed!\n";
-        defaultConfigString += "currentVersion=x\n";
-        defaultConfigString += "\n";
-        defaultConfigString += "# The newest known version of easympv.\n";
+        defaultConfigString += "# The newest known version of "+ Environment.brand +".\n";
         defaultConfigString +=
             "# If up-to-date, this value will be the same as currentVersion.\n";
         defaultConfigString +=
@@ -405,7 +398,7 @@ Settings.save = function () {
         defaultConfigString +=
             "# Whether to show the First Time configuration Wizard on the next startup.\n";
         defaultConfigString +=
-            "# Usually false, unless you just installed easympv.\n";
+            "# Usually false, unless you just installed "+ Environment.brand +".\n";
         defaultConfigString += "# Some updates might enable this too.\n";
         defaultConfigString += "# ! THIS WILL RESET PARTS OF YOUR CONFIGURATION !\n";
         defaultConfigString +=
@@ -414,7 +407,7 @@ Settings.save = function () {
 
         lines = defaultConfigString.replaceAll("\r\n", "\n").split("\n");
     } else {
-        lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
+        lines = mpv.readFile(mpv.getUserPath("~~/"+ Environment.brand +".conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
     }
@@ -439,7 +432,7 @@ Settings.save = function () {
     }
     this.DataCopy = this.DataCopy.replace(new RegExp("\\n$"), "");
     mpv.writeFile(
-        mpv.getUserPath("~~/easympv.conf"),
+        mpv.getUserPath("~~/"+ Environment.brand +".conf"),
         this.DataCopy
     );
 };
@@ -481,8 +474,8 @@ Settings.findMpvWindows = function () {
 Settings.migrate = function () {
     var copy = {};
     // read current settings into variable
-    if (mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
-        var lines = mpv.readFile(mpv.getUserPath("~~/easympv.conf"))
+    if (mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +".conf"))) {
+        var lines = mpv.readFile(mpv.getUserPath("~~/"+ Environment.brand +".conf"))
             .replaceAll("\r\n", "\n")
             .split("\n");
 
@@ -526,7 +519,7 @@ Settings.migrate = function () {
     }
 
     // delete easympv.conf
-    OS.fileRemove("easympv.conf");
+    OS.fileRemove(Environment.brand +".conf");
 
     Settings.Data.doMigration = false;
 
@@ -674,7 +667,7 @@ Settings.inputConfig.reset = function () {
     defaultConfigString += "WHEEL_UP add volume 5\n";
     defaultConfigString += "MBTN_FORWARD add speed 0.1\n";
     defaultConfigString += "MBTN_BACK add speed -0.1\n";
-    defaultConfigString += "MBTN_MID script_binding easympv\n";
+    defaultConfigString += "MBTN_MID script_binding "+ Environment.brand +"\n";
     defaultConfigString += "\n";
     defaultConfigString += "PLAYPAUSE cycle pause\n";
     defaultConfigString += "NEXT script_binding chapter_next\n";
@@ -686,8 +679,8 @@ Settings.inputConfig.reset = function () {
     defaultConfigString += "s async screenshot\n";
     defaultConfigString += "tab async screenshot\n";
     defaultConfigString += "q quit-watch-later\n";
-    defaultConfigString += "m script_binding easympv\n";
-    defaultConfigString += "esc script_binding easympv\n";
+    defaultConfigString += "m script_binding "+ Environment.brand +"\n";
+    defaultConfigString += "esc script_binding "+ Environment.brand +"\n";
     defaultConfigString += "k script_binding menu-test\n";
     defaultConfigString += "i script-binding stats/display-stats-toggle\n";
     defaultConfigString +=
@@ -770,7 +763,7 @@ Settings.presets.images = [];
 Settings.presets.load = function () {
     try {
         mpv.printInfo("Loading language: " + Settings.Data.language);
-        Settings.locale = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/locale/"+Settings.Data.language+".json")));
+        Settings.locale = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/locale/"+Settings.Data.language+".json")));
     }
     catch (_) {
         mpv.printWarn("Selected language could not be loaded! Falling back to localization keys...");
@@ -794,15 +787,15 @@ Settings.presets.load = function () {
         seperator = ";";
     };
 
-    if(mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/Presets.json")))
+    if(mpv.fileExists(mpv.getUserPath("~~/scripts/" + Environment.brand + "/assets/Presets.json")))
     {
-        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Presets.json")));
+        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/assets/Presets.json")));
         if (json["shadersets"] != undefined) {
             for (var set in json["shadersets"]) {
                 var filelist = "";
                 var i = 0;
                 for (i = 0; i < json["shadersets"][set].length; i++) {
-                    filelist = filelist + "~~/scripts/easympv/shaders/" + json["shadersets"][set][i] + seperator;
+                    filelist = filelist + "~~/scripts/" + Environment.brand + "/shaders/" + json["shadersets"][set][i] + seperator;
                 }
                 filelist = filelist.slice(0, filelist.length - 1);
                 Settings.presets.shadersets.push(new Settings.presets.shaderset(set, filelist));
@@ -868,7 +861,7 @@ Settings.presets.load = function () {
         if (json["images"] != undefined) {
             for (var i = 0; i <= json["images"].length-1; i++) {
                 var file = json["images"][i].file;
-                json["images"][i].file = "~~/scripts/easympv/images/" + json["images"][i].file;
+                json["images"][i].file = "~~/scripts/" + Environment.brand + "/images/" + json["images"][i].file;
                 json["images"][i].name = file.substring(0,file.length-4);
                 json["images"][i].active = false;
                 json["images"][i].id = i;
@@ -883,9 +876,9 @@ Settings.presets.load = function () {
         }
     }
 
-    if(mpv.fileExists(mpv.getUserPath("~~/easympv.json")))
+    if(mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +".json")))
     {
-        var jsonUser = JSON.parse(mpv.readFile(mpv.getUserPath("~~/easympv.json")));
+        var jsonUser = JSON.parse(mpv.readFile(mpv.getUserPath("~~/"+ Environment.brand +".json")));
 
         if (jsonUser["shadersets"] != undefined) {
             for (var set in jsonUser["shadersets"]) {
@@ -955,7 +948,7 @@ Settings.presets.load = function () {
         };
 
         mpv.writeFile(
-            mpv.getUserPath("~~/easympv.json"),
+            mpv.getUserPath("~~/"+ Environment.brand +".json"),
             JSON.stringify(dummyFile,null,4)
         );
     }
@@ -983,8 +976,8 @@ Settings.cache.load = function() {
 
     Settings.cache.perFileSaves = [];
 
-    if(mpv.fileExists(mpv.getUserPath("~~/easympv-cache.json"))) {
-        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/easympv-cache.json")));
+    if(mpv.fileExists(mpv.getUserPath("~~/"+ Environment.brand +"-cache.json"))) {
+        var json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/"+ Environment.brand +"-cache.json")));
         for(var i = 0; i < json["perFileSaves"].length; i++)
         {
             var key = json["perFileSaves"][i];
@@ -1017,7 +1010,7 @@ Settings.cache.save = function() {
     };
 
     mpv.writeFile(
-        mpv.getUserPath("~~/easympv-cache.json"),
+        mpv.getUserPath("~~/"+ Environment.brand +"-cache.json"),
         JSON.stringify(temp,null,4)
     );
 }

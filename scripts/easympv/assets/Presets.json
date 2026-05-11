@@ -47,6 +47,9 @@
             "Anime4K_AutoDownscalePre_x4.glsl",
             "Anime4K_Upscale_CNN_x2_M.glsl"
         ],
+        "Nvidia Image Scaler": ["NVScaler.glsl"],
+        "AMD FidelityFX Super Resolution": ["FSR.glsl"],
+        "AMD FidelityFX Contrast Adaptive Sharpening": ["CAS-scaled.glsl"],
         "KrigBilateral": ["KrigBilateral.glsl"],
         "Adaptive Sharpen": ["adaptive-sharpen.glsl", "KrigBilateral.glsl"],
         "A4K Denoiser": ["Anime4K_Upscale_Denoise_CNN_x2_L.glsl"],

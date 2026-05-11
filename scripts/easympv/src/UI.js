@@ -74,6 +74,14 @@ UI.SSA.setScale = function (scalePercent) {
     return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
 };
 
+/** Sets SSA text scale tag to the ideal scale at the current window resolution.
+ * @returns {string} SSA tag sequence
+*/
+UI.SSA.setScale = function () {
+    var scalePercent = UI.SSA.findIdealScale();
+    return "{\\fscx" + scalePercent + "\\fscy" + scalePercent + "}";
+};
+
 /** Sets SSA text transparancy tag from HEX value.
  * @param {string} transparencyHex - Desired scale as HEX value (without #)
  * @returns {string} SSA tag sequence
@@ -614,7 +622,7 @@ UI.Image.__getFilebyName = function (name) {
 UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
     return {
         id: id,
-        file: mpv.getUserPath("~~/scripts/easympv/images/") + file,
+        file: mpv.getUserPath("~~/scripts/" + Environment.brand + "/images/") + file,
         width: width,
         height: height,
         x: x,
@@ -626,7 +634,7 @@ UI.Image.Image = function (active, id, file, width, height, offset, x, y) {
 
 /**
  * Adds an image file to the internal file array.
- * Place the correctly formated image file in ~~/scripts/easympv/images/.
+ * Place the correctly formated image file in ~~/scripts/" + Environment.brand + "/images/.
  * @param {string} name internal name for image file, used when drawing/removing overlay
  * @param {string} file file name with extension
 
@@ -817,7 +825,7 @@ UI.Time.observer = function()
 UI.Time.assembleContent = function()
 {
     var content = "";
-    content += UI.SSA.setScale(UI.SSA.findIdealScale()) + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
+    content += UI.SSA.setScale() + UI.SSA.setTransparencyPercentage(50) + UI.SSA.setBorder(1);
     content += UI.SSA.setPositionAbsolutePercentage(UI.Time.xLocation, UI.Time.yLocation, Settings.Data.clockPosition);
     //content += UI.SSA.setPositionScreenCorner(Settings.Data.clockPosition,UI.Time.xLocation);
     content += UI.SSA.setAllignment(UI.Time.Allignment);
@@ -1208,7 +1216,7 @@ UI.Menus.Menu = function (settings, items, parentMenu) {
         {
             if (Utils.mpvComparableVersion <= 32) {
                 Utils.log(
-                    "!!! Your mpv version is too old for overlays. You must update mpv to use easympv. !!!","menusystem","error"
+                    "!!! Your mpv version is too old for overlays. You must update mpv to use "+ Environment.brand +". !!!","menusystem","error"
                 );
                 this.settings.displayMethod = "message";
             } else {
@@ -2668,7 +2676,7 @@ UI.Alerts.push = function(content, category, urgency)
         urgency = UI.Alerts.Urgencies.Normal;
     }
     notification.urgency = urgency;
-    if (category == undefined || category == "") category = "easympv";
+    if (category == undefined || category == "") category = Environment.brand;
     notification.category = category;
     notification.startTime = mp.get_time();
     notification.fancyTime = Utils.getCurrentTime();
@@ -2827,102 +2835,6 @@ UI.Alerts._build = function () {
     return content;
 }
 
-UI.oldAlerts = {};
-
-UI.oldAlerts.OSD = undefined;
-UI.oldAlerts.Timer = undefined;
-UI.oldAlerts.startTime = undefined;
-UI.oldAlerts.content = undefined;
-UI.oldAlerts.isVisible = false;
-
-UI.oldAlerts._startTimer = function() {
-    UI.oldAlerts.Timer = setInterval(function () {
-        if (3 <= 0 || UI.oldAlerts.startTime <= -1) {
-            return;
-        }
-        if (UI.oldAlerts.startTime <= mp.get_time() - 3) {
-            UI.oldAlerts._stopTimer();
-            UI.oldAlerts._hide();
-        }
-    }, 1000);
-};
-
-UI.oldAlerts._stopTimer = function () {
-    if (UI.oldAlerts.Timer != undefined) {
-        clearInterval(UI.oldAlerts.Timer);
-        UI.oldAlerts.Timer = undefined;
-    }
-};
-
-UI.oldAlerts._assembleContent = function (xpos,ypos) {
-    return UI.SSA.setPositionAbsolutePercentage(xpos,ypos) +
-    UI.SSA.setBorder(1) +
-    UI.SSA.setSize("36") +
-    UI.SSA.setFont(Utils.commonFontName) + UI.oldAlerts.content;
-}
-
-UI.oldAlerts._show = function(content)
-{
-    UI.oldAlerts.content = content;
-    UI.oldAlerts.startTime = mp.get_time();
-
-    if (!UI.oldAlerts.isVisible) {
-        UI.oldAlerts.isVisible = true;
-        if (UI.oldAlerts.OSD == undefined) {
-            UI.oldAlerts.OSD = mp.create_osd_overlay("ass-events");
-            UI.oldAlerts.OSD.res_y = mpv.getProperty("osd-height");
-            UI.oldAlerts.OSD.res_x = mpv.getProperty("osd-width");
-            UI.oldAlerts.OSD.z = 1;
-        }
-
-        if(Settings.Data.scrollAlerts)
-        {
-            var target = 110;
-            var pos = -50;
-            var interval = setInterval(function () {
-                if (pos < target)
-                {
-                    pos = pos + 0.2;
-                    UI.oldAlerts.OSD.data = UI.oldAlerts._assembleContent(pos,1);
-                    UI.oldAlerts.OSD.update();
-                }
-                else
-                {
-                    clearInterval(interval);
-                    UI.oldAlerts._hide();
-                }
-            }, 10);
-        }
-        else
-        {
-            UI.oldAlerts.OSD.data = UI.oldAlerts._assembleContent(33,1);
-            UI.oldAlerts.OSD.update();
-            UI.oldAlerts._startTimer();
-        }
-    }
-}
-
-UI.oldAlerts._hide = function()
-{
-    UI.oldAlerts.isVisible = false;
-    UI.oldAlerts.startTime = undefined;
-    if (UI.oldAlerts.OSD != undefined) {
-        mpv.commandv(
-            "osd-overlay",
-            UI.oldAlerts.OSD.id,
-            "none",
-            "",
-            0,
-            0,
-            0,
-            "no",
-            "no"
-        );
-        UI.oldAlerts.OSD = undefined;
-    }
-}
-
-
 /*----------------------------------------------------------------
 CLASS: UI.Input
 DESCRIPTION:
@@ -3079,7 +2991,7 @@ UI.Input.keybindOverrides = [
 
 UI.Input.returnBufferInserted = function(insert)
 {
-    return UI.Input.Buffer.slice(0,UI.Input.Buffer.length-UI.Input.Position) + insert + UI.Input.Buffer.slice(UI.Input.Buffer.length-UI.Input.Position);
+    return UI.Input.Buffer.slice(0, UI.Input.Buffer.length-UI.Input.Position) + insert + UI.Input.Buffer.slice(UI.Input.Buffer.length - UI.Input.Position);
 }
 
 UI.Input.handleKeyPress = function (key)
@@ -3164,7 +3076,7 @@ UI.Input.show = function (callback, prefix) {
         return;
     }
 
-    mpv.commandv("set","pause","yes");
+    mpv.commandv("set", "pause", "yes");
 
     if(prefix != undefined)
     {
@@ -3305,7 +3217,7 @@ UI.Input.OSDLog.addToBuffer = function (msg) {
 
     if (UI.Input.OSDLog.Buffer.length > 4000 && !Settings.Data.saveFullLog) // might reduce further in the future, lets see how this runs for now
     {
-        UI.Input.OSDLog.Buffer.splice(1000,2000,{prefix: "easympv", level: "warn", time: "invalid", color: UI.SSA.setColorYellow(), text: "!!! 2000 lines have been removed here to reduce memory usage !!!\n"});
+        UI.Input.OSDLog.Buffer.splice(1000,2000,{prefix: Environment.brand, level: "warn", time: "invalid", color: UI.SSA.setColorYellow(), text: "!!! 2000 lines have been removed here to reduce memory usage !!!\n"});
     }
 
     UI.Input.OSDLog.Buffer.push({prefix: msg.prefix, level: msg.level, time: Date.now(), color: color, text: msg.text});
@@ -3320,7 +3232,7 @@ UI.Input.OSDLog.writeLogToFile = function ()
     }
 
     mpv.writeFile(
-        mpv.getUserPath("~~desktop/easympv.log"),
+        mpv.getUserPath("~~desktop/"+ Environment.brand +".log"),
         data
     );
 
@@ -3397,7 +3309,7 @@ UI.Input.showJavascriptInput = function () {
                         }
                     }
                     var cmd = function (cmd) {
-                        print(OS._call(cmd));
+                        print(OS.call(cmd));
                     }
                     var crash = function() {
                         mpv.printWarn("CRASH FORCED: LOG IS INVALID!");
@@ -3411,7 +3323,7 @@ UI.Input.showJavascriptInput = function () {
                         "print(obj) -> shorthand for mpv.printWarn(JSON.stringify(obj))\n"+
                         "cmd(command) -> execute shell command\n"+
                         "clearOSD() -> force-removes ALL OSDs and messages on screen\n" +
-                        "crash() -> force-crashes easympv"
+                        "crash() -> force-crashes "+ Environment.brand
                         );
                     };
                     eval(result);

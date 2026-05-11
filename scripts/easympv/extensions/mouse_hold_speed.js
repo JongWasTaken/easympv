@@ -1,4 +1,4 @@
-// { "name": "Mouse: Hold For Speed", "icon": "", "author": "Jong", "version": "1.0.0", "description": "Hold the left mouse button to speed up playback, just like on YouTube!\n(Kinda broken? Might work...)" }
+// { "name": "Mouse: Hold For Speed", "icon": "", "author": "Jong", "version": "1.0.0", "description": "Hold the left mouse button to speed up playback, just like on YouTube!@br@(Kinda broken? Might work...)" }
 
 /*
  * MOUSE_HOLD_SPEED.JS (PART OF EASYMPV)

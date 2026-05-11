@@ -50,6 +50,23 @@ Math.percentage = function (partialValue, totalValue) {
     return Math.round((100 * partialValue) / totalValue);
 };
 
+var _callAsyncFunction = function (funcName, vars, callback) {
+    if (vars == undefined) vars = [];
+    var id = String(Math.floor(Math.random() * 10000));
+    mp.register_script_message(id, function(res) {
+        mp.unregister_script_message(id);
+        callback.call(undefined, JSON.parse(res));
+    });
+    mpv.printWarn(JSON.stringify(vars));
+    mp.commandv("script-message-to", "easympv_async", "run", mp.get_script_name(), id, funcName, JSON.stringify(vars));
+};
+
+/*
+_callAsyncFunction("custom", ["output = arg1+arg2+arg3;", "1", "2", "3"], function(ret) {
+    mpv.printWarn(ret);
+})
+*/
+
 var mpv = {};
 /**
  * Resolves special character sequences in given path.
@@ -81,16 +98,36 @@ mpv.fileExists = function (path) {
 /**
  * Lists content of given directory path.
  * @param {string} path Full path to directory.
- * @param {string} filter Either `files` or `dirs`. Leave undefined for none.
+ * @param {FileFilter} filter Either `FileFilter.FILES` or `FileFilter.DIRECTORIES`. Leave undefined for `FileFilter.ALL`
  * @returns String Array of elements
  */
 mpv.getDirectoryContents = function(path, filter) {
     if (filter == undefined)
     {
-        filter = "all";
+        filter = FileFilter.ALL;
     }
     return mp.utils.readdir(path, filter);
 };
+
+/**
+ * Lists content of given directory path asynchronously.
+ * @param {String} path Full path to directory.
+ * @param {FileFilter} filter Either `FileFilter.FILES` or `FileFilter.DIRECTORIES`. Leave undefined for `FileFilter.ALL`
+ * @param {Function} callback Callback which is called with a string array of elements.
+ */
+mpv.getDirectoryContentsAsync = function(path, filter, callback) {
+    if (filter == undefined)
+    {
+        filter = FileFilter.ALL;
+    }
+    _callAsyncFunction("listDirContents", [path, filter], callback);
+};
+
+var FileFilter = Object.freeze({
+    ALL: "all",
+    FILES: "files",
+    DIRECTORIES: "dirs"
+});
 
 /**
  * Reads file contents from given path.

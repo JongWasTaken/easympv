@@ -24,7 +24,7 @@ Tests.run = function (name)
 
 var Test_API_CreateMenu = function (name) {
     var success = undefined;
-    mp.register_script_message("easympv-response", function (res) {
+    mp.register_script_message(Environment.brand + "-response", function (res) {
         var p = JSON.parse(res);
         if (p.result == "success"){
             success = true;
@@ -33,11 +33,11 @@ var Test_API_CreateMenu = function (name) {
         Core.Menus.TestsMenu.setResultForItem(name,success);
         Core.Menus.TestsMenu.redrawMenu();
 
-        mp.unregister_script_message("easympv-response");
+        mp.unregister_script_message(Environment.brand + "-response");
     });
 
     var requestObj = {
-        'sender': 'easympv',
+        'sender': Environment.brand,
         'context': 'API_Test_Menu',
         'command': 'createmenu',
         'arguments': {
@@ -52,12 +52,12 @@ var Test_API_CreateMenu = function (name) {
             ]
         }
     }
-    mpv.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
+    mpv.commandv("script-message-to",Environment.brand,"json",JSON.stringify(requestObj));
 };
 
 var Test_API_RemoveMenu = function (name) {
     var success = undefined;
-    mp.register_script_message("easympv-response", function (res) {
+    mp.register_script_message(Environment.brand + "-response", function (res) {
         var p = JSON.parse(res);
         if (p.result == "success") {
             success = true;
@@ -66,20 +66,20 @@ var Test_API_RemoveMenu = function (name) {
         Core.Menus.TestsMenu.setResultForItem(name,success);
         Core.Menus.TestsMenu.redrawMenu();
 
-        mp.unregister_script_message("easympv-response");
+        mp.unregister_script_message(Environment.brand + "-response");
     });
 
     var requestObj = {
-        'sender': 'easympv',
+        'sender': Environment.brand,
         'context': 'API_Test_Menu',
         'command': 'removemenu',
         'arguments': {}
     }
-    mpv.commandv("script-message-to","easympv","json",JSON.stringify(requestObj));
+    mpv.commandv("script-message-to",Environment.brand,"json",JSON.stringify(requestObj));
 };
 
 var Test_OS_GetImageInfo = function (name) {
-    var output = OS.getImageInfo(mpv.getUserPath("~~/scripts/easympv/images/logo.bmp")).stdout;
+    var output = OS.getImageInfo(mpv.getUserPath("~~/scripts/" + Environment.brand + "/images/logo.bmp")).stdout;
     var success = false;
     if (OS.isWindows)
     {

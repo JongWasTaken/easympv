@@ -18,7 +18,7 @@ Events.earlyInit.$register(function() {
 
 Events.beforeBrowserFileOpen.$register(function(entry, path) {
     if (entry.extension == ".swf") {
-        OS._call("flashplayer \"" + path + "\"", true);
+        OS.call("flashplayer \"" + path + "\"", true);
         return true;
     }
 });

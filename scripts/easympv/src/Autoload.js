@@ -288,11 +288,15 @@ Autoload.buildPlaylist = function ()
         {
             if (foundCurrent)
             {
-                toAppend.push(Autoload.playlist[n].path);
+                if (!toAppend.includes(Autoload.playlist[n].path)) {
+                    toAppend.push(Autoload.playlist[n].path);
+                }
             }
             else
             {
-                toPrepend.push(Autoload.playlist[n].path);
+                if (!toPrepend.includes(Autoload.playlist[n].path)) {
+                    toPrepend.push(Autoload.playlist[n].path);
+                }
             }
         }
 
@@ -309,5 +313,4 @@ Autoload.buildPlaylist = function ()
     {
         mpv.commandv("loadfile", toAppend[l], "append");
     }
-
 }

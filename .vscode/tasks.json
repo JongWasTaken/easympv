@@ -4,10 +4,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "mpv (default)",
+            "label": "mpv (default w/ debugger)",
             "type": "shell",
             "command": "/usr/bin/mpv",
-            "args": ["--script-opts=osc-windowcontrols=no", "/mnt/smb/Anime/Archive/Yu-Gi-Oh*.mkv"],
+            "args": ["--scripts='~/.config/mpv/scripts/easympv/dev/debug.so'", "--script-opts=osc-windowcontrols=no", "/mnt/smb/Anime/Archive/Yu-Gi-Oh*.mkv"],
             "windows": {
                 "command": "cmd",
                 "args": ["/c","mpv.com","X:\\mpv-placeholder.png"],

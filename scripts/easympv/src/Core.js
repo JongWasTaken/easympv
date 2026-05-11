@@ -18,7 +18,7 @@ var cFile;
 
 Core.Menus = {};
 
-Core.alertCategory = "easympv Core";
+Core.alertCategory = Environment.brand + " Core";
 
 Core.enableSaveTimer = true;
 Core.enableChapterSeeking = true;
@@ -195,22 +195,22 @@ Core.doRegistrations = function () {
         }
     }
 
-    mp.add_key_binding(null, "easympv", handleMenuKeypress);
+    mp.add_key_binding(null, Environment.brand, handleMenuKeypress);
     if (Settings.Data.forcedMenuKey != "disabled")
     {
-        mp.add_forced_key_binding(Settings.Data.forcedMenuKey, "easympv-forced-menu", handleMenuKeypress);
+        mp.add_forced_key_binding(Settings.Data.forcedMenuKey, Environment.brand + "-forced-menu", handleMenuKeypress);
     }
 
     if (Core.enableChapterSeeking)
     {
         mp.add_key_binding(null, "chapter_next", function() {handleChapterSeek(1);});
         mp.add_key_binding(null, "chapter_prev", function() {handleChapterSeek(-1);});
-        mp.add_key_binding(null, "empv_chapter_next", function() {handleChapterSeek(1);});
-        mp.add_key_binding(null, "empv_chapter_prev", function() {handleChapterSeek(-1);});
+        mp.add_key_binding(null, Environment.brand + "_chapter_next", function() {handleChapterSeek(1);});
+        mp.add_key_binding(null, Environment.brand + "_chapter_prev", function() {handleChapterSeek(-1);});
     }
 
-    mp.add_forced_key_binding("Ctrl+`", "empv_command_hotkey", UI.Input.showInteractiveCommandInput);
-    mp.add_forced_key_binding("Ctrl+Alt+`", "empv_log_hotkey", function () {
+    mp.add_forced_key_binding("Ctrl+`", Environment.brand + "_command_hotkey", UI.Input.showInteractiveCommandInput);
+    mp.add_forced_key_binding("Ctrl+Alt+`", Environment.brand + "_log_hotkey", function () {
         if (UI.Input.OSDLog.OSD == undefined)
         {
             UI.Input.OSDLog.show();
@@ -221,13 +221,13 @@ Core.doRegistrations = function () {
 
     if(Settings.Data.debugMode)
     {
-        mp.add_forced_key_binding("Ctrl+M", "empv_tests_hotkey", function() {
+        mp.add_forced_key_binding("Ctrl+M", Environment.brand + "_tests_hotkey", function() {
             Core.Menus.TestsMenu.showMenu();
             UI.Time.show();
             return;
         });
 
-        mp.add_forced_key_binding("Ctrl+~", "empv_eval_hotkey", function() {
+        mp.add_forced_key_binding("Ctrl+~", Environment.brand + "_eval_hotkey", function() {
             UI.Input.showJavascriptInput();
             return;
         });
@@ -240,28 +240,28 @@ Core.doRegistrations = function () {
         // using commandv does not give user feedback, so we need to do that
 
         // left stick
-        mp.add_forced_key_binding("w", "empv_steaminput_lup", function() { mpv.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
-        mp.add_forced_key_binding("s", "empv_steaminput_ldown", function() { mpv.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
-        mp.add_forced_key_binding("a", "empv_steaminput_lleft", function() { mpv.commandv("script_binding","chapter_prev"); });
-        mp.add_forced_key_binding("d", "empv_steaminput_lright", function() { mpv.commandv("script_binding","chapter_next"); });
+        mp.add_forced_key_binding("w", Environment.brand + "_steaminput_lup", function() { mpv.commandv("add","volume","1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
+        mp.add_forced_key_binding("s", Environment.brand + "_steaminput_ldown", function() { mpv.commandv("add","volume","-1"); mp.osd_message("Volume: " + Number(mpv.getProperty("volume")) + "%"); });
+        mp.add_forced_key_binding("a", Environment.brand + "_steaminput_lleft", function() { mpv.commandv("script_binding","chapter_prev"); });
+        mp.add_forced_key_binding("d", Environment.brand + "_steaminput_lright", function() { mpv.commandv("script_binding","chapter_next"); });
 
         // dpad
-        mp.add_forced_key_binding("1", "empv_steaminput_dup", function() { mpv.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
-        mp.add_forced_key_binding("3", "empv_steaminput_ddown", function() { mpv.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
-        mp.add_forced_key_binding("4", "empv_steaminput_dleft", function() { mpv.commandv("seek","5"); });
-        mp.add_forced_key_binding("2", "empv_steaminput_dright", function() { mpv.commandv("seek","-5"); });
+        mp.add_forced_key_binding("1", Environment.brand + "_steaminput_dup", function() { mpv.commandv("add","speed","0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("3", Environment.brand + "_steaminput_ddown", function() { mpv.commandv("add","speed","-0.1"); mp.osd_message("Speed: " + Number(mpv.getProperty("speed")).toFixed(2)); });
+        mp.add_forced_key_binding("4", Environment.brand + "_steaminput_dleft", function() { mpv.commandv("seek","5"); });
+        mp.add_forced_key_binding("2", Environment.brand + "_steaminput_dright", function() { mpv.commandv("seek","-5"); });
 
         // right stick is mouse
 
         // buttons
-        mp.add_forced_key_binding("esc", "empv_steaminput_start", function() { mpv.commandv("script_binding","easympv"); });
-        mp.add_forced_key_binding("tab", "empv_steaminput_select", function() { mpv.commandv("script_binding","stats/display-stats-toggle"); });
-        mp.add_forced_key_binding("space", "empv_steaminput_a", function() { mpv.commandv("cycle","pause"); });
-        mp.add_forced_key_binding("e", "empv_steaminput_b", function() { mpv.commandv("cycle","pause"); });
-        mp.add_forced_key_binding("r", "empv_steaminput_x", function() { mpv.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mpv.getProperty("video-aspect-override")); });
-        mp.add_forced_key_binding("f", "empv_steaminput_y", function() { mpv.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mpv.getProperty("sub-scale")).toFixed(3)); });
-        mp.add_forced_key_binding("WHEEL_UP", "empv_steaminput_rb", function() { mpv.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
-        mp.add_forced_key_binding("WHEEL_DOWN", "empv_steaminput_lb", function() { mpv.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("esc", Environment.brand + "_steaminput_start", function() { mpv.commandv("script_binding",Environment.brand); });
+        mp.add_forced_key_binding("tab", Environment.brand + "_steaminput_select", function() { mpv.commandv("script_binding","stats/display-stats-toggle"); });
+        mp.add_forced_key_binding("space", Environment.brand + "_steaminput_a", function() { mpv.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("e", Environment.brand + "_steaminput_b", function() { mpv.commandv("cycle","pause"); });
+        mp.add_forced_key_binding("r", Environment.brand + "_steaminput_x", function() { mpv.commandv("cycle-values", "video-aspect-override", "16:9", "4:3", "1024:429", "-1"); mp.osd_message("Aspect ratio override: " + mpv.getProperty("video-aspect-override")); });
+        mp.add_forced_key_binding("f", Environment.brand + "_steaminput_y", function() { mpv.commandv("cycle-values", "sub-scale", "0.8", "0.9", "1", "1.1", "1.2"); mp.osd_message("Sub Scale: " + Number(mpv.getProperty("sub-scale")).toFixed(3)); });
+        mp.add_forced_key_binding("WHEEL_UP", Environment.brand + "_steaminput_rb", function() { mpv.commandv("add", "sub-delay", "0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
+        mp.add_forced_key_binding("WHEEL_DOWN", Environment.brand + "_steaminput_lb", function() { mpv.commandv("add", "sub-delay", "-0.1"); mp.osd_message("Sub delay: " + Number(mpv.getProperty("sub-delay")).toFixed(1) + "s"); });
 
         // lt and rt are mouse buttons
     }
@@ -271,7 +271,7 @@ Core.doRegistrations = function () {
     mp.register_event("shutdown", Core.onShutdown);
     mp.register_script_message("json", API.handleIncomingJSON);
     mp.register_script_message("__watchdog", function(data) {
-        mpv.commandv("script-message-to", "easympv_watchdog", "__watchdog", data);
+        mpv.commandv("script-message-to", Environment.brand + "_watchdog", "__watchdog", data);
     });
 
 
@@ -293,15 +293,15 @@ Core.doRegistrations = function () {
 }
 
 Core.doUnregistrations = function () {
-    mp.remove_key_binding("easympv");
-    mp.remove_key_binding("easympv-forced-menu");
-    mp.remove_key_binding("empv_command_hotkey");
-    mp.remove_key_binding("empv_log_hotkey");
-    mp.remove_key_binding("empv_eval_hotkey");
+    mp.remove_key_binding(Environment.brand);
+    mp.remove_key_binding(Environment.brand + "-forced-menu");
+    mp.remove_key_binding(Environment.brand + "_command_hotkey");
+    mp.remove_key_binding(Environment.brand + "_log_hotkey");
+    mp.remove_key_binding(Environment.brand + "_eval_hotkey");
     if (Core.enableChapterSeeking)
     {
-        mp.remove_key_binding("empv_chapter_next");
-        mp.remove_key_binding("empv_chapter_prev");
+        mp.remove_key_binding(Environment.brand + "_chapter_next");
+        mp.remove_key_binding(Environment.brand + "_chapter_prev");
         mp.remove_key_binding("chapter_next");
         mp.remove_key_binding("chapter_prev");
     }
@@ -309,22 +309,22 @@ Core.doUnregistrations = function () {
     if(OS.isSteamGamepadUI)
     {
         try {
-            mp.remove_key_binding("empv_steaminput_lup");
-            mp.remove_key_binding("empv_steaminput_ldown");
-            mp.remove_key_binding("empv_steaminput_lleft");
-            mp.remove_key_binding("empv_steaminput_lright");
-            mp.remove_key_binding("empv_steaminput_dup");
-            mp.remove_key_binding("empv_steaminput_ddown");
-            mp.remove_key_binding("empv_steaminput_dleft");
-            mp.remove_key_binding("empv_steaminput_dright");
-            mp.remove_key_binding("empv_steaminput_start");
-            mp.remove_key_binding("empv_steaminput_select");
-            mp.remove_key_binding("empv_steaminput_a");
-            mp.remove_key_binding("empv_steaminput_b");
-            mp.remove_key_binding("empv_steaminput_x");
-            mp.remove_key_binding("empv_steaminput_y");
-            mp.remove_key_binding("empv_steaminput_rb");
-            mp.remove_key_binding("empv_steaminput_lb");
+            mp.remove_key_binding(Environment.brand + "_steaminput_lup");
+            mp.remove_key_binding(Environment.brand + "_steaminput_ldown");
+            mp.remove_key_binding(Environment.brand + "_steaminput_lleft");
+            mp.remove_key_binding(Environment.brand + "_steaminput_lright");
+            mp.remove_key_binding(Environment.brand + "_steaminput_dup");
+            mp.remove_key_binding(Environment.brand + "_steaminput_ddown");
+            mp.remove_key_binding(Environment.brand + "_steaminput_dleft");
+            mp.remove_key_binding(Environment.brand + "_steaminput_dright");
+            mp.remove_key_binding(Environment.brand + "_steaminput_start");
+            mp.remove_key_binding(Environment.brand + "_steaminput_select");
+            mp.remove_key_binding(Environment.brand + "_steaminput_a");
+            mp.remove_key_binding(Environment.brand + "_steaminput_b");
+            mp.remove_key_binding(Environment.brand + "_steaminput_x");
+            mp.remove_key_binding(Environment.brand + "_steaminput_y");
+            mp.remove_key_binding(Environment.brand + "_steaminput_rb");
+            mp.remove_key_binding(Environment.brand + "_steaminput_lb");
         }
         catch(x) {}
     }
@@ -375,12 +375,12 @@ Core.defineMenus = function () {
     var descriptionSettings = function (a, b) {
         return (
             "mpv " + b +
-            "@br@easympv " + a
+            "@br@"+ Environment.brand + " " + a
         );
     };
 
     var MainMenuSettings = {
-        title: UI.SSA.insertSymbolFA("") + " easympv",
+        title: UI.SSA.insertSymbolFA("") + " " + Environment.brand,
         menuId: "main-menu",
         description: "",
         image: "logo"
@@ -1141,7 +1141,7 @@ Core.defineMenus = function () {
                     Settings.save();
                     Core.doUnregistrations();
                     Core.startExecution();
-                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
+                    //mpv.commandv("script-message-to", Environment.brand, "__internal", "restart");
                 }
             }
         },
@@ -1389,7 +1389,7 @@ Core.defineMenus = function () {
                             menuId: "credits-menu",
                             title: UI.SSA.insertSymbolFA("") + " " + Settings.getLocalizedString("credits.menu.title"),
                             autoClose: "0",
-                            description: "All of this would not be possible without these projects:", // Utils.getCredits().replaceAll("\n", "@br@")
+                            description: "All of this would not be possible without these projects:",
                             scrollingEnabled: true
                         },
                         [],
@@ -1400,7 +1400,7 @@ Core.defineMenus = function () {
                             cmenu = undefined;
                         }
                     };
-                    var lines = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/Credits.txt")).split("\n");
+                    var lines = mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/assets/Credits.txt")).split("\n");
                     for (var i = 0; i < lines.length; i++)
                     {
                         if (lines[i].trim() != "")
@@ -1496,7 +1496,7 @@ Core.defineMenus = function () {
                     menu.hideMenu();
                     Core.doUnregistrations();
                     Core.startExecution();
-                    //mpv.commandv("script-message-to", "easympv", "__internal", "restart");
+                    //mpv.commandv("script-message-to", Environment.brand, "__internal", "restart");
                 }
             }
         },
@@ -1842,6 +1842,32 @@ Core.defineMenus = function () {
             }
         },
         {
+            title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.daylightsavingtime.title"),
+            item: "daylight_saving_time",
+            descriptionPrefix: Settings.getLocalizedString("config.daylightsavingtime.description"),
+            description: "",
+            eventHandler: function(event, menu) {
+                if (event == "right") {
+                    if(Settings.Data.daylightSavingTime)
+                    {
+                        Settings.Data.daylightSavingTime = false;
+                        this.description = this.descriptionPrefix + disabledText;
+                        UI.Time.hide();
+                        UI.Time.show();
+                    }
+                    else
+                    {
+                        Settings.Data.daylightSavingTime = true;
+                        this.description = this.descriptionPrefix + enabledText;
+                        UI.Time.hide();
+                        UI.Time.show();
+                    }
+                    menu.redrawMenu();
+                    Settings.save();
+                }
+            }
+        },
+        {
             title: UI.SSA.insertSymbolFA(" ", 26, 35, Utils.commonFontName) + Settings.getLocalizedString("config.fademenu.title"),
             item: "menu_fade_in_out",
             descriptionPrefix: Settings.getLocalizedString("config.fademenu.description"),
@@ -2054,14 +2080,14 @@ Core.defineMenus = function () {
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("language")
             var locales = mpv.getDirectoryContents(
-                mpv.getUserPath("~~/scripts/easympv/locale/"),
+                mpv.getUserPath("~~/scripts/" + Environment.brand + "/locale/"),
                 "files"
             );
             locales.sort();
             var json = {};
             for (var i = 0; i < locales.length; i++)
             {
-                json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/locale/") + locales[i]));
+                json = JSON.parse(mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/locale/") + locales[i]));
                 item.list.push(
                     {
                         id: locales[i].split(".")[0],
@@ -2123,6 +2149,16 @@ Core.defineMenus = function () {
 
             item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("show_clock")
             if(Settings.Data.showClock)
+            {
+                item.description = item.descriptionPrefix + enabledText;
+            }
+            else
+            {
+                item.description = item.descriptionPrefix + disabledText;
+            }
+
+            item = Core.Menus.SettingsConfigurationSubMenu.getItemByName("daylight_saving_time")
+            if(Settings.Data.daylightSavingTime)
             {
                 item.description = item.descriptionPrefix + enabledText;
             }
@@ -2598,43 +2634,43 @@ Core.doFileChecks = function () {
         OS.fileRemove("easympvUtility.exe");
     }
 
-    if (!mpv.fileExists(mpv.getUserPath("~~/easympv.conf"))) {
-        Utils.log("Task: reset easympv.conf (file missing)","startup","info");
+    if (!mpv.fileExists(mpv.getUserPath("~~/" + Environment.brand + ".conf"))) {
+        Utils.log("Task: reset main plugin config (file missing)","startup","info");
         Settings.migrate();
         resetOccured = true;
     }
     else
     {
         if (Settings.Data.doMigration) {
-            Utils.log("Task: reset easympv.conf (user set)","startup","info");
+            Utils.log("Task: reset main plugin config (user set)","startup","info");
             Settings.migrate();
             resetOccured = true;
         }
     }
 
     if (!mpv.fileExists(mpv.getUserPath("~~/mpv.conf"))) {
-        Utils.log("Task: reset mpvConfig (file missing)","startup","info");
+        Utils.log("Task: reset mpv config (file missing)","startup","info");
         Settings.mpvConfig.reset();
         resetOccured = true;
     }
     else
     {
         if (Settings.Data.resetMpvConfig) {
-            Utils.log("Task: reset mpvConfig (user set)","startup","info");
+            Utils.log("Task: reset mpv config (user set)","startup","info");
             Settings.mpvConfig.reset();
             resetOccured = true;
         }
     }
 
     if (!mpv.fileExists(mpv.getUserPath("~~/input.conf"))) {
-        Utils.log("Task: reset inputConfig (file missing)","startup","info");
+        Utils.log("Task: reset input config (file missing)","startup","info");
         Settings.inputConfig.reset();
         resetOccured = true;
     }
     else
     {
         if (Settings.Data.resetInputConfig) {
-            Utils.log("Task: reset inputConfig (user set)","startup","info");
+            Utils.log("Task: reset input config (user set)","startup","info");
             Settings.inputConfig.reset();
             resetOccured = true;
         }
@@ -2651,22 +2687,24 @@ Core.doFileChecks = function () {
         Settings.inputConfig.reload();
     };
 
+    // TODO: fix
+    Autoload.enabled = false;
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/autoload.lua")))
     {
         Autoload.enabled = false;
-        Utils.log("autoload.lua has been detected! easympv's build-in playlist manager has been disabled!","startup","warn");
+        Utils.log("autoload.lua has been detected! The build-in playlist manager has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/autosave.lua")))
     {
         Core.enableSaveTimer = false;
-        Utils.log("autosave.lua has been detected! easympv's build-in automatic saving feature has been disabled!","startup","warn");
+        Utils.log("autosave.lua has been detected! The build-in automatic saving feature has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/scripts/betterchapters.lua")))
     {
         Core.enableChapterSeeking = false;
-        Utils.log("betterchapters.lua has been detected! easympv's build-in chapter seeking feature has been disabled!","startup","warn");
+        Utils.log("betterchapters.lua has been detected! The build-in chapter seeking feature has been disabled!","startup","warn");
     }
 
     if (mpv.fileExists(mpv.getUserPath("~~/INSTALLER_DATA_REGISTER"))) {
@@ -2686,13 +2724,10 @@ Core.startExecution = function () {
     ExtensionManager.init();
     Events.earlyInit.invoke();
     if (Environment.undead) {
-        mp.osd_message("easympv was loaded using evaluation! Expect issues...", 3);
+        mp.osd_message(Environment.brand + " was loaded using evaluation! Expect issues...", 3);
     }
 
     notifyAboutUpdates = Settings.Data.notifyAboutUpdates;
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    Settings.Data.currentVersion = "2.0.0";
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     if(Settings.Data.debugMode)
     {
@@ -2704,7 +2739,7 @@ Core.startExecution = function () {
     }
     mp.register_event("log-message", UI.Input.OSDLog.addToBuffer);
     OS.init();
-    Core.fancyCurrentVersion = Settings.Data.currentVersion;
+    Core.fancyCurrentVersion = Environment.version;
     if (OS.isGit)
     {
         if (OS.gitAvailable)
@@ -2716,7 +2751,7 @@ Core.startExecution = function () {
             Core.fancyCurrentVersion = Core.fancyCurrentVersion + "-git";
         }
     }
-    Utils.log("easympv " + Core.fancyCurrentVersion + " starting...","startup","info");
+    Utils.log(Environment.brand + " " + Core.fancyCurrentVersion + " starting...","startup","info");
 
     Utils.log("Checking for updates...","startup","info");
     setTimeout(function() {

@@ -53,7 +53,7 @@ var Impl_createmenu = function (json) {
 
             menu.eventHandler = function (event, action) {
                 var res = {
-                    "sender": "easympv",
+                    "sender": Environment.brand,
                     "context": json.context,
                     "data": {
                         "event": event,
@@ -158,5 +158,5 @@ API.sendJSON = function(target,data) {
         return;
     if(data == undefined)
         return;
-    mpv.commandv("script-message-to", target, "easympv-response", data);
+    mpv.commandv("script-message-to", target, Environment.brand + "-response", data);
 }

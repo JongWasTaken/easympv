@@ -143,7 +143,7 @@ Events.onFirstFileLoad = new Events.Event();
 Events.onFileLoad = new Events.Event();
 
 /**
- * - Called before a menu gets instanciated durng easympv initialization.
+ * - Called before a menu gets instanciated during easympv initialization.
  * - Registered callbacks will receive 2 arguments: `settings object, items array`.
  * - Cannot be cancelled.
  * - Arguments can be modified, e.g. to add items to the menu.

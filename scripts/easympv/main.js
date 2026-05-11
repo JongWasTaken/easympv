@@ -42,12 +42,15 @@ KNOWN ISSUES:
     INCOMPATIBILITY WITH SYNCPLAY: syncplay offsets the OSD, which makes most of the menus out-of-bounds.
         WORKAROUND: disable Chat message input & Chat message output in syncplay
 */
+
 var Environment = {};
 
+Environment.brand = "easympv";
+Environment.version = "2.0.0";
 Environment.startTime = Date.now();
 
 // Polyfills and extensions first
-eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/easympv/Preload.js")));
+eval(mp.utils.read_file(mp.utils.get_user_path("~~/scripts/" + Environment.brand + "/src/Preload.js")));
 
 Environment.Arguments = mpv.getEnv("EASYMPV_ARGS");
 
@@ -118,10 +121,15 @@ if (typeof Watchdog != "undefined") {
     Watchdog = undefined;
 }
 
+if(Environment.isDebug) {
+    // call debug.so
+    mpv.command("script-message-to debug show");
+}
+
 Environment.Extensions = [];
-if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
+if (mpv.fileExists(mpv.getUserPath("~~/scripts/" + Environment.brand + "/extensions/")))
 {
-    var extensions = mpv.getDirectoryContents(mpv.getUserPath("~~/scripts/easympv/extensions/"), "files");
+    var extensions = mpv.getDirectoryContents(mpv.getUserPath("~~/scripts/" + Environment.brand + "/extensions/"), FileFilter.FILES);
     if (extensions.length != 0)
     {
         var extText = "";
@@ -129,7 +137,7 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
         for (var j = 0; j < extensions.length; j++)
         {
             try {
-                extText = mpv.readFile(mpv.getUserPath("~~/scripts/easympv/extensions/" + extensions[j]));
+                extText = mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/extensions/" + extensions[j]));
                 extMeta = JSON.parse(extText.substring(2,extText.indexOf('\n')+1).trim());
                 extMeta.code = extText.substring(extText.indexOf('\n')+1);
                 extMeta.filename = extensions[j];
@@ -147,6 +155,8 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
                     mpv.printError("Extension \""+extMeta.filename+"\" has a non-boolean debug property!")
                     extMeta.debug = false;
                 }
+
+                extMeta.description = extMeta.description.replaceAll("\n", "@br@");
 
                 var temp = extMeta.filename.split(".");
                 temp.pop();
@@ -178,28 +188,28 @@ if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/extensions/")))
 Environment.LoadOrder = ["Settings.js", "OS.js", "Events.js", "UI.js", "Utils.js", "Autoload.js", "API.js", "Browsers.js", "ExtensionManager.js", "Core.js", "Setup.js", "Tests.js", "Video.js"];
 Environment.broken = false;
 Environment.minified = false;
-if (mpv.fileExists(mpv.getUserPath("~~/scripts/easympv/minified.js")) && !Environment.isDebug)
+if (mpv.fileExists(mpv.getUserPath("~~/scripts/" + Environment.brand + "/minified.js")) && !Environment.isDebug)
 {
     mpv.printInfo("Running on minified code!");
     Environment.minified = true;
-    eval(mpv.readFile(mpv.getUserPath("~~/scripts/easympv/minified.js")));
+    eval(mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/minified.js")));
 }
 else
 {
-    var code = "/* THIS FILE EXISTS FOR DEBUGGING PURPOSES ONLY: DO NOT COMMIT; DO NOT EDIT; CHANGES WILL BE LOST! */\n\n";
+    var code = "/* THIS FILE WAS GENERATED FOR DEBUGGING PURPOSES ONLY: DO NOT COMMIT; DO NOT EDIT; CHANGES WILL BE LOST! */\n\n";
     for (var i = 0; i < Environment.LoadOrder.length; i++)
     {
         try {
-            code += mpv.readFile(mpv.getUserPath("~~/scripts/easympv/" + Environment.LoadOrder[i])) + "\n\n";
+            code += mpv.readFile(mpv.getUserPath("~~/scripts/" + Environment.brand + "/src/" + Environment.LoadOrder[i])) + "\n\n";
         } catch (e) {
             Environment.broken = true;
             mpv.printError("Core files are missing or not accessible! Your installation might be corrupt!");
         }
     }
     if (Environment.isDebug) {
-        mpv.printWarn("Debug mode enabled: Code will be written to \"runtime.js\" before evaluation!")
+        mpv.printWarn("Debug mode enabled: Code will be written to \"_runtime.js\" before evaluation!")
         mpv.writeFile(
-            mpv.getUserPath("~~/scripts/easympv/runtime.js"),
+            mpv.getUserPath("~~/scripts/" + Environment.brand + "/_runtime.js"),
             code
         );
     }
@@ -207,12 +217,12 @@ else
         eval(code);
     } catch (e) {
         Environment.broken = true;
-        mpv.printError("Could not evaluate easympv code: " + e);
+        mpv.printError("Could not evaluate code: " + e);
     }
 }
 
 if (Environment.broken) {
-    mpv.printError("easympv will not be loaded due to previous errors!");
+    mpv.printError("Plugin will not be loaded due to previous errors!");
 } else {
     if (Environment.isDebug) {
         Core.startExecution();

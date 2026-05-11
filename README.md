@@ -118,6 +118,6 @@ See the [wiki page](https://github.com/JongWasTaken/easympv/wiki/Localization) f
 ## License
 All easympv code and assets (all JavaScript files and images in `scripts/easympv/images/`) are licensed under the MIT License.  
 Third-Party assets in this repository use different licenses, such as fonts and shaders.  
-See [`scripts/easympv/Credits.txt`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/Credits.txt) for all attributions.  
+See [`scripts/easympv/assets/Credits.txt`](https://github.com/JongWasTaken/easympv/blob/master/scripts/easympv/assets/Credits.txt) for all attributions.  
 Special thanks to VideoPlayerCode for their awesome plugins. They have served as inspiration for this project, although none of their code has been reused.  
 Please open an issue if I forgot someone!  
