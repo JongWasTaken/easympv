@@ -225,6 +225,8 @@
     "config.showclock.description": "Whether to show an unobstrusive clock on screen.@br@",
     "config.clockposition.title": "Clock overlay position on screen",
     "config.clockposition.description": "Where to show the clock on screen.@br@Currently ",
+    "config.daylightsavingtime.title": "Daylight saving time",
+    "config.daylightsavingtime.description": "Adds one hour to the clock if enabled.@br@",
     "config.fademenu.title": "Menu Fade In/Out",
     "config.fademenu.description": "Makes some menus fade in and out (possbile performance impact).@br@Leave this disabled if unsure.@br@",
     "config.scrollalerts.title": "Scroll Alerts",

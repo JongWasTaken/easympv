@@ -225,6 +225,8 @@
     "config.showclock.description": "Ob eine Uhr am Bildschirmrand zu sehen sein soll.@br@",
     "config.clockposition.title": "Uhr Position",
     "config.clockposition.description": "An welcher Bildschirmkante die Uhr zu sehen sein soll.@br@Derzeit ",
+    "config.daylightsavingtime.title": "Sommerzeit",
+    "config.daylightsavingtime.description": "Ob es gerade Sommerzeit ist (+1h auf die Uhr).@br@",
     "config.fademenu.title": "Menü Aus- und Einblendung",
     "config.fademenu.description": "Wenn aktiv, erhalten manche Menüs simple Animationen, was zwar hübsch aussieht, aber nicht gut für die Leistung ist.@br@Wenn unsicher, lieber ausgeschalten.@br@",
     "config.scrollalerts.title": "Scroll Benachrichtigungen",
